@@ -34,7 +34,7 @@ a.versel{ position:relative; display:inline-block;width:65px; height:38px; line-
 .ft-help dl{ float:left; width:145px; margin:0 30px 0 40px;} 
 .ft-help dt{color:#8899aa; font-size:18px;}
 .ft-help a{ display:block; line-height:26px;  color:#556677; font-size:14px;}
-.ft-copy{ padding:20px 0;border-top:1px solid #345; font-size:14px; color:#556677; text-align:center;}
+.ft-copy{ padding:20px 0;border-top:1px solid #345; font-size:14px; color:white; text-align:center;}
 /*banarea*/
 .banarea{ height:560px; background: no-repeat center bottom; text-align:left;}
 .slogan{width:600px;line-height:50px;font-size: 45px;color: #fff;text-align: left;font-weight: normal;font-family: arial;padding-top: 160px;padding-bottom: 10px;-webkit-font-smoothing: antialiased;}
@@ -253,12 +253,28 @@ i.icon-fet8{ background-position:-70px -210px;}
        url('http://lib.baomitu.com/fonts/hammersmith-one/hammersmith-one-v7-latin-regular.svg') format('svg'); /* Legacy iOS */
 }
 
+
 html, body {
   width: 100%;
   height: 100%;
-  background: url('../img/BingWallpaper.jpeg') #111 no-repeat 50% 0;
-  background-size: cover;
+  background-image: linear-gradient(125deg,#E4FFCD,#6DD5FA,#2980B9,#E4FFCD);
+  background: url('../img/BingWallpaper.jpeg') #aaa no-repeat 50% 0;
+  background-size: cover; 
+  /*animation: bganimation 10s infinite;*/
 }
+
+@keyframes bganimation {
+  0%{
+    background-color: linear-gradient(red 0%,red 50%,yellow 50%,yellow 100%);
+  }
+  50%{
+    background-color: linear-gradient(125deg,#E4FFCD,#6DD5FA,#2980B9,#E4FFCD);
+  }
+  100%{
+    background-color: linear-gradient(red 0%,red 50%,yellow 50%,yellow 100%);
+  }
+}
+
 .logo {
   margin-top: 23px;
 }
@@ -284,7 +300,17 @@ a.navbar-brand, a.navbar-brand:hover {
 }
 
 #logo {
-  height: 180px;
+  height:150px;
+  width:150px;
+  margin:auto;
+  -webkit-clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  background-image: url(../img/TrueMen.JPG);
+  background-size:cover;
+  background-position:center,center;
+  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=7)"; 
+  filter: alpha(opacity=7); 
+  opacity: 0.07;
 }
 .head {
   font-size: 5rem;
