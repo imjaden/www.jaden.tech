@@ -1108,8 +1108,8 @@ i.icon-fet8 {
 html, body {
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(125deg,#E4FFCD,#6DD5FA,#2980B9,#E4FFCD);
-    background: url('../img/BingWallpaper.jpeg') #aaa no-repeat 50% 0;
+    /*background-image: linear-gradient(125deg,#E4FFCD,#6DD5FA,#2980B9,#E4FFCD);*/
+    background: url('../img/BingWallpaper.jpeg') #fff no-repeat 50% 0;
     background-size: cover;
   /*animation: bganimation 10s infinite;*/
 }
@@ -1151,12 +1151,12 @@ a.navbar-brand, a.navbar-brand:hover {
     margin: auto;
     -webkit-clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
     clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
-    background-image: url(../img/TrueMen.JPG);
+    background-image: url(../img/TheTrumanShow03.png);
     background-size: cover;
     background-position: center,center;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=7)";
     filter: alpha(opacity=7);
-    opacity: 0.07;
+    opacity: 0.5;
     /*border-radius: 50%;*/
 }
 .head {
@@ -1174,6 +1174,17 @@ a.navbar-brand, a.navbar-brand:hover {
     letter-spacing: 1px;
     font-size: 2.6rem;
     line-height: 1.3;
+}
+#main .wrap {
+    width: 100%;
+    display: table;
+    position: absolute;
+    bottom: 60px;
+    color: lightskyblue;
+    word-wrap: break-word;
+    word-break:break-all;
+    text-align: center;
+
 }
 .buttons>.button {
     position: relative;
