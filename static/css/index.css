@@ -1109,9 +1109,19 @@ html, body {
     width: 100%;
     height: 100%;
     /*background-image: linear-gradient(125deg,#E4FFCD,#6DD5FA,#2980B9,#E4FFCD);*/
-    background: url('../img/BingWallpaper.jpeg') #fff no-repeat 50% 0;
+    /*background: url('../img/BingWallpaper.svg') #fff no-repeat 50% 0;*/
     background-size: cover;
   /*animation: bganimation 10s infinite;*/
+}
+#background {
+    height: 100%;
+    width:  auto;
+    position: absolute;
+    background-size: cover;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
 }
 @keyframes bganimation {
     0% {
@@ -1132,7 +1142,7 @@ a.navbar-brand, a.navbar-brand:hover {
     width: 130px;
   /* margin-top: 17px; */
     text-indent: -999em;
-    background: url('../img/logo.svg');
+    /*background: url('../img/logo.svg');*/
     background-size: cover;
 }
 #main {
@@ -1245,7 +1255,7 @@ a.navbar-brand, a.navbar-brand:hover {
 .github-corner {
     min-height: 50px;
 }
-.github-corner svg {
+.github-corner embed {
    /*left: -10px !important;*/
     fill: #fff;
     color: #FFF;
@@ -1421,6 +1431,7 @@ a.navbar-brand, a.navbar-brand:hover {
     text-align: center;
     background: rgba(0,0,0,0.41);
     padding: 10px 0;
+    opacity:0.5
 }
 .footer .wrap {
     color: #999;
