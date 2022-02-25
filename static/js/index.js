@@ -1,6 +1,13 @@
+var protocol = window.location.protocol;
+var href = window.location.href;
+if (protocol === 'http:') {
+  href = href.replace("http://", "https://");
+  window.location.replace(href);
+}
+
 var body = document.body;
 var footer = document.querySelector('.footer');
-var main = document.querySelector('#main .container')
+var main = document.querySelector('#main .container');
 window.onresize = (function calcMainheight() {
   var shouldBeHeight = body.clientHeight - footer.clientHeight - 40;
   if(shouldBeHeight < main.clientHeight) {
