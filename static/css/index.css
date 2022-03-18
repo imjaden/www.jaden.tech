@@ -1117,8 +1117,8 @@ html, body {
   /*animation: bganimation 10s infinite;*/
 }
 #background {
-    height: 100%;
-    width:  auto;
+    height: auto;
+    width: 100%;
     position: absolute;
     background-size: cover;
     left: 50%;
@@ -1164,7 +1164,7 @@ a.navbar-brand, a.navbar-brand:hover {
     margin: auto;
     -webkit-clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
     clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
-    background-image: url(../img/TheTrumanShow03.png);
+    background-image: url(../img/logo.png);
     background-size: cover;
     background-position: center,center;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=7)";
