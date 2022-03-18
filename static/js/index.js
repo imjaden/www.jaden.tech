@@ -13,7 +13,6 @@ window.onresize = (function calcMainheight() {
 
 var logo_border_radius = 0
 var logo_border_radius_interval = 15;
-var svg = document.getElementById("background").getSVGDocument()
 var style, node, random, last_path, last_path_style;
 setInterval(function() {
   style = "border-radius:" + logo_border_radius + "%;";
@@ -24,18 +23,43 @@ setInterval(function() {
     logo_border_radius_interval = 15
   }
   logo_border_radius += logo_border_radius_interval;
-
-  // if(svg) {
-  //   last_path.style = last_path_style;
-  //   random = Math.floor(Math.random()*node.childNodes.length)
-  //   last_path = node.childNodes.item(random)
-  //   last_path_style = last_path.getAttribute("style")
-  //   last_path.style = "stroke:#ff0"
-  // } else {
-  //   svg = document.getElementById("background").getSVGDocument()
-  //   node = svg.documentElement;
-  //   random = Math.floor(Math.random()*node.childNodes.length)
-  //   last_path = node.childNodes.item(random)
-  //   last_path_style = last_path.getAttribute("style")
-  // }
 }, 1000);
+
+window.Param = {
+  parse: function() {
+    var params = {},
+        search = window.location.search.substring(1),
+        parts = search.split('&'),
+        pairs = [];
+
+    for(var i = 0, len = parts.length; i < len; i++) {
+      pairs = parts[i].split('=');
+      if(pairs[0] === '') continue
+      params[pairs[0]] = (pairs.length > 1 ? pairs[1] : null);
+    }
+
+    return params;
+  },
+  toString: function(paramsHash) {
+    var pairs = [];
+    for(var key in paramsHash) {
+      pairs.push(key + "=" + paramsHash[key]);
+    }
+    
+    return window.location.href.split("?")[0] + "?" + pairs.join("&");
+  },
+  redirectTo: function(paramsHash) {
+    window.location.href = window.Param.toString(paramsHash);
+  }
+}
+
+var params = Param.parse()
+var t = params.t
+if (typeof(t) === 'undefined' || (Date.now() - t) > 60*60*1000) {
+  params.t = Date.now()
+  Param.redirectTo(params)
+}
+
+
+
+
