@@ -1118,7 +1118,7 @@ html, body {
 }
 #background {
     height: auto;
-    width: 100%;
+    width: 110%;
     position: absolute;
     background-size: cover;
     left: 50%;
@@ -1433,8 +1433,9 @@ a.navbar-brand, a.navbar-brand:hover {
     width: 100%;
     text-align: center;
     background: rgba(0,0,0,0.41);
-    padding: 10px 0;
-    opacity:0.5
+    height: 30px;
+    padding: 10px 0 0 0;
+    opacity: 0.3
 }
 .footer .wrap {
     color: #999;
