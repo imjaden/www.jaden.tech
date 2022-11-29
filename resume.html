@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<!--!
+     _   _    ____  _____ _   _ _____ _____ ____ _   _
+    | | / \  |  _ \| ____| \ | |_   _| ____/ ___| | | |
+ _  | |/ _ \ | | | |  _| |  \| | | | |  _|| |   | |_| |
+| |_| / ___ \| |_| | |___| |\  |_| | | |__| |___|  _  |
+ \___/_/   \_\____/|_____|_| \_(_)_| |_____\____|_| |_|
+-->
+<html>
+<head>
+<meta charset="UTF-8">
+<title>个人简历-李俊杰</title>
+<meta name="renderer" content="webkit">
+<meta name="format-detection" content="telephone=no">
+<meta name="referrer" content="always">
+<meta content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+<link rel="shortcut icon" href="//cdn.jaden.tech/static/img/favicon.png?t=1647593205410">
+<meta name="keywords" content="jaden.tech">
+<meta name="description" content="jaden.li@jaden.tech">
+<script type="text/javascript" src="//mozilla.github.io/pdf.js/build/pdf.js?t=1647593205410"></script>
+<script id="script">
+  //
+  // If absolute URL from the remote server is provided, configure the CORS
+  // header on that server.
+  //
+  const url = './resume.pdf';
+
+  //
+  // The workerSrc property shall be specified.
+  //
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js?t=1647593205410';
+
+  //
+  // Asynchronous download PDF
+  //
+  const loadingTask = pdfjsLib.getDocument(url);
+  (async () => {
+    const pdf = await loadingTask.promise;
+    //
+    // Fetch the first page
+    //
+    const page = await pdf.getPage(1);
+    const scale = 1.5;
+    const viewport = page.getViewport({ scale });
+    // Support HiDPI-screens.
+    const outputScale = window.devicePixelRatio || 1;
+
+    //
+    // Prepare canvas using PDF page dimensions
+    //
+    const canvas = document.getElementById("resume-canvas");
+    const context = canvas.getContext("2d");
+
+    canvas.width = Math.floor(viewport.width * outputScale);
+    canvas.height = Math.floor(viewport.height * outputScale);
+    canvas.style.width = Math.floor(viewport.width) + "px";
+    canvas.style.height = Math.floor(viewport.height) + "px";
+    canvas.textAlign = "center";
+
+    const transform = outputScale !== 1 
+      ? [outputScale, 0, 0, outputScale, 0, 0] 
+      : null;
+
+    //
+    // Render PDF page into canvas context
+    //
+    const renderContext = {
+      canvasContext: context,
+      transform,
+      viewport,
+    };
+    page.render(renderContext);
+  })();
+</script>
+<script>
+  if (window.location.hostname === 'jaden.tech' && window.location.protocol === 'http:') 
+      window.location.replace(window.location.href.replace("http://", "https://"));
+</script>
+</head>
+<body style="text-align:center;height:100%;">
+  <canvas id="resume-canvas"></canvas>
+  <script>
+  document.getElementById('resume-canvas').textContent =
+      document.getElementById('script').text;
+  </script>
+</body>
+</html>
