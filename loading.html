@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body style="background-color:#000000;">
+    <canvas width="300" height="300" style=" margin-left: 500px;margin-top: 200px;"></canvas>
+    <script>
+        //获取对应的CanvasRenderingContext2D对象(画笔)
+        var can = document.getElementsByTagName('canvas')[0].getContext('2d');
+        //定义一个加载数字；初始化为-1
+        var num = -1;
+        //定义一个定时器容器
+        var timer;
+        // 定义渐变颜色系列
+        var color = can.createLinearGradient(0,300,300,0);
+        color.addColorStop(0,'red');
+        color.addColorStop(.1,'orange');
+        color.addColorStop(.2,'yellow');
+        color.addColorStop(.3,'green');
+        color.addColorStop(.4,'blue');
+        color.addColorStop(.5,'purple');
+        color.addColorStop(.6,'red');
+        color.addColorStop(.7,'orange');
+        color.addColorStop(.8,'yellow');
+        color.addColorStop(.9,'green');
+        color.addColorStop(1,'blue');
+        // 加载函数主体
+        function loading(){
+            // 清除画布
+            can.clearRect(0,0,300,300);
+            // 保存当前状态
+            can.save();
+            // 定义原点位置
+            can.translate(150,150);
+            // 开始绘画
+            can.beginPath();
+            // 绘画一个半径为100的圆
+            can.arc(0,0,100,0,Math.PI*2);
+            // 每次让num++
+            num ++;
+            //判断当num大于或等于100的时候清除定时器
+            if (num>=1000){
+                // alert('加载完成');
+                clearInterval(timer);
+            }
+            // 定义字体和大小
+            can.font = '30px 宋体';
+            //定义字体居中
+            can.textAlign = 'center';
+            // 定义字体描边颜色
+            can.strokeStyle = '#fff';
+            // 字体的绘画
+            can.strokeText((num/10)+'%',0,0);
+            // 绘画出字体
+            // can.stroke();
+            // 结束绘画
+            can.closePath();
+            // 开始绘画
+            can.beginPath();
+            // 绘画一个半径为100的圆，开始弧度为负的90°，结束弧度为Math.PI/50 *num°（根据num去变化）
+            //Math.PI/50是为了分为100个刻度，-Math.PI/2是因为开始为负的90°，所以要减掉它
+            can.arc(0,0,100,-Math.PI/2,(Math.PI/50 *num/10)-Math.PI/2);
+            //绘制的边框宽度
+            can.lineWidth = 10;
+            // 描边的颜色
+            can.strokeStyle = color;
+            // 描边
+            can.stroke();
+            // 结束绘画
+            can.closePath();
+            // 恢复状态
+            can.restore();
+        }
+        // 初始化
+        loading();
+        // 定时器，没1毫秒执行一次loading函数
+        timer = setInterval(function () {
+            loading();
+        },10)
+
+
+    </script>
+</body>
+</html>
