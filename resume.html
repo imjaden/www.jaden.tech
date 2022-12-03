@@ -14,74 +14,117 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="referrer" content="always">
 <meta content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-<link rel="shortcut icon" href="//cdn.jaden.tech/static/img/favicon.png?t=1647593205410">
+<link rel="shortcut icon" href="//cdn.jaden.tech/static/img/favicon.png?t=1670076001">
 <meta name="keywords" content="jaden.tech">
 <meta name="description" content="jaden.li@jaden.tech">
-<script type="text/javascript" src="//mozilla.github.io/pdf.js/build/pdf.js?t=1647593205410"></script>
-<script id="script">
-  //
-  // If absolute URL from the remote server is provided, configure the CORS
-  // header on that server.
-  //
-  const url = './resume.pdf';
-
-  //
-  // The workerSrc property shall be specified.
-  //
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js?t=1647593205410';
-
-  //
-  // Asynchronous download PDF
-  //
-  const loadingTask = pdfjsLib.getDocument(url);
-  (async () => {
-    const pdf = await loadingTask.promise;
-    //
-    // Fetch the first page
-    //
-    const page = await pdf.getPage(1);
-    const scale = 1.5;
-    const viewport = page.getViewport({ scale });
-    // Support HiDPI-screens.
-    const outputScale = window.devicePixelRatio || 1;
-
-    //
-    // Prepare canvas using PDF page dimensions
-    //
-    const canvas = document.getElementById("resume-canvas");
-    const context = canvas.getContext("2d");
-
-    canvas.width = Math.floor(viewport.width * outputScale);
-    canvas.height = Math.floor(viewport.height * outputScale);
-    canvas.style.width = Math.floor(viewport.width) + "px";
-    canvas.style.height = Math.floor(viewport.height) + "px";
-    canvas.textAlign = "center";
-
-    const transform = outputScale !== 1 
-      ? [outputScale, 0, 0, outputScale, 0, 0] 
-      : null;
-
-    //
-    // Render PDF page into canvas context
-    //
-    const renderContext = {
-      canvasContext: context,
-      transform,
-      viewport,
-    };
-    page.render(renderContext);
-  })();
-</script>
 <script>
   if (window.location.hostname === 'jaden.tech' && window.location.protocol === 'http:') 
       window.location.replace(window.location.href.replace("http://", "https://"));
 </script>
 </head>
-<body style="text-align:center;height:100%;">
-  <canvas id="resume-canvas"></canvas>
+<body style="text-align:center;height:100vh;width:100vw;">
+  <canvas id="loading"></canvas>
+  <canvas id="resume" style="display:none;"></canvas>
   <script>
-  document.getElementById('resume-canvas').textContent =
-      document.getElementById('script').text;
+      let canvas = document.getElementById('loading');
+      let context = canvas.getContext('2d');
+      var num = -1;
+      var timer;
+      var color = context.createLinearGradient(0,300,300,0);
+      color.addColorStop(0,'red');
+      color.addColorStop(.1,'orange');
+      color.addColorStop(.2,'yellow');
+      color.addColorStop(.3,'green');
+      color.addColorStop(.4,'blue');
+      color.addColorStop(.5,'purple');
+      color.addColorStop(.6,'red');
+      color.addColorStop(.7,'orange');
+      color.addColorStop(.8,'yellow');
+      color.addColorStop(.9,'green');
+      color.addColorStop(1,'blue');
+
+      canvas.style.marginTop = (window.innerHeight - 300)/2+"px";
+      canvas.style.marginLeft = (window.innerWidth - 300)/2+"px";
+
+      function loading(){
+          context.clearRect(0,0,300,300);
+          context.save();
+          context.translate(150,150);
+          context.beginPath();
+          context.arc(0,0,100,0,Math.PI*2);
+          num ++;
+          if (num >= 1000){
+              clearInterval(timer);
+          }
+          context.font = '30px 宋体';
+          context.textAlign = 'center';
+          context.strokeStyle = 'black';
+          context.strokeText((num/10)+'%',0,0);
+          context.closePath();
+          context.beginPath();
+          context.arc(0,0,100,-Math.PI/2,(Math.PI/50 *num/10)-Math.PI/2);
+          context.lineWidth = 10;
+          context.strokeStyle = color;
+          context.stroke();
+          context.closePath();
+          context.restore();
+      }
+      loading();
+      timer = setInterval(function () {
+          loading();
+      },100)
+  </script>
+  <script type="text/javascript" src="//cdn.jaden.tech/static/js/pdf.js?t=1670076001"></script>
+  <script id="script">
+    const url = (window.innerWidth > window.innerHeight ? './resume-landscape.pdf' : './resume.pdf');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '//cdn.jaden.tech/static/js/pdf.worker.js?t=1670076001';
+
+    const loadingTask = pdfjsLib.getDocument(url);
+    (async () => {
+      const pdf = await loadingTask.promise;
+      const page = await pdf.getPage(1);
+      let width = 595, height = 841;
+      if (window.innerWidth > window.innerHeight) {
+        width = 841;
+        height = 595;
+      }
+      const a = 1.0*window.innerWidth/width;
+      const b = 1.0*window.innerHeight/height;
+      const scale = b > a ? a : b;
+
+      const viewport = page.getViewport({ scale });
+      outputScale = window.devicePixelRatio || 1;
+
+      const canvas = document.getElementById("resume");
+      const context = canvas.getContext("2d");
+
+      canvas.width = Math.floor(viewport.width * outputScale);
+      canvas.height = Math.floor(viewport.height * outputScale);
+      canvas.style.width = Math.floor(viewport.width) + "px";
+      canvas.style.height = Math.floor(viewport.height) + "px";
+      canvas.textAlign = "center";
+      if(Math.floor(viewport.width) == window.innerWidth) {
+        canvas.style.marginTop = (window.innerHeight - Math.floor(viewport.height))/4+"px";
+      } else {
+        canvas.style.marginLeft = (window.innerWidth - Math.floor(viewport.width))/2+"px";
+      }
+
+      const transform = outputScale !== 1  ? [outputScale, 0, 0, outputScale, 0, 0]  : null;
+
+      const renderContext = {
+        canvasContext: context,
+        transform,
+        viewport,
+      };
+
+      page.render(renderContext);
+      canvas.style.display = "block";
+      document.getElementById('loading').style.display = "none";
+      timer && clearInterval(timer);
+    })();
+  </script>
+  <script>
+    document.getElementById('resume').textContent = document.getElementById('script').text;
   </script>
 </body>
 </html>
