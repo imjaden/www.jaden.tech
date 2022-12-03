@@ -1117,8 +1117,8 @@ html, body {
   /*animation: bganimation 10s infinite;*/
 }
 #background {
-    height: auto;
-    width: 110%;
+    width: auto;
+    height: 110%;
     position: absolute;
     background-size: cover;
     left: 50%;
@@ -1428,7 +1428,7 @@ a.navbar-brand, a.navbar-brand:hover {
 .footer {
     background: transparent;
     position: absolute;
-    bottom: 0;
+    bottom: 0px;
     font-size: 14px;
     width: 100%;
     text-align: center;
@@ -1507,6 +1507,7 @@ a.navbar-brand, a.navbar-brand:hover {
         height: 43px;
         line-height: 43px;
     }
+
 }
 @media screen and (max-width: 640px) {
     .wrap {
@@ -1524,6 +1525,9 @@ a.navbar-brand, a.navbar-brand:hover {
     }
     .footer .wrap > .ft-about, .footer .wrap >  .ft-copy {
         /*display: none;*/
+    }
+    .footer {
+        bottom: 0px;
     }
 }
 @media screen and (max-width: 375px) {
@@ -1543,9 +1547,15 @@ a.navbar-brand, a.navbar-brand:hover {
     .footer .wrap > div + div {
         margin-left: 0;
     }
+    .footer {
+        bottom: 0px;
+    }
 }
 @media screen and (max-width: 320px) {
     #main {
         padding-top: 20px;
+    }
+    .footer {
+        bottom: 0px;
     }
 }
