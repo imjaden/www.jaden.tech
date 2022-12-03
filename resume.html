@@ -74,10 +74,10 @@
           loading();
       },100)
   </script>
-  <script type="text/javascript" src="//cdn.jaden.tech/static/js/pdf.js?t=1670076001"></script>
+  <script type="text/javascript" src="//mozilla.github.io/pdf.js/build/pdf.js?t=1670076001"></script>
   <script id="script">
     const url = (window.innerWidth > window.innerHeight ? './resume-landscape.pdf' : './resume.pdf');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = '//cdn.jaden.tech/static/js/pdf.worker.js?t=1670076001';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js?t=1670076001';
 
     const loadingTask = pdfjsLib.getDocument(url);
     (async () => {
