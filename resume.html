@@ -23,57 +23,55 @@
 </script>
 </head>
 <body style="text-align:center;height:100vh;width:100vw;">
-  <canvas id="loading" width="300" height="300"></canvas>
+  <canvas id="loading" width="400" height="400"></canvas>
   <canvas id="resume" style="display:none;"></canvas>
-  <script>
-      let canvas = document.getElementById('loading');
-      let context = canvas.getContext('2d');
-      var num = -1;
-      var timer;
-      var color = context.createLinearGradient(0,300,300,0);
-      color.addColorStop(0,'red');
-      color.addColorStop(.1,'orange');
-      color.addColorStop(.2,'yellow');
-      color.addColorStop(.3,'green');
-      color.addColorStop(.4,'blue');
-      color.addColorStop(.5,'purple');
-      color.addColorStop(.6,'red');
-      color.addColorStop(.7,'orange');
-      color.addColorStop(.8,'yellow');
-      color.addColorStop(.9,'green');
-      color.addColorStop(1,'blue');
+    <script>
+        const _canvas = document.getElementsByTagName('canvas')[0]
+        const _context = _canvas.getContext('2d');
 
-      canvas.style.marginTop = (window.innerHeight - 300)/2+"px";
-      canvas.style.marginLeft = (window.innerWidth - 300)/3+"px";
+        function fun_draw_circle(_context, k, width, height, clear_x, clear_y, count, text) {
+            let _color = _context.createLinearGradient(0, width, height, 0);
+            _color.addColorStop(0, 'red');
+            _color.addColorStop(.1, 'orange');
+            _color.addColorStop(.2, 'yellow');
+            _color.addColorStop(.3, 'green');
+            _color.addColorStop(.4, 'blue');
+            _color.addColorStop(.5, 'purple');
+            _color.addColorStop(.6, 'red');
+            _color.addColorStop(.7, 'orange');
+            _color.addColorStop(.8, 'yellow');
+            _color.addColorStop(.9, 'green');
+            _color.addColorStop(1, 'blue');
 
-      function loading(){
-          context.clearRect(0,0,300,300);
-          context.save();
-          context.translate(150,150);
-          context.beginPath();
-          context.arc(0,0,100,0,Math.PI*2);
-          num ++;
-          if (num >= 1000){
-              clearInterval(timer);
-          }
-          context.font = '30px 宋体';
-          context.textAlign = 'center';
-          context.strokeStyle = 'black';
-          context.strokeText((num/10)+'%',0,0);
-          context.closePath();
-          context.beginPath();
-          context.arc(0,0,100,-Math.PI/2,(Math.PI/50 *num/10)-Math.PI/2);
-          context.lineWidth = 10;
-          context.strokeStyle = color;
-          context.stroke();
-          context.closePath();
-          context.restore();
-      }
-      loading();
-      timer = setInterval(function () {
-          loading();
-      },100)
-  </script>
+            _context.clearRect(clear_x, clear_x, clear_y, clear_y);
+            _context.save();
+            _context.translate(200, 200);
+            _context.beginPath();
+            _context.arc(0, 0, k, 0, Math.PI*2);
+            _context.font = '30px 宋体';
+            _context.textAlign = 'center';
+            _context.strokeStyle = 'black';
+            _context.strokeText(text, 0, 0);
+            _context.closePath();
+            _context.beginPath();
+            _context.arc(0, 0, k, -Math.PI/2, (Math.PI/50*count/10)-Math.PI/2);
+            _context.lineWidth = 10;
+            _context.strokeStyle = _color;
+            _context.stroke();
+            _context.closePath();
+            _context.restore();
+        }
+        fun_draw_circle(_context, 100, 300, 300, 0, 350, 1000, '');
+
+        let count = 1;
+        let timer, text;
+        timer = setInterval(function () { 
+            text = (count/10) >= 100 ? '100%' : (count/10)+'%';
+            fun_draw_circle(_context, 70, 300, 300, 150, 100, count, text);
+            count += Math.floor(Math.random()*20);
+            if (count >= 1000) clearInterval(timer)
+        }, 100)
+    </script>
   <script type="text/javascript" src="//cdn.jaden.tech/static/js/pdf.js?t=1670076001"></script>
   <script id="script">
     const url = (window.innerWidth > window.innerHeight ? './resume-landscape.pdf' : './resume.pdf');
