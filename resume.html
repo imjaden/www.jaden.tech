@@ -21,108 +21,72 @@
   if (window.location.hostname === 'jaden.tech' && window.location.protocol === 'http:') 
       window.location.replace(window.location.href.replace("http://", "https://"));
 </script>
+<link rel="stylesheet" href="//cdn.jaden.tech/static/css/index.css?t=1670076001"/>
+<style>
+  html, body {
+    margin: 0px 0px;
+    width: 100%;
+    height: 100%;
+  }
+  iframe {
+    argin: 0px 0px;
+    width: 100%;
+    height: 100%;
+  }
+  </style>
 </head>
-<body style="text-align:center;height:100vh;width:100vw;">
-  <canvas id="loading" width="400" height="400"></canvas>
-  <canvas id="resume" style="display:none;"></canvas>
-    <script>
-        const _canvas = document.getElementsByTagName('canvas')[0]
-        const _context = _canvas.getContext('2d');
-
-        function fun_draw_circle(_context, k, width, height, clear_x, clear_y, count, text) {
-            let _color = _context.createLinearGradient(0, width, height, 0);
-            _color.addColorStop(0, 'red');
-            _color.addColorStop(.1, 'orange');
-            _color.addColorStop(.2, 'yellow');
-            _color.addColorStop(.3, 'green');
-            _color.addColorStop(.4, 'blue');
-            _color.addColorStop(.5, 'purple');
-            _color.addColorStop(.6, 'red');
-            _color.addColorStop(.7, 'orange');
-            _color.addColorStop(.8, 'yellow');
-            _color.addColorStop(.9, 'green');
-            _color.addColorStop(1, 'blue');
-
-            _context.clearRect(clear_x, clear_x, clear_y, clear_y);
-            _context.save();
-            _context.translate(200, 200);
-            _context.beginPath();
-            _context.arc(0, 0, k, 0, Math.PI*2);
-            _context.font = '30px 宋体';
-            _context.textAlign = 'center';
-            _context.strokeStyle = 'black';
-            _context.strokeText(text, 0, 0);
-            _context.closePath();
-            _context.beginPath();
-            _context.arc(0, 0, k, -Math.PI/2, (Math.PI/50*count/10)-Math.PI/2);
-            _context.lineWidth = 10;
-            _context.strokeStyle = _color;
-            _context.stroke();
-            _context.closePath();
-            _context.restore();
-        }
-        fun_draw_circle(_context, 100, 300, 300, 0, 350, 1000, '');
-
-        let count = 1;
-        let timer, text;
-        timer = setInterval(function () { 
-            text = (count/10) >= 100 ? '100%' : (count/10)+'%';
-            fun_draw_circle(_context, 70, 300, 300, 150, 100, count, text);
-            count += Math.floor(Math.random()*20);
-            if (count >= 1000) clearInterval(timer)
-        }, 100)
-    </script>
-  <script type="text/javascript" src="//cdn.jaden.tech/static/js/pdf.js?t=1670076001"></script>
-  <script id="script">
-    const url = (window.innerWidth > window.innerHeight ? './resume-landscape.pdf' : './resume.pdf');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = '//cdn.jaden.tech/static/js/pdf.worker.js?t=1670076001';
-
-    const loadingTask = pdfjsLib.getDocument(url);
-    (async () => {
-      const pdf = await loadingTask.promise;
-      const page = await pdf.getPage(1);
-      let width = 595, height = 841;
-      if (window.innerWidth > window.innerHeight) {
-        width = 841;
-        height = 595;
-      }
-      const a = 1.0*window.innerWidth/width;
-      const b = 1.0*window.innerHeight/height;
-      const scale = b > a ? a : b;
-
-      const viewport = page.getViewport({ scale });
-      outputScale = window.devicePixelRatio || 1;
-
-      const canvas = document.getElementById("resume");
-      const context = canvas.getContext("2d");
-
-      canvas.width = Math.floor(viewport.width * outputScale);
-      canvas.height = Math.floor(viewport.height * outputScale);
-      canvas.style.width = Math.floor(viewport.width) + "px";
-      canvas.style.height = Math.floor(viewport.height) + "px";
-      canvas.textAlign = "center";
-      if(Math.floor(viewport.width) == window.innerWidth) {
-        canvas.style.marginTop = (window.innerHeight - Math.floor(viewport.height))/4+"px";
-      } else {
-        canvas.style.marginLeft = (window.innerWidth - Math.floor(viewport.width))/2+"px";
-      }
-
-      const transform = outputScale !== 1  ? [outputScale, 0, 0, outputScale, 0, 0]  : null;
-
-      const renderContext = {
-        canvasContext: context,
-        transform,
-        viewport,
-      };
-
-      page.render(renderContext);
-      canvas.style.display = "block";
-      document.getElementById('loading').style.display = "none";
-      timer && clearInterval(timer);
-    })();
-  </script>
+<body>
+  <iframe frameborder=0 scrolling=no></iframe>
   <script>
-    document.getElementById('resume').textContent = document.getElementById('script').text;
+    window.Param = {
+      parse: function() {
+        var params = {},
+            search = window.location.search.substring(1),
+            parts = search.split('&'),
+            pairs = [];
+
+        for(var i = 0, len = parts.length; i < len; i++) {
+          pairs = parts[i].split('=');
+          if(pairs[0] === '') continue
+          params[pairs[0]] = (pairs.length > 1 ? pairs[1] : null);
+        }
+
+        return params;
+      },
+      toString: function(paramsHash) {
+        var pairs = [];
+        for(var key in paramsHash) {
+          pairs.push(key + "=" + paramsHash[key]);
+        }
+        
+        return window.location.href.split("?")[0] + "?" + pairs.join("&");
+      },
+      redirectTo: function(paramsHash) {
+        window.location.href = window.Param.toString(paramsHash);
+      }
+    }
+
+    let resume_loader = function() {
+      let params = Param.parse()
+      let t = params.t
+      if (typeof(t) === 'undefined' || (Date.now() - t) > 60*60*1000) {
+        params.t = Date.now()
+        Param.redirectTo(params)
+      }
+      console.log("fresh timestamp: " + t);
+
+      document.getElementsByTagName('iframe')[0].height = "100%";
+      document.getElementsByTagName('iframe')[0].src = (window.innerWidth > window.innerHeight ? '//jaden.tech/resume-landscape-672cfe02a8443258f4892d518a61a963.pdf' : '//jaden.tech/resume-vertical-e8520975ff8f7ece244b97a5f3ad9494.pdf');
+    };
+    resume_loader()
+    window.onresize = resume_loader;
   </script>
+  <div class="footer"> 
+    <div class="wrap">
+      <div class="ft-copy">
+          <p><a href="https://beian.miit.gov.cn">备案号：沪ICP备20021619号-1</a></p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
