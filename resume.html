@@ -36,7 +36,7 @@
   </style>
 </head>
 <body>
-  <iframe frameborder=0 scrolling=no></iframe>
+  <iframe border="0" frameborder="0" scrolling="yes" allowfullscreen="true"></iframe>
   <script>
     window.Param = {
       parse: function() {
@@ -75,8 +75,7 @@
       }
       console.log("fresh timestamp: " + t);
 
-      document.getElementsByTagName('iframe')[0].height = "100%";
-      document.getElementsByTagName('iframe')[0].src = (window.innerWidth > window.innerHeight ? '//jaden.tech/resume-landscape-672cfe02a8443258f4892d518a61a963.pdf' : '//jaden.tech/resume-vertical-e8520975ff8f7ece244b97a5f3ad9494.pdf');
+      document.getElementsByTagName('iframe')[0].src = (window.innerWidth > window.innerHeight ? '//jaden.tech/resume-landscape-672cfe02a8443258f4892d518a61a963.pdf' : '//jaden.tech/resume-vertical-e8520975ff8f7ece244b97a5f3ad9494.pdf') + "#view=Fit";
     };
     resume_loader()
     window.onresize = resume_loader;
