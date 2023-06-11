@@ -13,7 +13,7 @@
 <meta name="renderer" content="webkit">
 <meta name="format-detection" content="telephone=no">
 <meta name="referrer" content="always">
-<meta content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <link rel="shortcut icon" href="//cdn.jaden.tech/static/img/favicon.png?t=1670076001">
 <meta name="keywords" content="jaden.tech">
 <meta name="description" content="jaden.li@jaden.tech">
@@ -29,7 +29,7 @@
     height: 100%;
   }
   iframe {
-    argin: 0px 0px;
+    margin: 0px 0px;
     width: 100%;
     height: 100%;
   }
@@ -66,6 +66,8 @@
       }
     }
 
+    let iframe = document.getElementsByTagName('iframe')[0];
+    let scroll_handler;
     let resume_loader = function() {
       let params = Param.parse()
       let t = params.t
@@ -75,10 +77,21 @@
       }
       console.log("fresh timestamp: " + t);
 
-      document.getElementsByTagName('iframe')[0].src = (window.innerWidth > window.innerHeight ? '//jaden.tech/resume-landscape-672cfe02a8443258f4892d518a61a963.pdf' : '//jaden.tech/resume-vertical-e8520975ff8f7ece244b97a5f3ad9494.pdf') + "#view=Fit";
+      document.getElementsByTagName('iframe')[0].src = (window.innerWidth > window.innerHeight ? '//jaden.tech/resume-landscape-672cfe02a8443258f4892d518a61a963.pdf' : '//jaden.tech/resume-vertical-e8520975ff8f7ece244b97a5f3ad9494.pdf') + "#view=Fit,Top,Center";
+
+      scroll_handler = setInterval(function() {
+        iframe.width = '100%'
+        document.getElementsByTagName('iframe')[0].scrollLeft = document.getElementsByTagName('iframe')[0].scrollWidth;
+        document.body.scrollLeft = document.body.scrollWidth;
+        clearInterval(scroll_handler)
+      }, 2000);
     };
     resume_loader()
     window.onresize = resume_loader;
+    iframe.onload = function () {
+        iframe.contentWindow.scrollTo(document.body.scrollWidth, 0);
+        iframe.width = document.body.clientWidth + 'px';
+    }
   </script>
   <div class="footer"> 
     <div class="wrap">
