@@ -1169,7 +1169,7 @@ a.navbar-brand, a.navbar-brand:hover {
     background-position: center,center;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=7)";
     filter: alpha(opacity=7);
-    opacity: 0.5;
+    /*opacity: 0.85;*/
     /*border-radius: 50%;*/
 }
 .head {
@@ -1389,7 +1389,7 @@ body {
 a.navbar-brand, a.navbar-brand:hover {
     height: 32px;
     width: 115px;
-    background-image: url('../img/logo.svg');
+    background-image: url('../img/favicon.svg');
 }
 .nav {
     height: 32px;
