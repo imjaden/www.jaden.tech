@@ -14,10 +14,10 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="referrer" content="always">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<link rel="shortcut icon" href="static/img/favicon.png?t=1727712000">
+<link rel="shortcut icon" href="static/img/favicon.png?t=1780910447">
 <meta name="keywords" content="jaden.tech">
 <meta name="description" content="jaden.li@jaden.tech">
-<link rel="stylesheet" href="/static/css/index.css?t=1727712000"/>
+<link rel="stylesheet" href="static/css/index.css?t=1780910447"/>
 <style>
   .icon-links {
     display: flex;
@@ -48,22 +48,22 @@
 </script>
 </head>
 <body>
-  <embed id="background" name="background" type="image/svg+xml" src="static/img/bear01.svg?t=1727712000"/>
+  <embed id="background" name="background" type="image/svg+xml" src="static/img/bear01.svg?t=1780910447"/>
   <a href="//github.com/imjaden" class="github-corner" aria-label="View source on Github">
       <embed type="image/svg+xml" src="static/img/github.svg"/>
   </a>
 <div class="header"><div class="wrap clearfix"></div></div>
 <section id="main">
   <div class="container">
-    <a href="javascript:void(0);">
-        <img id="logo" type="image/svg+xml" src="static/img/favicon.svg?t=1727712000"/>
+    <a href="javascript:void(0);" id="logo-link">
+        <img id="logo" type="image/svg+xml" src="static/img/favicon.svg?t=1780910447"/>
     </a>
     <div class="icon-links">
       <a href="https://intfocus.archived.jaden.tech/" target="_blank" title="Intfocus">
-        <img src="static/img/icons/intfocus.png" alt="Intfocus"/>
+        <img src="static/img/icons/intfocus.png?t=1780910447" alt="Intfocus"/>
       </a>
       <a href="https://cloudwise.archived.jaden.tech" target="_blank" title="Cloudwise">
-        <img src="static/img/icons/cloudwise.png" alt="Cloudwise"/>
+        <img src="static/img/icons/cloudwise.png?t=1780910447" alt="Cloudwise"/>
       </a>
     </div>
   </div> 
@@ -78,6 +78,34 @@
     </div>
   </div>
 </div>
-<script type="text/javascript" src="static/js/index.js?t=1727712000"></script>
+<script type="text/javascript" src="static/js/index.js?t=1780910447"></script>
+<script>
+(function() {
+  var logo = document.getElementById('logo');
+  var link = document.getElementById('logo-link');
+  var originalSrc = logo.src;
+  var qrSrc = 'static/img/wechat-qr.png';
+  var timer = null;
+
+  function toggleQR(e) {
+    e.preventDefault();
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (logo.src.indexOf('wechat-qr') !== -1) {
+      logo.src = originalSrc;
+    } else {
+      logo.src = qrSrc;
+      timer = setTimeout(function() {
+        logo.src = originalSrc;
+        timer = null;
+      }, 60000);
+    }
+  }
+
+  logo.addEventListener('click', toggleQR);
+  link.addEventListener('click', function(e) {
+    if (e.target !== logo) toggleQR(e);
+  });
+})();
+</script>
 </body>
 </html>
