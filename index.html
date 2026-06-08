@@ -52,7 +52,6 @@
   <a href="//github.com/imjaden" class="github-corner" aria-label="View source on Github">
       <embed type="image/svg+xml" src="static/img/github.svg"/>
   </a>
-<div class="header"><div class="wrap clearfix"></div></div>
 <section id="main">
   <div class="container">
     <a href="javascript:void(0);" id="logo-link">
@@ -79,33 +78,5 @@
   </div>
 </div>
 <script type="text/javascript" src="static/js/index.js?t=1780910447"></script>
-<script>
-(function() {
-  var logo = document.getElementById('logo');
-  var link = document.getElementById('logo-link');
-  var originalSrc = logo.src;
-  var qrSrc = 'static/img/wechat-qr.png';
-  var timer = null;
-
-  function toggleQR(e) {
-    e.preventDefault();
-    if (timer) { clearTimeout(timer); timer = null; }
-    if (logo.src.indexOf('wechat-qr') !== -1) {
-      logo.src = originalSrc;
-    } else {
-      logo.src = qrSrc;
-      timer = setTimeout(function() {
-        logo.src = originalSrc;
-        timer = null;
-      }, 60000);
-    }
-  }
-
-  logo.addEventListener('click', toggleQR);
-  link.addEventListener('click', function(e) {
-    if (e.target !== logo) toggleQR(e);
-  });
-})();
-</script>
 </body>
 </html>
