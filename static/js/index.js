@@ -1,65 +1,136 @@
-var body = document.body;
-var footer = document.querySelector('.footer');
-var main = document.querySelector('#main .container');
-window.onresize = (function calcMainheight() {
-  var shouldBeHeight = body.clientHeight - footer.clientHeight - 40;
-  if(shouldBeHeight < main.clientHeight) {
-    var scaleSize = (shouldBeHeight / main.clientHeight).toFixed(2);
-    main.style.transform = 'scale(' + scaleSize + ')';
-    main.parentNode.style.padding = 0;
-  }
-  return calcMainheight;
+/**
+ * Main page JavaScript
+ */
+
+(function() {
+    'use strict';
+
+    // DOM Elements
+    var body = document.body;
+    var footer = document.querySelector('.footer');
+    var mainContainer = document.querySelector('#main .container');
+    var logo = document.getElementById('logo');
+    var logoLink = document.getElementById('logo-link');
+
+    /**
+     * Responsive layout adjustment
+     * Scale main content when viewport is smaller than content
+     */
+    function adjustMainHeight() {
+        var availableHeight = body.clientHeight - footer.clientHeight - 40;
+        if (availableHeight < mainContainer.clientHeight) {
+            var scale = (availableHeight / mainContainer.clientHeight).toFixed(2);
+            mainContainer.style.transform = 'scale(' + scale + ')';
+            mainContainer.parentNode.style.padding = '0';
+        }
+    }
+
+    // Initialize and bind resize event
+    adjustMainHeight();
+    window.addEventListener('resize', adjustMainHeight);
+
+    /**
+     * Logo border-radius animation
+     * Smoothly transitions between square and rounded corners
+     */
+    var borderRadius = 0;
+    var borderRadiusStep = 15;
+
+    setInterval(function() {
+        logo.style.borderRadius = borderRadius + '%';
+
+        // Reverse direction when reaching bounds
+        if (borderRadiusStep > 0 && borderRadius >= 90) {
+            borderRadiusStep = -15;
+        } else if (borderRadiusStep < 0 && borderRadius < 5) {
+            borderRadiusStep = 15;
+        }
+
+        borderRadius += borderRadiusStep;
+    }, 1000);
+
+    /**
+     * URL Parameter Utility
+     * Parse, stringify, and redirect with query parameters
+     */
+    window.Param = {
+        parse: function() {
+            var params = {};
+            var search = window.location.search.substring(1);
+            var parts = search.split('&');
+
+            for (var i = 0, len = parts.length; i < len; i++) {
+                var pair = parts[i].split('=');
+                if (pair[0] === '') continue;
+                params[pair[0]] = (pair.length > 1 ? pair[1] : null);
+            }
+
+            return params;
+        },
+
+        toString: function(paramsHash) {
+            var pairs = [];
+            for (var key in paramsHash) {
+                if (paramsHash.hasOwnProperty(key)) {
+                    pairs.push(key + '=' + paramsHash[key]);
+                }
+            }
+            return window.location.href.split('?')[0] + '?' + pairs.join('&');
+        },
+
+        redirectTo: function(paramsHash) {
+            window.location.href = window.Param.toString(paramsHash);
+        }
+    };
+
+    /**
+     * Timestamp refresh logic
+     * Refresh page if timestamp is missing or older than 1 hour
+     */
+    var params = window.Param.parse();
+    var timestamp = params.t;
+    var oneHour = 60 * 60 * 1000;
+
+    if (typeof timestamp === 'undefined' || (Date.now() - timestamp) > oneHour) {
+        params.t = Date.now();
+        window.Param.redirectTo(params);
+    }
+
+    /**
+     * QR Code toggle functionality
+     * Switch between logo and QR code on click
+     */
+    var originalLogoSrc = logo.src;
+    var qrCodeSrc = 'static/img/wechat-qr.png';
+    var qrTimer = null;
+
+    function toggleQRCode(event) {
+        event.preventDefault();
+
+        // Clear existing timer if any
+        if (qrTimer) {
+            clearTimeout(qrTimer);
+            qrTimer = null;
+        }
+
+        // Toggle between original logo and QR code
+        if (logo.src.indexOf('wechat-qr') !== -1) {
+            logo.src = originalLogoSrc;
+        } else {
+            logo.src = qrCodeSrc;
+            // Auto-revert after 60 seconds
+            qrTimer = setTimeout(function() {
+                logo.src = originalLogoSrc;
+                qrTimer = null;
+            }, 60000);
+        }
+    }
+
+    // Bind click events for QR code toggle
+    logo.addEventListener('click', toggleQRCode);
+    logoLink.addEventListener('click', function(event) {
+        if (event.target !== logo) {
+            toggleQRCode(event);
+        }
+    });
 })();
-
-var logo_border_radius = 0
-var logo_border_radius_interval = 15;
-var style, node, random, last_path, last_path_style;
-setInterval(function() {
-  style = "border-radius:" + logo_border_radius + "%;";
-  document.getElementById("logo").style = style
-  if (logo_border_radius_interval > 0 && logo_border_radius >= 90) {
-    logo_border_radius_interval = -15
-  } else if (logo_border_radius_interval < 0 && logo_border_radius < 5) {
-    logo_border_radius_interval = 15
-  }
-  logo_border_radius += logo_border_radius_interval;
-}, 1000);
-
-window.Param = {
-  parse: function() {
-    var params = {},
-        search = window.location.search.substring(1),
-        parts = search.split('&'),
-        pairs = [];
-
-    for(var i = 0, len = parts.length; i < len; i++) {
-      pairs = parts[i].split('=');
-      if(pairs[0] === '') continue
-      params[pairs[0]] = (pairs.length > 1 ? pairs[1] : null);
-    }
-
-    return params;
-  },
-  toString: function(paramsHash) {
-    var pairs = [];
-    for(var key in paramsHash) {
-      pairs.push(key + "=" + paramsHash[key]);
-    }
-    
-    return window.location.href.split("?")[0] + "?" + pairs.join("&");
-  },
-  redirectTo: function(paramsHash) {
-    window.location.href = window.Param.toString(paramsHash);
-  }
-}
-
-var params = Param.parse()
-var t = params.t
-if (typeof(t) === 'undefined' || (Date.now() - t) > 60*60*1000) {
-  params.t = Date.now()
-  Param.redirectTo(params)
-}
-
-
-
-
