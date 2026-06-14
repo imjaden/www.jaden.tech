@@ -4,7 +4,7 @@
 
 ## 域名
 
-- `jaden.tech`
+- `www.jaden.tech`
 - `cloudwise.archived.jaden.tech`
 - `intfocus.archived.jaden.tech`
 
