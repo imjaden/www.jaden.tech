@@ -161,7 +161,8 @@ html, body {
     min-height: 50px;
 }
 .github-corner embed,
-.github-corner svg {
+.github-corner svg,
+.github-corner img {
     fill: #fff;
     color: #FFF;
     position: absolute;
