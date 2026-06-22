@@ -72,7 +72,8 @@ class TimestampManager:
         self.script_dir = Path(__file__).parent
         self.project_root = self.script_dir.parent
         self.html_files = [
-            self.project_root / 'index.html'
+            self.project_root / 'index.html',
+            self.project_root / 'wechat.html',
         ]
         self.timestamp_pattern = re.compile(r'\?t=(\d+)')
         self.update_threshold = timedelta(hours=1)
