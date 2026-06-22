@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "command": {
+    "review": {
+      "description": "Review uncommitted changes — security scan, quality gates",
+      "subtask": true
+    },
+    "commit": {
+      "description": "Stage and commit changes with conventional message",
+      "subtask": false
+    }
+  }
+}
