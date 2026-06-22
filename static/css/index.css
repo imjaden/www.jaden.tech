@@ -69,11 +69,13 @@ html, body {
     width: 100%;
     height: 100%;
     min-height: 100vh;
+    overflow: hidden;
+}
+body {
     background: #fff;
     background-size: cover;
     font: 16px/1.7 "Microsoft YaHei", arial, sans-serif;
     position: relative;
-    overflow: hidden;
 }
 
 /* Layout */
@@ -123,10 +125,10 @@ html, body {
 
 /* ===== Main page (index.html) ===== */
 #background {
-    width: auto;
+    width: 100%;
     height: 110%;
     position: absolute;
-    background-size: cover;
+    object-fit: cover;
     left: 50%;
     transform: translateX(-50%);
 }
@@ -152,10 +154,13 @@ html, body {
     width: 100%;
     position: absolute;
     bottom: 60px;
-    color: lightskyblue;
     word-wrap: break-word;
     word-break: break-all;
     text-align: center;
+}
+#main .wrap a {
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 .github-corner {
     position: fixed;
