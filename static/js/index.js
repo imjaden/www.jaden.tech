@@ -30,28 +30,8 @@
     window.addEventListener('resize', adjustMainHeight);
 
     /**
-     * Logo border-radius animation
-     * Smoothly transitions between square and rounded corners
-     */
-    var borderRadius = 0;
-    var borderRadiusStep = 15;
-
-    setInterval(function() {
-        logo.style.borderRadius = borderRadius + '%';
-
-        // Reverse direction when reaching bounds
-        if (borderRadiusStep > 0 && borderRadius >= 90) {
-            borderRadiusStep = -15;
-        } else if (borderRadiusStep < 0 && borderRadius < 5) {
-            borderRadiusStep = 15;
-        }
-
-        borderRadius += borderRadiusStep;
-    }, 1000);
-
-    /**
      * URL Parameter Utility
-     * Parse, stringify, and redirect with query parameters
+     * Parse, stringify, and set timestamp with replaceState
      */
     window.Param = {
         parse: function() {
@@ -76,10 +56,6 @@
                 }
             }
             return window.location.href.split('?')[0] + '?' + pairs.join('&');
-        },
-
-        redirectTo: function(paramsHash) {
-            window.location.href = window.Param.toString(paramsHash);
         }
     };
 
@@ -88,12 +64,12 @@
      * Refresh page if timestamp is missing or older than 1 hour
      */
     var params = window.Param.parse();
-    var timestamp = params.t;
+    var timestamp = Number(params.t);
     var oneHour = 60 * 60 * 1000;
 
-    if (typeof timestamp === 'undefined' || (Date.now() - timestamp) > oneHour) {
-        params.t = Date.now();
-        window.Param.redirectTo(params);
+    if (isNaN(timestamp) || timestamp - Math.floor(Date.now() / 1000) > 1 || (Date.now() - timestamp * 1000) > oneHour) {
+        params.t = Math.floor(Date.now() / 1000);
+        history.replaceState(null, '', window.Param.toString(params));
     }
 
     /**
