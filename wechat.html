@@ -1,0 +1,777 @@
+<!--
+===========================================================================
+Karpathy Principles - AI编程四大原则
+===========================================================================
+1. 先思考 - 不假设，不隐藏困惑 → 不确定就问，多种解释列出
+2. 保持简单 - 最小代码解决问题 → 无多余抽象
+3. 精准修改 - 只改必须改的 → 不"顺便"改进邻接代码
+4. 目标驱动 - 测试先行，验证闭环 → "修bug"→"写测试复现→让测试通过"
+
+Version: 1.0(2026-06-13)
+Description
+- 微信朋友圈背景图生成器
+- 3:5 竖版（1080×1800px）适配微信朋友圈背景图裁剪
+- 支持多种配色主题切换
+- 支持导出为PNG图片
+
+【功能清单】
+| 功能 | 说明 |
+|------|------|
+| 主题切换 | 支持深海蓝、午夜黑、翡翠绿、落日红、星空紫五种配色 |
+| 尺寸适配 | 响应式缩放预览，适配不同屏幕尺寸 |
+| 图片导出 | 使用html2canvas导出1080×1800px高清图片 |
+| 边框切换 | 显示/隐藏预览边框 |
+
+【辅助工具】
+| 工具方法 | 功能说明 |
+|---------|---------|
+| ThemeManager.applyTheme() | 应用主题配色 |
+| ThemeManager.getThemes() | 获取主题配置 |
+| CardScaler.fitCard() | 计算并应用卡片缩放比例 |
+| ImageExporter.saveImage() | 导出卡片为图片 |
+| Utils.init() | 初始化页面 |
+
+Related Paths
+- 项目根目录: ~/CodeSpace/script-miner
+- 缓存目录: ~/CodeSpace/script-miner/cache
+
+Environments:
+- Mac MacBookPro-2025-26.5-25F71
+- IDE TRAE CN 版本
+
+Dependency
+- html2canvas@1.4.1 (CDN引入)
+
+Sublime Text
+- Command + k, Command + 1 收缩所有函数代码
+- Command + k, Command + j 展示所有函数代码
+
+触发条件
+- 制作个人简历朋友圈背景图时
+- 需要更换配色方案时
+
+版本说明
+- 主版本号默认为1，修订号从0开始
+- 每次代码修改后修订号+1
+- 重大架构变更时主版本号+1，修订号归零
+
+敏感信息管理
+- 禁止在源码中明文存储敏感信息：API_KEY|SECRET|TOKEN|PASSWORD|PRIVATE_KEY
+- 本页面无敏感信息
+===========================================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>朋友圈背景图生成器</title>
+    <link rel="shortcut icon" href="https://jaden.tech/static/img/favicon.png">
+    
+    <!-- 外部依赖 -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    
+    <style>
+        /* 【1】全局重置与基础样式 */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            background: #0e0e1a; 
+            font-family: "微软雅黑", "PingFang SC", sans-serif; 
+            color: #ccc; 
+            overflow-x: hidden; 
+        }
+
+        /* 【2】响应式布局容器 */
+        .layout {
+            display: flex; 
+            gap: 16px; 
+            padding: 16px;
+            min-height: 100vh; 
+            align-items: stretch; 
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* 【3】左侧面板：设计说明 */
+        .col-prompt {
+            width: 22vw; 
+            min-width: 260px; 
+            max-width: 340px; 
+            flex-shrink: 0;
+            display: flex; 
+            flex-direction: column;
+        }
+        
+        .col-prompt h3 { 
+            color: #6ba3ff; 
+            font-size: 14px; 
+            margin-bottom: 10px; 
+        }
+        
+        .prompt-box {
+            background: #161628; 
+            border: 1px solid #2a2a4a; 
+            border-radius: 8px;
+            padding: 12px 14px; 
+            font-size: 11.5px; 
+            line-height: 1.85; 
+            color: #999;
+            flex: 1; 
+            overflow-y: auto;
+        }
+        
+        .prompt-box strong { color: #6ba3ff; }
+        .prompt-box ul { padding-left: 14px; margin-top: 6px; }
+        .prompt-box li { margin-bottom: 3px; }
+        .prompt-box .sep { border-top: 1px solid #2a2a4a; margin: 8px 0; }
+
+        /* 【4】中间区域：卡片预览 */
+        .col-card {
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            min-width: 300px;
+        }
+        
+        .card-scaler {
+            width: 100%; 
+            height: calc(100vh - 32px);
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+        
+        .card {
+            width: 1080px; 
+            height: 1800px;
+            position: relative; 
+            overflow: hidden;
+            font-family: "微软雅黑", "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: #fff; 
+            display: flex; 
+            flex-direction: column;
+            border: 2px dashed rgba(255,255,255,0.3);
+            transform: scale(var(--card-scale, 0.5));
+            transform-origin: center center;
+        }
+
+        /* 【5】右侧面板：控制区域 */
+        .col-controls {
+            width: 18vw; 
+            min-width: 200px; 
+            max-width: 280px; 
+            flex-shrink: 0;
+            display: flex; 
+            flex-direction: column;
+        }
+        
+        .col-controls h3 { 
+            color: #6ba3ff; 
+            font-size: 14px; 
+            margin-bottom: 10px; 
+        }
+        
+        .control-box {
+            background: #161628; 
+            border: 1px solid #2a2a4a; 
+            border-radius: 8px;
+            padding: 12px 14px; 
+            margin-bottom: 10px;
+        }
+        
+        .control-box .label { 
+            font-size: 12px; 
+            color: #888; 
+            margin-bottom: 8px; 
+        }
+        
+        .theme-option {
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            margin-bottom: 6px; 
+            cursor: pointer;
+        }
+        
+        .theme-option input { accent-color: #6ba3ff; }
+        
+        .theme-option .swatch {
+            width: 18px; 
+            height: 18px; 
+            border-radius: 4px; 
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .theme-option .name { 
+            font-size: 12px; 
+            color: #bbb; 
+        }
+        
+        .btn-save {
+            width: 100%; 
+            background: #2b5797; 
+            color: #fff; 
+            border: none; 
+            padding: 10px;
+            border-radius: 6px; 
+            font-size: 13px; 
+            cursor: pointer; 
+            transition: background 0.2s;
+            margin-top: 4px;
+        }
+        
+        .btn-save:hover { background: #3a6db7; }
+        
+        .btn-border {
+            width: 100%; 
+            background: transparent; 
+            color: #888; 
+            border: 1px solid #333;
+            padding: 7px; 
+            border-radius: 6px; 
+            font-size: 11px; 
+            cursor: pointer; 
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+        
+        .btn-border:hover { 
+            border-color: #6ba3ff; 
+            color: #6ba3ff; 
+        }
+        
+        .size-info {
+            font-size: 10px; 
+            color: #555; 
+            text-align: center; 
+            margin-top: 6px;
+        }
+        
+        .scale-info {
+            font-size: 10px; 
+            color: #444; 
+            text-align: center; 
+            margin-top: 4px;
+        }
+
+        /* 【6】主题配色方案 */
+        .theme-deep-blue { 
+            background: linear-gradient(180deg, #08081e 0%, #0d0d30 20%, #141448 40%, #1a1a5a 60%, #222270 80%, #2b5797 100%); 
+        }
+        
+        .theme-midnight { 
+            background: linear-gradient(180deg, #0a0a0a 0%, #111111 20%, #1a1a2e 40%, #16213e 60%, #0f3460 80%, #1a1a5a 100%); 
+        }
+        
+        .theme-emerald { 
+            background: linear-gradient(180deg, #071a0e 0%, #0d2818 20%, #143d24 40%, #1b5e35 60%, #227a45 80%, #2d9b5a 100%); 
+        }
+        
+        .theme-sunset { 
+            background: linear-gradient(180deg, #1a0a0a 0%, #2d1111 20%, #451a1a 40%, #6b2222 60%, #8b3030 80%, #b04040 100%); 
+        }
+        
+        .theme-purple { 
+            background: linear-gradient(180deg, #0d0820 0%, #1a1040 20%, #2a1860 40%, #3a2080 60%, #4a2898 80%, #5a30b0 100%); 
+        }
+
+        /* 【7】装饰元素 */
+        .dot1 { 
+            position: absolute; 
+            top: 120px; 
+            right: -60px; 
+            width: 280px; 
+            height: 280px; 
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.03); 
+        }
+        
+        .dot2 { 
+            position: absolute; 
+            bottom: 200px; 
+            left: -40px; 
+            width: 200px; 
+            height: 200px; 
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.02); 
+        }
+
+        /* 【8】卡片内容结构 */
+        .top { 
+            height: 540px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        .top-label { 
+            font-size: 16px; 
+            letter-spacing: 10px; 
+            color: rgba(255,255,255,0.5); 
+            text-transform: uppercase; 
+            margin-bottom: 20px; 
+        }
+        
+        .top-line { 
+            width: 40px; 
+            height: 1px; 
+            background: rgba(255,255,255,0.1); 
+        }
+
+        .middle { 
+            height: 720px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 0 80px; 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        .name { 
+            font-size: 72px; 
+            font-weight: bold; 
+            letter-spacing: 4px; 
+            margin-bottom: 8px; 
+            text-align: center; 
+        }
+        
+        .name span { 
+            color: var(--accent, #6ba3ff); 
+            font-weight: normal; 
+        }
+        
+        .title-line { 
+            font-size: 26px; 
+            color: var(--sub, #7aa8e8); 
+            margin-bottom: 32px; 
+            letter-spacing: 2px; 
+            text-align: center; 
+        }
+        
+        .tags { 
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 28px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+        }
+        
+        .tag { 
+            background: rgba(255,255,255,0.08); 
+            border: 1px solid rgba(255,255,255,0.15); 
+            padding: 8px 22px; 
+            border-radius: 24px; 
+            font-size: 22px; 
+            color: var(--tag, #b0c8f0); 
+        }
+        
+        .divider { 
+            width: 50px; 
+            height: 2px; 
+            background: var(--accent, #6ba3ff); 
+            margin: 20px 0; 
+        }
+        
+        .highlight { 
+            font-size: 26px; 
+            line-height: 1.7; 
+            color: var(--sub, #c0d4f0); 
+            text-align: center; 
+        }
+        
+        .highlight strong { 
+            color: #fff; 
+            font-size: 30px; 
+            display: block; 
+            margin-bottom: 6px; 
+        }
+
+        .bottom { 
+            height: 540px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        .open-to-work { 
+            font-size: 16px; 
+            letter-spacing: 8px; 
+            color: rgba(255,255,255,0.5); 
+            text-transform: uppercase; 
+            margin-bottom: 40px; 
+        }
+        
+        .contact { 
+            text-align: left; 
+            font-size: 22px; 
+            color: var(--sub, #eef0f3); 
+            line-height: 2.2; 
+        } 
+        .contact a {
+            color: white;
+            text-decoration: none;
+        }
+        .contact a:hover {
+            color: var(--accent, #6ba3ff);
+            text-decoration: underline;
+        }
+        
+        .bottom-line { 
+            width: 40px; 
+            height: 1px; 
+            background: rgba(255,255,255,0.1); 
+            margin-top: 40px; 
+        }
+
+        /* 【9】响应式适配 */
+        @media (max-width: 1200px) {
+            .col-prompt {
+                display: none;
+            }
+            .col-controls {
+                width: 25vw;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .layout {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .col-prompt, .col-controls {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .col-card {
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- 左侧：设计说明 -->
+        <div class="col-prompt">
+            <h3>📐 设计说明</h3>
+            <div class="prompt-box">
+                <strong>比例与尺寸</strong>
+                <ul>
+                    <li>3:5 竖版（1080×1800px）</li>
+                    <li>适配微信朋友圈背景图裁剪</li>
+                </ul>
+                <div class="sep"></div>
+                <strong>三层结构</strong>
+                <ul>
+                    <li><strong>上 30%</strong>（540px）：下拉才露出，淡色英文装饰</li>
+                    <li><strong>中 40%</strong>（720px）：默认展示区，核心信息集中</li>
+                    <li><strong>下 30%</strong>（540px）：下拉才露出，联系方式</li>
+                </ul>
+                <div class="sep"></div>
+                <strong>中间区内容</strong>
+                <ul>
+                    <li>姓名（大号加粗）</li>
+                    <li>🎯 求职意向 + 经验年限</li>
+                    <li>5 个胶囊标签传递量级感</li>
+                    <li>一句话价值主张</li>
+                </ul>
+                <div class="sep"></div>
+                <strong>配色逻辑</strong>
+                <ul>
+                    <li>深色渐变背景 + 浅色文字</li>
+                    <li>与微信白色昵称/签名形成高对比</li>
+                    <li>胶囊标签用低透明度底色</li>
+                </ul>
+                <div class="sep"></div>
+                <strong>标签含义</strong>
+                <ul>
+                    <li>8年研发管理 → 技术深度</li>
+                    <li>6年售前架构 → 客户能力</li>
+                    <li>50+客户 → 服务量级</li>
+                    <li>10+行业 → 覆盖广度</li>
+                    <li>LLM运维落地 → AI差异化</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 中间：卡片预览 -->
+        <div class="col-card">
+            <div class="card-scaler">
+                <div class="card" id="card">
+                    <div class="dot1"></div>
+                    <div class="dot2"></div>
+                    <div class="top">
+                        <div class="top-label">Solution Architect</div>
+                        <div class="top-line"></div>
+                    </div>
+                    <div class="middle">
+                        <div class="name">李俊杰 <span>Jaden</span></div>
+                        <div class="title-line">🎯 FDE · 解决方案架构师 · 14年技术经验</div>
+                        <div class="tags">
+                            <span class="tag">8年研发管理</span>
+                            <span class="tag">6年售前架构</span>
+                            <span class="tag">50+客户</span>
+                            <span class="tag">10+行业</span>
+                            <span class="tag">LLM运维落地</span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="highlight">
+                            <strong>从需求洞察到生产部署</strong>
+                            端到端交付能力 · 驻场客户环境
+                        </div>
+                    </div>
+                    <div class="bottom">
+                        <div class="open-to-work">Open to Work</div>
+                        <div class="contact">
+                            📞 &nbsp;&nbsp; <a href="tel:17269398060">17269398060</a><br>
+                            🌐 &nbsp;&nbsp; <a href="https://www.jaden.tech" target="_blank">https://www.jaden.tech</a><br>
+                            ✉️ &nbsp;&nbsp; <a href="mailto:jaden.li@jaden.tech">jaden.li@jaden.tech</a>
+                        </div>
+                        <div class="bottom-line"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：控制面板 -->
+        <div class="col-controls">
+            <h3>🎨 配色方案</h3>
+            <div class="control-box">
+                <div class="label">选择背景色</div>
+                <label class="theme-option">
+                    <input type="radio" name="theme" value="deep-blue">
+                    <div class="swatch" style="background:linear-gradient(180deg,#08081e,#2b5797)"></div>
+                    <span class="name">深海蓝</span>
+                </label>
+                <label class="theme-option">
+                    <input type="radio" name="theme" value="midnight">
+                    <div class="swatch" style="background:linear-gradient(180deg,#0a0a0a,#1a1a5a)"></div>
+                    <span class="name">午夜黑</span>
+                </label>
+                <label class="theme-option">
+                    <input type="radio" name="theme" value="emerald">
+                    <div class="swatch" style="background:linear-gradient(180deg,#071a0e,#2d9b5a)"></div>
+                    <span class="name">翡翠绿</span>
+                </label>
+                <label class="theme-option">
+                    <input type="radio" name="theme" value="sunset">
+                    <div class="swatch" style="background:linear-gradient(180deg,#1a0a0a,#b04040)"></div>
+                    <span class="name">落日红</span>
+                </label>
+                <label class="theme-option">
+                    <input type="radio" name="theme" value="purple" checked>
+                    <div class="swatch" style="background:linear-gradient(180deg,#0d0820,#5a30b0)"></div>
+                    <span class="name">星空紫</span>
+                </label>
+            </div>
+            <div class="control-box">
+                <div class="label">导出操作</div>
+                <button class="btn-save" onclick="ImageExporter.saveImage()">📥 保存为图片</button>
+                <button class="btn-border" onclick="CardScaler.toggleBorder()">◻ 切换边框</button>
+                <div class="size-info">输出尺寸：1080 × 1800 px</div>
+                <div class="scale-info" id="scaleInfo">当前缩放：—</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 主题管理器
+         * 负责管理配色主题的切换和应用
+         */
+        const ThemeManager = (function() {
+            const themes = {
+                'deep-blue': { accent: '#6ba3ff', sub: '#7aa8e8', tag: '#b0c8f0' },
+                'midnight':  { accent: '#4a9eff', sub: '#6ab0ff', tag: '#a0c4f0' },
+                'emerald':   { accent: '#4ae68a', sub: '#6bffa0', tag: '#a0f0c0' },
+                'sunset':    { accent: '#ff6a4a', sub: '#ff8a6a', tag: '#f0b0a0' },
+                'purple':    { accent: '#b06aff', sub: '#c080ff', tag: '#d0b0f0' },
+            };
+
+            /**
+             * 应用主题配色
+             * @param {string} name - 主题名称
+             */
+            function applyTheme(name) {
+                const card = document.getElementById('card');
+                if (!card) return;
+                
+                card.className = 'card theme-' + name;
+                const theme = themes[name];
+                if (theme) {
+                    card.style.setProperty('--accent', theme.accent);
+                    card.style.setProperty('--sub', theme.sub);
+                    card.style.setProperty('--tag', theme.tag);
+                }
+            }
+
+            /**
+             * 获取主题配置
+             * @returns {Object} 主题配置对象
+             */
+            function getThemes() {
+                return themes;
+            }
+
+            /**
+             * 初始化主题事件监听
+             */
+            function init() {
+                document.querySelectorAll('input[name="theme"]').forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        applyTheme(this.value);
+                    });
+                });
+            }
+
+            return {
+                applyTheme,
+                getThemes,
+                init
+            };
+        })();
+
+        /**
+         * 卡片缩放管理器
+         * 负责响应式调整卡片显示比例
+         */
+        const CardScaler = (function() {
+            /**
+             * 计算并应用卡片缩放比例
+             */
+            function fitCard() {
+                const card = document.getElementById('card');
+                const scaleInfo = document.getElementById('scaleInfo');
+                if (!card || !scaleInfo) return;
+                
+                const scaler = card.parentElement;
+                const availH = scaler.clientHeight - 20;
+                const availW = scaler.clientWidth - 20;
+                const cardH = 1800;
+                const cardW = 1080;
+                const scaleH = availH / cardH;
+                const scaleW = availW / cardW;
+                const scale = Math.min(scaleH, scaleW);
+                
+                card.style.setProperty('--card-scale', scale);
+                scaleInfo.textContent = '当前缩放：' + Math.round(scale * 100) + '%';
+            }
+
+            /**
+             * 切换卡片边框显示
+             */
+            function toggleBorder() {
+                const card = document.getElementById('card');
+                if (!card) return;
+                
+                card.style.border = card.style.border === 'none' 
+                    ? '2px dashed rgba(255,255,255,0.3)' 
+                    : 'none';
+            }
+
+            /**
+             * 初始化窗口大小变化监听
+             */
+            function init() {
+                window.addEventListener('resize', fitCard);
+            }
+
+            return {
+                fitCard,
+                toggleBorder,
+                init
+            };
+        })();
+
+        /**
+         * 图片导出器
+         * 负责将卡片导出为PNG图片
+         */
+        const ImageExporter = (function() {
+            /**
+             * 保存卡片为图片
+             */
+            function saveImage() {
+                const card = document.getElementById('card');
+                if (!card) return;
+                
+                const origBorder = card.style.border;
+                const origScale = card.style.getPropertyValue('--card-scale');
+                
+                // 临时移除边框并恢复原始尺寸
+                card.style.border = 'none';
+                card.style.setProperty('--card-scale', '1');
+                
+                // 使用html2canvas导出图片
+                html2canvas(card, { 
+                    width: 1080, 
+                    height: 1800, 
+                    scale: 1, 
+                    useCORS: true, 
+                    backgroundColor: null 
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = '李俊杰-朋友圈背景图-1080x1800.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // 恢复原始状态
+                    card.style.border = origBorder;
+                    card.style.setProperty('--card-scale', origScale);
+                }).catch(error => {
+                    console.error('图片导出失败:', error);
+                    // 确保恢复原始状态
+                    card.style.border = origBorder;
+                    card.style.setProperty('--card-scale', origScale);
+                });
+            }
+
+            return {
+                saveImage
+            };
+        })();
+
+        /**
+         * 工具函数集合
+         */
+        const Utils = (function() {
+            /**
+             * 初始化页面
+             */
+            function init() {
+                // 应用默认主题
+                ThemeManager.applyTheme('purple');
+                
+                // 计算初始缩放
+                CardScaler.fitCard();
+                
+                // 初始化事件监听
+                ThemeManager.init();
+                CardScaler.init();
+            }
+
+            return {
+                init
+            };
+        })();
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', Utils.init);
+    </script>
+</body>
+</html>
