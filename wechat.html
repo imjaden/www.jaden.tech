@@ -66,8 +66,56 @@ Sublime Text
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>朋友圈背景图生成器</title>
-    <link rel="shortcut icon" href="https://jaden.tech/static/img/favicon.png">
-    
+    <link rel="shortcut icon" href="static/img/favicon.png?t=1780910447">
+    <script>
+        /**
+         * URL Parameter Utility
+         * Parse, stringify, and redirect with query parameters
+         */
+        window.Param = {
+            parse: function() {
+                var params = {};
+                var search = window.location.search.substring(1);
+                var parts = search.split('&');
+
+                for (var i = 0, len = parts.length; i < len; i++) {
+                    var pair = parts[i].split('=');
+                    if (pair[0] === '') continue;
+                    params[pair[0]] = (pair.length > 1 ? pair[1] : null);
+                }
+
+                return params;
+            },
+
+            toString: function(paramsHash) {
+                var pairs = [];
+                for (var key in paramsHash) {
+                    if (paramsHash.hasOwnProperty(key)) {
+                        pairs.push(key + '=' + paramsHash[key]);
+                    }
+                }
+                return window.location.href.split('?')[0] + '?' + pairs.join('&');
+            },
+
+            redirectTo: function(paramsHash) {
+                window.location.href = window.Param.toString(paramsHash);
+            }
+        };
+
+        /**
+         * Timestamp refresh logic
+         * Refresh page if timestamp is missing or older than 1 hour
+         */
+        var params = window.Param.parse();
+        var timestamp = params.t;
+        var oneHour = 60 * 60 * 1000;
+
+        if (typeof timestamp === 'undefined' || (Date.now() - timestamp) > oneHour) {
+            params.t = Date.now();
+            window.Param.redirectTo(params);
+        }
+
+    </script>
     <!-- 外部依赖 -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     
@@ -659,7 +707,9 @@ Sublime Text
                 const scaleInfo = document.getElementById('scaleInfo');
                 if (!card || !scaleInfo) return;
                 
-                const scaler = card.parentElement;
+                const scaler = document.querySelector('.card-scaler');
+                if (!scaler) return;
+                
                 const availH = scaler.clientHeight - 20;
                 const availW = scaler.clientWidth - 20;
                 const cardH = 1800;
@@ -670,6 +720,9 @@ Sublime Text
                 
                 card.style.setProperty('--card-scale', scale);
                 scaleInfo.textContent = '当前缩放：' + Math.round(scale * 100) + '%';
+                
+                // 强制重绘
+                void scaleInfo.offsetWidth;
             }
 
             /**
@@ -679,7 +732,10 @@ Sublime Text
                 const card = document.getElementById('card');
                 if (!card) return;
                 
-                card.style.border = card.style.border === 'none' 
+                const currentBorder = card.style.border;
+                const isHidden = currentBorder === 'none' || currentBorder === '';
+                
+                card.style.border = isHidden 
                     ? '2px dashed rgba(255,255,255,0.3)' 
                     : 'none';
             }
@@ -712,32 +768,89 @@ Sublime Text
                 
                 const origBorder = card.style.border;
                 const origScale = card.style.getPropertyValue('--card-scale');
+                const origParent = card.parentElement;
+                const origNextSibling = card.nextElementSibling;
                 
-                // 临时移除边框并恢复原始尺寸
+                // 创建临时容器用于导出
+                const tempContainer = document.createElement('div');
+                tempContainer.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                    z-index: -1;
+                `;
+                
+                // 将卡片移动到临时容器
+                document.body.appendChild(tempContainer);
+                tempContainer.appendChild(card);
+                
+                // 设置卡片为原始尺寸
                 card.style.border = 'none';
                 card.style.setProperty('--card-scale', '1');
+                card.style.width = '1080px';
+                card.style.height = '1800px';
+                card.style.transform = 'none';
+                card.style.transformOrigin = 'center center';
+                
+                // 强制浏览器重绘
+                void card.offsetWidth;
                 
                 // 使用html2canvas导出图片
                 html2canvas(card, { 
                     width: 1080, 
                     height: 1800, 
                     scale: 1, 
-                    useCORS: true, 
-                    backgroundColor: null 
+                    useCORS: true,
+                    backgroundColor: null,
+                    logging: false,
+                    allowTaint: true,
+                    imageTimeout: 0
                 }).then(canvas => {
                     const link = document.createElement('a');
-                    link.download = '李俊杰-朋友圈背景图-1080x1800.png';
+                    link.download = `wechat-${(new Date()).valueOf()}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     
                     // 恢复原始状态
                     card.style.border = origBorder;
                     card.style.setProperty('--card-scale', origScale);
+                    card.style.width = '';
+                    card.style.height = '';
+                    card.style.transform = '';
+                    card.style.transformOrigin = '';
+                    
+                    // 将卡片移回原位置
+                    if (origNextSibling) {
+                        origParent.insertBefore(card, origNextSibling);
+                    } else {
+                        origParent.appendChild(card);
+                    }
+                    
+                    // 移除临时容器
+                    tempContainer.remove();
                 }).catch(error => {
                     console.error('图片导出失败:', error);
+                    
                     // 确保恢复原始状态
                     card.style.border = origBorder;
                     card.style.setProperty('--card-scale', origScale);
+                    card.style.width = '';
+                    card.style.height = '';
+                    card.style.transform = '';
+                    card.style.transformOrigin = '';
+                    
+                    // 将卡片移回原位置
+                    if (origNextSibling) {
+                        origParent.insertBefore(card, origNextSibling);
+                    } else {
+                        origParent.appendChild(card);
+                    }
+                    
+                    // 移除临时容器
+                    tempContainer.remove();
                 });
             }
 
