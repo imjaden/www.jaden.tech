@@ -1,63 +1,8 @@
 <!--
 ===========================================================================
-Karpathy Principles - AI编程四大原则
-===========================================================================
-1. 先思考 - 不假设，不隐藏困惑 → 不确定就问，多种解释列出
-2. 保持简单 - 最小代码解决问题 → 无多余抽象
-3. 精准修改 - 只改必须改的 → 不"顺便"改进邻接代码
-4. 目标驱动 - 测试先行，验证闭环 → "修bug"→"写测试复现→让测试通过"
-
-Version: 1.0(2026-06-13)
-Description
-- 微信朋友圈背景图生成器
-- 3:5 竖版（1080×1800px）适配微信朋友圈背景图裁剪
-- 支持多种配色主题切换
-- 支持导出为PNG图片
-
-【功能清单】
-| 功能 | 说明 |
-|------|------|
-| 主题切换 | 支持深海蓝、午夜黑、翡翠绿、落日红、星空紫五种配色 |
-| 尺寸适配 | 响应式缩放预览，适配不同屏幕尺寸 |
-| 图片导出 | 使用html2canvas导出1080×1800px高清图片 |
-| 边框切换 | 显示/隐藏预览边框 |
-
-【辅助工具】
-| 工具方法 | 功能说明 |
-|---------|---------|
-| ThemeManager.applyTheme() | 应用主题配色 |
-| ThemeManager.getThemes() | 获取主题配置 |
-| CardScaler.fitCard() | 计算并应用卡片缩放比例 |
-| ImageExporter.saveImage() | 导出卡片为图片 |
-| Utils.init() | 初始化页面 |
-
-Related Paths
-- 项目根目录: ~/CodeSpace/script-miner
-- 缓存目录: ~/CodeSpace/script-miner/cache
-
-Environments:
-- Mac MacBookPro-2025-26.5-25F71
-- IDE TRAE CN 版本
-
-Dependency
-- html2canvas@1.4.1 (CDN引入)
-
-Sublime Text
-- Command + k, Command + 1 收缩所有函数代码
-- Command + k, Command + j 展示所有函数代码
-
-触发条件
-- 制作个人简历朋友圈背景图时
-- 需要更换配色方案时
-
-版本说明
-- 主版本号默认为1，修订号从0开始
-- 每次代码修改后修订号+1
-- 重大架构变更时主版本号+1，修订号归零
-
-敏感信息管理
-- 禁止在源码中明文存储敏感信息：API_KEY|SECRET|TOKEN|PASSWORD|PRIVATE_KEY
-- 本页面无敏感信息
+WeChat Moment Background Generator
+- 3:5 vertical (1080×1800px) — fits WeChat Moments cover crop
+- 5 color themes, html2canvas PNG export
 ===========================================================================
 -->
 <!DOCTYPE html>
@@ -65,12 +10,13 @@ Sublime Text
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WeChat Moments background generator — 1080×1800px, 5 themes, PNG export.">
     <title>朋友圈背景图生成器</title>
-    <link rel="shortcut icon" href="static/img/favicon.png?t=1780910447">
+    <link rel="shortcut icon" href="static/img/favicon.png?t=1782129264">
     <script>
         /**
          * URL Parameter Utility
-         * Parse, stringify, and redirect with query parameters
+         * Parse, stringify, and update timestamp with replaceState
          */
         window.Param = {
             parse: function() {
@@ -95,10 +41,6 @@ Sublime Text
                     }
                 }
                 return window.location.href.split('?')[0] + '?' + pairs.join('&');
-            },
-
-            redirectTo: function(paramsHash) {
-                window.location.href = window.Param.toString(paramsHash);
             }
         };
 
@@ -107,12 +49,12 @@ Sublime Text
          * Refresh page if timestamp is missing or older than 1 hour
          */
         var params = window.Param.parse();
-        var timestamp = params.t;
+        var timestamp = Number(params.t);
         var oneHour = 60 * 60 * 1000;
 
-        if (typeof timestamp === 'undefined' || (Date.now() - timestamp) > oneHour) {
-            params.t = Date.now();
-            window.Param.redirectTo(params);
+        if (isNaN(timestamp) || timestamp - Math.floor(Date.now() / 1000) > 1 || (Date.now() - timestamp * 1000) > oneHour) {
+            params.t = Math.floor(Date.now() / 1000);
+            history.replaceState(null, '', window.Param.toString(params));
         }
 
     </script>
@@ -732,8 +674,7 @@ Sublime Text
                 const card = document.getElementById('card');
                 if (!card) return;
                 
-                const currentBorder = card.style.border;
-                const isHidden = currentBorder === 'none' || currentBorder === '';
+                const isHidden = getComputedStyle(card).borderStyle === 'none';
                 
                 card.style.border = isHidden 
                     ? '2px dashed rgba(255,255,255,0.3)' 
