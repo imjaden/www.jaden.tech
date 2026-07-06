@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DailyTracker 07-06</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;padding:24px;max-width:960px;margin:0 auto}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px}
+h1{font-size:22px;font-weight:600}
+.date{color:#8b949e;font-size:13px}
+h2{font-size:15px;font-weight:600;margin:18px 0 10px;padding-bottom:5px;border-bottom:1px solid #30363d;color:#7ee787;display:flex;justify-content:space-between;align-items:center}
+.h2-link{font-size:12px;font-weight:400;color:#58a6ff}
+table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:13px}
+th{text-align:left;padding:6px 8px;background:#161b22;color:#8b949e;font-weight:500;border-bottom:1px solid #30363d}
+td{padding:6px 8px;border-bottom:1px solid #21262d}
+tr:hover td{background:#161b22}
+.num{text-align:right}
+.center{text-align:center}
+.check{color:#7ee787}
+.cross{color:#f85149}
+.empty{color:#484f58}
+.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:6px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px}
+.card h3{font-size:13px;color:#8b949e;margin-bottom:6px}
+.card .value{font-size:24px;font-weight:700}
+.card .value.green{color:#7ee787}
+.card .value.yellow{color:#d29922}
+.card .value.red{color:#f85149}
+.card .unit{font-size:13px;color:#8b949e;font-weight:400}
+.card .sub{font-size:12px;color:#8b949e;margin-top:3px}
+.card .bar-wrap{background:#21262d;border-radius:4px;height:6px;margin-top:8px;overflow:hidden}
+.card .bar-fill{height:100%;border-radius:4px}
+.bar-green{background:#7ee787}
+.bar-yellow{background:#d29922}
+.trend-box{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px;margin-bottom:6px}
+.trend-box h3{font-size:13px;color:#8b949e;margin-bottom:6px}
+.trend-line{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:13px}
+.trend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-green{background:#7ee787}
+.dot-yellow{background:#d29922}
+.dot-red{background:#f85149}
+.badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:500;margin-left:4px}
+.badge-green{background:#1b3827;color:#7ee787}
+.badge-yellow{background:#3d2e00;color:#d29922}
+.badge-red{background:#3d1114;color:#f85149}
+.toggle{cursor:pointer;font-size:13px;color:#8b949e;user-select:none;padding:2px 6px;border-radius:4px}
+.toggle:hover{background:#21262d;color:#e6edf3}
+.collapse{display:none}
+footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#484f58}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏋️ DailyTracker</h1>
+  <p class="date">2026-07-06 · 4 days tracked</p>
+</div>
+
+<h2>🎯 Target Progress</h2>
+<div class="goal-grid">
+  <div class="card">
+    <h3>⚖️ Weight</h3>
+    <div class="value green">70.3 <span class="unit">kg</span></div>
+    <div class="sub">Target: 65.0 · Lost: 0.8 kg (14%)</div>
+    <div class="bar-wrap"><div class="bar-fill bar-green" style="width:14%"></div></div>
+    <div class="sub">↓ Need 5.3 kg · Pace: 0.27 kg/day → ~20 days</div>
+  </div>
+  <div class="card">
+    <h3>🏃 Exercise</h3>
+    <div class="value green">4/4 <span class="unit">days</span></div>
+    <div class="sub">07-03 跑步6k · 07-04 跑步5k · 07-05 跑步5k · 07-06 下肢锻炼</div>
+  </div>
+  <div class="card">
+    <h3>🔥 Streaks</h3>
+    <div class="value green">4 <span class="unit">days</span></div>
+    <div class="sub">AntForest 4 · English 4 · UniCourse 2 · Exercise 4/4</div>
+  </div>
+</div>
+
+<h2>📈 Weight Trend</h2>
+<div class="trend-box">
+  <h3>71.1 → 70.3 · -0.8 kg in 3 days</h3>
+  <div class="trend-line"><span class="trend-dot dot-green"></span> 07-06: 70.3 kg — ↓0.1 (slowing)</div>
+  <div class="trend-line"><span class="trend-dot dot-green"></span> 07-05: 70.4 kg — ↓0.4</div>
+  <div class="trend-line"><span class="trend-dot dot-green"></span> 07-04: 70.8 kg — ↓0.3</div>
+  <div class="trend-line"><span class="trend-dot dot-green"></span> 07-03: 71.1 kg — Baseline</div>
+  <div class="sub" style="margin-top:6px">📐 Pace slowing from 0.35 to 0.27 kg/day. Normal for day 4—water loss phase ending.</div>
+</div>
+
+<h2>📋 Daily Records<span class="toggle" onclick="t(this)">▶ 展开</span></h2>
+<div id="records" class="collapse">
+<table>
+  <thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead>
+  <tbody>
+    <tr><td>07-06</td><td class="num">70.3</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-05</td><td class="num">70.4</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-04</td><td class="num">70.8</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-03</td><td class="num">71.1</td><td>跑步6k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center cross">❌</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>📊 连续打卡<span class="toggle" onclick="t(this)">▶ 展开</span></h2>
+<div id="streak" class="collapse">
+<table>
+  <thead><tr><th>Metric</th><th>07-06</th><th>07-05</th><th>07-04</th><th>07-03</th><th>Streak</th></tr></thead>
+  <tbody>
+    <tr><td>AntForest</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">4 <span class="badge badge-green">Solid</span></td></tr>
+    <tr><td>EnglishPractice</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">4 <span class="badge badge-green">Solid</span></td></tr>
+    <tr><td>UniCourse</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center cross">❌</td><td class="center">2 <span class="badge badge-yellow">Building</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+<footer>IRIS (byHermes) · Snapshot · 2026-07-06 · Notion DailyTracker</footer>
+<script>
+function t(el){var d=el.parentElement.nextElementSibling;while(d&&d.tagName!='DIV')d=d.nextElementSibling;if(d){d.classList.toggle('collapse');el.textContent=d.classList.contains('collapse')?'▶ 展开':'▼ 收起'}}
+</script>
+</body>
+</html>
