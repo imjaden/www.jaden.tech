@@ -1,0 +1,18 @@
+level: L2
+owner: Jaden Li
+classification: public
+data_types:
+  - name
+  - email
+  - phone
+compliance:
+  - none
+review_history:
+  - date: 2026-07-08
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: FAIL
+    score: 65
+    findings_total: 7
+    findings_open: 7
+    tracking: JT-SEC-001 ~ JT-SEC-007

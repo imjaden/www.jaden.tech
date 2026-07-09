@@ -11,7 +11,7 @@
 ## 用法
 
 ```bash
-cd /Users/jadenli/CodeSpace/jaden.tech/scripts
+cd scripts/
 
 # 检查远程域名证书
 python ssl-manager.py --check-remote
