@@ -18,6 +18,7 @@ import subprocess
 import socket
 import shutil
 import ssl
+import shlex
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional, Tuple
@@ -30,7 +31,7 @@ DOMAINS = [
     "intfocus.archived.jaden.tech",
 ]
 
-EMAIL = "527130673@qq.com"
+EMAIL = os.getenv("CERTBOT_EMAIL", "527130673@qq.com")
 BASE_CERT_DIR = Path.home() / "CodeSpace" / "jaden.tech" / "certs"
 CURRENT_DATE = datetime.now().strftime("%Y%m%d")
 CERT_PATH = BASE_CERT_DIR / CURRENT_DATE
@@ -67,15 +68,20 @@ def print_info(msg: str):
     print(f"{Colors.BLUE}ℹ️  {msg}{Colors.RESET}")
 
 
-def run_command(cmd: str, sudo: bool = False, check: bool = True) -> Tuple[str, bool]:
-    """执行命令并返回输出"""
+def run_command(cmd_args: list, sudo: bool = False, check: bool = True) -> Tuple[str, bool]:
+    """执行命令并返回输出
+    
+    Args:
+        cmd_args: 命令参数列表（不使用 shell=True，避免注入）
+        sudo: 是否以 sudo 执行
+        check: 失败时是否打印错误
+    """
     if sudo:
-        cmd = f"sudo {cmd}"
+        cmd_args = ["sudo"] + cmd_args
     
     try:
         result = subprocess.run(
-            cmd,
-            shell=True,
+            cmd_args,
             capture_output=True,
             text=True,
             timeout=300
@@ -121,7 +127,7 @@ def check_dependencies() -> bool:
         print_success("已安装 certbot")
     else:
         print_warning("未安装 certbot，正在安装...")
-        _, ok = run_command("brew install certbot")
+        _, ok = run_command(["brew", "install", "certbot"])
         if not ok:
             print_error("certbot 安装失败")
             return False
@@ -159,7 +165,7 @@ def check_cert_expiry(cert_path: Path) -> Optional[int]:
     print(f"\n=== 本地证书检查 ===")
     print(f"路径: {cert_path}")
     
-    output, ok = run_command(f"openssl x509 -in {fullchain} -noout -dates", check=False)
+    output, ok = run_command(["openssl", "x509", "-in", str(fullchain), "-noout", "-dates"], check=False)
     if not ok:
         return None
     
@@ -278,7 +284,9 @@ def generate_certificate(auth_method: str, force: bool = False) -> Optional[Path
     print(f"域名: {', '.join(DOMAINS)}")
     print(f"目录: {CERT_PATH}")
     
-    domain_params = " ".join(f"-d {d}" for d in DOMAINS)
+    domain_flags = []
+    for d in DOMAINS:
+        domain_flags.extend(["-d", d])
     
     work_dir = BASE_CERT_DIR / "work"
     config_dir = BASE_CERT_DIR / "config"
@@ -287,18 +295,22 @@ def generate_certificate(auth_method: str, force: bool = False) -> Optional[Path
     for d in [work_dir, config_dir, logs_dir]:
         d.mkdir(parents=True, exist_ok=True)
     
+    base_args = [
+        "certbot", "certonly",
+        "--email", EMAIL,
+        "--agree-tos", "--no-eff-email",
+    ] + domain_flags + [
+        "--work-dir", str(work_dir),
+        "--config-dir", str(config_dir),
+        "--logs-dir", str(logs_dir),
+    ]
+    
     if auth_method == "http":
         if not check_port_available(80):
             print_error("80 端口被占用")
             return None
         
-        cmd = (
-            f"certbot certonly --standalone --preferred-challenges http "
-            f"--email {EMAIL} --agree-tos --no-eff-email "
-            f"{domain_params} "
-            f"--work-dir {work_dir} --config-dir {config_dir} --logs-dir {logs_dir} "
-            f"--cert-path {CERT_PATH}"
-        )
+        certbot_args = base_args + ["--standalone", "--preferred-challenges", "http"]
         
     elif auth_method == "dns":
         print("\n请添加 DNS TXT 记录:")
@@ -308,13 +320,7 @@ def generate_certificate(auth_method: str, force: bool = False) -> Optional[Path
         print("-" * 50)
         print(f"阿里云 DNS: {ALIYUN_DNS_URL}")
         
-        cmd = (
-            f"certbot certonly --manual --preferred-challenges dns "
-            f"--email {EMAIL} --agree-tos --no-eff-email "
-            f"{domain_params} "
-            f"--work-dir {work_dir} --config-dir {config_dir} --logs-dir {logs_dir} "
-            f"--cert-path {CERT_PATH}"
-        )
+        certbot_args = base_args + ["--manual", "--preferred-challenges", "dns"]
     else:
         print_error(f"未知验证方式: {auth_method}")
         return None
@@ -323,8 +329,8 @@ def generate_certificate(auth_method: str, force: bool = False) -> Optional[Path
     print_warning("按提示操作，需要时按回车继续")
     
     process = subprocess.Popen(
-        cmd,
-        shell=True,
+        certbot_args,
+        shell=False,
         stdin=sys.stdin,
         stdout=sys.stdout,
         stderr=sys.stderr
@@ -337,9 +343,9 @@ def generate_certificate(auth_method: str, force: bool = False) -> Optional[Path
     
     if (CERT_PATH / "fullchain.pem").exists():
         current_user = os.getenv("USER", "jadenli")
-        run_command(f"chown -R {current_user} {BASE_CERT_DIR}", sudo=True)
-        run_command(f"find {BASE_CERT_DIR} -type d -exec chmod 755 {{}} \\;", sudo=True)
-        run_command(f"find {BASE_CERT_DIR} -type f -exec chmod 644 {{}} \\;", sudo=True)
+        run_command(["chown", "-R", current_user, str(BASE_CERT_DIR)], sudo=True)
+        run_command(["find", str(BASE_CERT_DIR), "-type", "d", "-exec", "chmod", "755", "{}", ";"], sudo=True)
+        run_command(["find", str(BASE_CERT_DIR), "-type", "f", "-exec", "chmod", "644", "{}", ";"], sudo=True)
     
     print_success("证书生成完成！")
     return CERT_PATH

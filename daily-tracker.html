@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DailyTracker 07-08</title>
+<title>DailyTracker 07-09</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -72,40 +72,41 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
 
 <div class="header">
   <h1>🏋️ DailyTracker</h1>
-  <p class="date">2026-07-08 · 6 days tracked</p>
+  <p class="date">2026-07-09 · 7 days tracked</p>
 </div>
 
 <h2>🎯 Target Progress</h2>
 <div class="goal-grid">
   <div class="card">
     <h3>⚖️ Weight</h3>
-    <div class="value green">69.7 <span class="unit">kg</span></div>
-    <div class="sub">Target: 65.0 · Lost: 1.4 kg (23%)</div>
-    <div class="bar-wrap"><div class="bar-fill bar-green" style="width:23%"></div></div>
-    <div class="sub">↓ Need 4.7 kg · Pace: 0.28 kg/day → ~17 days</div>
+    <div class="value yellow">70.3 <span class="unit">kg</span></div>
+    <div class="sub">Target: 65.0 · Lost: 0.8 kg (13%)</div>
+    <div class="bar-wrap"><div class="bar-fill bar-yellow" style="width:13%"></div></div>
+    <div class="sub">↓ Need 5.3 kg · Today +0.6 (normal fluctuation)</div>
   </div>
   <div class="card">
     <h3>🏃 Exercise</h3>
-    <div class="value green">6/6 <span class="unit">days</span></div>
-    <div class="sub">跑步6k · 跑步5k · 跑步5k · 下肢锻炼 · 跑步3.5km · 下肢锻炼</div>
+    <div class="value green">7/7 <span class="unit">days</span></div>
+    <div class="sub">跑步6k · 跑步5k · 跑步5k · 下肢锻炼 · 跑步3.5km · 下肢锻炼 · 跑步7.41km</div>
   </div>
   <div class="card">
     <h3>🔥 Streaks</h3>
-    <div class="value green">6 <span class="unit">days</span></div>
-    <div class="sub">AntForest 6 · English 6 · UniCourse 5 · Exercise 6/6</div>
+    <div class="value green">7 <span class="unit">days</span></div>
+    <div class="sub">AntForest 7 · English 7 · UniCourse 6 · Exercise 7/7</div>
   </div>
 </div>
 
 <h2>📈 Weight Trend</h2>
 <div class="trend-box">
-  <h3>71.1 → 69.7 · -1.4 kg in 5 days 🎉 Below 70!</h3>
+  <h3>71.1 → 70.3 · -0.8 kg in 6 days (bounce +0.6 today)</h3>
+  <div class="trend-line"><span class="trend-dot dot-yellow"></span> 07-09: 70.3 kg — ↑0.6</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-08: 69.7 kg — ↓0.3</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-07: 70.0 kg — ↓0.3</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-06: 70.3 kg — ↓0.1</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-05: 70.4 kg — ↓0.4</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-04: 70.8 kg — ↓0.3</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-03: 71.1 kg — Baseline</div>
-  <div class="sub" style="margin-top:6px">📐 Below 70kg! -1.4 kg in 5 days, 23% of target done.</div>
+  <div class="sub" style="margin-top:6px">📐 Bounce is normal — 6-day trend still -0.8 kg in total.</div>
 </div>
 
 <h2>📋 Daily Records<span class="toggle" onclick="t(this)">▶ 展开</span></h2>
@@ -113,6 +114,7 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
 <table>
   <thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead>
   <tbody>
+    <tr><td>07-09</td><td class="num">70.3</td><td>跑步7.41km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
     <tr><td>07-08</td><td class="num">69.7</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
     <tr><td>07-07</td><td class="num">70.0</td><td>跑步3.5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
     <tr><td>07-06</td><td class="num">70.3</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
@@ -126,16 +128,16 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
 <h2>📊 连续打卡<span class="toggle" onclick="t(this)">▶ 展开</span></h2>
 <div id="streak" class="collapse">
 <table>
-  <thead><tr><th>Metric</th><th>07-08</th><th>07-07</th><th>07-06</th><th>07-05</th><th>07-04</th><th>07-03</th><th>Streak</th></tr></thead>
+  <thead><tr><th>Metric</th><th>07-09</th><th>07-08</th><th>07-07</th><th>07-06</th><th>07-05</th><th>07-04</th><th>07-03</th><th>Streak</th></tr></thead>
   <tbody>
-    <tr><td>AntForest</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">6 <span class="badge badge-green">Solid</span></td></tr>
-    <tr><td>EnglishPractice</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">6 <span class="badge badge-green">Solid</span></td></tr>
-    <tr><td>UniCourse</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center cross">❌</td><td class="center">5 <span class="badge badge-green">Solid</span></td></tr>
+    <tr><td>AntForest</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">7 <span class="badge badge-green">Solid</span></td></tr>
+    <tr><td>EnglishPractice</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">7 <span class="badge badge-green">Solid</span></td></tr>
+    <tr><td>UniCourse</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center cross">❌</td><td class="center">6 <span class="badge badge-green">Solid</span></td></tr>
   </tbody>
 </table>
 </div>
 
-<footer>IRIS (byHermes) · Snapshot · 2026-07-08 · daily-tracker</footer>
+<footer>IRIS (byHermes) · Snapshot · 2026-07-09 · daily-tracker</footer>
 <script>
 function t(el){var d=el.parentElement.nextElementSibling;while(d&&d.tagName!='DIV')d=d.nextElementSibling;if(d){d.classList.toggle('collapse');el.textContent=d.classList.contains('collapse')?'▶ 展开':'▼ 收起'}}
 </script>
