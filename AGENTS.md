@@ -6,6 +6,7 @@ Static personal homepage hosted on GitHub Pages.
 
 - `index.html` — Main landing page
 - `wechat.html` — WeChat moment background generator (3:5, 1080×1800px)
+- `daily-tracker.html` — Daily habit tracker
 
 ## Deploy
 

@@ -52,3 +52,43 @@
 ---
 
 *下次审查: 待定*
+
+---
+
+## 2026-07-11 — Re-review (all fixes verified)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 复查 2026-07-08 全部 7 项修复 + 文档结构评审
+- **Verdict**: PASS
+- **Score**: 100 / 100 (Rating: A)
+
+### Summary
+
+全部 7 项发现已确认修复。无新增问题。文档结构优化：REVIEW_POLICY.md 上移至 ~/.hermes/，scripts/README.md 重命名为 scripts/ssl-manager.md，.gitignore 追加 certs/、__pycache__/、*.pyc。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| — | — | 无新增发现 | — | — |
+
+### Positives
+
+- 所有 JT-SEC-001 ~ JT-SEC-007 修复到位
+- ssl-manager.py 全面改用 list args + shell=False
+- html2canvas CDN 已添加 SRI integrity
+- referrer policy 已改为 strict-origin-when-cross-origin
+- Git 历史 PII 已清除
+
+### Tracking
+
+| Issue | Title | Severity | Status |
+|:------|:------|:--------:|:------:|
+| JT-SEC-001 | ssl-manager.py shell 注入风险 | HIGH | Verified |
+| JT-SEC-002 | CDN html2canvas 无 SRI | MED | Verified |
+| JT-SEC-003 | html2canvas allowTaint: true | MED | Verified |
+| JT-SEC-004 | referrer: always 泄露 URL | MED | Verified |
+| JT-SEC-005 | Git 历史简历 PII 残留 | MED | Verified |
+| JT-SEC-006 | QQ 邮箱硬编码 | LOW | Verified |
+| JT-SEC-007 | 本地路径在 README 暴露 | LOW | Verified |
