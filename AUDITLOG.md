@@ -92,3 +92,43 @@
 | JT-SEC-005 | Git 历史简历 PII 残留 | MED | Verified |
 | JT-SEC-006 | QQ 邮箱硬编码 | LOW | Verified |
 | JT-SEC-007 | 本地路径在 README 暴露 | LOW | Verified |
+
+---
+
+## 2026-07-11 — Full Project Re-audit
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 (index.html / wechat.html / daily-tracker.html / static/js/ / static/css/ / scripts/) + Git 历史 + CDN 依赖
+- **Commit**: 37ee18e
+- **Verdict**: PASS
+- **Score**: 95 / 100 (Rating: A)
+
+### Summary
+
+全项目安全复审。上次 7 项已全部修复且未回归。新增 1 个 🟡 中危（wechat.html / daily-tracker.html 缺少 referrer policy）、1 个 🟢 低危（timestamp-manager.py docstring 硬编码本地路径）。无高危发现，无新增凭证泄露。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| 1 | 🟡 | wechat.html 缺少 referrer policy，外链泄露完整 URL | `wechat.html:10` | Open |
+| 2 | 🟡 | daily-tracker.html 缺少 referrer policy | `daily-tracker.html:3` | Open |
+| 3 | 🟢 | timestamp-manager.py docstring 硬编码本地路径 | `scripts/timestamp-manager.py:33` | Open |
+
+### Positives
+
+- 零凭证泄露 — Python 脚本无可提取的 API key / token / password
+- 零 shell 注入 — ssl-manager.py 全部使用 list args + shell=False
+- 零 XSS 入口 — 无 innerHTML、无 JSON 注入、无 eval/exec
+- 唯一 CDN 依赖 (html2canvas) 已配置 SRI integrity
+- index.html referrer policy 已正确配置为 strict-origin-when-cross-origin
+- Git 历史 PII (resume.pdf) 已通过 filter-branch 清除且未回归
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-008 | wechat.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
