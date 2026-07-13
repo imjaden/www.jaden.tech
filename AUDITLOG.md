@@ -132,3 +132,43 @@
 | JT-SEC-008 | wechat.html 缺少 referrer policy | MED | P2 | Open |
 | JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
+
+---
+
+## 2026-07-13 — Re-audit (no new issues, 3 still open)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 + 新 commits (37ee18e..677e499) — 2 commits (audit trail docs + daily-tracker data update)
+- **Commits**: 37ee18e → 677e499
+- **Verdict**: PASS
+- **Score**: 90 / 100 (Rating: A)
+
+### Summary
+
+复审 3 个开放项均未修复，无新增问题。2 个新 commit 仅含审计记录和 daily-tracker 数据更新，无安全敏感变更。上次 7 项修复 (JT-SEC-001~007) 全部验证无回归。评分从 95 降至 90（因 2 个 🟡 仍开放）。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| 1 | 🟡 | wechat.html 缺少 referrer policy | `wechat.html:10` | Open |
+| 2 | 🟡 | daily-tracker.html 缺少 referrer policy | `daily-tracker.html:3` | Open |
+| 3 | 🟢 | timestamp-manager.py docstring 硬编码本地路径 | `scripts/timestamp-manager.py:33` | Open |
+
+### Positives
+
+- 零回归 — JT-SEC-001~007 全部验证通过
+- 零新发现 — 2 个新 commit 无安全敏感变更
+- Credential scan Pass 1-2 零命中
+- 零 shell 注入、零 XSS 入口
+- CDN SRI integrity 保持配置
+- Git 历史无新增 PII
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-008 | wechat.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
