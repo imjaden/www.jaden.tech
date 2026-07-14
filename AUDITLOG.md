@@ -172,3 +172,46 @@
 | JT-SEC-008 | wechat.html 缺少 referrer policy | MED | P2 | Open |
 | JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
+
+---
+
+## 2026-07-14 — Full Project Re-audit (no new issues, 3 still open)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 (index.html / wechat.html / daily-tracker.html / static/ / scripts/) + Git 历史 + CDN 依赖
+- **Commit**: 78c7a5c
+- **Verdict**: PASS
+- **Score**: 90 / 100 (Rating: A)
+
+### Summary
+
+全项目复审。仅 1 个审计记录 commit (78c7a5c) 自上次复查，无源代码变更。3 个开放项 (JT-SEC-008~010) 仍未修复。全部先前修复 (JT-SEC-001~007) 验证无回归。Credential Pass 1-2 零命中，shell 注入零命中，XSS 零命中，CDN SRI 完整，Git 历史干净。⚠️ 注：JT-SEC-006 (QQ 邮箱) 使用 `os.getenv("CERTBOT_EMAIL", "527130673@qq.com")` 模式，邮箱作为默认回退值仍存在于源码中 — 主路径已安全（环境变量优先），残留风险低。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| 1 | 🟡 | wechat.html 缺少 referrer policy | `wechat.html:10` | Open |
+| 2 | 🟡 | daily-tracker.html 缺少 referrer policy | `daily-tracker.html:3` | Open |
+| 3 | 🟢 | timestamp-manager.py docstring 硬编码本地路径 | `scripts/timestamp-manager.py:33` | Open |
+
+### Positives
+
+- 零回归 — JT-SEC-001~007 全部验证通过
+- 零新发现 — 无新增安全敏感变更
+- Credential scan Pass 1-2 零命中
+- 零 shell 注入 — `run_command()` 使用 list args, `subprocess.Popen` 使用 `shell=False`
+- 零 XSS 入口 — 无 innerHTML, 无 eval/exec, 无 document.write, 无 JSON 注入
+- CDN html2canvas SRI integrity 保持配置
+- `index.html` referrer policy 已正确配置为 `strict-origin-when-cross-origin`
+- Git 历史无新增 PII，所有 refs (包括 filter-branch backup refs + stash) 均干净
+- `.gitignore` 正确排除 certs/ + __pycache__/
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-008 | wechat.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
