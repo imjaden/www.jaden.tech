@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DailyTracker 07-14</title>
+<title>DailyTracker 07-15</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;padding:24px;max-width:960px;margin:0 auto}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;padding:24px;max-width:1100px;margin:0 auto}
 a{color:#58a6ff;text-decoration:none}
 a:hover{text-decoration:underline}
 .header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px}
@@ -25,6 +26,18 @@ tr:hover td{background:#161b22}
 .cross{color:#f85149}
 .empty{color:#484f58}
 .goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:6px}
+.main-grid{display:grid;grid-template-columns:1fr 240px;gap:16px;align-items:start}
+.main-content{min-width:0}
+.sidebar-card{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px;margin-bottom:10px}
+.sidebar-card h3{font-size:13px;color:#8b949e;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #30363d}
+.sidebar-card .job{font-size:12px;margin-bottom:6px;padding:5px 0;border-bottom:1px solid #21262d}
+.sidebar-card .job:last-child{border-bottom:none}
+.sidebar-card .job-name{font-weight:500;color:#e6edf3}
+.sidebar-card .job-time{color:#8b949e;font-size:11px}
+.sidebar-card .job-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:500}
+.job-badge.ok{background:#1b3827;color:#7ee787}
+.job-badge.error{background:#3d1114;color:#f85149}
+.job-badge.pending{background:#3d2e00;color:#d29922}
 .card{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px}
 .card h3{font-size:13px;color:#8b949e;margin-bottom:6px}
 .card .value{font-size:24px;font-weight:700}
@@ -57,7 +70,11 @@ tr:hover td{background:#161b22}
 .toggle{cursor:pointer;font-size:13px;color:#8b949e;user-select:none;padding:2px 6px;border-radius:4px}
 .toggle:hover{background:#21262d;color:#e6edf3}
 .collapse{display:none}
+.chart-wrap{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px;margin-bottom:6px;position:relative}
+.chart-wrap h3{font-size:13px;color:#8b949e;margin-bottom:8px}
+.chart-wrap canvas{width:100%!important;max-height:280px}
 footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#484f58}
+@media(max-width:768px){.main-grid{grid-template-columns:1fr}.sidebar-card .job{display:flex;justify-content:space-between;align-items:center}}
 </style>
 </head>
 <body>
@@ -72,33 +89,37 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
 
 <div class="header">
   <h1>🏋️ DailyTracker</h1>
-  <p class="date">2026-07-14 · 12 days tracked</p>
+  <p class="date">2026-07-03 → 07-28 · 07-15 latest · 13 days to deadline</p>
 </div>
 
 <h2>🎯 Target Progress</h2>
 <div class="goal-grid">
   <div class="card">
     <h3>⚖️ Weight</h3>
-    <div class="value green">69.6 <span class="unit">kg</span></div>
-    <div class="sub">Target: 65.0 · Lost: 1.5 kg (25%)</div>
-    <div class="bar-wrap"><div class="bar-fill bar-green" style="width:25%"></div></div>
-    <div class="sub">↓ Need 4.6 kg · Tied lowest! Resting HR 50</div>
+    <div class="value green">69.5 <span class="unit">kg</span></div>
+    <div class="sub">Target: 65.0 · Lost: 1.6 kg (26%)</div>
+    <div class="bar-wrap"><div class="bar-fill bar-green" style="width:26%"></div></div>
+    <div class="sub">↓ Need 4.5 kg · Deadline 07-28 (13 days left)</div>
   </div>
   <div class="card">
     <h3>🏃 Exercise</h3>
-    <div class="value green">12/12 <span class="unit">days</span></div>
-    <div class="sub">跑步6k · 跑步5k · 跑步5k · 下肢锻炼 · 跑步3.5km · 下肢锻炼 · 跑步7.41km · 下肢锻炼 · 跑步10km · Indoor sports · Running 5km · Indoor sports</div>
+    <div class="value green">13/13 <span class="unit">days</span></div>
+    <div class="sub">100% attendance since 07-03</div>
   </div>
   <div class="card">
     <h3>🔥 Streaks</h3>
-    <div class="value green">12 <span class="unit">days</span></div>
-    <div class="sub">AntForest 12 · English 12 · UniCourse 11 · Exercise 12/12</div>
+    <div class="value green">13 <span class="unit">days</span></div>
+    <div class="sub">AntForest 13 · English 13 · UniCourse 12</div>
   </div>
 </div>
 
+<div class="main-grid">
+<div class="main-content">
+
 <h2>📈 Weight Trend</h2>
 <div class="trend-box">
-  <h3>71.1 → 69.6 · -1.5 kg in 11 days · Tied lowest!</h3>
+  <h3>71.1 → 69.5 · -1.6 kg in 12 days</h3>
+  <div class="trend-line"><span class="trend-dot dot-green"></span> 07-15: 69.5 kg — ↓0.1</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-14: 69.6 kg — ↓0.6</div>
   <div class="trend-line"><span class="trend-dot dot-yellow"></span> 07-13: 70.2 kg — ↑0.5</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-12: 69.7 kg — ↓0.2</div>
@@ -111,7 +132,13 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-05: 70.4 kg — ↓0.4</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-04: 70.8 kg — ↓0.3</div>
   <div class="trend-line"><span class="trend-dot dot-green"></span> 07-03: 71.1 kg — Baseline</div>
-  <div class="sub" style="margin-top:6px">🎉 12-day streak! -1.5 kg, 25% of target. Resting HR 50 — well recovered.</div>
+  <div class="sub" style="margin-top:6px">🎉 100% streak · -1.6 kg in 12 days, 26% of target. On track.</div>
+</div>
+
+<h2>📉 Weight Chart</h2>
+<div class="chart-wrap">
+  <h3>Actual vs Target — 07-03 → 07-28</h3>
+  <canvas id="weightChart"></canvas>
 </div>
 
 <h2>📋 Daily Records<span class="toggle" onclick="t(this)">▶ 展开</span></h2>
@@ -119,6 +146,7 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
 <table>
   <thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead>
   <tbody>
+    <tr><td>07-15</td><td class="num">69.5</td><td>-</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
     <tr><td>07-14</td><td class="num">69.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
     <tr><td>07-13</td><td class="num">70.2</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
     <tr><td>07-12</td><td class="num">69.7</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
@@ -138,17 +166,157 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
 <h2>📊 连续打卡<span class="toggle" onclick="t(this)">▶ 展开</span></h2>
 <div id="streak" class="collapse">
 <table>
-  <thead><tr><th>Metric</th><th>07-14</th><th>07-13</th><th>07-12</th><th>07-11</th><th>07-10</th><th>07-09</th><th>07-08</th><th>07-07</th><th>07-06</th><th>07-05</th><th>07-04</th><th>07-03</th><th>Streak</th></tr></thead>
+  <thead><tr><th>Metric</th><th>07-15</th><th>07-14</th><th>07-13</th><th>07-12</th><th>07-11</th><th>07-10</th><th>07-09</th><th>07-08</th><th>07-07</th><th>07-06</th><th>07-05</th><th>07-04</th><th>07-03</th><th>Streak</th></tr></thead>
   <tbody>
-    <tr><td>AntForest</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">12 <span class="badge badge-green">Solid</span></td></tr>
-    <tr><td>EnglishPractice</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">12 <span class="badge badge-green">Solid</span></td></tr>
-    <tr><td>UniCourse</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center cross">❌</td><td class="center">11 <span class="badge badge-green">Solid</span></td></tr>
+    <tr><td>AntForest</td><td class="center empty">-</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">12 <span class="badge badge-green">Solid</span></td></tr>
+    <tr><td>EnglishPractice</td><td class="center empty">-</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center">12 <span class="badge badge-green">Solid</span></td></tr>
+    <tr><td>UniCourse</td><td class="center empty">-</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td><td class="center cross">❌</td><td class="center">11 <span class="badge badge-green">Solid</span></td></tr>
   </tbody>
 </table>
 </div>
 
-<footer>IRIS (byHermes) · Snapshot · 2026-07-14 · daily-tracker</footer>
+</div><!-- /.main-content -->
+
+<div class="sidebar">
+
+<div class="sidebar-card">
+  <h3>🔄 Cron Jobs</h3>
+  <div class="job">
+    <div><span class="job-name">🌅 10:00</span></div>
+    <div class="job-time">Last: 07-15 10:06</div>
+    <div><span class="job-badge ok">✅ ok</span></div>
+  </div>
+  <div class="job">
+    <div><span class="job-name">🌙 23:00</span></div>
+    <div class="job-time">Last: 07-14 23:32</div>
+    <div><span class="job-badge error">⚠️ error</span></div>
+  </div>
+  <div class="job">
+    <div><span class="job-name">🔒 23:30 Review</span></div>
+    <div class="job-time">Status: from review profile</div>
+    <div><span class="job-badge pending">⏳ pending</span></div>
+  </div>
+</div>
+
+<div class="sidebar-card">
+  <h3>📊 Stats</h3>
+  <div style="font-size:13px;line-height:1.8">
+    <div>📅 Period: 07-03 → 07-28</div>
+    <div>📆 Days elapsed: 13 / 26</div>
+    <div>🎯 Target: 65.0 kg</div>
+    <div>📉 Pace: 0.13 kg/day</div>
+    <div>🔮 Projected: ~67.8 kg by 07-28</div>
+    <div>⏰ Deadline: 13 days left</div>
+  </div>
+</div>
+
+</div><!-- /.sidebar -->
+</div><!-- /.main-grid -->
+
+<footer>IRIS (byHermes) · Snapshot · 2026-07-15 · daily-tracker</footer>
+
 <script>
+// Weight data
+const weightData = [
+  {date:'07-03', wt:71.1},{date:'07-04', wt:70.8},{date:'07-05', wt:70.4},
+  {date:'07-06', wt:70.3},{date:'07-07', wt:70.0},{date:'07-08', wt:69.7},
+  {date:'07-09', wt:70.3},{date:'07-10', wt:70.0},{date:'07-11', wt:69.9},
+  {date:'07-12', wt:69.7},{date:'07-13', wt:70.2},{date:'07-14', wt:69.6},
+  {date:'07-15', wt:69.5}
+];
+
+// Predicted trend: linear regression from 07-03 to 07-28
+// Slope: -0.133 kg/day from 71.1 at day 0
+const labels = [];
+for(let d=3; d<=28; d++) labels.push('07-'+String(d).padStart(2,'0'));
+
+const actual = labels.map((l,i)=>{
+  const found = weightData.find(w=>w.date===l);
+  return found ? found.wt : null;
+});
+
+const predicted = labels.map((_,i)=>{
+  return 71.1 - 0.133 * i;
+});
+
+const ctx = document.getElementById('weightChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Actual',
+        data: actual,
+        borderColor: '#7ee787',
+        backgroundColor: 'rgba(126,231,135,0.1)',
+        pointBackgroundColor: '#7ee787',
+        pointBorderColor: '#0d1117',
+        pointBorderWidth: 2,
+        pointRadius: actual.map(v=>v?4:0),
+        pointHoverRadius: 6,
+        spanGaps: false,
+        tension: 0.3,
+        fill: true
+      },
+      {
+        label: 'Trend (projected)',
+        data: predicted,
+        borderColor: '#8b949e',
+        borderDash: [6,3],
+        pointRadius: 0,
+        borderWidth: 2,
+        tension: 0
+      },
+      {
+        label: 'Target 65.0 kg',
+        data: Array(labels.length).fill(65.0),
+        borderColor: '#f85149',
+        borderDash: [4,4],
+        pointRadius: 0,
+        borderWidth: 1.5
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {color:'#8b949e', font:{size:11}, boxWidth:12, padding:8},
+        position: 'bottom'
+      },
+      tooltip: {
+        backgroundColor: '#161b22',
+        titleColor: '#e6edf3',
+        bodyColor: '#8b949e',
+        borderColor: '#30363d',
+        borderWidth: 1,
+        callbacks: {
+          label: function(ctx) {
+            if(ctx.dataset.label==='Actual' && ctx.parsed.y!==null) return ctx.parsed.y+' kg';
+            if(ctx.dataset.label==='Trend (projected)') return '~'+ctx.parsed.y.toFixed(1)+' kg (predicted)';
+            return ctx.parsed.y+' kg '+ctx.dataset.label;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: {color:'#21262d'},
+        ticks: {color:'#8b949e', font:{size:10}, maxTicksLimit:12}
+      },
+      y: {
+        min: 65,
+        max: 72,
+        grid: {color:'#21262d'},
+        ticks: {color:'#8b949e', font:{size:10}, stepSize:0.5},
+        title: {display:true, text:'kg', color:'#8b949e'}
+      }
+    }
+  }
+});
+
 function t(el){var d=el.parentElement.nextElementSibling;while(d&&d.tagName!='DIV')d=d.nextElementSibling;if(d){d.classList.toggle('collapse');el.textContent=d.classList.contains('collapse')?'▶ 展开':'▼ 收起'}}
 </script>
 </body>

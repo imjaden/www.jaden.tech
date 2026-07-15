@@ -52,7 +52,7 @@
   └─ 产出
       ├─ .review-level.yaml (追加 review_history)
       ├─ AUDITLOG.md (追加新条目)
-      └─ git commit + push (仅 PASS)
+      └─ git add + commit + push（推送所有本地待推送 commit）
 ```
 
 ---
