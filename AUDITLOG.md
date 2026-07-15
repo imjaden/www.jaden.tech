@@ -215,3 +215,47 @@
 | JT-SEC-008 | wechat.html 缺少 referrer policy | MED | P2 | Open |
 | JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
+
+---
+
+## 2026-07-15 — Re-audit (1 new finding, 3 still open)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 (index.html / wechat.html / daily-tracker.html / static/ / scripts/) + Git 历史 + CDN 依赖 + 新增 documents/
+- **Commits**: bf72898 → 232b058 (4 个代码变更: daily-tracker 重设计, Chart.js, Cron 状态卡片, 文档)
+- **Verdict**: PASS
+- **Score**: 85 / 100 (Rating: A)
+
+### Summary
+
+复审发现 1 个新增 🟡 中危（daily-tracker.html 新增 Chart.js CDN 加载缺少 SRI integrity），3 个既往开放项 (JT-SEC-008~010) 仍未修复。全部先前修复 (JT-SEC-001~007) 验证无回归。Credential Pass 1-2 零命中，shell 注入零命中，XSS 零命中（Chart.js 通过 `document.getElementById` 使用，安全）。Git 历史干净。⚠️ 历史数据修正：2026-07-11 条目的 `findings_total` 从 2 修正为 3（JT-SEC-008~010 实际为 3 个 ID）。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| 1 | 🟡 | Chart.js@4.4.7 CDN 缺少 SRI integrity 校验 | `daily-tracker.html:8` | **New** |
+| 2 | 🟡 | wechat.html 缺少 referrer policy | `wechat.html:10` | Open |
+| 3 | 🟡 | daily-tracker.html 缺少 referrer policy | `daily-tracker.html:3` | Open |
+| 4 | 🟢 | timestamp-manager.py docstring 硬编码本地路径 | `scripts/timestamp-manager.py:33` | Open |
+
+### Positives
+
+- 零回归 — JT-SEC-001~007 全部验证通过
+- Credential scan Pass 1-2 零命中，Pass 3 (shell 注入) 零命中，Pass 4 (comment-residual keys) 仅 `os.getenv` 回退值命中（已知，非注入）
+- 零 XSS 入口 — 无 innerHTML, 无 eval/exec, 无 document.write, 无 JSON 注入。Chart.js 使用 `document.getElementById()` 安全 API
+- html2canvas CDN SRI integrity 保持配置
+- `index.html` referrer policy 已正确配置为 `strict-origin-when-cross-origin`
+- Git 历史无新增 PII，无删除的密钥文件
+- 所有 CDN 资源均通过 HTTPS 加载
+- documents/daily-tracker-review.md 无敏感信息（仅包含 cron 管理命令和文档结构描述）
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-008 | wechat.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
+| JT-SEC-011 | daily-tracker.html Chart.js CDN 无 SRI integrity | MED | P2 | New |
