@@ -259,3 +259,48 @@
 | JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
 | JT-SEC-011 | daily-tracker.html Chart.js CDN 无 SRI integrity | MED | P2 | New |
+
+---
+
+## 2026-07-16 — Re-audit (pure data updates, no new issues, 4 still open)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 + 新 commits (fbe73a1..c8e4f90) — 2 commits (habits data update + cron status)
+- **Commits**: fbe73a1 → c8e4f90
+- **Verdict**: PASS
+- **Score**: 85 / 100 (Rating: A)
+
+### Summary
+
+复审 2 个新 commit 均为纯数据更新（streak 13→14, cron status error→ok, 07-15 record 填充）。无代码变更、无新脚本、无新 CDN 资源。4 个既往开放项 (JT-SEC-008~011) 仍未修复。全部先前修复 (JT-SEC-001~007) 验证无回归。Credential Pass 1-2 零命中，shell 注入零命中，XSS 零命中。Git 历史干净。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| 1 | 🟡 | Chart.js@4.4.7 CDN 缺少 SRI integrity 校验 | `daily-tracker.html:8` | Open |
+| 2 | 🟡 | wechat.html 缺少 referrer policy | `wechat.html:10` | Open |
+| 3 | 🟡 | daily-tracker.html 缺少 referrer policy | `daily-tracker.html:3` | Open |
+| 4 | 🟢 | timestamp-manager.py docstring 硬编码本地路径 | `scripts/timestamp-manager.py:33` | Open |
+
+### Positives
+
+- 零回归 — JT-SEC-001~007 全部验证通过
+- 零新发现 — 2 个新 commit 无安全敏感变更
+- Credential scan Pass 1-2 零命中
+- 零 shell 注入 (`shell=True` 仅在注释中), 零 `os.system()`
+- 零 XSS 入口 — 无 innerHTML, 无 eval/exec, 无 document.write
+- html2canvas CDN SRI integrity 保持配置 ✅
+- `index.html` referrer policy 正确配置 ✅
+- Git 历史无新增 PII，仅 daily-tracker.html blob 变更
+- 所有 CDN 资源均 HTTPS
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-008 | wechat.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
+| JT-SEC-011 | daily-tracker.html Chart.js CDN 无 SRI integrity | MED | P2 | Open |
