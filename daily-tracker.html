@@ -84,16 +84,17 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
 <div class="goal-grid">
   <div class="card">
     <h3>⚖️ Weight</h3>
-    <div class="value green">69.5 <span class="unit">kg</span></div>
-    <div class="sub">Target: 65.0 · Lost: 1.6 kg (26%)</div>
-    <div class="bar-wrap"><div class="bar-fill bar-green" style="width:26%"></div></div>
-    <div class="sub">↓ Need 4.5 kg · 07-28 deadline (13d)</div>
+    <div class="value green">69.4 <span class="unit">kg</span></div>
+    <div class="sub">Target: 65.0 · Lost: 1.7 kg (28%)</div>
+    <div class="bar-wrap"><div class="bar-fill bar-green" style="width:28%"></div></div>
+    <div class="sub">↓ Need 4.4 kg · 07-28 deadline (12d)</div>
   </div>
   <div class="card">
     <h3>🏃 Exercise</h3>
     <div class="value green">14/14 <span class="unit">days</span></div>
     <div class="sub">100% attendance · Running 5-10km / Indoor</div>
     <div class="sub">Pace trend: 7:30 → 7:00 /km</div>
+    <div class="sub"><a href="https://www.jaden.tech/documents/plan-omad-v1.0.html" style="color:#58a6ff;text-decoration:underline">📋 完整饮食运动计划 →</a></div>
   </div>
   <div class="card">
     <h3>🔥 Habits</h3>
@@ -121,6 +122,7 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
 <table id="recordsTbl" class="collapse">
   <thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead>
   <tbody>
+    <tr><td>07-16</td><td class="num">69.4</td><td>室内力量</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
     <tr><td>07-15</td><td class="num">69.5</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
     <tr><td>07-14</td><td class="num">69.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
     <tr><td>07-13</td><td class="num">70.2</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
@@ -143,7 +145,7 @@ footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:1
 const weightData = [
   {d:'07-03',w:71.1},{d:'07-04',w:70.8},{d:'07-05',w:70.4},{d:'07-06',w:70.3},
   {d:'07-07',w:70.0},{d:'07-08',w:69.7},{d:'07-09',w:70.3},{d:'07-10',w:70.0},
-  {d:'07-11',w:69.9},{d:'07-12',w:69.7},{d:'07-13',w:70.2},{d:'07-14',w:69.6},{d:'07-15',w:69.5}
+  {d:'07-11',w:69.9},{d:'07-12',w:69.7},{d:'07-13',w:70.2},{d:'07-14',w:69.6},{d:'07-15',w:69.5},{d:'07-16',w:69.4}
 ];
 const labels=Array.from({length:26},(_,i)=>'07-'+String(i+3).padStart(2,'0'));
 const actual=labels.map(l=>{const f=weightData.find(d=>d.d===l);return f?f.w:null});
