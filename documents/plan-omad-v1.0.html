@@ -6,34 +6,45 @@
 <title>减重冲刺计划 — OMAD + 居家健身 v1.0</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;padding:24px;max-width:860px;margin:0 auto;line-height:1.7}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;padding:32px;max-width:1060px;margin:0 auto;line-height:1.7}
 h1{font-size:24px;font-weight:700;margin-bottom:4px;color:#f0f6fc}
 .sub{color:#8b949e;font-size:13px;margin-bottom:20px}
 h2{font-size:16px;font-weight:600;margin:24px 0 12px;padding-bottom:5px;border-bottom:1px solid #30363d;color:#7ee787;display:flex;align-items:center;gap:8px}
 h2 .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px}
 .badge-green{background:#1b3827;color:#7ee787}
 .badge-yellow{background:#3d2e00;color:#d29922}
+.badge-blue{background:#0c2d6b;color:#58a6ff}
 .badge-red{background:#3d1114;color:#f85149}
 h3{font-size:14px;font-weight:600;margin:16px 0 8px;color:#e6edf3}
 p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
 .schedule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:10px 0 18px}
-.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;transition:all .3s}
 .card.run{border-left:3px solid #58a6ff}
 .card.strength{border-left:3px solid #d29922}
 .card.rest{border-left:3px solid #8b949e}
+.card.highlight{box-shadow:0 0 0 2px #7ee787;background:#1c2333}
+.card.highlight.run{box-shadow:0 0 0 2px #58a6ff}
+.card.highlight.strength{box-shadow:0 0 0 2px #d29922}
+.card.highlight.rest{box-shadow:0 0 0 2px #8b949e}
 .card h4{font-size:13px;font-weight:600;margin-bottom:8px;color:#f0f6fc}
 .card .day{font-size:11px;color:#8b949e;margin-bottom:4px}
 .card ul{list-style:none;padding:0}
 .card li{padding:2px 0;font-size:12px;color:#c9d1d9;position:relative;padding-left:14px}
 .card li::before{content:"·";position:absolute;left:2px;color:#58a6ff}
 .meal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin:10px 0 18px}
-.meal-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px}
-.meal-card.run{border-left:3px solid #58a6ff}
-.meal-card.rest{border-left:3px solid #7ee787}
+.meal-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;transition:all .3s}
+.meal-card.run{border-top:3px solid #58a6ff}
+.meal-card.strength{border-top:3px solid #d29922}
+.meal-card.recovery{border-top:3px solid #f0883e}
+.meal-card.highlight{box-shadow:0 0 0 2px #7ee787;background:#1c2333}
+.meal-card.highlight.run{box-shadow:0 0 0 2px #58a6ff}
+.meal-card.highlight.strength{box-shadow:0 0 0 2px #d29922}
+.meal-card.highlight.recovery{box-shadow:0 0 0 2px #f0883e}
 .meal-card h4{font-size:13px;font-weight:600;margin-bottom:8px;color:#f0f6fc}
 .meal-card .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;margin-left:6px}
 .tag-blue{background:#0c2d6b;color:#58a6ff}
 .tag-green{background:#1b3827;color:#7ee787}
+.tag-yellow{background:#3d2e00;color:#d29922}
 .meal-card .kcal{font-size:11px;color:#8b949e;margin:4px 0 6px}
 .meal-card ul{list-style:none;padding:0}
 .meal-card li{padding:2px 0;font-size:12px;color:#c9d1d9;padding-left:14px;position:relative}
@@ -49,6 +60,7 @@ p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
 .tip-box{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin:8px 0}
 .tip-box li{font-size:12px;color:#c9d1d9;padding:2px 0}
 .footer{margin-top:30px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#484f58}
+.today-tip{text-align:center;font-size:13px;color:#7ee787;margin:-6px 0 10px;font-weight:500}
 </style>
 </head>
 <body>
@@ -56,14 +68,12 @@ p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
 <h1>🏋️ 减重冲刺计划 v1.0</h1>
 <p class="sub">OMAD + 居家健身 · 69.4 kg → 65.0 kg by 07-28 · 剩余 12 天</p>
 
-<!-- ═══════ 第一部分：核心日程 — 饮食 + 运动 ═══════ -->
-
-<h2>🏃 周运动日程 <span class="badge badge-green">跑1休1</span></h2>
-<p style="font-size:12px;color:#8b949e;margin-top:-6px">昨天跑了 → 今天室内力量</p>
+<h2>🏃 周运动日程 <span class="badge badge-blue">🏃 1·3·5·7 跑步 · 2·4 力量 · 6 恢复</span></h2>
+<p class="today-tip" id="todayTip"></p>
 
 <div class="schedule-grid">
-  <div class="card run">
-    <div class="day">周一 · 三 · 五</div>
+  <div class="card run" data-day="1,3,5,7">
+    <div class="day">周一 · 周三 · 周五 · 周日</div>
     <h4>🏃 跑步日（空腹）</h4>
     <ul>
       <li>晚上 5-7km，配速 7:00-7:30</li>
@@ -71,8 +81,8 @@ p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
       <li>跑后冷茉莉茶 / 淡盐水</li>
     </ul>
   </div>
-  <div class="card strength">
-    <div class="day">周二 · 四 · 六</div>
+  <div class="card strength" data-day="2,4">
+    <div class="day">周二 · 周四</div>
     <h4>🏋️ 力量日（居家）</h4>
     <ul>
       <li>壶铃摇摆 4×15</li>
@@ -83,24 +93,25 @@ p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
       <li>握力器 3×15（间隙做）</li>
     </ul>
   </div>
-  <div class="card rest">
-    <div class="day">周日</div>
+  <div class="card rest" data-day="6">
+    <div class="day">周六</div>
     <h4>🧘 主动恢复</h4>
     <ul>
       <li>散步 30min</li>
       <li>拉伸 10min</li>
       <li>握力器随意</li>
+      <li>OMAD 可提前到 12:00</li>
     </ul>
   </div>
 </div>
 
-<h2 style="margin-top:20px">🍽 OMAD 正餐方案</h2>
-<p style="font-size:12px;color:#8b949e;margin-top:-6px">目标 1200-1400 kcal · 高蛋白 · 在家食材</p>
+<h2 style="margin-top:20px">🍽 OMAD 正餐方案 <span class="badge badge-green" id="mealBadge"></span></h2>
+<p class="today-tip" id="mealTip"></p>
 
 <div class="meal-grid">
-  <div class="meal-card run">
+  <div class="meal-card run" data-day="1,3,5,7">
     <h4>方案 A · 跑步日 <span class="tag tag-blue">需能量</span></h4>
-    <div class="kcal">≈ 650 kcal + 食用油 → 约 800-900</div>
+    <div class="kcal">≈ 800-900 kcal</div>
     <ul>
       <li>酱牛肉 100g（30g蛋白）</li>
       <li>去皮鸡腿 1只（25g蛋白）</li>
@@ -109,9 +120,9 @@ p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
       <li>生抽+醋+蒜调味</li>
     </ul>
   </div>
-  <div class="meal-card rest">
-    <h4>方案 B · 非跑步日 <span class="tag tag-green">轻食</span></h4>
-    <div class="kcal">≈ 550 kcal + 食用油 → 约 650-750</div>
+  <div class="meal-card strength" data-day="2,4">
+    <h4>方案 B · 力量日 <span class="tag tag-yellow">轻食</span></h4>
+    <div class="kcal">≈ 650-750 kcal</div>
     <ul>
       <li>煮鸡蛋 3个（21g蛋白）</li>
       <li>火龙果 1个 — 纤维+甜味</li>
@@ -119,9 +130,9 @@ p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
       <li>生菜不限 — 油醋汁</li>
     </ul>
   </div>
-  <div class="meal-card rest">
-    <h4>方案 C · 换口味 <span class="tag tag-green">灵活</span></h4>
-    <div class="kcal">≈ 600 kcal + 食用油 → 约 750-850</div>
+  <div class="meal-card recovery" data-day="6">
+    <h4>方案 C · 周六换口味</h4>
+    <div class="kcal">≈ 750-850 kcal</div>
     <ul>
       <li>酱牛肉 + 煮鸡蛋 2个</li>
       <li>火龙果半个</li>
@@ -141,8 +152,6 @@ p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
     <tr><td>五香花生米</td><td>100g≈550 kcal，脂肪炸弹</td><td>OMAD 期间不吃</td></tr>
   </tbody>
 </table>
-
-<!-- ═══════ 第二部分：说明 & 参考 ═══════ -->
 
 <h2 style="margin-top:28px">🏋️ 器材使用指南</h2>
 
@@ -203,5 +212,38 @@ p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
   Generated: 2026-07-16 · DailyTracker · jaden.tech
 </div>
 
+<script>
+// Auto-highlight today's card with background color
+(function(){
+  var d = new Date();
+  var dow = d.getDay(); // 0=Sun, 7 days
+  // Map JS day (0=Sun) to schedule day numbers (1=Mon..7=Sun)
+  var dayNum = {0:7, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6}[dow];
+  var dayNames = {1:'周一',2:'周二',3:'周三',4:'周四',5:'周五',6:'周六',7:'周日'};
+  var woLabel = {1:'🏃 跑步日',2:'🏋️ 力量日',3:'🏃 跑步日',4:'🏋️ 力量日',5:'🏃 跑步日',6:'🧘 恢复日',7:'🏃 跑步日'};
+  var mealLabel = {1:'🍽 方案 A（跑步日）',2:'🍽 方案 B（力量日）',3:'🍽 方案 A（跑步日）',4:'🍽 方案 B（力量日）',5:'🍽 方案 A（跑步日）',6:'🍽 方案 C 周六换口味',7:'🍽 方案 A（跑步日）'};
+  var mealBadge = {1:'🍽 方案 A',2:'🍽 方案 B',3:'🍽 方案 A',4:'🍽 方案 B',5:'🍽 方案 A',6:'🍽 方案 C 换口味',7:'🍽 方案 A'};
+  
+  document.getElementById('todayTip').textContent = '📌 今天 ' + dayNames[dayNum] + ' — ' + woLabel[dayNum];
+  document.getElementById('mealTip').textContent = '今天推荐 ' + mealLabel[dayNum];
+  document.getElementById('mealBadge').textContent = mealBadge[dayNum];
+  
+  // Highlight workout cards containing today's day number
+  document.querySelectorAll('.card[data-day]').forEach(function(el){
+    var days = el.getAttribute('data-day').split(',');
+    if(days.indexOf(String(dayNum)) !== -1){
+      el.classList.add('highlight');
+    }
+  });
+  
+  // Highlight meal cards containing today's day number
+  document.querySelectorAll('.meal-card[data-day]').forEach(function(el){
+    var days = el.getAttribute('data-day').split(',');
+    if(days.indexOf(String(dayNum)) !== -1){
+      el.classList.add('highlight');
+    }
+  });
+})();
+</script>
 </body>
 </html>
