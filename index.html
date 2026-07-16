@@ -3,404 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DailyTracker 07-15</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
-<title>DailyTracker</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;line-height:1.7}
-.tab-bar{background:#161b22;border-bottom:1px solid #30363d;max-width:1060px;margin:0 auto;display:flex;gap:0;position:sticky;top:0;z-index:100}
-.tab-btn{background:transparent;border:none;color:#8b949e;padding:12px 18px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
-.tab-btn:hover{color:#e6edf3;background:#1c2333}
-.tab-btn.active{color:#7ee787;border-bottom-color:#7ee787;font-weight:600}
-.page{max-width:1060px;margin:0 auto;display:none}
-.page.active{display:block}
-h1{font-size:24px;font-weight:700;margin-bottom:4px;color:#f0f6fc}
-.sub{color:#8b949e;font-size:13px;margin-bottom:0px}
-h2{font-size:16px;font-weight:600;margin:24px 0 12px;padding-bottom:5px;border-bottom:1px solid #30363d;color:#7ee787;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-h2 .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px}
-.badge-green{background:#1b3827;color:#7ee787}
-.badge-blue{background:#0c2d6b;color:#58a6ff}
-.badge-yellow{background:#3d2e00;color:#d29922}
-h3{font-size:14px;font-weight:600;margin:0px 0 8px;color:#e6edf3}
-p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
-a{color:#58a6ff}
-
-/* Goal Cards */
-.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0 18px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;padding:32px;max-width:1060px;margin:0 auto}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px}
+h1{font-size:22px;font-weight:600}
+.date{color:#8b949e;font-size:13px}
+h2{font-size:15px;font-weight:600;margin:18px 0 10px;padding-bottom:5px;border-bottom:1px solid #30363d;color:#7ee787;display:flex;justify-content:space-between;align-items:center}
+table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:13px}
+th{text-align:left;padding:6px 8px;background:#161b22;color:#8b949e;font-weight:500;border-bottom:1px solid #30363d}
+td{padding:6px 8px;border-bottom:1px solid #21262d}
+tr:hover td{background:#161b22}
+.num{text-align:right}
+.center{text-align:center}
+.check{color:#7ee787}
+.cross{color:#f85149}
+.empty{color:#484f58}
+.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:6px}
 .card{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px}
-.card.run{border-left:3px solid #58a6ff}.card.strength{border-left:3px solid #d29922}.card.rest{border-left:3px solid #8b949e}
-.card.highlight{box-shadow:0 0 0 2px #7ee787;background:#1c2333}
-.card.run.highlight{box-shadow:0 0 0 2px #58a6ff}.card.strength.highlight{box-shadow:0 0 0 2px #d29922}.card.rest.highlight{box-shadow:0 0 0 2px #8b949e}
 .card h3{font-size:13px;color:#8b949e;margin-bottom:6px}
-.card h4{font-size:13px;font-weight:600;margin-bottom:6px;color:#f0f6fc}
-.card .day{font-size:11px;color:#8b949e;margin-bottom:4px}
-.card .value{font-size:24px;font-weight:700}.card .value.green{color:#7ee787}.card .value.blue{color:#58a6ff}
+.card .value{font-size:24px;font-weight:700}
+.card .value.green{color:#7ee787}
+.card .value.yellow{color:#d29922}
+.card .value.red{color:#f85149}
 .card .unit{font-size:13px;color:#8b949e;font-weight:400}
 .card .sub{font-size:12px;color:#8b949e;margin-top:3px}
 .card .bar-wrap{background:#21262d;border-radius:4px;height:6px;margin-top:8px;overflow:hidden}
-.card .bar-fill{height:100%;border-radius:4px;background:#7ee787}
-.card ul{list-style:none;padding:0}
-.card li{padding:2px 0;font-size:12px;color:#c9d1d9;padding-left:14px;position:relative}
-.card li::before{content:"·";position:absolute;left:2px;color:#58a6ff}
-
-/* Schedule + Meal Grids */
-.schedule-grid,.meal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:10px 0 18px}
-.meal-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;transition:all .3s}
-.meal-card.run{border-top:3px solid #58a6ff}.meal-card.strength{border-top:3px solid #d29922}.meal-card.recovery{border-top:3px solid #f0883e}
-.meal-card.highlight{box-shadow:0 0 0 2px #7ee787;background:#1c2333}
-.meal-card.highlight.run{box-shadow:0 0 0 2px #58a6ff}.meal-card.highlight.strength{box-shadow:0 0 0 2px #d29922}
-.meal-card h4{font-size:13px;font-weight:600;margin-bottom:4px;color:#f0f6fc}
-.meal-card .kcal{font-size:11px;color:#8b949e;margin:4px 0 6px}
-.meal-card ul{list-style:none;padding:0}
-.meal-card li{padding:2px 0;font-size:12px;color:#c9d1d9;padding-left:14px;position:relative}
-.meal-card li::before{content:"·";position:absolute;left:2px;color:#7ee787}
-.tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;margin-left:6px}
-.tag-blue{background:#0c2d6b;color:#58a6ff}.tag-green{background:#1b3827;color:#7ee787}.tag-yellow{background:#3d2e00;color:#d29922}
-
-/* Chart */
+.card .bar-fill{height:100%;border-radius:4px}
+.bar-green{background:#7ee787}
+.bar-yellow{background:#d29922}
 .chart-wrap{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px;margin-bottom:6px}
-.chart-wrap h3{font-size:13px;color:#8b949e;margin-bottom:8px}.chart-wrap canvas{width:100%!important;max-height:280px}
-
-/* Table */
-table{width:100%;border-collapse:collapse;margin:.75rem 0;font-size:12px}
-th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #21262d}
-th{background:#161b22;color:#8b949e;font-weight:500}tr:hover td{background:#161b22}
-.num{text-align:right}.center{text-align:center}
-.check{color:#7ee787}.cross{color:#f85149}.empty{color:#484f58}
-
-/* FAQ */
-.faq-q{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;margin:12px 0}
-.faq-q .q{font-size:14px;font-weight:600;color:#f0f6fc;margin-bottom:8px}
-.faq-q .q .num{display:inline-block;background:#1b3827;color:#7ee787;padding:1px 8px;border-radius:4px;font-size:12px;margin-right:6px;font-weight:500}
-.faq-q .a{font-size:13px;color:#c9d1d9;line-height:1.8}
-.faq-q .a ul{list-style:none;padding:0;margin:4px 0}
-.faq-q .a li{padding:2px 0;font-size:12px;padding-left:14px;position:relative;color:#c9d1d9}
-.faq-q .a li::before{content:"·";position:absolute;left:2px;color:#58a6ff}
-
-/* References */
-.ref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin:10px 0}
-.ref-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px}
-.ref-card h4{font-size:13px;font-weight:600;margin-bottom:6px;color:#f0f6fc}
-.ref-card a{display:block;font-size:12px;padding:2px 0;text-decoration:none}
-.ref-card a:hover{text-decoration:underline;color:#7ee787}
-.ref-card .desc{font-size:11px;color:#8b949e;margin-top:4px}
-
-/* Meta grid */
-.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem;margin:.75rem 0}
-.meta-item{padding:.5rem .75rem;background:#222326;border-radius:6px;font-size:.85rem}
-.meta-item strong{color:#888;margin-right:.5rem}
-.progress-bar{height:6px;background:#21262d;border-radius:4px;margin:.5rem 0;overflow:hidden}
-.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#7ee787,#58a6ff);transition:width .5s}
+.chart-wrap h3{font-size:13px;color:#8b949e;margin-bottom:8px}
+.chart-wrap canvas{width:100%!important;max-height:280px}
+.badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:500;margin-left:4px}
+.badge-green{background:#1b3827;color:#7ee787}
+.badge-yellow{background:#3d2e00;color:#d29922}
+.badge-red{background:#3d1114;color:#f85149}
+.job-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:500}
+.job-badge.ok{background:#1b3827;color:#7ee787}
+.job-badge.error{background:#3d1114;color:#f85149}
+.job-badge.pending{background:#3d2e00;color:#d29922}
 .cron-list{font-size:12px}
 .cron-item{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
 .cron-item+.cron-item{border-top:1px solid #21262d;padding-top:5px;margin-top:3px}
-.cron-name{font-weight:500;color:#e6edf3}.cron-time{color:#8b949e;font-size:11px;display:none;}
-.job-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:500}
-.job-badge.ok{background:#1b3827;color:#7ee787}.job-badge.error{background:#3d1114;color:#f85149}.job-badge.pending{background:#3d2e00;color:#d29922}
+.cron-name{font-weight:500;color:#e6edf3}
+.cron-time{color:#8b949e;font-size:11px}
+.github-corner{position:fixed;top:0;right:0;z-index:100;width:72px;height:72px}
+.github-corner svg{fill:#fff;color:#FFF;position:absolute;top:0;border:0;right:0}
+.github-corner:hover svg{filter:drop-shadow(0 0 8px rgba(96,165,250,0.5))}
+.github-corner .octo-arm{transform-origin:130px 106px}
+.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}
+@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}
+.toggle{cursor:pointer;font-size:13px;color:#8b949e;user-select:none;padding:2px 6px;border-radius:4px}
+.toggle:hover{background:#21262d;color:#e6edf3}
 .collapse{display:none}
-h2 .toggle{cursor:pointer;color:#8b949e;font-size:13px;font-weight:400;padding:2px 8px;border-radius:4px;user-select:none}
-h2 .toggle:hover{background:#21262d;color:#e6edf3}
-.today-tip{text-align:center;font-size:13px;color:#7ee787;margin:-6px 0 10px;font-weight:500}
-.danger-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
-.danger-table th{padding:6px 8px;background:#161b22;color:#8b949e;font-weight:500;border-bottom:1px solid #30363d;text-align:left}
-.danger-table td{padding:6px 8px;border-bottom:1px solid #21262d;color:#c9d1d9}
-.danger-table tr:hover td{background:#161b22}
-.eq-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin:8px 0}
-.eq-card h4{font-size:13px;font-weight:600;margin-bottom:6px;color:#e6edf3}
-.eq-card .moves{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#8b949e}
-.eq-card .moves div{padding:4px 8px;background:#0d1117;border-radius:4px}
-.tip-box{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin:8px 0}
-.tip-box li{font-size:12px;color:#c9d1d9;padding:2px 0}
-.cta{display:inline-block;background:#238636;color:#fff;padding:6px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;margin-top:6px}
-.cta:hover{background:#2ea043}
-.footer{margin-top:30px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#484f58;text-align:center}
+footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#484f58}
 </style>
 </head>
 <body>
 
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('today')">📊 Today</button>
-  <button class="tab-btn" onclick="switchTab('omad')">🍽 OMAD</button>
-  <button class="tab-btn" onclick="switchTab('faq')">❓ FAQ</button>
-  <button class="tab-btn" onclick="switchTab('refs')">🔗 References</button>
+<a href="https://github.com/imjaden" class="github-corner" target="_blank" rel="noopener" aria-label="View source on Github">
+  <svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" fill="rgba(0,0,0,0.41)"></path>
+    <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+    <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+  </svg>
+</a>
+
+<div class="header">
+  <h1>🏋️ DailyTracker</h1>
+  <p class="date">2026-07-03 → 07-28 · 13 days to deadline</p>
 </div>
 
-<!-- ═══════ TODAY TAB ═══════ -->
-
-<div id="tab-today" class="page active">
-<h1>📊 DailyTracker</h1>
-<p class="sub">🎉 69.4 kg → 65.0 kg by 07-28 · 剩余 12 天</p>
-
+<h2>🎯 Overview</h2>
 <div class="goal-grid">
-  <div class="card"><h3>⚖️ Weight</h3><div class="value green">69.4 <span class="unit">kg</span></div><div class="sub">Target: 65.0 · Lost: 1.7 kg (28%)</div><div class="bar-wrap"><div class="bar-fill" style="width:28%"></div></div><div class="sub">↓ Need 4.4 kg · 12 days left</div></div>
-  <div class="card"><h3>🏃 Exercise</h3><div class="value blue">室内力量 <span class="unit">今天</span></div><div class="sub">跑1休1 · 昨天跑步 5km</div></div>
-  <div class="card"><h3>🔥 Habits</h3><div class="value green">14/14 <span class="unit">days</span></div><div class="sub">🌳✓ 📖✓ 🎓✓ (to 07-15)</div></div>
-  <div class="card"><h3>🤖 Cron jobs</h3><div class="cron-list">
-    <div class="cron-item"><span><span class="cron-name">🌅 10:00</span> <span class="cron-time">07-15 10:06</span></span> <span class="job-badge ok">✅ ok</span></div>
-    <div class="cron-item"><span><span class="cron-name">🌙 23:00</span> <span class="cron-time">07-15 23:00</span></span> <span class="job-badge ok">✅ ok</span></div>
-    <div class="cron-item"><span><span class="cron-name">🔒 23:30 Review</span> <span class="cron-time">07-15 23:34</span></span> <span class="job-badge ok">✅ ok</span></div>
-  </div></div>
-</div>
-
-<h2>📉 Weight Chart <span class="badge badge-green">📈 预测 07-28: ~67.8 kg</span></h2>
-<div class="chart-wrap"><canvas id="wtChart"></canvas></div>
-
-<h2>🎯 Progress</h2>
-<div class="meta-grid">
-<div class="meta-item"><strong>Start</strong>71.1 kg</div><div class="meta-item"><strong>Current</strong><strong>69.4</strong> kg</div>
-<div class="meta-item"><strong>Lost</strong>1.7 kg (28%)</div><div class="meta-item"><strong>Left</strong>4.4 kg</div>
-</div>
-<div class="progress-bar"><div class="progress-fill" style="width:28%"></div></div>
-
-<h2>📋 Records <span class="badge badge-green">🔥 14d streak</span> <span class="toggle" onclick="tbl=document.getElementById('todayTbl');tbl.classList.toggle('collapse');this.textContent=tbl.classList.contains('collapse')?'▶ expand':'▼ collapse'">▶ expand</span></h2>
-<table id="todayTbl" class="collapse"><thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead><tbody>
-<tr><td>07-16</td><td class="num">69.4</td><td>室内力量</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-<tr><td>07-15</td><td class="num">69.5</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-14</td><td class="num">69.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-13</td><td class="num">70.2</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-12</td><td class="num">69.7</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-11</td><td class="num">69.9</td><td>跑步10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-10</td><td class="num">70.0</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-09</td><td class="num">70.3</td><td>跑步7.41km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-08</td><td class="num">69.7</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-07</td><td class="num">70.0</td><td>跑步3.5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-06</td><td class="num">70.3</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-05</td><td class="num">70.4</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-04</td><td class="num">70.8</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-03</td><td class="num">71.1</td><td>跑步6k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">-</td></tr>
-</tbody></table>
-<div class="footer">DailyTracker · 2026-07-16 · <a href="javascript:switchTab('omad')">🍽 OMAD 计划</a> · <a href="javascript:switchTab('faq')">❓ FAQ</a></div>
-</div>
-
-<!-- ═══════ OMAD TAB ═══════ -->
-
-<div id="tab-omad" class="page">
-<h1>🍽 OMAD + 居家健身计划</h1>
-<p class="sub">69.4 kg → 65.0 kg by 07-28 · 剩余 12 天</p>
-
-<h2>🏃 周运动日程 <span class="badge badge-blue">🏃 1·3·5·7 跑步 · 2·4 力量 · 6 恢复</span></h2>
-<p class="today-tip" id="omadTip"></p>
-<div class="schedule-grid">
-  <div class="card run" data-days="1,3,5,7"><div class="day">周一 · 周三 · 周五 · 周日</div><h4>🏃 跑步日（空腹）</h4><ul><li>晚上 5-7km，配速 7:00-7:30</li><li>最后 1km 变速冲刺</li><li>跑后冷茉莉茶 / 淡盐水 / 盐汽水</li></ul></div>
-  <div class="card strength" data-days="2,4"><div class="day">周二 · 周四</div><h4>🏋️ 力量日（居家）</h4><ul><li>壶铃摇摆 4×15</li><li>壶铃深蹲 3×15</li><li>俯卧撑 4×12（支架）</li><li>单臂划船 3×12/侧</li><li>卷腹 3×15</li><li>握力器 3×15（间隙做）</li></ul></div>
-  <div class="card rest" data-days="6"><div class="day">周六</div><h4>🧘 主动恢复</h4><ul><li>散步 30min + 拉伸 10min</li><li>握力器随意</li><li>OMAD 可提前到 12:00</li></ul></div>
-</div>
-
-<h2 style="margin-top:20px">🍽 OMAD 正餐方案</h2>
-<p class="today-tip" id="omadMealTip"></p>
-<div class="meal-grid">
-  <div class="meal-card run" data-days="1,3,5,7">
-    <h4>方案 A · 跑步日 <span class="tag tag-blue">需能量</span></h4>
-    <div class="kcal">≈ 800-900 kcal</div>
-    <ul><li>酱牛肉 100g（30g蛋白）</li><li>去皮鸡腿 1只（25g蛋白）</li><li>煮红薯 1个（中）— 慢碳</li><li>黄瓜 1根 + 生菜不限</li><li>香菇酱少许调味</li><li>生抽+醋+蒜</li></ul>
+  <div class="card">
+    <h3>⚖️ Weight</h3>
+    <div class="value green">69.4 <span class="unit">kg</span></div>
+    <div class="sub">Target: 65.0 · Lost: 1.7 kg (28%)</div>
+    <div class="bar-wrap"><div class="bar-fill bar-green" style="width:28%"></div></div>
+    <div class="sub">↓ Need 4.4 kg · 07-28 deadline (12d)</div>
   </div>
-  <div class="meal-card strength" data-days="2,4">
-    <h4>方案 B · 力量日 <span class="tag tag-yellow">轻食</span></h4>
-    <div class="kcal">≈ 650-750 kcal</div>
-    <ul><li>煮鸡蛋 3个（21g蛋白）</li><li>火龙果 1个 — 纤维+甜味</li><li>黄瓜 1根 + 胡萝卜 1根</li><li>生菜不限 + 油醋汁</li><li>青汁粉 1杯（饱腹）</li></ul>
+  <div class="card">
+    <h3>🏃 Exercise</h3>
+    <div class="value green">14/14 <span class="unit">days</span></div>
+    <div class="sub">100% attendance · Running 5-10km / Indoor</div>
+    <div class="sub">Pace trend: 7:30 → 7:00 /km</div>
+    <div class="sub"><a href="https://www.jaden.tech/documents/plan-omad-v1.0.html" style="color:#58a6ff;text-decoration:underline">📋 完整饮食运动计划 →</a></div>
   </div>
-  <div class="meal-card recovery" data-days="6">
-    <h4>方案 C · 周六换口味</h4>
-    <div class="kcal">≈ 750-850 kcal</div>
-    <ul><li>酱牛肉 + 煮鸡蛋 2个</li><li>火龙果半个</li><li>黄瓜生菜沙拉</li><li>或：鸡腿肉撕碎拌香菇酱</li><li>牛乳冰淇淋 1份（奖励）</li></ul>
+  <div class="card">
+    <h3>🔥 Habits</h3>
+    <div class="value green">14 <span class="unit">days</span></div>
+    <div class="sub">🌳 AntForest 14 · 📖 English 14</div>
+    <div class="sub">🎓 UniCourse 12</div>
+  </div>
+  <div class="card">
+    <h3>🤖 Cron Status</h3>
+    <div class="cron-list">
+      <div class="cron-item"><span><span class="cron-name">🌅 10:00</span> <span class="cron-time">07-15 10:06</span></span> <span class="job-badge ok">✅ ok</span></div>
+      <div class="cron-item"><span><span class="cron-name">🌙 23:00</span> <span class="cron-time">07-15 23:00</span></span> <span class="job-badge ok">✅ ok</span></div>
+      <div class="cron-item"><span><span class="cron-name">🔒 23:30 Review</span> <span class="cron-time">07-15 23:34</span></span> <span class="job-badge ok">✅ ok</span></div>
+    </div>
   </div>
 </div>
 
-<h2>☕ 饮品 & 加餐</h2>
-<table class="danger-table">
-  <thead><tr><th>饮品</th><th>用途</th><th>建议</th></tr></thead>
+<h2>📉 Weight Chart</h2>
+<div class="chart-wrap">
+  <h3>Actual vs Target — 07-03 → 07-28 (target 65.0 kg, deadline ║)</h3>
+  <canvas id="weightChart"></canvas>
+</div>
+
+<h2>📋 Daily Records <span class="badge badge-green">🔥 14d streak</span> <span class="toggle" onclick="tbl=document.getElementById('recordsTbl');tbl.classList.toggle('collapse');this.textContent=tbl.classList.contains('collapse')?'▶ expand':'▼ collapse'">▶ expand</span></h2>
+<table id="recordsTbl" class="collapse">
+  <thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead>
   <tbody>
-    <tr><td>黑咖啡（0糖0脂）</td><td>食欲抑制 + 提神</td><td>空腹跑步前 30min 喝 · 禁食窗口最佳饮品</td></tr>
-    <tr><td>青汁粉冲水</td><td>纤维+饱腹 + 维生素</td><td>饥饿感时喝 1杯 · 午餐前/跑步前</td></tr>
-    <tr><td>盐汽水</td><td>电解质补充</td><td>跑步后喝 1瓶 · 替代运动饮料（几乎 0 卡）</td></tr>
-    <tr><td>冷茉莉茶 / 淡盐水</td><td>跑后补水</td><td>不破坏禁食 · 随便喝</td></tr>
-    <tr><td>牛乳冰淇淋</td><td>奖励 / 放纵</td><td>每周最多 1 次 · 放在周六 OMAD 餐内</td></tr>
+    <tr><td>07-16</td><td class="num">69.4</td><td>室内力量</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
+    <tr><td>07-15</td><td class="num">69.5</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-14</td><td class="num">69.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-13</td><td class="num">70.2</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-12</td><td class="num">69.7</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-11</td><td class="num">69.9</td><td>跑步10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-10</td><td class="num">70.0</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-09</td><td class="num">70.3</td><td>跑步7.41km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-08</td><td class="num">69.7</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-07</td><td class="num">70.0</td><td>跑步3.5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-06</td><td class="num">70.3</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-05</td><td class="num">70.4</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-04</td><td class="num">70.8</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+    <tr><td>07-03</td><td class="num">71.1</td><td>跑步6k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center cross">❌</td></tr>
   </tbody>
 </table>
 
-<h2>⚠️ 饮食红线</h2>
-<table class="danger-table">
-  <thead><tr><th>食材</th><th>风险</th><th>建议</th></tr></thead>
-  <tbody>
-    <tr><td>壮馍</td><td>面粉+油，1/4张≈350 kcal</td><td>一周最多1次，替代红薯</td></tr>
-    <tr><td>芝麻酱米线</td><td>芝麻酱=纯脂肪，一碗≈600 kcal</td><td>芝麻酱减半，醋蒜调味</td></tr>
-    <tr><td>蟹黄干脆面</td><td>油炸碳水，1包≈400 kcal</td><td>建议不吃，或当放纵餐</td></tr>
-    <tr><td>五香花生米</td><td>100g≈550 kcal，脂肪炸弹</td><td>OMAD 期间不吃</td></tr>
-    <tr><td>牛乳冰淇淋</td><td>糖+脂肪</td><td>一周最多1次，不单独吃</td></tr>
-  </tbody>
-</table>
-
-<h2>🏋️ 器材使用</h2>
-<div class="eq-card"><h4>6kg 壶铃</h4><div class="moves"><div>🍑 壶铃摇摆 → 臀+腿+心肺</div><div>🦵 壶铃深蹲 → 股四+臀</div><div>💪 单臂划船 → 背+二头</div><div>☝️ 单臂推举 → 肩</div></div></div>
-<div class="eq-card"><h4>俯卧撑架</h4><div class="moves"><div>标准架 → 胸大肌</div><div>窄距架 → 三头</div><div>宽距架 → 胸外侧</div><div>脚抬高 → 上胸</div></div></div>
-<div class="eq-card"><h4>握力器</h4><div class="moves"><div>办公/看视频时做</div><div>3组×15次 / 侧</div><div>提升前臂+减压</div></div></div>
-
-<h2>💡 关键提醒</h2>
-<div class="tip-box"><ul>
-<li><strong>进食窗口</strong>：跑步日 15:00-23:00 / 非跑步日 12:00-20:00</li>
-<li><strong>跑后不进食</strong>：只喝冷茉莉茶/淡盐水/盐汽水/黑咖啡</li>
-<li><strong>花生米是隐形陷阱</strong>：100g=550 kcal，一顿 OMAD 的热量</li>
-<li><strong>红薯是好碳水</strong>：跑前 3h 吃，给肌肉充糖原</li>
-<li><strong>饮水 ≥ 2L/天</strong>，尤其跑后补充 500ml+</li>
-<li><strong>黑咖啡可空腹喝</strong>：提升运动表现 + 抑制食欲</li>
-<li><strong>青汁粉</strong>：饥饿感时冲 1 杯，填充胃部</li>
-</ul></div>
-<div class="footer">OMAD Plan v1.0 · Updated 2026-07-16 · <a href="javascript:switchTab('faq')">❓ FAQ</a></div>
-</div>
-
-<!-- ═══════ FAQ TAB ═══════ -->
-
-<div id="tab-faq" class="page">
-<h1>❓ FAQ — 减重 & 饮食问答</h1>
-<p class="sub">持续更新 · 每个问题有编号，方便追问</p>
-
-<div class="faq-q">
-  <div class="q"><span class="num">#001</span> 减重时如何提升力量 / 男友力？</div>
-  <div class="a">
-    <p>你目前 OMAD + 空腹跑主要目标是减脂，同时做力量训练可以在热量赤字下尽可能保留（甚至微增）肌肉。核心原则：</p>
-    <ul>
-      <li><strong>蛋白质管够</strong>：正餐 50g+ 蛋白（牛肉+鸡腿+鸡蛋），这是肌肉不流失的底线</li>
-      <li><strong>复合动作为王</strong>：壶铃摇摆（模拟硬拉）、俯卧撑、单臂划船 — 这三个动作练到全身主要肌群，"男友力"就是推、拉、扛的能力</li>
-      <li><strong>渐进超负荷</strong>：每周加 1 组或加 2 次，力量日不要永远做 4×15</li>
-      <li><strong>辅助提升"实际男友力"</strong>：壶铃农夫行走（拎着走 30m×4 组）对抱/搬东西最实用；俯卧撑练推力，帮女友推重物时不发抖</li>
-      <li><strong>睡眠是隐藏变量</strong>：你深睡平均 0.6h，深度睡眠不足会严重影响力量增长 — 尽量保证 7h+ 总睡眠</li>
-      <li><strong>不要空腹力量</strong>：力量日正餐可以 12:00 吃，饭后 2h 练；跑步可以空腹，力量不行</li>
-    </ul>
-    <p>你现在 69.4kg，每减 1kg 脂肪 + 维持住肌肉，体脂率下降后同样肌肉量看起来会更精壮。16 字总结：<strong>蛋白打底、复合为主、渐进加压、睡好恢复</strong>。</p>
-  </div>
-</div>
-
-<div class="faq-q">
-  <div class="q"><span class="num">#002</span> 饥饿感时推荐吃的顺序是什么？</div>
-  <div class="a">
-    <p>冰箱库存：黄瓜、西红柿、煮鸡蛋、煮红薯、煮胡萝卜、酱牛肉、去皮卤鸡腿。</p>
-    <p>原则：<strong>热量密度从低到高 + 蛋白质最后收尾</strong>。推荐进食顺序：</p>
-    <table style="font-size:12px;margin:8px 0"><thead><tr><th>顺序</th><th>食物</th><th>理由</th></tr></thead><tbody>
-    <tr><td>①</td><td>黄瓜 🥒</td><td>几乎 0 热量，水分填充胃部</td></tr>
-    <tr><td>②</td><td>西红柿 🍅</td><td>低热量 + 纤维，酸甜味缓解食欲</td></tr>
-    <tr><td>③</td><td>煮胡萝卜 🥕</td><td>纤维 + 微甜，比生胡萝卜更饱腹</td></tr>
-    <tr><td>④</td><td>煮鸡蛋蛋白 🥚</td><td>10g 蛋白/个，开始提供饱腹信号</td></tr>
-    <tr><td>⑤</td><td>酱牛肉 / 卤鸡腿 🥩</td><td>高蛋白最高饱腹感，压住食欲</td></tr>
-    <tr><td>⑥</td><td>煮红薯 🍠</td><td>碳水 — 只在真的饿才吃，否则跳过</td></tr>
-    </tbody></table>
-    <p><strong>禁食窗口饥饿</strong>：先喝水/黑咖啡/青汁粉，等 10min。如果还是饿，吃黄瓜或喝青汁粉。如果离进食窗口不到 1h，可以吃半个煮鸡蛋蛋白。</p>
-    <p><strong>进食窗口饥饿</strong>：直接按上面顺序吃到酱牛肉/鸡腿，一般吃完蛋白+肉就饱了。</p>
-  </div>
-</div>
-
-<div class="faq-q">
-  <div class="q"><span class="num">#003</span> 一个人住，食物多了怎么处理？当天没吃完第二天要扔掉吗？</div>
-  <div class="a">
-    <p>单人 OMAD 的核心矛盾：家庭装食材 vs 单人一餐。以下是实战建议：</p>
-    <ul>
-      <li><strong>肉类（酱牛肉/卤鸡腿）</strong>：煮熟后冷藏可放 3-4 天，分装成单份（每份 100g 牛肉 / 1 只鸡腿），每次 OMAD 取一份加热</li>
-      <li><strong>煮鸡蛋</strong>：带壳冷藏 5-7 天没问题。一次煮 6-8 个，每天吃 2-3 个</li>
-      <li><strong>煮红薯/煮胡萝卜</strong>：冷藏 3 天。一次煮 2-3 个红薯 + 3-4 根胡萝卜</li>
-      <li><strong>黄瓜/生菜/西红柿</strong>：买新鲜的，2-3 天吃完。黄瓜切了当天吃完，不切可放 3-4 天</li>
-      <li><strong>酱牛肉、鸡腿第 3 天还没吃</strong>：撕碎重新调味（加香菇酱/醋/蒜）做成凉拌，吃掉</li>
-      <li><strong>当天没吃完 ≠ 丢掉</strong>：你的 OMAD 只有一餐，剩下的本来就是为了明天准备的。只要没变质，放进冰箱明天继续吃</li>
-    </ul>
-    <p><strong>底线原则</strong>：闻起来没坏、看起来没霉、尝起来没酸 — 就可以吃。浪费食物 ≈ 浪费你采购和烹饪的时间。</p>
-    <p>唯一建议当天丢的：切开的黄瓜（隔夜口感差）、切开的水果（火龙果切开放半天氧化）。</p>
-  </div>
-</div>
-
-<div class="footer">FAQ · 持续更新中 · 问题编号可追问 · <a href="javascript:switchTab('refs')">🔗 References</a></div>
-</div>
-
-<!-- ═══════ REFERENCES TAB ═══════ -->
-
-<div id="tab-refs" class="page">
-<h1>🔗 References</h1>
-<p class="sub">本项目资源 + 推荐阅读 / 观看</p>
-
-<h2>📂 本项目文件</h2>
-<div class="ref-grid">
-  <div class="ref-card"><h4>📊 今日 Snapshot</h4><a href="snapshots/dailytracker-snapshot-v1.0-20260716.html">snapshots/20260716.html</a><div class="desc">完整日跟踪数据，包含 Chart.js 折线图</div></div>
-  <div class="ref-card"><h4>📈 站点主页</h4><a href="https://www.jaden.tech/daily-tracker.html">www.jaden.tech/daily-tracker.html</a><div class="desc">线上部署版（需 review push）</div></div>
-  <div class="ref-card"><h4>🤖 GitHub</h4><a href="https://github.com/imjaden">github.com/imjaden</a><div class="desc">Jaden Li · 项目源码</div></div>
-</div>
-
-<h2>📚 推荐阅读</h2>
-<div class="ref-grid">
-  <div class="ref-card"><h4>📖 OMAD 入门</h4><a href="https://youtu.be/example" target="_blank" rel="noopener">Dr. Fung — 间歇性断食完全指南</a><div class="desc">Jason Fung 的断食理论基础，解释了为什么 OMAD 能有效减脂</div></div>
-  <div class="ref-card"><h4>📖 空腹运动</h4><a href="https://youtu.be/example" target="_blank" rel="noopener">空腹有氧 vs 力量训练时机</a><div class="desc">Jeff Nippard / Renaissance Periodization 关于空腹训练的科学研究</div></div>
-  <div class="ref-card"><h4>📖 居家力量</h4><a href="https://youtu.be/example" target="_blank" rel="noopener">哑铃/壶铃家庭训练计划</a><div class="desc">6kg 壶铃能做哪些有效动作；新手渐进方案</div></div>
-  <div class="ref-card"><h4>📖 OMAD 食谱</h4><a href="https://youtu.be/example" target="_blank" rel="noopener">OMAD 一天一餐吃什么</a><div class="desc">高蛋白低卡 OMAD 备餐思路，跟你的食材清单类似</div></div>
-</div>
-
-<div class="footer">References · 推荐链接待补充具体 URL · <a href="javascript:switchTab('faq')">❓ FAQ</a></div>
-</div>
+<footer>IRIS (byHermes) · Snapshot · 2026-07-15 · daily-tracker</footer>
 
 <script>
-// Tab switching — saves preference to localStorage
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
-  document.querySelector('.tab-btn[onclick*="'+name+'"]').classList.add('active');
-  document.getElementById('tab-'+name).classList.add('active');
-  localStorage.setItem('dt_active_tab', name);
-  // Re-render chart if switching to today tab
-  if(name==='today' && document.getElementById('wtChart')) renderChart();
-}
-
-// Restore last tab on load
-(function(){
-  var saved = localStorage.getItem('dt_active_tab');
-  if(saved && saved !== 'today') switchTab(saved);
-})();
-
-// Today's chart
-function renderChart(){
-  var c=document.getElementById('wtChart');
-  if(!c) return;
-  if(window._wtChart){window._wtChart.destroy()}
-  var lbs=Array.from({length:26},(_,i)=>'07-'+String(i+3).padStart(2,'0'));
-  var wd=[{d:'07-03',w:71.1},{d:'07-04',w:70.8},{d:'07-05',w:70.4},{d:'07-06',w:70.3},{d:'07-07',w:70},{d:'07-08',w:69.7},{d:'07-09',w:70.3},{d:'07-10',w:70},{d:'07-11',w:69.9},{d:'07-12',w:69.7},{d:'07-13',w:70.2},{d:'07-14',w:69.6},{d:'07-15',w:69.5},{d:'07-16',w:69.4}];
-  var ac=lbs.map(function(l){var f=wd.find(function(d){return d.d===l});return f?f.w:null});
-  var pr=lbs.map(function(_,i){return +(71.1-0.133*i).toFixed(1)});
-  window._wtChart=new Chart(c,{
-    type:'line',
-    data:{labels:lbs,datasets:[
-      {label:'Actual',data:ac,borderColor:'#7ee787',backgroundColor:'rgba(126,231,135,0.1)',pointBackgroundColor:'#7ee787',pointBorderColor:'#0d1117',pointBorderWidth:2,pointRadius:ac.map(function(v){return v?4:0}),spanGaps:false,tension:.3,fill:true},
-      {label:'Trend',data:pr,borderColor:'#8b949e',borderDash:[6,3],pointRadius:0,borderWidth:2,tension:0},
-      {label:'Target 65.0',data:Array(26).fill(65),borderColor:'#f85149',borderDash:[4,4],pointRadius:0,borderWidth:1.5}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'#8b949e',font:{size:11},boxWidth:12,padding:8},position:'bottom'},
-        tooltip:{backgroundColor:'#161b22',titleColor:'#e6edf3',bodyColor:'#8b949e',borderColor:'#30363d',borderWidth:1,
-          callbacks:{label:function(ctx){
-            if(ctx.dataset.label==='Actual'&&ctx.parsed.y!==null)return ctx.parsed.y+' kg';
-            if(ctx.dataset.label==='Trend')return '~'+ctx.parsed.y.toFixed(1)+' kg (pred)';
-            return ctx.parsed.y+' kg '+ctx.dataset.label;
-          }}
-        }
-      },
-      scales:{x:{grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},maxTicksLimit:12}},
-        y:{min:65,max:72,grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},stepSize:0.5}}}
+const weightData = [
+  {d:'07-03',w:71.1},{d:'07-04',w:70.8},{d:'07-05',w:70.4},{d:'07-06',w:70.3},
+  {d:'07-07',w:70.0},{d:'07-08',w:69.7},{d:'07-09',w:70.3},{d:'07-10',w:70.0},
+  {d:'07-11',w:69.9},{d:'07-12',w:69.7},{d:'07-13',w:70.2},{d:'07-14',w:69.6},{d:'07-15',w:69.5},{d:'07-16',w:69.4}
+];
+const labels=Array.from({length:26},(_,i)=>'07-'+String(i+3).padStart(2,'0'));
+const actual=labels.map(l=>{const f=weightData.find(d=>d.d===l);return f?f.w:null});
+const predicted=labels.map((_,i)=>+(71.1-0.133*i).toFixed(1));
+const target=Array(26).fill(65);
+new Chart(document.getElementById('weightChart'),{
+  type:'line',
+  data:{
+    labels,
+    datasets:[
+      {label:'Actual',data:actual,borderColor:'#7ee787',backgroundColor:'rgba(126,231,135,0.1)',pointBackgroundColor:'#7ee787',pointBorderColor:'#0d1117',pointBorderWidth:2,pointRadius:actual.map(v=>v?4:0),spanGaps:false,tension:.3,fill:true},
+      {label:'Trend',data:predicted,borderColor:'#8b949e',borderDash:[6,3],pointRadius:0,borderWidth:2,tension:0},
+      {label:'Target 65.0',data:target,borderColor:'#f85149',borderDash:[4,4],pointRadius:0,borderWidth:1.5}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{labels:{color:'#8b949e',font:{size:11},boxWidth:12,padding:8},position:'bottom'},
+      tooltip:{backgroundColor:'#161b22',titleColor:'#e6edf3',bodyColor:'#8b949e',borderColor:'#30363d',borderWidth:1,
+        callbacks:{label:function(ctx){
+          if(ctx.dataset.label==='Actual'&&ctx.parsed.y!==null)return ctx.parsed.y+' kg';
+          if(ctx.dataset.label==='Trend')return '~'+ctx.parsed.y.toFixed(1)+' kg (pred)';
+          return ctx.parsed.y+' kg '+ctx.dataset.label;
+        }}
+      }
+    },
+    scales:{
+      x:{grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},maxTicksLimit:12}},
+      y:{min:65,max:72,grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},stepSize:0.5}}
     }
-  });
-}
-
-// OMAD tab auto-highlight
-(function(){
-  var d=new Date();
-  var dow=d.getDay();
-  var dayNum={0:7,1:1,2:2,3:3,4:4,5:5,6:6}[dow];
-  var dayNames={1:'周一',2:'周二',3:'周三',4:'周四',5:'周五',6:'周六',7:'周日'};
-  var woLabel={1:'🏃 跑步日',2:'🏋️ 力量日',3:'🏃 跑步日',4:'🏋️ 力量日',5:'🏃 跑步日',6:'🧘 恢复日',7:'🏃 跑步日'};
-  var mealLabel={1:'🍽 方案 A（跑步日）',2:'🍽 方案 B（力量日）',3:'🍽 方案 A（跑步日）',4:'🍽 方案 B（力量日）',5:'🍽 方案 A（跑步日）',6:'🍽 方案 C 周六换口味',7:'🍽 方案 A（跑步日）'};
-  document.getElementById('omadTip').textContent='📌 今天 '+dayNames[dayNum]+' — '+woLabel[dayNum];
-  document.getElementById('omadMealTip').textContent='今天推荐 '+mealLabel[dayNum];
-  document.querySelectorAll('#tab-omad .card[data-days],#tab-omad .meal-card[data-days]').forEach(function(el){
-    var days=el.getAttribute('data-days').split(',');
-    if(days.indexOf(String(dayNum))!==-1) el.classList.add('highlight');
-  });
-})();
-
-// Render chart on page load
-document.addEventListener('DOMContentLoaded', renderChart);
+  }
+});
 </script>
 </body>
 </html>
