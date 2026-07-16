@@ -304,3 +304,47 @@
 | JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
 | JT-SEC-011 | daily-tracker.html Chart.js CDN 无 SRI integrity | MED | P2 | Open |
+
+---
+
+## 2026-07-16 — Re-audit (1 new finding, score drops to B)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 + 新 commits (8b7e3d8..12d8409) — index.html revert + daily-tracker 重构 + plan-omad-v1.0.html 新增
+- **Commits**: 8b7e3d8 → 12d8409
+- **Verdict**: CONDITIONAL PASS
+- **Score**: 80 / 100 (Rating: B)
+
+### Summary
+
+复审发现 1 个新增 🟡（documents/plan-omad-v1.0.html 缺少 referrer policy），4 个既往开放项仍未修复。index.html 通过 revert 恢复到已审查版本，无新增风险。daily-tracker.html 大幅重构（+504/-140 行），Chart.js CDN 仍无 SRI（JT-SEC-011）。全部先前修复 (JT-SEC-001~007) 验证无回归。评分首次降至 B 级（80 分），触发 CONDITIONAL PASS。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| 1 | 🟡 | plan-omad-v1.0.html 缺少 referrer policy | `documents/plan-omad-v1.0.html:3` | **New** |
+| 2 | 🟡 | wechat.html 缺少 referrer policy | `wechat.html:10` | Open |
+| 3 | 🟡 | daily-tracker.html 缺少 referrer policy | `daily-tracker.html:3` | Open |
+| 4 | 🟡 | daily-tracker.html Chart.js CDN 无 SRI integrity | `daily-tracker.html:8` | Open |
+| 5 | 🟢 | timestamp-manager.py docstring 硬编码本地路径 | `scripts/timestamp-manager.py:33` | Open |
+
+### Positives
+
+- 零回归 — JT-SEC-001~007 全部验证通过
+- 零新发现 — 无新增安全敏感变更
+- Credential scan Pass 1-2 零命中
+- 零 shell 注入、零 XSS 入口
+- html2canvas CDN SRI integrity 保持配置
+- index.html referrer policy 已正确配置
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-008 | wechat.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | P2 | Open |
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
+| JT-SEC-011 | daily-tracker.html Chart.js CDN 无 SRI integrity | MED | P2 | Open |
+| JT-SEC-012 | plan-omad-v1.0.html 缺少 referrer policy | MED | P2 | New |
