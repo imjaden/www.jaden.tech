@@ -387,3 +387,46 @@
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | Open |
 | JT-SEC-011 | daily-tracker.html Chart.js CDN 无 SRI integrity | MED | Verified |
 | JT-SEC-012 | plan-omad-v1.0.html 缺少 referrer policy | MED | Verified |
+
+---
+
+## 2026-07-16 — Re-audit (2 REGRESSIONS, FAIL)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 新 commit 163f12e (daily-tracker portal sync)
+- **Commit**: 163f12e
+- **Verdict**: FAIL
+- **Score**: 70 / 100 (Rating: C)
+
+### Summary
+
+🔴 **REGRESSION ×2** — commit 163f12e（"sync: portal 07-16 habits fix"）覆盖了 daily-tracker.html，删除了刚修复的两项：
+1. `<meta name="referrer">` 标签被移除（JT-SEC-009）
+2. Chart.js CDN 的 `integrity` + `crossorigin` 属性被移除（JT-SEC-011）
+
+根因：数据同步工具用旧版 daily-tracker.html 覆盖了安全修复版本。wechat.html、index.html、plan-omad-v1.0.html 的修复完好。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| 1 | 🔴 | REGRESSION: daily-tracker.html referrer policy 被同步覆盖移除 | `daily-tracker.html:3` | Open |
+| 2 | 🔴 | REGRESSION: daily-tracker.html Chart.js SRI integrity 被同步覆盖移除 | `daily-tracker.html:8` | Open |
+| 3 | 🟢 | timestamp-manager.py docstring 硬编码本地路径 | `scripts/timestamp-manager.py:33` | Open |
+
+### Positives
+
+- wechat.html referrer + SRI 完好 ✅
+- index.html referrer 完好 ✅
+- plan-omad-v1.0.html referrer 完好 ✅
+- Credential scan 零命中
+- 零 shell 注入、零 XSS
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-009 | REGRESSION: daily-tracker.html referrer 被覆盖 | HIGH | P0 | Open |
+| JT-SEC-011 | REGRESSION: daily-tracker.html Chart.js SRI 被覆盖 | HIGH | P0 | Open |
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |

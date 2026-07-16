@@ -63,3 +63,11 @@ review_history:
     findings_total: 0
     findings_open: 1
     tracking: JT-SEC-010 (🟢 LOW, 仅记录)
+  - date: 2026-07-16
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: FAIL
+    score: 70
+    findings_total: 2
+    findings_open: 3
+    tracking: JT-SEC-009, JT-SEC-011 (REGRESSION), JT-SEC-010
