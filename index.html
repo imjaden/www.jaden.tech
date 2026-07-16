@@ -1,184 +1,63 @@
 <!DOCTYPE html>
+<!--!
+     _   _    ____  _____ _   _ _____ _____ ____ _   _
+    | | / \  |  _ \| ____| \ | |_   _| ____/ ___| | | |
+ _  | |/ _ \ | | | |  _| |  \| | | | |  _|| |   | |_| |
+|| |_| / ___ \| |_| | |___| |\  |_| | |__| |___|  _  |
+ \___/_/   \_\____/|_____|_| \_(_)_| |_____\_____|_| |_|
+-->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DailyTracker 07-15</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;padding:32px;max-width:1060px;margin:0 auto}
-a{color:#58a6ff;text-decoration:none}
-a:hover{text-decoration:underline}
-.header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px}
-h1{font-size:22px;font-weight:600}
-.date{color:#8b949e;font-size:13px}
-h2{font-size:15px;font-weight:600;margin:18px 0 10px;padding-bottom:5px;border-bottom:1px solid #30363d;color:#7ee787;display:flex;justify-content:space-between;align-items:center}
-table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:13px}
-th{text-align:left;padding:6px 8px;background:#161b22;color:#8b949e;font-weight:500;border-bottom:1px solid #30363d}
-td{padding:6px 8px;border-bottom:1px solid #21262d}
-tr:hover td{background:#161b22}
-.num{text-align:right}
-.center{text-align:center}
-.check{color:#7ee787}
-.cross{color:#f85149}
-.empty{color:#484f58}
-.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:6px}
-.card{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px}
-.card h3{font-size:13px;color:#8b949e;margin-bottom:6px}
-.card .value{font-size:24px;font-weight:700}
-.card .value.green{color:#7ee787}
-.card .value.yellow{color:#d29922}
-.card .value.red{color:#f85149}
-.card .unit{font-size:13px;color:#8b949e;font-weight:400}
-.card .sub{font-size:12px;color:#8b949e;margin-top:3px}
-.card .bar-wrap{background:#21262d;border-radius:4px;height:6px;margin-top:8px;overflow:hidden}
-.card .bar-fill{height:100%;border-radius:4px}
-.bar-green{background:#7ee787}
-.bar-yellow{background:#d29922}
-.chart-wrap{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px;margin-bottom:6px}
-.chart-wrap h3{font-size:13px;color:#8b949e;margin-bottom:8px}
-.chart-wrap canvas{width:100%!important;max-height:280px}
-.badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:500;margin-left:4px}
-.badge-green{background:#1b3827;color:#7ee787}
-.badge-yellow{background:#3d2e00;color:#d29922}
-.badge-red{background:#3d1114;color:#f85149}
-.job-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:500}
-.job-badge.ok{background:#1b3827;color:#7ee787}
-.job-badge.error{background:#3d1114;color:#f85149}
-.job-badge.pending{background:#3d2e00;color:#d29922}
-.cron-list{font-size:12px}
-.cron-item{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
-.cron-item+.cron-item{border-top:1px solid #21262d;padding-top:5px;margin-top:3px}
-.cron-name{font-weight:500;color:#e6edf3}
-.cron-time{color:#8b949e;font-size:11px}
-.github-corner{position:fixed;top:0;right:0;z-index:100;width:72px;height:72px}
-.github-corner svg{fill:#fff;color:#FFF;position:absolute;top:0;border:0;right:0}
-.github-corner:hover svg{filter:drop-shadow(0 0 8px rgba(96,165,250,0.5))}
-.github-corner .octo-arm{transform-origin:130px 106px}
-.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}
-@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}
-.toggle{cursor:pointer;font-size:13px;color:#8b949e;user-select:none;padding:2px 6px;border-radius:4px}
-.toggle:hover{background:#21262d;color:#e6edf3}
-.collapse{display:none}
-footer{margin-top:24px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#484f58}
-</style>
+<title>Jaden Li — Solutions Architect · AI in Production</title>
+<meta name="renderer" content="webkit">
+<meta name="format-detection" content="telephone=no">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<link rel="shortcut icon" href="static/img/favicon.png?t=1782129264">
+<meta name="keywords" content="Jaden Li, 李俊杰, Solutions Architect, AIOps, Enterprise AI, Hermes Agent, Shanghai">
+<meta name="description" content="Jaden Li (李俊杰), Solutions Architect. 14yrs: 8 Dev + 6 Presales. Enterprise AIOps delivery for China Telecom, China Mobile, UnionPay.">
+<meta property="og:title" content="Jaden Li">
+<meta property="og:description" content="Solutions Architect · 14yrs Dev + Presales · Enterprise AI in Production">
+<meta property="og:image" content="https://www.jaden.tech/static/img/favicon.png">
+<meta property="og:url" content="https://www.jaden.tech">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="static/css/index.css?t=1782129264"/>
 </head>
 <body>
-
-<a href="https://github.com/imjaden" class="github-corner" target="_blank" rel="noopener" aria-label="View source on Github">
-  <svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true">
-    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" fill="rgba(0,0,0,0.41)"></path>
-    <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
-    <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
-  </svg>
-</a>
-
-<div class="header">
-  <h1>🏋️ DailyTracker</h1>
-  <p class="date">2026-07-03 → 07-28 · 13 days to deadline</p>
+  <img id="background" src="static/img/bear01.jpg?t=1782129264" alt="Polar bear background"/>
+  <a href="https://github.com/imjaden" class="github-corner" target="_blank" rel="noopener" aria-label="View source on Github">
+      <svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" fill="rgba(0,0,0,0.41)"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+      </svg>
+  </a>
+<section id="main">
+  <div class="container">
+    <a href="javascript:void(0);" id="logo-link">
+        <img id="logo" type="image/svg+xml" src="static/img/favicon.svg?t=1782129264" alt="Jaden Li"/>
+    </a>
+    <div class="icon-links">
+      <a href="https://intfocus.archived.jaden.tech/" target="_blank" title="Intfocus">
+        <img src="static/img/icons/intfocus.png?t=1782129264" alt="Intfocus"/>
+      </a>
+      <a href="https://cloudwise.archived.jaden.tech" target="_blank" title="Cloudwise">
+        <img src="static/img/icons/cloudwise.png?t=1782129264" alt="Cloudwise"/>
+      </a>
+    </div>
+  </div> 
+<div class="wrap">
+<a href="javascript:void(0)">好奇地看着相机的北极熊</a><a href="./daily-tracker.html" target="_blank">🐻‍❄️</a>
 </div>
-
-<h2>🎯 Overview</h2>
-<div class="goal-grid">
-  <div class="card">
-    <h3>⚖️ Weight</h3>
-    <div class="value green">69.4 <span class="unit">kg</span></div>
-    <div class="sub">Target: 65.0 · Lost: 1.7 kg (28%)</div>
-    <div class="bar-wrap"><div class="bar-fill bar-green" style="width:28%"></div></div>
-    <div class="sub">↓ Need 4.4 kg · 07-28 deadline (12d)</div>
-  </div>
-  <div class="card">
-    <h3>🏃 Exercise</h3>
-    <div class="value green">14/14 <span class="unit">days</span></div>
-    <div class="sub">100% attendance · Running 5-10km / Indoor</div>
-    <div class="sub">Pace trend: 7:30 → 7:00 /km</div>
-    <div class="sub"><a href="https://www.jaden.tech/documents/plan-omad-v1.0.html" style="color:#58a6ff;text-decoration:underline">📋 完整饮食运动计划 →</a></div>
-  </div>
-  <div class="card">
-    <h3>🔥 Habits</h3>
-    <div class="value green">14 <span class="unit">days</span></div>
-    <div class="sub">🌳 AntForest 14 · 📖 English 14</div>
-    <div class="sub">🎓 UniCourse 12</div>
-  </div>
-  <div class="card">
-    <h3>🤖 Cron Status</h3>
-    <div class="cron-list">
-      <div class="cron-item"><span><span class="cron-name">🌅 10:00</span> <span class="cron-time">07-15 10:06</span></span> <span class="job-badge ok">✅ ok</span></div>
-      <div class="cron-item"><span><span class="cron-name">🌙 23:00</span> <span class="cron-time">07-15 23:00</span></span> <span class="job-badge ok">✅ ok</span></div>
-      <div class="cron-item"><span><span class="cron-name">🔒 23:30 Review</span> <span class="cron-time">07-15 23:34</span></span> <span class="job-badge ok">✅ ok</span></div>
+</section> 
+<div class="footer"> 
+  <div class="wrap">
+    <div class="ft-copy">
+        <p><a href="https://beian.miit.gov.cn">备案号：沪ICP备20021619号-1</a></p>
     </div>
   </div>
 </div>
-
-<h2>📉 Weight Chart</h2>
-<div class="chart-wrap">
-  <h3>Actual vs Target — 07-03 → 07-28 (target 65.0 kg, deadline ║)</h3>
-  <canvas id="weightChart"></canvas>
-</div>
-
-<h2>📋 Daily Records <span class="badge badge-green">🔥 14d streak</span> <span class="toggle" onclick="tbl=document.getElementById('recordsTbl');tbl.classList.toggle('collapse');this.textContent=tbl.classList.contains('collapse')?'▶ expand':'▼ collapse'">▶ expand</span></h2>
-<table id="recordsTbl" class="collapse">
-  <thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead>
-  <tbody>
-    <tr><td>07-16</td><td class="num">69.4</td><td>室内力量</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-    <tr><td>07-15</td><td class="num">69.5</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-14</td><td class="num">69.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-13</td><td class="num">70.2</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-12</td><td class="num">69.7</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-11</td><td class="num">69.9</td><td>跑步10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-10</td><td class="num">70.0</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-09</td><td class="num">70.3</td><td>跑步7.41km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-08</td><td class="num">69.7</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-07</td><td class="num">70.0</td><td>跑步3.5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-06</td><td class="num">70.3</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-05</td><td class="num">70.4</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-04</td><td class="num">70.8</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-    <tr><td>07-03</td><td class="num">71.1</td><td>跑步6k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center cross">❌</td></tr>
-  </tbody>
-</table>
-
-<footer>IRIS (byHermes) · Snapshot · 2026-07-15 · daily-tracker</footer>
-
-<script>
-const weightData = [
-  {d:'07-03',w:71.1},{d:'07-04',w:70.8},{d:'07-05',w:70.4},{d:'07-06',w:70.3},
-  {d:'07-07',w:70.0},{d:'07-08',w:69.7},{d:'07-09',w:70.3},{d:'07-10',w:70.0},
-  {d:'07-11',w:69.9},{d:'07-12',w:69.7},{d:'07-13',w:70.2},{d:'07-14',w:69.6},{d:'07-15',w:69.5},{d:'07-16',w:69.4}
-];
-const labels=Array.from({length:26},(_,i)=>'07-'+String(i+3).padStart(2,'0'));
-const actual=labels.map(l=>{const f=weightData.find(d=>d.d===l);return f?f.w:null});
-const predicted=labels.map((_,i)=>+(71.1-0.133*i).toFixed(1));
-const target=Array(26).fill(65);
-new Chart(document.getElementById('weightChart'),{
-  type:'line',
-  data:{
-    labels,
-    datasets:[
-      {label:'Actual',data:actual,borderColor:'#7ee787',backgroundColor:'rgba(126,231,135,0.1)',pointBackgroundColor:'#7ee787',pointBorderColor:'#0d1117',pointBorderWidth:2,pointRadius:actual.map(v=>v?4:0),spanGaps:false,tension:.3,fill:true},
-      {label:'Trend',data:predicted,borderColor:'#8b949e',borderDash:[6,3],pointRadius:0,borderWidth:2,tension:0},
-      {label:'Target 65.0',data:target,borderColor:'#f85149',borderDash:[4,4],pointRadius:0,borderWidth:1.5}
-    ]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:false,
-    plugins:{
-      legend:{labels:{color:'#8b949e',font:{size:11},boxWidth:12,padding:8},position:'bottom'},
-      tooltip:{backgroundColor:'#161b22',titleColor:'#e6edf3',bodyColor:'#8b949e',borderColor:'#30363d',borderWidth:1,
-        callbacks:{label:function(ctx){
-          if(ctx.dataset.label==='Actual'&&ctx.parsed.y!==null)return ctx.parsed.y+' kg';
-          if(ctx.dataset.label==='Trend')return '~'+ctx.parsed.y.toFixed(1)+' kg (pred)';
-          return ctx.parsed.y+' kg '+ctx.dataset.label;
-        }}
-      }
-    },
-    scales:{
-      x:{grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},maxTicksLimit:12}},
-      y:{min:65,max:72,grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},stepSize:0.5}}
-    }
-  }
-});
-</script>
+<script type="text/javascript" src="static/js/index.js?t=1782129264"></script>
 </body>
 </html>
