@@ -348,3 +348,42 @@
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
 | JT-SEC-011 | daily-tracker.html Chart.js CDN 无 SRI integrity | MED | P2 | Open |
 | JT-SEC-012 | plan-omad-v1.0.html 缺少 referrer policy | MED | P2 | New |
+
+---
+
+## 2026-07-16 — Re-review (all 4 🟡 fixed, back to 100)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 验证 JT-SEC-008~012 修复状态
+- **Verdict**: PASS
+- **Score**: 100 / 100 (Rating: A)
+
+### Summary
+
+4 个 🟡 全部修复验证通过。仅剩 JT-SEC-010（🟢 LOW，不计分）。Credential scan 零命中，shell 注入零命中，XSS 零命中。回归检查通过。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| — | — | 无新增发现 | — | — |
+
+### Fix Verification
+
+| Issue | Verify |
+|:------|:------:|
+| JT-SEC-008 wechat.html referrer | ✅ `<meta name="referrer" content="strict-origin-when-cross-origin">` |
+| JT-SEC-009 daily-tracker.html referrer | ✅ 同上 |
+| JT-SEC-011 Chart.js CDN SRI | ✅ integrity + crossorigin |
+| JT-SEC-012 plan-omad-v1.0.html referrer | ✅ 同上 |
+
+### Tracking
+
+| Issue | Title | Severity | Status |
+|:------|:------|:--------:|:------:|
+| JT-SEC-008 | wechat.html 缺少 referrer policy | MED | Verified |
+| JT-SEC-009 | daily-tracker.html 缺少 referrer policy | MED | Verified |
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | Open |
+| JT-SEC-011 | daily-tracker.html Chart.js CDN 无 SRI integrity | MED | Verified |
+| JT-SEC-012 | plan-omad-v1.0.html 缺少 referrer policy | MED | Verified |
