@@ -430,3 +430,32 @@
 | JT-SEC-009 | REGRESSION: daily-tracker.html referrer 被覆盖 | HIGH | P0 | Open |
 | JT-SEC-011 | REGRESSION: daily-tracker.html Chart.js SRI 被覆盖 | HIGH | P0 | Open |
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
+
+---
+
+## 2026-07-16 — Re-review (regressions fixed, back to 100)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 验证 JT-SEC-009/011 回归修复
+- **Verdict**: PASS
+- **Score**: 100 / 100 (Rating: A)
+
+### Summary
+
+JT-SEC-009 (referrer) 和 JT-SEC-011 (Chart.js SRI) 回归修复验证通过。仅剩 JT-SEC-010 (🟢 LOW)。全扫描零命中。
+
+### Fix Verification
+
+| Issue | Verify |
+|:------|:------:|
+| JT-SEC-009 referrer | ✅ `<meta name="referrer" content="strict-origin-when-cross-origin">` |
+| JT-SEC-011 Chart.js SRI | ✅ integrity + crossorigin |
+
+### Tracking
+
+| Issue | Title | Severity | Status |
+|:------|:------|:--------:|:------:|
+| JT-SEC-009 | REGRESSION: daily-tracker.html referrer 被覆盖 | HIGH | Verified |
+| JT-SEC-011 | REGRESSION: daily-tracker.html Chart.js SRI 被覆盖 | HIGH | Verified |
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | Open |
