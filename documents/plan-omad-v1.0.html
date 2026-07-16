@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>减重冲刺计划 — OMAD + 居家健身 v1.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;padding:24px;max-width:860px;margin:0 auto;line-height:1.7}
+h1{font-size:24px;font-weight:700;margin-bottom:4px;color:#f0f6fc}
+.sub{color:#8b949e;font-size:13px;margin-bottom:20px}
+h2{font-size:16px;font-weight:600;margin:24px 0 12px;padding-bottom:5px;border-bottom:1px solid #30363d;color:#7ee787;display:flex;align-items:center;gap:8px}
+h2 .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px}
+.badge-green{background:#1b3827;color:#7ee787}
+.badge-yellow{background:#3d2e00;color:#d29922}
+.badge-red{background:#3d1114;color:#f85149}
+h3{font-size:14px;font-weight:600;margin:16px 0 8px;color:#e6edf3}
+p,li{font-size:13px;color:#c9d1d9;margin-bottom:6px}
+.schedule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:10px 0 18px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px}
+.card.run{border-left:3px solid #58a6ff}
+.card.strength{border-left:3px solid #d29922}
+.card.rest{border-left:3px solid #8b949e}
+.card h4{font-size:13px;font-weight:600;margin-bottom:8px;color:#f0f6fc}
+.card .day{font-size:11px;color:#8b949e;margin-bottom:4px}
+.card ul{list-style:none;padding:0}
+.card li{padding:2px 0;font-size:12px;color:#c9d1d9;position:relative;padding-left:14px}
+.card li::before{content:"·";position:absolute;left:2px;color:#58a6ff}
+.meal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin:10px 0 18px}
+.meal-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px}
+.meal-card.run{border-left:3px solid #58a6ff}
+.meal-card.rest{border-left:3px solid #7ee787}
+.meal-card h4{font-size:13px;font-weight:600;margin-bottom:8px;color:#f0f6fc}
+.meal-card .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;margin-left:6px}
+.tag-blue{background:#0c2d6b;color:#58a6ff}
+.tag-green{background:#1b3827;color:#7ee787}
+.meal-card .kcal{font-size:11px;color:#8b949e;margin:4px 0 6px}
+.meal-card ul{list-style:none;padding:0}
+.meal-card li{padding:2px 0;font-size:12px;color:#c9d1d9;padding-left:14px;position:relative}
+.meal-card li::before{content:"·";position:absolute;left:2px;color:#7ee787}
+.danger-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+.danger-table th{padding:6px 8px;background:#161b22;color:#8b949e;font-weight:500;border-bottom:1px solid #30363d;text-align:left}
+.danger-table td{padding:6px 8px;border-bottom:1px solid #21262d;color:#c9d1d9}
+.danger-table tr:hover td{background:#161b22}
+.eq-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin:8px 0}
+.eq-card h4{font-size:13px;font-weight:600;margin-bottom:6px;color:#e6edf3}
+.eq-card .moves{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#8b949e}
+.eq-card .moves div{padding:4px 8px;background:#0d1117;border-radius:4px}
+.tip-box{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin:8px 0}
+.tip-box li{font-size:12px;color:#c9d1d9;padding:2px 0}
+.footer{margin-top:30px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#484f58}
+</style>
+</head>
+<body>
+
+<h1>🏋️ 减重冲刺计划 v1.0</h1>
+<p class="sub">OMAD + 居家健身 · 69.4 kg → 65.0 kg by 07-28 · 剩余 12 天</p>
+
+<!-- ═══════ 第一部分：核心日程 — 饮食 + 运动 ═══════ -->
+
+<h2>🏃 周运动日程 <span class="badge badge-green">跑1休1</span></h2>
+<p style="font-size:12px;color:#8b949e;margin-top:-6px">昨天跑了 → 今天室内力量</p>
+
+<div class="schedule-grid">
+  <div class="card run">
+    <div class="day">周一 · 三 · 五</div>
+    <h4>🏃 跑步日（空腹）</h4>
+    <ul>
+      <li>晚上 5-7km，配速 7:00-7:30</li>
+      <li>最后 1km 变速冲刺</li>
+      <li>跑后冷茉莉茶 / 淡盐水</li>
+    </ul>
+  </div>
+  <div class="card strength">
+    <div class="day">周二 · 四 · 六</div>
+    <h4>🏋️ 力量日（居家）</h4>
+    <ul>
+      <li>壶铃摇摆 4×15</li>
+      <li>壶铃深蹲 3×15</li>
+      <li>俯卧撑 4×12（支架）</li>
+      <li>单臂划船 3×12/侧</li>
+      <li>卷腹 3×15</li>
+      <li>握力器 3×15（间隙做）</li>
+    </ul>
+  </div>
+  <div class="card rest">
+    <div class="day">周日</div>
+    <h4>🧘 主动恢复</h4>
+    <ul>
+      <li>散步 30min</li>
+      <li>拉伸 10min</li>
+      <li>握力器随意</li>
+    </ul>
+  </div>
+</div>
+
+<h2 style="margin-top:20px">🍽 OMAD 正餐方案</h2>
+<p style="font-size:12px;color:#8b949e;margin-top:-6px">目标 1200-1400 kcal · 高蛋白 · 在家食材</p>
+
+<div class="meal-grid">
+  <div class="meal-card run">
+    <h4>方案 A · 跑步日 <span class="tag tag-blue">需能量</span></h4>
+    <div class="kcal">≈ 650 kcal + 食用油 → 约 800-900</div>
+    <ul>
+      <li>酱牛肉 100g（30g蛋白）</li>
+      <li>去皮鸡腿 1只（25g蛋白）</li>
+      <li>煮红薯 1个（中）— 慢碳</li>
+      <li>黄瓜 1根 + 生菜不限</li>
+      <li>生抽+醋+蒜调味</li>
+    </ul>
+  </div>
+  <div class="meal-card rest">
+    <h4>方案 B · 非跑步日 <span class="tag tag-green">轻食</span></h4>
+    <div class="kcal">≈ 550 kcal + 食用油 → 约 650-750</div>
+    <ul>
+      <li>煮鸡蛋 3个（21g蛋白）</li>
+      <li>火龙果 1个 — 纤维+甜味</li>
+      <li>黄瓜 1根 + 胡萝卜 1根</li>
+      <li>生菜不限 — 油醋汁</li>
+    </ul>
+  </div>
+  <div class="meal-card rest">
+    <h4>方案 C · 换口味 <span class="tag tag-green">灵活</span></h4>
+    <div class="kcal">≈ 600 kcal + 食用油 → 约 750-850</div>
+    <ul>
+      <li>酱牛肉 + 煮鸡蛋 2个</li>
+      <li>火龙果半个</li>
+      <li>黄瓜生菜沙拉</li>
+      <li>或：去骨鸡腿肉撕碎拌生菜</li>
+    </ul>
+  </div>
+</div>
+
+<h2>⚠️ 饮食红线</h2>
+<table class="danger-table">
+  <thead><tr><th>食材</th><th>风险</th><th>建议</th></tr></thead>
+  <tbody>
+    <tr><td>濮阳壮馍</td><td>面粉+油，1/4张≈350 kcal</td><td>一周最多1次，替代红薯</td></tr>
+    <tr><td>芝麻酱米线</td><td>芝麻酱=纯脂肪，一碗≈600 kcal</td><td>芝麻酱减半，醋蒜调味</td></tr>
+    <tr><td>蟹黄干脆面</td><td>油炸碳水，1包≈400 kcal</td><td>建议不吃，或当放纵餐</td></tr>
+    <tr><td>五香花生米</td><td>100g≈550 kcal，脂肪炸弹</td><td>OMAD 期间不吃</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════ 第二部分：说明 & 参考 ═══════ -->
+
+<h2 style="margin-top:28px">🏋️ 器材使用指南</h2>
+
+<div class="eq-card">
+  <h4>6kg 壶铃 — 4个动作搞定全身</h4>
+  <div class="moves">
+    <div>🍑 壶铃摇摆 → 臀+腿+心肺</div>
+    <div>🦵 壶铃深蹲 → 股四+臀</div>
+    <div>💪 单臂划船 → 背+二头</div>
+    <div>☝️ 单臂推举 → 肩</div>
+  </div>
+</div>
+
+<div class="eq-card">
+  <h4>俯卧撑架 — 胸+三头+肩</h4>
+  <div class="moves">
+    <div>标准架 → 胸大肌</div>
+    <div>窄距架 → 三头</div>
+    <div>宽距架 → 胸外侧</div>
+    <div>脚抬高 → 上胸</div>
+  </div>
+</div>
+
+<div class="eq-card">
+  <h4>握力器 — 随时随地</h4>
+  <div class="moves">
+    <div>办公/看视频时做</div>
+    <div>3组×15次 / 侧</div>
+    <div>提升前臂+减压</div>
+  </div>
+</div>
+
+<h2>📊 历史参考</h2>
+<div class="tip-box">
+  <ul>
+    <li><strong>起始</strong> 71.1 kg (07-03) → <strong>当前</strong> 69.4 kg (07-16)</li>
+    <li><strong>已减</strong> 1.7 kg / 28%</li>
+    <li><strong>速率</strong> 0.131 kg/天 — 目标需 0.367 kg/天</li>
+    <li><strong>两轮反弹</strong> 69.7 后反弹 0.5-0.6 — 已突破</li>
+    <li><strong>当前线性外推</strong> 07-28 约 67.7 kg</li>
+    <li><strong>合理目标</strong> 67.0-67.5 kg / <strong>冲刺</strong> 65.0 kg（需最后断食）</li>
+  </ul>
+</div>
+
+<h2>💡 关键提醒</h2>
+<div class="tip-box">
+  <ul>
+    <li><strong>进食窗口</strong>：跑步日 15:00-23:00 / 非跑步日 12:00-20:00</li>
+    <li><strong>跑后不进食</strong>：只喝冷茉莉茶/淡盐水/白水</li>
+    <li><strong>花生米是隐形陷阱</strong>：100g=550 kcal，一顿 OMAD 的热量</li>
+    <li><strong>红薯是好碳水</strong>：跑前 3h 吃，给肌肉充糖原</li>
+    <li><strong>饮水 ≥ 2L/天</strong>，尤其跑后补充 500ml+</li>
+    <li><strong>四样高热量只选一样吃</strong>：壮馍/米线/干脆面/花生米不同时出现</li>
+  </ul>
+</div>
+
+<div class="footer">
+  Generated: 2026-07-16 · DailyTracker · jaden.tech
+</div>
+
+</body>
+</html>
