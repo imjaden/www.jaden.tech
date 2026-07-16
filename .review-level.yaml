@@ -23,46 +23,6 @@ review_history:
     score: 100
     findings_total: 0
     findings_open: 0
-  - date: 2026-07-11
-    reviewer: Security Reviewer
-    review_level: L2
-    verdict: PASS
-    score: 95
-    findings_total: 2
-    findings_open: 2
-    tracking: JT-SEC-008 ~ JT-SEC-010
-  - date: 2026-07-13
-    reviewer: Security Reviewer
-    review_level: L2
-    verdict: PASS
-    score: 90
-    findings_total: 2
-    findings_open: 2
-    tracking: JT-SEC-008 ~ JT-SEC-009
-  - date: 2026-07-15
-    reviewer: Security Reviewer
-    review_level: L2
-    verdict: PASS
-    score: 85
-    findings_total: 3
-    findings_open: 4
-    tracking: JT-SEC-008 ~ JT-SEC-011
-  - date: 2026-07-16
-    reviewer: Security Reviewer
-    review_level: L2
-    verdict: CONDITIONAL PASS
-    score: 80
-    findings_total: 4
-    findings_open: 5
-    tracking: JT-SEC-008 ~ JT-SEC-012
-  - date: 2026-07-16
-    reviewer: Security Reviewer
-    review_level: L2
-    verdict: PASS
-    score: 100
-    findings_total: 0
-    findings_open: 1
-    tracking: JT-SEC-010 (🟢 LOW, 仅记录)
   - date: 2026-07-16
     reviewer: Security Reviewer
     review_level: L2
@@ -71,3 +31,11 @@ review_history:
     findings_total: 2
     findings_open: 3
     tracking: JT-SEC-009, JT-SEC-011 (REGRESSION), JT-SEC-010
+  - date: 2026-07-16
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: PASS
+    score: 100
+    findings_total: 0
+    findings_open: 1
+    tracking: JT-SEC-010 (🟢 LOW, 仅记录)
