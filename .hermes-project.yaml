@@ -1,0 +1,16 @@
+project: jaden-tech
+website: https://www.jaden.tech
+profiles:
+- name: dev
+- name: ops
+- name: review
+sessions:
+- role: ops
+  profile: ops
+  title: jaden-tech-ops
+- role: review
+  profile: review
+  title: jaden-tech-review
+- role: dev
+  profile: dev
+  title: jaden-tech-dev
