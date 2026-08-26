@@ -11,7 +11,7 @@ quality:
   cross_profile: 0.85
 ---
 
-# {Project Name} — review-log
+# jaden-tech — review-log
 
 > 产出文档的元信息必须遵循 `skills-governance/document-frontmatter.md` 规范。
 
@@ -25,37 +25,23 @@ quality:
 
 - **reviewer**: {role}/{session-title}（如 ops/hermes-manager-ops）
 
-## {YYYY-MM-DD} — {review标题}
+## 2026-08-26 — Pilot: features.md + review-log.md + .hermes-project.yaml 治理评审
 
-- **review者**: {profile}/{session} ({agent version})
-- **范围**: {review范围描述}
-- **Tracking**: {PROJECT-CODE-SEC-NNN ~ SEC-MMM}（可选，对应详细报告中的发现编号）
-- **状态**: ✅ PASS / ⏳ AWAITING REVIEW / ❌ FAIL
-- **报告**: {path to full audit report}
-- **实现 prompt**: ✅ 已生成 / ⬜ 无需生成
+- **review者**: review/jaden-tech-review (hermes-0.19.1)
+- **范围**: 2 commit 治理合规评审 — `05d8814` chore@project: register handoff config (dev doc) + `7bc73e9` docs@project: pilot features.md + review-log.md from skill-templates
+- **Tracking**: 无（doc-pilot，无 SEC 发现）
+- **状态**: ✅ PASS
+- **报告**: 无（trivial green batch，跳正式报告）
+- **实现 prompt**: ⬜ 无需生成
 
 ### 发现摘要
 
-{简要列出关键发现项或分数变化}
+5/5 检查项通过，治理等级 A：
 
-（可选: 详细表格）
-
-#### 发现摘要格式示例
-
-**安全审计型:**
-```
-| # | Severity | Title | Status |
-|---|----------|-------|--------|
-| HM-SEC-001 | 🔴 | Hardcoded credential in config.py | Fixed |
-| HM-SEC-002 | 🟡 | Missing input validation on --port | Open |
-```
-
-**质量校准型:**
-```
-| Skill | Before | After (C/D/M/X) | Grade |
-|-------|--------|-------------------|-------|
-| spec-review | 0.42 | 0.85 (0.85/0.90/0.75/0.85) | 优秀 |
-```
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | commit 格式 / frontmatter / 模板完整性 / .hermes-project.yaml / 无并行污染 | PASS |
+| — | 🟡 | cache/ 未 gitignore，建议后续加 `cache/` 防 `git add -A` 误扫 | Open（建议项） |
 
 ---
 
