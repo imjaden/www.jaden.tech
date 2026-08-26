@@ -41,7 +41,29 @@ quality:
 | # | Level | Title | Status |
 |---|-------|-------|--------|
 | — | 🟢 | commit 格式 / frontmatter / 模板完整性 / .hermes-project.yaml / 无并行污染 | PASS |
-| — | 🟡 | cache/ 未 gitignore，建议后续加 `cache/` 防 `git add -A` 误扫 | Open（建议项） |
+| — | 🟡 | cache/ 未 gitignore，建议后续加 `cache/` 防 `git add -A` 误扫 | ✅ RESOLVED (fa60a0d) |
+
+---
+
+## 2026-08-26 — Tail-item 复核: cache/ gitignore 补丁
+
+- **review者**: review/jaden-tech-review (hermes-0.19.1)
+- **范围**: 1 commit 尾项复核 — `fa60a0d` chore@config: gitignore cache/ (review RIG finding)
+- **Tracking**: 无（config-patch，无 SEC 发现）
+- **状态**: ✅ PASS
+- **报告**: 无（trivial green batch，跳正式报告）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+4/4 检查项通过，上一轮 🟡 建议项已关闭：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| 1 | 🟢 | commit 格式 `chore@config` + 英文 + 无敏感信息 | PASS |
+| 2 | 🟢 | .gitignore 追加 `cache/`，既有条目 (certs/ __pycache__/ *.pyc) 未受影响 | PASS |
+| 3 | 🟢 | `git status --short` 干净，`git ls-files cache/` = 0，`check-ignore` 命中 | PASS |
+| 4 | 🟢 | 范围仅 .gitignore 1 文件 1 行，无混入 | PASS |
 
 ---
 
