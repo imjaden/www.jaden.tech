@@ -496,3 +496,41 @@ JT-SEC-009 (referrer) 和 JT-SEC-011 (Chart.js SRI) 回归修复验证通过。�
 | Issue | Title | Severity | Priority | Status |
 |:------|:------|:--------:|:--------:|:------:|
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open |
+
+---
+
+## 2026-08-28 — Re-audit (14 commits: 9 data + 5 docs/config, no regressions)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 + 新 commits (535ca03..c94115c) — 9 个 data@update + 5 个 docs/chore（新增 .hermes-project.yaml / features.md / review-log.md，.gitignore 追加 cache/）
+- **Commits**: 535ca03 → c94115c
+- **Verdict**: PASS
+- **Score**: 100 / 100 (Rating: A)
+
+### Summary
+
+自 08-19 上次审查以来共 14 个 commit：9 个 `data@update: daily-tracker`（纯习惯数据，每 commit 约 +8/-7 行体重/运动/打勾记录）+ 5 个 docs/chore（新增治理文件 .hermes-project.yaml、features.md、review-log.md，及 .gitignore 追加 `cache/`）。重点回归检查通过：数据同步管道此前两次覆盖安全修复（JT-SEC-009/011），本次验证 08-20~08-28 共 9 次同步后 daily-tracker.html 的 referrer meta 与 Chart.js SRI integrity 均完好，未再回归。新增文件逐一审查无敏感信息（.hermes-project.yaml 仅 profile/session 名，features.md 为模板占位符，review-log.md 为审计日志）。全量扫描：凭证 Pass 1-2 零命中、shell 注入零命中（4 处 grep 命中均为注释/docstring/历史日志，非代码）、XSS 零命中、Git 历史干净。唯一开放项 JT-SEC-010（🟢 LOW 仅记录，不计分）。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| — | — | 无新增发现 | — | — |
+
+### Positives
+
+- 零回归 — JT-SEC-001~009、011、012 全部验证通过（含两次曾被覆盖的 JT-SEC-009/011）
+- daily-tracker.html referrer + Chart.js SRI 完好 ✅（08-20~08-28 共 9 次数据同步未再覆盖）
+- wechat.html referrer + html2canvas SRI 完好 ✅
+- index.html / plan-omad-v1.0.html referrer 完好 ✅
+- 新增文件 .hermes-project.yaml / features.md / review-log.md 无凭证、无 PII、无注入面
+- Credential scan Pass 1-2 零命中；shell 注入/XSS 零命中（命中项均为注释/文档/历史日志）
+- 9 个数据 commit 仅含习惯记录，无新增文件、无密钥、无 PII
+- Git 历史无新增敏感文件（新增文件仅 .hermes-project.yaml / features.md / review-log.md）
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open（🟢 仅记录，不计分） |
