@@ -534,3 +534,42 @@ JT-SEC-009 (referrer) 和 JT-SEC-011 (Chart.js SRI) 回归修复验证通过。�
 | Issue | Title | Severity | Priority | Status |
 |:------|:------|:--------:|:--------:|:------:|
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open（🟢 仅记录，不计分） |
+
+---
+
+## 2026-08-31 — Re-audit (3 data commits, no regressions)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 + 新 commits (82889ca..9b3da21) — 3 个 data@update（仅 daily-tracker.html 习惯数据）
+- **Commits**: 82889ca → 9b3da21
+- **Verdict**: PASS
+- **Score**: 100 / 100 (Rating: A)
+
+### Summary
+
+自 08-28 上次审查以来共 3 个 `data@update: daily-tracker` commit（08-29、08-30、08-31），仅修改 daily-tracker.html 的习惯记录数据（体重 68.4→67.7、运动记录、习惯打勾，+10/-7 行）。无代码变更、无新脚本、无新 CDN 资源、无新文件。重点回归检查通过：数据同步管道此前两次覆盖安全修复（JT-SEC-009/011），本次验证 daily-tracker.html 的 referrer meta（line 5）与 Chart.js SRI integrity + crossorigin（line 9）均完好，未再回归。全量扫描：凭证 Pass 1-4 零命中、shell 注入零命中、XSS 零命中、Git 历史干净。唯一开放项 JT-SEC-010（🟢 LOW 仅记录，不计分）。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| — | — | 无新增发现 | — | — |
+
+### Positives
+
+- 零回归 — JT-SEC-001~009、011、012 全部验证通过（含两次曾被覆盖的 JT-SEC-009/011）
+- daily-tracker.html referrer policy 完好 ✅（line 5）
+- daily-tracker.html Chart.js CDN SRI integrity + crossorigin 完好 ✅（line 9）
+- wechat.html referrer + html2canvas SRI（integrity + crossorigin）+ `allowTaint: false` 完好 ✅
+- index.html referrer 完好 ✅
+- 凭证扫描 Pass 1-4 零命中（唯一命中为审查文档自描述，非实际凭证）
+- 零 shell 注入 — ssl-manager.py 使用 list args + `shell=False`
+- 零 XSS 入口 — 无 innerHTML/eval/document.write（onclick 均为静态函数调用，无用户输入插值）
+- 3 个数据 commit 仅含习惯记录，无新增文件、无密钥、无 PII
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open（🟢 仅记录，不计分） |
