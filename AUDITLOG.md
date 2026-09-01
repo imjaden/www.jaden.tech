@@ -573,3 +573,40 @@ JT-SEC-009 (referrer) 和 JT-SEC-011 (Chart.js SRI) 回归修复验证通过。�
 | Issue | Title | Severity | Priority | Status |
 |:------|:------|:--------:|:--------:|:------:|
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open（🟢 仅记录，不计分） |
+
+---
+
+## 2026-09-01 — Re-audit (1 feat archive refactor + 1 data commit, no regressions)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 + 新 commits (ee943de..f314e99) — 1 个 feat（daily-tracker.html 改造为归档页）+ 1 个 data@update（新增归档文件）
+- **Commits**: ee943de → f314e99
+- **Verdict**: PASS
+- **Score**: 100 / 100 (Rating: A)
+
+### Summary
+
+自 08-31 上次审查以来共 2 个 commit：`0f76ddd` feat@daily-tracker（daily-tracker.html 从实时追踪 4-tab 改造为归档 2-tab，展示 07~08 全量 51 条记录，today→archived，含 DT-SEC-038 标记）+ `f314e99` data@update（新增 daily-tracker-archive-202607-202608.html 归档文件）。重点回归检查通过：feat 重构后 daily-tracker.html 的 referrer meta（line 5）与 Chart.js SRI integrity + crossorigin（line 9）均完好，新增归档文件同样携带 referrer + Chart.js SRI，未再发生数据管道覆盖回归（此前 JT-SEC-009/011 曾两次被覆盖）。安全增强：localStorage 恢复逻辑新增白名单守卫（旧值 today/faq/refs → 回落 archived），消除了此前未校验 localStorage 值直传 switchTab 构建 CSS 选择器的隐患。全量扫描：凭证 Pass 1-4 零命中（命中项仅为 cache/closed-loop token 计数元数据与文档自描述）、shell 注入零命中（仅 ssl-manager.py 注释）、XSS 零命中（无 innerHTML/eval/document.write，onclick 均为静态函数）、两文件内联 `<script>` 块 node --check 语法通过、无 http:// 明文外链、无 target="_blank" 缺失 rel、Git 历史无新增敏感文件。唯一开放项 JT-SEC-010（🟢 LOW 仅记录，不计分）。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| — | — | 无新增发现 | — | — |
+
+### Positives
+
+- 零回归 — JT-SEC-001~009、011、012 全部验证通过（含两次曾被覆盖的 JT-SEC-009/011）
+- daily-tracker.html referrer policy（line 5）+ Chart.js SRI（line 9）完好 ✅
+- 新增 daily-tracker-archive-202607-202608.html 携带 referrer（line 5）+ Chart.js SRI（line 9）✅
+- localStorage 恢复新增白名单守卫（DT-SEC-038）— 安全增强而非回归 ✅
+- 凭证扫描 Pass 1-4 零命中；shell 注入/XSS 零命中（命中项均为注释/文档/token 计数元数据）
+- 两文件内联 JS 块 node --check 语法通过；无 http:// 明文外链、无 target="_blank" 缺失 rel
+- 归档页仅含习惯/体重/运动记录，无密钥、无 PII、无注入面
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open（🟢 仅记录，不计分） |
