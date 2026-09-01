@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+<title>DailyTracker 归档 · 2026-07 ~ 2026-08</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;line-height:1.7;padding:24px;max-width:1060px;margin:0 auto}
+h1{font-size:24px;font-weight:700;margin-bottom:4px;color:#f0f6fc}
+.sub{color:#8b949e;font-size:13px;margin-bottom:18px}
+h2{font-size:16px;font-weight:600;margin:24px 0 12px;padding-bottom:5px;border-bottom:1px solid #30363d;color:#7ee787;display:flex;align-items:center;gap:8px}
+a{color:#58a6ff}
+.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0 18px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px}
+.card h3{font-size:13px;color:#8b949e;margin-bottom:6px}
+.card .value{font-size:24px;font-weight:700}.card .value.green{color:#7ee787}
+.card .unit{font-size:13px;color:#8b949e;font-weight:400}
+.card .sub{font-size:12px;color:#8b949e;margin-top:3px}
+.chart-wrap{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px;margin-bottom:6px}
+.chart-wrap canvas{width:100%!important;max-height:280px}
+table{width:100%;border-collapse:collapse;margin:.75rem 0;font-size:12px}
+th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #21262d}
+th{background:#161b22;color:#8b949e;font-weight:500}tr:hover td{background:#161b22}
+.num{text-align:right}.center{text-align:center}
+.check{color:#7ee787}.empty{color:#484f58}
+.footer{margin-top:30px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#484f58;text-align:center}
+.collapse{display:none}
+h2 .toggle{cursor:pointer;color:#8b949e;font-size:13px;font-weight:400;padding:2px 8px;border-radius:4px;user-select:none}
+h2 .toggle:hover{background:#21262d;color:#e6edf3}
+</style>
+</head>
+<body>
+<h1>📦 DailyTracker 归档 · 2026-07 ~ 2026-08</h1>
+<p class="sub">数据源 records.json · 生成时间 2026-09-01 · <a href="daily-tracker.html">← 返回 DailyTracker</a></p>
+
+<h2>📅 月度小结</h2>
+<div class="goal-grid">
+<div class="card"><h3>📅 7 月</h3><div class="value green">22 <span class="unit">记录</span></div><div class="sub">范围 07-04 ~ 07-31 · 运动 21 天</div><div class="sub">起始 70.8 kg · 月末 71.3 kg</div><div class="sub">最低 68.5 kg · 最高 71.3 kg</div><div class="sub">净变化 +0.5 kg</div></div>
+<div class="card"><h3>📅 8 月</h3><div class="value green">29 <span class="unit">记录</span></div><div class="sub">范围 08-01 ~ 08-31 · 运动 27 天</div><div class="sub">起始 70.6 kg · 月末 67.7 kg</div><div class="sub">最低 67.7 kg · 最高 70.6 kg</div><div class="sub">净变化 -2.9 kg</div></div>
+</div>
+
+<h2>📉 Weight 曲线（51 条 · 2026-07 ~ 2026-08 全量）</h2>
+<div class="chart-wrap"><canvas id="wtChart"></canvas></div>
+
+<h2>📋 全部记录（51 行，日期降序）<span class="toggle" onclick="tbl=document.getElementById('archiveTbl');tbl.classList.toggle('collapse');this.textContent=tbl.classList.contains('collapse')?'▶ expand':'▼ collapse'">▶ expand</span></h2>
+<table id="archiveTbl" class="collapse"><thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead><tbody>
+<tr><td>08-31</td><td class="num">67.7</td><td>running 5.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-30</td><td class="num">68.2</td><td>running 5.25km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-29</td><td class="num">68.4</td><td>running 5.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-28</td><td class="num">68.4</td><td>-</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
+<tr><td>08-27</td><td class="num">68.1</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-26</td><td class="num">68.0</td><td>running 5.12km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-25</td><td class="num">69.0</td><td>running 10.16km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-24</td><td class="num">69.2</td><td>running 5.25km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-23</td><td class="num">68.8</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-22</td><td class="num">68.9</td><td>running 3.16km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-21</td><td class="num">69.0</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-20</td><td class="num">69.3</td><td>running 2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-19</td><td class="num">69.6</td><td>running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-18</td><td class="num">70.3</td><td>running 7.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-17</td><td class="num">-</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-14</td><td class="num">68.8</td><td>-</td><td class="center check">✅</td><td class="center check">✅</td><td class="center empty">-</td></tr>
+<tr><td>08-13</td><td class="num">68.4</td><td>running 5.20km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-12</td><td class="num">68.9</td><td>running 5.20km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-11</td><td class="num">69.6</td><td>running 5.20km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-10</td><td class="num">70.3</td><td>running 5.25km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-09</td><td class="num">69.3</td><td>running 5.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-08</td><td class="num">69.6</td><td>running 5.05km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-07</td><td class="num">69.6</td><td>running 6.96km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-06</td><td class="num">70.0</td><td>running 5.3km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-05</td><td class="num">69.7</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-04</td><td class="num">69.7</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-03</td><td class="num">70.1</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-02</td><td class="num">70.2</td><td>running 5.1km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>08-01</td><td class="num">70.6</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-31</td><td class="num">71.3</td><td>running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-30</td><td class="num">-</td><td>running 5km</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
+<tr><td>07-23</td><td class="num">69.0</td><td>-</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
+<tr><td>07-22</td><td class="num">68.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-21</td><td class="num">68.5</td><td>Running 7.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-20</td><td class="num">68.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-19</td><td class="num">69.1</td><td>Running 6km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-18</td><td class="num">69.1</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-17</td><td class="num">69.2</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-16</td><td class="num">69.4</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-15</td><td class="num">69.5</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-14</td><td class="num">69.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-13</td><td class="num">70.2</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-12</td><td class="num">69.7</td><td>Indoor sports</td><td class="center check">✅</td><td class="center empty">-</td><td class="center check">✅</td></tr>
+<tr><td>07-11</td><td class="num">69.9</td><td>跑步10KM</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-10</td><td class="num">70.0</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-09</td><td class="num">70.3</td><td>跑步7.41km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-08</td><td class="num">69.7</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-07</td><td class="num">70.0</td><td>跑步3.5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-06</td><td class="num">70.3</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-05</td><td class="num">70.4</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+<tr><td>07-04</td><td class="num">70.8</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
+</tbody></table>
+
+<div class="footer">DailyTracker Archive · Generated by Personal Assistant</div>
+
+<script>
+var lbs=["07-04", "07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05", "08-06", "08-07", "08-08", "08-09", "08-10", "08-11", "08-12", "08-13", "08-14", "08-17", "08-18", "08-19", "08-20", "08-21", "08-22", "08-23", "08-24", "08-25", "08-26", "08-27", "08-28", "08-29", "08-30", "08-31"];
+var wd=[70.8, 70.4, 70.3, 70.0, 69.7, 70.3, 70.0, 69.9, 69.7, 70.2, 69.6, 69.5, 69.4, 69.2, 69.1, 69.1, 68.6, 68.5, 68.6, 69.0, null, 71.3, 70.6, 70.2, 70.1, 69.7, 69.7, 70.0, 69.6, 69.6, 69.3, 70.3, 69.6, 68.9, 68.4, 68.8, null, 70.3, 69.6, 69.3, 69.0, 68.9, 68.8, 69.2, 69.0, 68.0, 68.1, 68.4, 68.4, 68.2, 67.7];
+var ac=wd;
+var pr=[70.1, 70.1, 70.1, 70.0, 70.0, 70.0, 70.0, 69.9, 69.9, 69.9, 69.9, 69.8, 69.8, 69.8, 69.8, 69.7, 69.7, 69.7, 69.7, 69.6, null, 69.5, 69.4, 69.4, 69.4, 69.4, 69.3, 69.3, 69.3, 69.3, 69.2, 69.2, 69.2, 69.2, 69.1, 69.1, null, 69.0, 69.0, 69.0, 69.0, 68.9, 68.9, 68.9, 68.9, 68.8, 68.8, 68.8, 68.8, 68.7, 68.7];
+new Chart(document.getElementById('wtChart'),{
+  type:'line',
+  data:{labels:lbs,datasets:[
+    {label:'Actual',data:ac,borderColor:'#7ee787',backgroundColor:'rgba(126,231,135,0.1)',pointBackgroundColor:'#7ee787',pointBorderColor:'#0d1117',pointBorderWidth:2,pointRadius:ac.map(function(v){return v?4:0}),spanGaps:false,tension:.3,fill:true},
+    {label:'Trend',data:pr,borderColor:'#8b949e',borderDash:[6,3],pointRadius:0,borderWidth:2,tension:0},
+    {label:'Target 65.0',data:Array(51).fill(65.0),borderColor:'#f85149',borderDash:[4,4],pointRadius:0,borderWidth:1.5}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#8b949e',font:{size:11},boxWidth:12,padding:8},position:'bottom'},
+      tooltip:{backgroundColor:'#161b22',titleColor:'#e6edf3',bodyColor:'#8b949e',borderColor:'#30363d',borderWidth:1,
+        callbacks:{label:function(ctx){
+          if(ctx.dataset.label==='Actual'&&ctx.parsed.y!==null)return ctx.parsed.y+' kg';
+          if(ctx.dataset.label==='Trend')return '~'+ctx.parsed.y.toFixed(1)+' kg (pred)';
+          return ctx.parsed.y+' kg '+ctx.dataset.label;
+        }}
+      }
+    },
+    scales:{x:{grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},maxTicksLimit:12}},
+      y:{min:64,max:72,grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},stepSize:0.5}}}
+  }
+});
+</script>
+</body>
+</html>
