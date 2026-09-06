@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="https://www.jaden.tech/static/img/favicon.png" type="image/png">
+<title>跨项目任务板 · 运行态</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="board-wrap">
+  <header class="topbar">
+    <h1>跨项目任务板</h1>
+
+    <div class="meta-side">
+      <label class="switch" title="自动刷新开关（默认开, 每 10 分钟, 记忆状态, 跨页共享偏好）">
+        <input type="checkbox" id="auto-refresh" checked>
+        <span>自动刷新 10m</span><span id="refresh-state"></span>
+      </label>
+      <span>版本 b3e0a09</span>
+      <span id="meta-count">共 0 条</span>
+    </div>
+  </header>
+  <div class="stats-section" id="stats-section">
+    <div id="stats-root"></div>
+    <div id="stats-notice" class="notice" style="display:none">统计暂不可用（stats 数据源失败; 任务表仍为最新, 下次 cron 刷新自动重试）</div>
+  </div>
+  <div class="board-main">
+    <div class="table-side">
+      <div class="table-card">
+        <div class="table-wrap">
+          <table class="data-table" id="main-table">
+            <thead id="th-full">
+              <tr>
+                <th data-sort="number" class="sortable col-number">编号</th>
+                <th data-sort="status" class="sortable">状态</th>
+                <th data-sort="progress" class="sortable col-progress">进度</th>
+                <th data-sort="desc" class="sortable">描述</th>
+                <th data-sort="created_at" class="sortable">创建时间</th>
+                <th data-sort="updated_at" class="sortable">更新时间</th>
+              </tr>
+            </thead>
+            <thead id="th-split" style="display:none">
+              <tr>
+                <th class="col-number">编号</th>
+                <th class="col-progress">进度</th>
+              </tr>
+            </thead>
+            <tbody id="board-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <aside class="detail-panel closed" id="detail-panel">
+      <div class="detail-head">
+        <button class="detail-close" id="detail-close" type="button">✕ 关闭</button>
+        <div class="detail-number" id="d-number"></div>
+        <div class="detail-proj" id="d-proj"></div>
+      </div>
+      <div id="detail-body"></div>
+    </aside>
+  </div>
+
+  <footer>跨项目任务板 · 运行态 · 公开镜像 · 自动同步 · 已脱敏过滤</footer>
+</div>
+
+<script>window.LIVE_ITEMS = [
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL005",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-08-30",
+    "updated_at": "2026-08-30 09:22",
+    "desc": "heal 通知与留痕追溯"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL006",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-08-30",
+    "updated_at": "2026-08-30 23:21",
+    "desc": "hm-version + 1acl-scheduler 检查项"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL038",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-09-06",
+    "desc": "hm memory heal 子指令"
+  },
+  {
+    "project": "llm-radar",
+    "number": "LLM-RADAR-CL006",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-09-06 22:28",
+    "desc": "llm-radar 双端分叉自动收敛（CL006 实施+审计闭环）"
+  }
+];</script>
+<script>window.BOARD_STATS = {
+  "running": 2,
+  "series": [
+    {
+      "api_calls": 208,
+      "cache_read_tokens": 18965632,
+      "date": "20260831",
+      "estimated_cost_usd": 0.6116,
+      "files": 10,
+      "total_tokens": 1170609
+    },
+    {
+      "api_calls": 738,
+      "cache_read_tokens": 60531968,
+      "date": "20260901",
+      "estimated_cost_usd": 2.0754,
+      "files": 50,
+      "total_tokens": 4758732
+    },
+    {
+      "api_calls": 51,
+      "cache_read_tokens": 3207936,
+      "date": "20260902",
+      "estimated_cost_usd": 0.1463,
+      "files": 25,
+      "total_tokens": 333594
+    },
+    {
+      "api_calls": 138,
+      "cache_read_tokens": 17738496,
+      "date": "20260903",
+      "estimated_cost_usd": 0.1675,
+      "files": 15,
+      "total_tokens": 488594
+    },
+    {
+      "api_calls": 53,
+      "cache_read_tokens": 3131008,
+      "date": "20260904",
+      "estimated_cost_usd": 0.1439,
+      "files": 7,
+      "total_tokens": 285602
+    },
+    {
+      "api_calls": 54,
+      "cache_read_tokens": 3605248,
+      "date": "20260905",
+      "estimated_cost_usd": 0.1092,
+      "files": 25,
+      "total_tokens": 339065
+    },
+    {
+      "api_calls": 73,
+      "cache_read_tokens": 4375936,
+      "date": "20260906",
+      "estimated_cost_usd": 0.2043,
+      "files": 4,
+      "total_tokens": 407216
+    }
+  ]
+};</script>
+<script src="assets/common.js"></script>
+<script>
+/* ═══ 运行态页逻辑（独立维护; 正式版由生成器注入本页数据段）═══ */
+(function () {
+  "use strict";
+  var HB = window.HB;
+  var PAGE = "index";
+  var items = window.LIVE_ITEMS;
+  var sortState = { key: "number", dir: 1 };
+  var split = null; // {number, project}
+
+  /* CL037: stats 区渲染（DOM/textContent 构建; SEC-1） */
+  function renderStats() {
+    var root = document.getElementById("stats-root");
+    var notice = document.getElementById("stats-notice");
+    var stats = window.BOARD_STATS;
+    if (!stats || !stats.series || !stats.series.length) {
+      if (notice) { notice.style.display = ""; }
+      if (root) { root.textContent = ""; }
+      return;
+    }
+    if (notice) { notice.style.display = "none"; }
+    var s = stats.series;
+    var today = s[s.length - 1];
+    var sum = 0;
+    for (var i = 0; i < s.length; i++) { sum += (s[i].total_tokens || 0); }
+    var maxv = 1;
+    for (var j = 0; j < s.length; j++) { if (s[j].total_tokens > maxv) { maxv = s[j].total_tokens; } }
+
+    function card(label, value, sub) {
+      var c = document.createElement("div"); c.className = "stat-card";
+      var l = document.createElement("div"); l.className = "stat-label"; l.textContent = label; c.appendChild(l);
+      var v = document.createElement("div"); v.className = "stat-value"; v.textContent = value; c.appendChild(v);
+      var b = document.createElement("div"); b.className = "stat-sub"; b.textContent = sub; c.appendChild(b);
+      return c;
+    }
+    function fmtD(v) { return (v || 0).toLocaleString(); }
+    var wrap = document.createElement("div"); wrap.className = "stats-strip";
+    wrap.appendChild(card("今日 tokens · 闭环落盘", HB.fmtCompact(today.total_tokens),
+      "in+out+reasoning · cache_read " + HB.fmtCompact(today.cache_read_tokens) +
+      " · $" + (today.estimated_cost_usd || 0).toFixed(4)));
+    wrap.appendChild(card("近 7 日合计", HB.fmtCompact(sum),
+      "7 自然日 · 含今日(部分日)"));
+    wrap.appendChild(card("运行中任务", String(stats.running),
+      "跨项目 active 态 · 共 " + items.length + " 条"));
+    var trend = document.createElement("div"); trend.className = "stat-card";
+    var tl = document.createElement("div"); tl.className = "stat-label"; tl.textContent = "近 7 日 tokens 趋势"; trend.appendChild(tl);
+    var bars = document.createElement("div"); bars.className = "trend-bars";
+    for (var k = 0; k < s.length; k++) {
+      var it = s[k];
+      var h = Math.max(4, Math.round((it.total_tokens || 0) / maxv * 62));
+      var col = document.createElement("div"); col.className = "bar-col";
+      col.title = String(it.date).slice(4, 6) + "-" + String(it.date).slice(6, 8) +
+        " total " + fmtD(it.total_tokens) + " | cache_read " + fmtD(it.cache_read_tokens) +
+        " | $" + (it.estimated_cost_usd || 0).toFixed(4) + " | " + (it.files || 0) + " 文件";
+      var bv = document.createElement("div"); bv.className = "bar-val"; bv.textContent = HB.fmtCompact(it.total_tokens); col.appendChild(bv);
+      var bar = document.createElement("div"); bar.className = "bar"; bar.style.height = h + "px"; col.appendChild(bar);
+      var bd = document.createElement("div"); bd.className = "bar-day"; bd.textContent = String(it.date).slice(4, 6) + "-" + String(it.date).slice(6, 8); col.appendChild(bd);
+      bars.appendChild(col);
+    }
+    trend.appendChild(bars);
+    var ts = document.createElement("div"); ts.className = "stat-sub"; ts.textContent = "悬停看明细 · 柱高按日峰值归一"; trend.appendChild(ts);
+    wrap.appendChild(trend);
+    root.textContent = "";
+    root.appendChild(wrap);
+  }
+
+  function keyOf(it) { return String(it.number || "") + "@" + String(it.project || ""); }
+  function findItem(number, project) {
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].number === number && (!project || items[i].project === project)) { return items[i]; }
+    }
+    return null;
+  }
+
+  /* 自然比较 / 日期比较（列头排序用） */
+  function natCmp(a, b) {
+    var pa = String(a == null ? "" : a).split(/(\d+)/);
+    var pb = String(b == null ? "" : b).split(/(\d+)/);
+    var n = Math.max(pa.length, pb.length);
+    for (var i = 0; i < n; i++) {
+      var x = pa[i], y = pb[i];
+      if (x === undefined) { return -1; }
+      if (y === undefined) { return 1; }
+      if (x === y) { continue; }
+      var xN = /^\d+$/.test(x), yN = /^\d+$/.test(y);
+      if (xN && yN) { var xi = parseInt(x, 10), yi = parseInt(y, 10); if (xi !== yi) { return xi - yi; } }
+      else { if (xN) { return -1; } if (yN) { return 1; } if (x < y) { return -1; } if (x > y) { return 1; } }
+    }
+    return 0;
+  }
+  function dateVal(v) {
+    if (!v || v === "-") { return null; }
+    var t = Date.parse(String(v).replace(" ", "T"));
+    return isNaN(t) ? null : t;
+  }
+  function compare(a, b) {
+    var r = 0;
+    if (sortState.key === "number") { r = natCmp(a.number, b.number); }
+    else if (sortState.key === "desc") {
+      var da = String(a.desc || ""), db = String(b.desc || "");
+      r = da < db ? -1 : (da > db ? 1 : 0);
+    } else if (sortState.key === "status" || sortState.key === "progress") {
+      var sa = String(a[sortState.key] || ""), sb = String(b[sortState.key] || "");
+      r = sa < sb ? -1 : (sa > sb ? 1 : 0);
+    } else {
+      var va = dateVal(a[sortState.key]), vb = dateVal(b[sortState.key]);
+      if (va === null && vb === null) { r = 0; }
+      else if (va === null) { r = 1; }
+      else if (vb === null) { r = -1; }
+      else { r = va - vb; }
+      if (r === 0) { r = natCmp(a.number, b.number); }
+    }
+    if (r === 0) {
+      var pa = String(a.project || ""), pb = String(b.project || "");
+      r = pa < pb ? -1 : (pa > pb ? 1 : 0);
+    }
+    return r * sortState.dir;
+  }
+  function ordered() { return items.slice().sort(compare); }
+
+  /* 编号链接: 点同一编号=退出分栏; 点其他编号=切换详情; 无任何筛选 */
+  function numLink(it) {
+    var a = HB.el("span", "num-link", it.number);
+    a.title = "点击进入/切换/退出分栏详情";
+    a.addEventListener("click", function () {
+      var k = keyOf(it);
+      if (split && split.tabKey === k) { closeSplit(); }
+      else { split = { tabKey: k, number: it.number, project: it.project }; }
+      HB.saveSplit(PAGE, split);
+      render();
+    });
+    return a;
+  }
+  function closeSplit() { split = null; HB.saveSplit(PAGE, null); render(); }
+
+  function render() {
+    var body = document.getElementById("board-body");
+    body.textContent = "";
+    var splitMode = !!(split && findItem(split.number, split.project));
+    if (!splitMode) { split = null; }
+    document.getElementById("th-full").style.display = splitMode ? "none" : "";
+    document.getElementById("th-split").style.display = splitMode ? "" : "none";
+    document.getElementById("main-table").classList.toggle("mode-split", splitMode);
+    document.querySelector(".board-main").classList.toggle("split-on", splitMode);
+    var it0 = splitMode ? findItem(split.number, split.project) : null;
+
+    ordered().forEach(function (it) {
+      var tr = HB.el("tr");
+      var sel = splitMode && keyOf(it) === keyOf(it0);
+      if (sel) { tr.className = "selected"; }
+      if (splitMode) {
+        var td1 = HB.el("td", "col-number"); td1.appendChild(numLink(it)); tr.appendChild(td1);
+        tr.appendChild(HB.el("td", "progress-cell col-progress", it.progress || "-"));
+      } else {
+        var tdA = HB.el("td", "col-number"); tdA.appendChild(numLink(it)); tr.appendChild(tdA);
+        var tdS = HB.el("td"); tdS.appendChild(HB.statusBadge(it.status)); tr.appendChild(tdS);
+        tr.appendChild(HB.el("td", "progress-cell col-progress", it.progress || "-"));
+        tr.appendChild(HB.el("td", "col-desc", it.desc));
+        tr.appendChild(HB.el("td", "col-time", it.created_at));
+        tr.appendChild(HB.el("td", "col-time", it.updated_at));
+      }
+      body.appendChild(tr);
+    });
+    if (!items.length) {
+      var e = HB.el("tr"); e.appendChild(HB.el("td", "empty-row", "（无队列任务数据）")); body.appendChild(e);
+    }
+    document.getElementById("meta-count").textContent = "共 " + items.length + " 条";
+    if (splitMode) {
+      showDetail(it0);
+    } else {
+      HB.closePanel();
+    }
+  }
+
+  function showDetail(it) {
+    HB.openPanel();
+    HB.fillPanelHead(it.number, String(it.project || "") + " · " + String(it.status || "") +
+      (it.prefix ? " · 前缀 " + it.prefix : ""));
+    HB.renderLiveDetail(document.getElementById("detail-body"), it);
+  }
+
+  /* 列头排序 */
+  function bindSort() {
+    var headers = document.querySelectorAll("#th-full th.sortable");
+    headers.forEach(function (th) {
+      th.addEventListener("click", function () {
+        var k = th.getAttribute("data-sort");
+        if (sortState.key === k) { sortState.dir = -sortState.dir; } else { sortState.key = k; sortState.dir = 1; }
+        headers.forEach(function (h) {
+          var hk = h.getAttribute("data-sort");
+          h.className = "sortable" + (hk === sortState.key ? (sortState.dir === 1 ? " sort-asc" : " sort-desc") : "");
+        });
+        render();
+      });
+    });
+  }
+
+  function bindClose() {
+    document.getElementById("detail-close").addEventListener("click", closeSplit);
+  }
+
+  function initFromUrl() {
+    var qs = HB.urlParams();
+    var number = qs.get("number");
+    if (number) {
+      var it = findItem(number, qs.get("project") || undefined);
+      if (it) {
+        split = { tabKey: keyOf(it), number: it.number, project: it.project };
+        HB.saveSplit(PAGE, split);
+      }
+    }
+  }
+
+  /* init */
+  (function () {
+    var st = HB.loadSplit(PAGE);
+    if (st && st.number && findItem(st.number, st.project)) { split = st; }
+    initFromUrl(); // URL 深链优先
+    HB.bindRefreshSwitch(document.getElementById("auto-refresh"), document.getElementById("refresh-state"));
+    bindSort();
+    bindClose();
+    renderStats();
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
