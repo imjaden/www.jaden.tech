@@ -67,6 +67,27 @@ quality:
 
 ---
 
+## 2026-09-06 — tokens-tracker 隐私泄露修复复审 r2
+
+- **review者**: review/jaden-tech-review (hermes-0.19.1)
+- **范围**: 8 commit 复审 — `82254f9..8e82c49`（脱敏重建链）；r1 findings 🔴-1/🟡-2/🟢-3 逐条回归
+- **Tracking**: JT-SEC-014（🔴-1 隐私泄露，已验证修复）
+- **状态**: ✅ PASS
+- **报告**: 无（绿色批复审，跳正式报告；详见 AUDITLOG.md 同日期 r2 条目）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，无新增问题：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| 🔴-1 | 🔴 HIGH | tokens-tracker 镜像泄露私密内容（personal-cinema/JAV/retro_summary 等） | ✅ RESOLVED (56ff185 白名单过滤+字段投影+fail-closed) |
+| 🟡-2 | 🟡 MED | daily-tracker→bmi-tracker 重命名引用不同步 | ✅ RESOLVED (bc952c1 + 8e82c49) |
+| 🟢-3 | 🟢 LOW | 镜像守卫覆盖不全（common.js/style.css 未守卫） | ✅ RESOLVED (56ff185 三产物均守卫) |
+
+---
+
 ## 条目格式说明
 
 ```
