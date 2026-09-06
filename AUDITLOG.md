@@ -648,3 +648,50 @@ JT-SEC-009 (referrer) 和 JT-SEC-011 (Chart.js SRI) 回归修复验证通过。�
 |:------|:------|:--------:|:--------:|:------:|
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open（🟢 仅记录，不计分） |
 | JT-SEC-013 | tokens-tracker 页面缺 referrer meta + favicon 绝对 URL | LOW | P2 | Open（🟢 仅记录，不计分） |
+
+---
+
+## 2026-09-06 — Re-review r2 (privacy-leak fix verified, chain rebuilt)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: r1 复审回归 — 8 个重建 commit (`82254f9..8e82c49`，脱敏重建链)
+- **Commits**: 82254f9 → 8e82c49
+- **Verdict**: PASS
+- **Score**: 100 / 100 (Rating: A)
+
+### Summary
+
+r1 发现 🔴-1 高危隐私泄露（tokens-tracker 公开镜像含 personal-cinema 磁力/JAV/迅雷、daily-checker retro_summary 整篇复盘、llm-radar 阿里云细节等，requirement/acceptance/retro_summary/retro_path/steps 全字段进入公开仓），判定 NOT PASS。ops 按用户决策 A/A1 修复：`scripts/tokens-tracker-mirror.py` 白名单行级过滤 + 字段投影 + fail-closed 守卫，并整链重建（hashes 全变）；泄露版 commit `54ee972` 已丢弃，原链存于 `quarantine/20260906-tokens-mirror-leak` 备查。
+
+r2 逐条回归验证：
+
+- LIVE_ITEMS 仅 4 条白名单项目（daily-checker / hermes-manager / llm-radar），keys 仅 project/number/status/progress/created_at/updated_at/desc ✅
+- tokens-tracker/ 三文件（index.html / common.js / style.css）敏感词扫描 0 命中（/Users、jadenli、personal-cinema、JAV、磁力、Thunder、飞书、阿里云、retro_summary、retro_path、requirement、acceptance）✅
+- renderLiveDetail 为安全摘要版（任务/状态/进度/描述/创建更新），无需求全文/验收/复盘/路径渲染 ✅
+- 脚本守卫 fail-closed：SENSITIVE + LOCAL_ANY 正则命中即 abort（rc=2）不写盘，index.html + common.js + style.css 三产物同守卫 ✅
+- scripts/ 内本地路径常量与敏感词正则属工具必需（不部署、不经 GitHub Pages 服务），非泄露 ✅
+
+全量扫描：凭证 Pass 1-4 零命中、shell 注入零命中、XSS 零命中（页面渲染全走 textContent/createElement）、Git 历史无新增 PII。`54ee972` 已从 HEAD 祖先链清除（仅存于 quarantine 分支）。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| — | — | 无新增发现（r1 🔴-1/🟡-2/🟢-3 全部验证修复） | — | — |
+
+### Fix Verification
+
+| Issue | Verify |
+|:------|:------:|
+| 🔴-1 隐私泄露 (JT-SEC-014) | ✅ LIVE_ITEMS 白名单 4 条 + 字段投影；敏感词 0 命中；fail-closed 守卫 |
+| 🟡-2 重命名引用 | ✅ README.md + AGENTS.md 无 daily-tracker.html 死引用 |
+| 🟢-3 守卫覆盖 | ✅ common.js/style.css/index.html 写盘前均有守卫 |
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open（🟢 仅记录，不计分） |
+| JT-SEC-013 | tokens-tracker 页面缺 referrer meta + favicon 绝对 URL | LOW | P2 | Open（🟢 仅记录，不计分） |
+| JT-SEC-014 | tokens-tracker 镜像隐私泄露（脱敏不完整） | HIGH | P0 | Fixed — 白名单过滤 + 字段投影 + fail-closed 守卫 |
