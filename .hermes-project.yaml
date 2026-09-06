@@ -14,3 +14,7 @@ sessions:
 - role: dev
   profile: dev
   title: jaden-tech-dev
+handoff:
+  enabled: true
+  doc: documents/handoff/handoff-www.jaden.tech-ops.md
+  updated_at: '2026-09-06'
