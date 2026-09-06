@@ -109,4 +109,32 @@
             toggleQRCode(event);
         }
     });
+
+    /**
+     * Language auto-switch (A1: navigator.language, zh* -> Chinese, else English)
+     * Visible UI copy only (F1); ICP footer stays Chinese.
+     * Static HTML defaults to zh; [data-zh]/[data-en] hold both copies.
+     */
+    function detectLanguage() {
+        var l = (navigator.language || navigator.userLanguage || 'zh').toLowerCase();
+        return l.indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+
+    function applyLanguage() {
+        var lang = detectLanguage();
+        var attr = lang === 'zh' ? 'data-zh' : 'data-en';
+
+        document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+        var nodes = document.querySelectorAll('[data-zh][data-en]');
+        for (var i = 0; i < nodes.length; i++) {
+            var el = nodes[i];
+            var text = el.getAttribute(attr);
+            if (text !== null) {
+                el.textContent = text;
+            }
+        }
+    }
+
+    applyLanguage();
 })();
