@@ -610,3 +610,41 @@ JT-SEC-009 (referrer) 和 JT-SEC-011 (Chart.js SRI) 回归修复验证通过。�
 | Issue | Title | Severity | Priority | Status |
 |:------|:------|:--------:|:--------:|:------:|
 | JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open（🟢 仅记录，不计分） |
+
+---
+
+## 2026-09-06 — Re-audit (5 feat/fix/refactor/docs + 3 data commits, no regressions)
+
+- **Reviewer**: Security Reviewer
+- **Level**: L2
+- **Scope**: 全量源码 + 新 commits (248235b..54ee972) — tokens-tracker 运行态看板镜像（新脚本 `scripts/tokens-tracker-mirror.py` + 新公开页 `tokens-tracker/`）、主页 i18n 自动切换 + "What I'm Doing Now" 卡片、daily-tracker.html→bmi-tracker.html 重命名、handoff 文档、3 个 data@update
+- **Commits**: 248235b → 54ee972
+- **Verdict**: PASS
+- **Score**: 100 / 100 (Rating: A)
+
+### Summary
+
+自 09-01 上次审查以来共 8 个 commit：5 个 feat/fix/refactor/docs + 3 个 data@update。核心新增为 tokens-tracker 特性：`scripts/tokens-tracker-mirror.py`（从 hermes-manager `web/1acl` 运行态看板同步数据到本仓库，含本地绝对路径脱敏守卫 `/Users/<user>/CodeSpace/` → 项目相对路径 + 检测到 `jadenli` 即中止）+ 新公开页 `tokens-tracker/index.html`（565 行）+ `tokens-tracker/assets/{common.js,style.css}`。同步脚本安全要点全部通过：`subprocess.run` 全部 list-form 参数（零 `shell=True`）、`check=False` 显式处理返回码、确定性输出（数据未变则 git clean）、脱敏验证无 `/Users/` 路径泄露、无邮箱泄露、`<script>`/`</script>` 开闭标签数一致（无 JSON-in-script 逃逸）、页面 DOM 渲染全走 textContent/createElement（无 innerHTML/eval/document.write）。主页 i18n 特性用 `textContent` + `data-zh`/`data-en` 属性切换（无 innerHTML），daily-tracker→bmi-tracker 重命名后 localStorage 白名单守卫（DT-SEC-038）完好。回归检查：referrer meta + Chart.js SRI + html2canvas SRI 全部完好，未再发生数据管道覆盖安全修复（此前 JT-SEC-009/011 曾两次被覆盖）。凭证扫描 Pass 1-4 零命中、shell 注入零命中、XSS 零命中。新增 🟢 LOW 仅记录 JT-SEC-013（tokens-tracker 页面一致性），不计分。JT-SEC-010 仍开放（🟢 仅记录，不计分）。
+
+### Findings
+
+| # | Severity | Title | File:Line | Status |
+|:-:|:--------:|:------|:---------:|:------:|
+| 1 | 🟢 LOW | tokens-tracker 页面缺 referrer meta + favicon 绝对 URL（本地预览 parity） | `tokens-tracker/index.html:6` | Open（仅记录） |
+
+### Positives
+
+- 零回归 — JT-SEC-001~009、011、012 全部验证通过（含两次曾被覆盖的 JT-SEC-009/011）
+- tokens-tracker-mirror.py：list-form `subprocess.run`（零 shell 注入）、脱敏守卫 + 泄漏中止、确定性输出、仅本地 dev 工具未部署 ✅
+- tokens-tracker 页面：textContent 渲染零 XSS、脱敏验证无 `/Users/` 路径/邮箱泄露、无 JSON-in-script 逃逸 ✅
+- 主页 i18n：`textContent` + `data-zh`/`data-en` 属性切换，无 innerHTML ✅
+- bmi-tracker.html（原 daily-tracker）localStorage 白名单守卫 DT-SEC-038 完好 ✅
+- referrer + Chart.js SRI + html2canvas SRI 全部完好，数据管道未覆盖安全修复 ✅
+- 凭证 Pass 1-4 / shell 注入 / XSS 全零命中 ✅
+
+### Tracking
+
+| Issue | Title | Severity | Priority | Status |
+|:------|:------|:--------:|:--------:|:------:|
+| JT-SEC-010 | timestamp-manager.py docstring 本地路径泄露 | LOW | P2 | Open（🟢 仅记录，不计分） |
+| JT-SEC-013 | tokens-tracker 页面缺 referrer meta + favicon 绝对 URL | LOW | P2 | Open（🟢 仅记录，不计分） |
