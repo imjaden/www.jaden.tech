@@ -4,9 +4,10 @@ Static personal homepage hosted on GitHub Pages.
 
 ## Pages
 
-- `index.html` — Main landing page
+- `index.html` — Main landing page (zh/en auto i18n, What I'm Doing Now cards)
 - `wechat.html` — WeChat moment background generator (3:5, 1080×1800px)
-- `daily-tracker.html` — Daily habit tracker
+- `bmi-tracker.html` — DailyTracker archive page (GENERATED artifact, renamed from daily-tracker.html on 2026-09-06, do NOT hand-edit)
+- `tokens-tracker/index.html` — 1acl run-state board mirror (GENERATED artifact, desensitized, do NOT hand-edit)
 
 ## Deploy
 
