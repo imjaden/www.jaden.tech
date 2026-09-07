@@ -51,7 +51,7 @@
   │
   └─ 产出
       ├─ .review-level.yaml (追加 review_history)
-      ├─ AUDITLOG.md (追加新条目)
+      ├─ review-log.md (追加新条目)
       └─ git add + commit + push（推送所有本地待推送 commit）
 ```
 
@@ -117,7 +117,7 @@ NNN — 三位序号
 | 文件 | 说明 |
 |:-----|:-----|
 | `.review-level.yaml` | 项目评审级别 + 历史记录 |
-| `AUDITLOG.md` | 每次审查的完整审计日志 |
+| `review-log.md` | 每次审查的完整审计日志 |
 | `~/.hermes/REVIEW_POLICY.md` | 全局评审策略（L1/L2/L3 定义） |
 | `~/.hermes/profiles/review/skills/software-development/project-security-review/` | 审查 Skill 定义 |
 
@@ -148,7 +148,7 @@ session_search query="jaden.tech re-audit PASS" sort=newest
 cronjob action=list
 
 # 查看审计日志
-cat ~/CodeSpace/www.jaden.tech/AUDITLOG.md
+cat ~/CodeSpace/www.jaden.tech/review-log.md
 ```
 
 ---
