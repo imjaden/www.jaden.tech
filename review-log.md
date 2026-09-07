@@ -88,6 +88,28 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-09-07 — AUDITLOG.md 过期文档清理审计（W6）
+
+- **review者**: review/jaden-tech-review (hermes-0.20.6)
+- **范围**: 2 commit 清理审计 — `a69df7d` docs@cleanup: remove deprecated AUDITLOG.md + `46a135c` docs@sync: fix dangling references
+- **Tracking**: 无（docs 清理，无 SEC 发现）
+- **状态**: ✅ PASS
+- **报告**: 无（docs 清理 green batch，跳正式报告）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+4/4 检查项通过 + 1 项 🟡 协调项已当场修复。JT-SEC-010 / JT-SEC-013（🟢 仅记录）现仅存 git 历史 ff08fec，删除决策已确认，不迁移：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| 1 | 🟢 | 删除决策正确（697 行内容 git 历史 ff08fec 可溯，review-log.md 未受影响） | PASS |
+| 2 | 🟢 | 引用零残留（仅 review-log.md:76 注记；daily-tracker-review.md L54/L120/L151 已改指） | PASS |
+| 3 | 🟢 | git 卫生（两 commit 仅目标文件，worktree 干净，ahead 2） | PASS |
+| 4 | 🟡 | 夜间 cron prompt + skill 仍指向 AUDITLOG.md（仓库外，今晚 23:30 会重建） | ✅ RESOLVED（cron prompt「写 AUDITLOG」→「写 review-log.md」+ skill 改 single-log 约定） |
+
+---
+
 ## 条目格式说明
 
 ```
