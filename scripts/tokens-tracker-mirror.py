@@ -66,6 +66,80 @@ JS_SAFE_DETAIL = """  function renderLiveDetail(root, it) {
 FOOTER_OLD = "1acl-board-gen 生成, 勿手改"
 FOOTER_NEW = "公开镜像 · 自动同步 · 已脱敏过滤"
 
+# ── Site chrome injection (2026-09-07): github profile corner + home tab-bar ──
+# GitHub corner: same shape as index.html, but light triangle + dark octocat for
+# dark themed pages (index uses dark triangle on the light bear photo).
+GH_CORNER_HTML = (
+    '<a href="https://github.com/imjaden" class="github-corner" target="_blank" rel="noopener" '
+    'aria-label="View source on Github">'
+    '<svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true">'
+    '<path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" fill="#ffffff"></path>'
+    '<path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 '
+    'C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" '
+    'fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>'
+    '<path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 '
+    'C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 '
+    'C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 '
+    'C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 '
+    'C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 '
+    'C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>'
+    "</svg></a>"
+)
+
+HOME_TAB_HTML = (
+    '<div class="tab-bar home-tab">'
+    '<a class="tab-btn" href="../index.html">🏠 首页</a>'
+    "</div>"
+)
+
+CHROME_CSS = """
+/* site chrome: github corner + home tab-bar (dark-theme variants) */
+.github-corner {
+  position: fixed; top: 0; right: 0; z-index: 999; width: 72px; height: 72px;
+}
+.github-corner svg { fill: #fff; color: #151b23; position: absolute; top: 0; border: 0; right: 0; }
+.github-corner:hover svg { filter: drop-shadow(0 0 8px rgba(96,165,250,.5)); }
+.github-corner .octo-arm { transform-origin: 130px 106px; }
+.github-corner:hover .octo-arm { animation: octocat-wave 560ms ease-in-out; }
+@keyframes octocat-wave { 0%,100%{transform:rotate(0)} 20%,60%{transform:rotate(-25deg)} 40%,80%{transform:rotate(10deg)} }
+@media (max-width: 500px) { .github-corner:hover .octo-arm { animation: none; } }
+.tab-bar.home-tab {
+  background: rgba(22,27,34,.92); border-bottom: 1px solid #30363d;
+  display: flex; gap: 0; position: sticky; top: 0; z-index: 100;
+  border-radius: 6px 6px 0 0;
+}
+.tab-bar.home-tab .tab-btn {
+  background: transparent; border: none; color: #8b949e; padding: 8px 16px;
+  font-size: 13px; cursor: pointer; text-decoration: none;
+}
+.tab-bar.home-tab .tab-btn:hover { color: #e6edf3; background: #1c2333; text-decoration: none; }
+"""
+
+
+def inject_chrome(html: str) -> str:
+    """Add github-corner + home tab-bar to the mirrored page (deterministic)."""
+    if "github-corner" in html:
+        raise RuntimeError("chrome already present — refusing double inject")
+    # 1) corner right after <body ...>
+    m = re.search(r"(<body[^>]*>)", html)
+    if not m:
+        raise RuntimeError("no <body> — cannot inject chrome (fail-closed)")
+    html = html[: m.end()] + "\n" + GH_CORNER_HTML + html[m.end():]
+    # 2) style block before </head>
+    m = re.search(r"</head>", html)
+    if not m:
+        raise RuntimeError("no </head> — cannot inject chrome css (fail-closed)")
+    html = html[: m.start()] + "<style>" + CHROME_CSS + "</style>\n" + html[m.start():]
+    # 3) home tab bar before <header class="topbar"> (top of board-wrap)
+    m = re.search(r"(<header class=\"topbar\">)", html)
+    if not m:
+        # fallback: insert right after <div class="board-wrap">
+        m = re.search(r"(<div class=\"board-wrap\">)", html)
+        if not m:
+            raise RuntimeError("no topbar/board-wrap anchor — cannot inject tab-bar (fail-closed)")
+    html = html[: m.start()] + HOME_TAB_HTML + "\n" + html[m.start():]
+    return html
+
 
 def trunc(s):  # py3.9-compatible (no PEP 604 unions on this host python)
     s = s or ""
@@ -133,6 +207,7 @@ def main() -> int:
 
     src_html = SRC_INDEX.read_text(encoding="utf-8")
     new_html = transform(src_html)
+    new_html = inject_chrome(new_html)
     if not guard_ok(new_html, "index.html"):
         return 2
 
