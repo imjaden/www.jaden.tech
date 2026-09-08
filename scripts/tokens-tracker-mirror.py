@@ -89,6 +89,7 @@ GH_CORNER_HTML = (
 HOME_TAB_HTML = (
     '<div class="tab-bar home-tab">'
     '<a class="tab-btn" href="../index.html">🏠 首页</a>'
+    '<span class="tab-btn active" aria-current="page">🧩 1ACL Task</span>'
     "</div>"
 )
 
@@ -111,6 +112,9 @@ CHROME_CSS = """
 .tab-bar.home-tab .tab-btn {
   background: transparent; border: none; color: #8b949e; padding: 8px 16px;
   font-size: 13px; cursor: pointer; text-decoration: none;
+}
+.tab-bar.home-tab .tab-btn.active {
+  color: #7ee787; border-bottom: 2px solid #7ee787; font-weight: 600;
 }
 .tab-bar.home-tab .tab-btn:hover { color: #e6edf3; background: #1c2333; text-decoration: none; }
 """
