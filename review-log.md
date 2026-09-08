@@ -110,6 +110,25 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-09-08 — 夜间 L2 复审（site chrome feat + data sync）
+
+- **review者**: review/jaden-tech-review (hermes-0.20.6)
+- **范围**: 5 commit 复审 — `6bc1862..d755b9e`（2 feat@tokens-tracker site chrome + 3 data@update sync）
+- **Tracking**: JT-SEC-015（🟢 LOW，仅记录）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿（git diff 范围无密钥/PII），shell 注入无（list-form subprocess），XSS 无（textContent 渲染，无 innerHTML/document.write/eval），依赖 SRI 完整（chart.js@4.4.7 + html2canvas@1.4.1 integrity 未剥离），referrer meta 在 bmi-tracker/daily-tracker-archive 数据同步后未回归。site chrome 注入（`inject_chrome`）为静态字面量 + fail-closed + `rel="noopener"`，安全。1 项 🟢 仅记录：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| 1 | 🟢 LOW | tokens-tracker/index.html 缺 `referrer` meta（全站其余公开页均 `strict-origin-when-cross-origin`） | OPEN（生成产物，修复点：mirror `inject_chrome` 或源 hermes-manager 页） |
+
+---
+
 ## 条目格式说明
 
 ```
