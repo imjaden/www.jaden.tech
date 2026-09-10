@@ -129,6 +129,26 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-09-10 — 夜间 L2 复审（daily-poetry feat + tokens-tracker sync）
+
+- **review者**: review/jaden-tech-review (hermes-0.20.6)
+- **范围**: 3 commit 复审 — `9a23bd2` feat@daily-poetry（首页诗词行 + 月归档页，i18n aware）+ `e395da7` data@update: tokens-tracker sync + `8119fd4` fix@daily-poetry: github corner 对齐 profile
+- **Tracking**: JT-SEC-016, JT-SEC-017（🟢 LOW，仅记录）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿（约 2.5 万行诗词数据 static/js/today-poetry-*.js 无密钥/token/邮箱/手机号/私钥/外链），shell 注入无（既有 Python 脚本 list-form subprocess，本轮未改动），XSS 无活跃向量（index.html 诗词行用 textContent 渲染；daily-poetry.html innerHTML 仅注入静态离线生成数据，非用户输入），依赖 SRI 完整（chart.js@4.4.7 + html2canvas@1.4.1 integrity 未剥离），referrer meta 在 index/wechat/bmi-tracker 未回归。动态加载 today-poetry-{yymm}.js 文件名由日期派生、cache-bust 参数限 `\d+`，无路径注入；github-corner 均 `target="_blank"` + `rel="noopener"`。2 项 🟢 仅记录：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| 1 | 🟢 LOW | daily-poetry.html 用 innerHTML 渲染静态诗词字段（title/author/paragraphs/tags/match_reasons/lunar/节日/历史事件）未 HTML 转义；数据离线生成、非用户输入，无活跃 XSS 向量，防御纵深建议 textContent/escape | OPEN（仅记录） |
+| 2 | 🟢 LOW | daily-poetry.html 新页缺 `referrer` meta（全站其余公开页均 `strict-origin-when-cross-origin`；同 JT-SEC-015 类） | OPEN（仅记录） |
+
+---
+
 ## 条目格式说明
 
 ```
