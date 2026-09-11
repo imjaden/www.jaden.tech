@@ -149,6 +149,27 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-09-11 — 夜间 L2 复审（docs 归档 + data sync + daily-poetry 防御纵深 WIP）
+
+- **review者**: review/jaden-tech-review (hermes-0.20.6)
+- **范围**: 2 commit 复审 — `12071f8` docs@archive（daily-tracker-review 归档 + documents/README.md 索引）+ `64671ad` data@update: daily-tracker 09-10 sync + 工作树未提交 `daily-poetry.html` v1.3.3（JT-SEC-016/017 防御纵深修复，dev WIP）
+- **Tracking**: 无新发现；JT-SEC-016/017（🟢 LOW，工作树已有未提交修复）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿（docs 归档 + data 时间戳 sync + daily-poetry WIP diff 均无密钥/token/PII），shell 注入无（本轮无 Python/shell 改动），XSS 无活跃向量（daily-poetry.html 工作树新增 `esc()` 转义 + `referrer` meta，10 处数据驱动 innerHTML 插值全部转义；其余 innerHTML 仅静态常量/清空，无 `document.write`/`eval`/`outerHTML`）。data@update 仅改「生成时间」1 行，bmi-tracker.html 与 daily-tracker-archive 的 `referrer` meta + chart.js@4.4.7 SRI integrity 未剥离（无回归）。JT-SEC-016（innerHTML 转义）/ JT-SEC-017（referrer meta）在工作树已有未提交修复（dev WIP，按并行会话隔离原则未扫入本次 audit commit）：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | 数据同步未剥离 referrer/SRI（bmi-tracker + archive） | PASS |
+| — | 🟢 | JT-SEC-016 innerHTML 转义（esc() 纵深防御） | ⏳ 工作树已修复（daily-poetry.html v1.3.3，未提交，dev WIP） |
+| — | 🟢 | JT-SEC-017 referrer meta | ⏳ 工作树已修复（同上，未提交） |
+
+---
+
 ## 条目格式说明
 
 ```
