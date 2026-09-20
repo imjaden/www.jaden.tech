@@ -39,7 +39,7 @@
 </head>
 <body>
 <a href="https://github.com/imjaden" class="github-corner" target="_blank" rel="noopener" aria-label="View source on Github"><svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" fill="#ffffff"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
-<style>.wc-nav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:8px 14px;background:var(--surface-900,#15151f);border-bottom:1px solid #2a2a3e;font-size:0.8rem;position:sticky;top:0;z-index:50;}.wc-nav .wc-brand{font-weight:700;margin-right:10px;color:#e0e0e0;}.wc-nav a{color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px;white-space:nowrap;}.wc-nav a:hover{background:rgba(79,70,229,.15);color:#e0e0e0;}.wc-nav a.active{background:var(--cobalt-600,#4f46e5);color:#fff;}.wc-nav .wc-pub{margin-left:auto;display:flex;gap:2px;}</style>
+<style>.wc-nav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:8px 16px;background:var(--surface-900,#15151f);border-bottom:1px solid #2a2a3e;font-size:0.8rem;position:sticky;top:0;z-index:50;}.wc-nav .wc-brand{font-weight:700;margin-right:10px;color:#e0e0e0;}.wc-nav a{color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px;white-space:nowrap;}.wc-nav a:hover{background:rgba(79,70,229,.15);color:#e0e0e0;}.wc-nav a.active{background:var(--cobalt-600,#4f46e5);color:#fff;}.wc-nav .wc-pub{margin-left:auto;display:flex;gap:2px;}</style>
 <div class="wc-nav">
 <span class="wc-brand">Hermes 控制台</span>
 <a class="active" href="/1acl/index.html">Task</a>
@@ -57,11 +57,7 @@
     <h1>跨项目任务板</h1>
 
     <div class="meta-side">
-      <label class="switch" title="自动刷新开关（默认开, 每 10 分钟, 记忆状态, 跨页共享偏好）">
-        <input type="checkbox" id="auto-refresh" checked>
-        <span>自动刷新 10m</span><span id="refresh-state"></span>
-      </label>
-      <span>版本 2102e3c</span>
+      <span title="壳文件仅模板变更时更新（CL039 壳/数据分离）">静态壳</span>
       <span id="meta-count">共 0 条</span>
     </div>
   </header>
@@ -113,87 +109,18 @@
   <footer>跨项目任务板 · Task · 公开镜像 · 自动同步 · 已脱敏过滤</footer>
 </div>
 
-<script>window.LIVE_ITEMS = [
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL005",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-08-30",
-    "updated_at": "2026-08-30 09:22",
-    "desc": "heal 通知与留痕追溯"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL006",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-08-30",
-    "updated_at": "2026-08-30 23:21",
-    "desc": "hm-version + 1acl-scheduler 检查项"
-  }
-];</script>
-<script>window.BOARD_STATS = {
-  "running": 2,
-  "series": [
-    {
-      "api_calls": 138,
-      "cache_read_tokens": 17738496,
-      "date": "20260903",
-      "estimated_cost_usd": 0.1675,
-      "files": 15,
-      "total_tokens": 488594
-    },
-    {
-      "api_calls": 53,
-      "cache_read_tokens": 3131008,
-      "date": "20260904",
-      "estimated_cost_usd": 0.1439,
-      "files": 7,
-      "total_tokens": 285602
-    },
-    {
-      "api_calls": 54,
-      "cache_read_tokens": 3605248,
-      "date": "20260905",
-      "estimated_cost_usd": 0.1092,
-      "files": 25,
-      "total_tokens": 339065
-    },
-    {
-      "api_calls": 153,
-      "cache_read_tokens": 9791616,
-      "date": "20260906",
-      "estimated_cost_usd": 0.458,
-      "files": 8,
-      "total_tokens": 913269
-    },
-    {
-      "api_calls": 429,
-      "cache_read_tokens": 54455680,
-      "date": "20260907",
-      "estimated_cost_usd": 0.6114,
-      "files": 14,
-      "total_tokens": 1722072
-    },
-    {
-      "api_calls": 0,
-      "cache_read_tokens": 0,
-      "date": "20260908",
-      "estimated_cost_usd": 0.0,
-      "files": 0,
-      "total_tokens": 0
-    },
-    {
-      "api_calls": 0,
-      "cache_read_tokens": 0,
-      "date": "20260909",
-      "estimated_cost_usd": 0.0,
-      "files": 0,
-      "total_tokens": 0
-    }
-  ]
-};</script>
+<script>
+/* CL039 壳/数据分离: data 异步加载 + ready 事件 gate + 30m 整页刷新(H1) + 失败占位(J1) */
+(function () {
+  var ts = Date.now();
+  var s = document.createElement("script");
+  s.src = "data/live.js?t=" + ts;
+  s.onerror = function () { window.WEB_DATA_FAILED = true; };
+  document.head.appendChild(s);
+  setTimeout(function () { if (!window.WEB_DATA_READY) { window.WEB_DATA_FAILED = true; } }, 5000);
+  setTimeout(function () { var search = location.search.replace(/[?&](?:cb|t)=\d+/g, ""); location.replace(location.pathname + search + (search ? "&" : "?") + "t=" + Date.now()); }, 30 * 60 * 1000);
+})();
+</script>
 <script src="assets/common.js"></script>
 <script>
 /* CL038: Task 双 tab（?tab=history → 历史视图, 运行态默认） */
@@ -216,8 +143,9 @@
   "use strict";
   var HB = window.HB;
   var PAGE = "index";
-  var items = window.LIVE_ITEMS;
-  var sortState = { key: "number", dir: 1 };
+  var items = []; /* CL039: 数据到达后在 init 赋值 */
+  /* CL061 R9/E2A/O4: 默认排序 = 更新时间由近到远（生成器侧数据同序; 空值恒末尾） */
+  var sortState = { key: "updated_at", dir: -1 };
   var split = null; // {number, project}
 
   /* CL037: stats 区渲染（DOM/textContent 构建; SEC-1） */
@@ -316,10 +244,11 @@
       r = sa < sb ? -1 : (sa > sb ? 1 : 0);
     } else {
       var va = dateVal(a[sortState.key]), vb = dateVal(b[sortState.key]);
-      if (va === null && vb === null) { r = 0; }
-      else if (va === null) { r = 1; }
-      else if (vb === null) { r = -1; }
-      else { r = va - vb; }
+      /* CL061 O4: 空值（`-`）恒排末尾 —— 代码级指令: 空值分支**直接返回**,
+         **不乘** sortState.dir（否则 dir=-1 会把空值翻到最前, 与 G4A 冲突） */
+      if (va === null && vb !== null) { return 1; }
+      if (vb === null && va !== null) { return -1; }
+      r = (va === null && vb === null) ? 0 : va - vb;
       if (r === 0) { r = natCmp(a.number, b.number); }
     }
     if (r === 0) {
@@ -398,12 +327,18 @@
       th.addEventListener("click", function () {
         var k = th.getAttribute("data-sort");
         if (sortState.key === k) { sortState.dir = -sortState.dir; } else { sortState.key = k; sortState.dir = 1; }
-        headers.forEach(function (h) {
-          var hk = h.getAttribute("data-sort");
-          h.className = "sortable" + (hk === sortState.key ? (sortState.dir === 1 ? " sort-asc" : " sort-desc") : "");
-        });
+        markSort();
         render();
       });
+    });
+    markSort();   /* CL061 R9: 首屏即标注默认排序列（updated_at 降序） */
+  }
+
+  function markSort() {
+    document.querySelectorAll("#th-full th.sortable").forEach(function (h) {
+      var hk = h.getAttribute("data-sort");
+      h.className = "sortable" + (hk === sortState.key
+        ? (sortState.dir === 1 ? " sort-asc" : " sort-desc") : "");
     });
   }
 
@@ -423,17 +358,59 @@
     }
   }
 
-  /* init */
-  (function () {
+  /* CL039 数据失败占位（J1: 壳保留, 区域显示暂不可用） */
+  function dataPlaceholder() {
+    items = [];
+    var notice = document.getElementById("stats-notice");
+    if (notice) {
+      notice.textContent = "数据暂不可用（data/live.js 加载失败）; 30 分钟后自动重试";
+      notice.style.display = "";
+    }
+    var root = document.getElementById("stats-root");
+    if (root) { root.textContent = ""; }
+    var body = document.getElementById("board-body");
+    if (body) {
+      body.textContent = "";
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      td.className = "empty-row";
+      td.textContent = "数据暂不可用";
+      tr.appendChild(td);
+      body.appendChild(tr);
+    }
+  }
+
+  /* init（R2 gate: data js 置 window.WEB_DATA_READY 并派发 web-data-ready） */
+  function init() {
+    items = window.LIVE_ITEMS || [];
     var st = HB.loadSplit(PAGE);
     if (st && st.number && findItem(st.number, st.project)) { split = st; }
     initFromUrl(); // URL 深链优先
-    HB.bindRefreshSwitch(document.getElementById("auto-refresh"), document.getElementById("refresh-state"));
     bindSort();
     bindClose();
     renderStats();
     render();
-  })();
+  }
+
+  /* CL055 gate 契约（哨兵语义, 禁改）:
+     · 容器: web-data-ready 必须在 window 上监听（生成器在 window 派发）;
+     · 双哨兵: window.WEB_DATA_READY = 数据到达（生成器写）,
+       window.__PAGE_INITED = 本页渲染完成（壳写）; 置位点在 init() 返回之后
+       ⇒ init 抛异常时哨兵保持 false, 5s 后占位可见（失败不再静默）;
+     · 幂等: 重复触发只渲染一次; 慢加载先占位, 数据到达后由 initOnce 覆盖为真实内容;
+     · 占位 dataPlaceholder() = 全量重置（stats-root + 表格区）, 禁改成只清表格。 */
+  function initOnce() {
+    if (window.__PAGE_INITED) { return; }
+    init();
+    window.__PAGE_INITED = true;
+  }
+
+  if (window.WEB_DATA_READY) {
+    initOnce();
+  } else {
+    window.addEventListener("web-data-ready", initOnce);
+    setTimeout(function () { if (!window.__PAGE_INITED) { dataPlaceholder(); } }, 5000);
+  }
 })();
 </script>
 </body>
