@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
 """tokens-tracker mirror — sync hermes-manager 1acl run-state board into www repo.
 
-Flow (cron 23:10, no_agent):
-  1. Read source  hermes-manager/web/1acl/index.html (run-state board, generated every 10m by 1acl-board-gen)
-  2. PUBLIC-SAFE PROJECTION (A1 decision 2026-09-06, review 🔴-1):
+Contract (since hermes-manager CL039/CL058 — shell + data js split):
+  1. Source SHELL  hermes-manager/web/1acl/index.html (template only; loads data async)
+  2. Source DATA   hermes-manager/web/1acl/data/live.js (cron-rewritten every 10m, gitignored upstream):
+       window.WEB_DATA_META = {...};  window.LIVE_ITEMS = [...];
+       window.BOARD_STATS = {...};    window.WEB_DATA_READY = true; (+ web-data-ready event)
+     The shell injects `<script src="data/live.js?t=<ts>">` and gates rendering on the
+     window.WEB_DATA_READY double-sentinel — the mirrored data file MUST keep META/
+     LIVE_ITEMS/BOARD_STATS and the trailing READY sentinel + dispatchEvent verbatim-in-shape.
+  3. PUBLIC-SAFE PROJECTION (A1 decision 2026-09-06, review 🔴-1):
      - Whitelist rows by project (personal-cinema etc. NEVER mirrored)
      - Keep only safe columns: project/number/status/progress/created_at/updated_at + desc (≤40 chars)
-     - Drop full-text fields entirely: requirement/acceptance/retro_summary/retro_path/steps/prefix/...
-     - Replace common.js live-detail renderer with a safe summary renderer (no 需求全文/验收/复盘 sections)
-  3. Drop dead nav links (history/projects/guide are NOT mirrored — run-state only)
-  4. Copy assets/common.js (renderer-stripped) + style.css
+     - Drop full-text fields entirely: requirement/acceptance/retro_*/steps/prefix/... fields
+     - Drop internal-only META prose (source command string); keep structural metadata
+     - Replace common.js live-detail renderer with a safe summary renderer
+  4. Shell transform: path desensitization + drop nav-tabs (history/projects/guide not mirrored) + footer marker
   5. Guards (fail-closed, rc=2): no /Users/<user>/, no "jadenli", no sensitive-word hits
-     in final index.html AND in both assets
+     in ANY output (index.html, data/live.js, assets/common.js, assets/style.css)
   6. Commit only if content changed (no push; review profile pushes)
+
+Nav / cache-bust are handled by the shell contract (async loader with Date.now() cache-bust);
+the mirror only neutralises links to pages it does not publish.
 
 Exit/stdout: silent on no-change & success-without-change; print one line when committed.
 Never edits hermes-manager sources. Deterministic output → git clean when data unchanged.
@@ -26,20 +35,32 @@ import sys
 from pathlib import Path
 
 WWW_REPO = Path("/Users/jadenli/CodeSpace/www.jaden.tech")
-SRC_INDEX = Path("/Users/jadenli/CodeSpace/hermes-manager/web/1acl/index.html")
-SRC_ASSETS = Path("/Users/jadenli/CodeSpace/hermes-manager/web/1acl/assets")
+SRC_DIR = Path("/Users/jadenli/CodeSpace/hermes-manager/web/1acl")
+SRC_INDEX = SRC_DIR / "index.html"
+SRC_LIVE = SRC_DIR / "data" / "live.js"
+SRC_ASSETS = SRC_DIR / "assets"
 DST_DIR = WWW_REPO / "tokens-tracker"
 DST_INDEX = DST_DIR / "index.html"
+DST_LIVE = DST_DIR / "data" / "live.js"
 DST_ASSETS = DST_DIR / "assets"
 
 # A1 privacy boundary (2026-09-06): only these projects' task rows are public-safe.
 PROJECT_WHITELIST = {"daily-checker", "hermes-manager", "llm-radar"}
-# Fields kept per row (full-text fields requirement/acceptance/retro_summary/retro_path/
-# steps/prefix etc. are DROPPED — they carried the 🔴-1 leak).
+# Fields kept per row (full-text fields requirement/acceptance/retro_*/steps/prefix etc.
+# are DROPPED — they carried the 🔴-1 leak).
 KEEP_FIELDS = ("project", "number", "status", "progress", "created_at", "updated_at", "desc")
 DESC_MAX = 40
-# Row-level + final-output guard (hit → drop row / abort).
-SENSITIVE = re.compile(r"personal-cinema|JAV|磁力|Thunder|迅雷|飞书|阿里云|演员|actress|retro_path|retro_summary")
+# META fields dropped (internal-only prose; META is not read by the shell for rendering).
+META_DROP_FIELDS = ("source",)
+# Row-level + data-output guard (hit → drop row / abort).
+# Two levels: content words always; retro_*/full-text FIELD NAMES additionally on data
+# outputs (they must never appear in mirrored data), but NOT on JS assets where they are
+# legitimate code identifiers (e.g. the shared retroSection helper — driven by data we drop).
+_SENSITIVE_WORDS = r"personal-cinema|JAV|磁力|Thunder|迅雷|飞书|阿里云|演员|actress"
+SENSITIVE_LEAK = re.compile(
+    _SENSITIVE_WORDS + r"|retro_name|retro_slice|retro_slug|retro_path|retro_summary"
+)
+SENSITIVE_CONTENT = re.compile(_SENSITIVE_WORDS)
 LOCAL_PREFIX = re.compile(r"/Users/[^/]+/CodeSpace/")
 LOCAL_ANY = re.compile(r"/Users/[^/]+/|jadenli")
 
@@ -62,6 +83,13 @@ JS_SAFE_DETAIL = """  function renderLiveDetail(root, it) {
     card("创建 / 更新", String(it.created_at || "-") + " / " + String(it.updated_at || "-"));
   }
 """
+
+# live.js data-layer blocks (line-anchored close: `];`/`};` at column 0, pretty-printed).
+LIVE_META_RE = re.compile(r"window\.WEB_DATA_META = (\{.*?\n\});", re.S)
+LIVE_ITEMS_RE = re.compile(r"window\.LIVE_ITEMS = (\[.*?\n\]);", re.S)
+LIVE_STATS_RE = re.compile(r"window\.BOARD_STATS = (\{.*?\n\});", re.S)
+READY_TAIL_MARK = "window.WEB_DATA_READY = true;"
+LIVE_HEADER = "// 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)\n"
 
 FOOTER_OLD = "1acl-board-gen 生成, 勿手改"
 FOOTER_NEW = "公开镜像 · 自动同步 · 已脱敏过滤"
@@ -150,12 +178,8 @@ def trunc(s):  # py3.9-compatible (no PEP 604 unions on this host python)
     return s if len(s) <= DESC_MAX else s[:DESC_MAX] + "…"
 
 
-def project_items(html: str) -> tuple[list[dict], str, str]:
-    """Parse LIVE_ITEMS JSON block, return (kept items, json_block, indent)."""
-    m = re.search(r"(<script>window\.LIVE_ITEMS = )(\[.*?\n\]);</script>", html, re.S)
-    if not m:
-        raise RuntimeError("LIVE_ITEMS block not found")
-    items = json.loads(m.group(2))
+def project_items(items: list) -> list:
+    """Whitelist rows by project + safe-column projection + row-level sensitive guard."""
     kept = []
     for it in items:
         proj = it.get("project")
@@ -163,25 +187,59 @@ def project_items(html: str) -> tuple[list[dict], str, str]:
             continue
         row = {k: it.get(k) for k in KEEP_FIELDS}
         row["desc"] = trunc(row.get("desc"))
-        if SENSITIVE.search(json.dumps(row, ensure_ascii=False)):
+        if SENSITIVE_LEAK.search(json.dumps(row, ensure_ascii=False)):
             continue  # row-level guard: drop rows still carrying sensitive words
         kept.append(row)
-    return kept, m.group(1), m.group(2)
+    return kept
 
 
-def transform(html: str) -> str:
-    """Public-safe projection + desensitize + scope to run-state page."""
+def transform_shell(html: str) -> str:
+    """Desensitize the shell + drop links to pages the mirror does not publish."""
     # 1) path desensitization (E1/B1): /Users/<user>/CodeSpace/xxx -> xxx (project-relative)
     html = LOCAL_PREFIX.sub("", html)
     # 2) drop nav to non-mirrored pages (history/projects/guide → 404 otherwise)
     html = re.sub(r"\s*<nav class=\"nav-tabs\">.*?</nav>", "\n", html, flags=re.S)
-    # 3) LIVE_ITEMS → whitelist + safe-column projection
-    kept, pre, _json_block = project_items(html)
-    new_block = pre + json.dumps(kept, ensure_ascii=False, indent=2) + ";</script>"
-    html = re.sub(r"<script>window\.LIVE_ITEMS = \[.*?\n\];</script>", lambda _m: new_block, html, count=1, flags=re.S)
-    # 4) footer honesty marker (non-fatal if layout changed upstream)
+    # 3) footer honesty marker (non-fatal if layout changed upstream)
     html = html.replace(FOOTER_OLD, FOOTER_NEW)
     return html
+
+
+def transform_live(js: str) -> str:
+    """Project the CL039 data layer to public-safe content, keeping the shell contract.
+
+    Keeps: WEB_DATA_META (minus internal-only fields), projected LIVE_ITEMS, BOARD_STATS,
+    and the trailing WEB_DATA_READY sentinel + web-data-ready dispatch (render gate).
+    """
+    m_meta = LIVE_META_RE.search(js)
+    m_items = LIVE_ITEMS_RE.search(js)
+    m_stats = LIVE_STATS_RE.search(js)
+    if not (m_meta and m_items and m_stats):
+        missing = [
+            n
+            for n, m in (("WEB_DATA_META", m_meta), ("LIVE_ITEMS", m_items), ("BOARD_STATS", m_stats))
+            if not m
+        ]
+        raise RuntimeError(f"live.js blocks not found: {', '.join(missing)}")
+    tail = js[m_stats.end():]
+    if READY_TAIL_MARK not in tail or "web-data-ready" not in tail:
+        raise RuntimeError("live.js READY sentinel / web-data-ready dispatch missing — fail-closed")
+
+    meta = json.loads(m_meta.group(1))
+    for field in META_DROP_FIELDS:
+        meta.pop(field, None)
+    items = project_items(json.loads(m_items.group(1)))
+    stats = json.loads(m_stats.group(1))
+
+    def dump(value) -> str:
+        return json.dumps(value, ensure_ascii=False, indent=2)
+
+    return (
+        LIVE_HEADER
+        + "window.WEB_DATA_META = " + dump(meta) + ";\n"
+        + "window.LIVE_ITEMS = " + dump(items) + ";\n"
+        + "window.BOARD_STATS = " + dump(stats) + ";\n"
+        + tail.lstrip("\n")
+    )
 
 
 def transform_js(js: str) -> str:
@@ -193,8 +251,8 @@ def transform_js(js: str) -> str:
     return js[:i] + JS_SAFE_DETAIL + js[j:]
 
 
-def guard_ok(text: str, what: str) -> bool:
-    if LOCAL_ANY.search(text) or SENSITIVE.search(text):
+def guard_ok(text: str, what: str, pattern=SENSITIVE_LEAK) -> bool:
+    if LOCAL_ANY.search(text) or pattern.search(text):
         print(f"⚠️ tokens-tracker mirror: guard failed in {what}, aborting")
         return False
     return True
@@ -205,32 +263,40 @@ def main() -> int:
     ap.add_argument("--write-only", action="store_true", help="transform + write files, no git ops")
     args = ap.parse_args()
 
-    if not SRC_INDEX.exists():
-        print(f"⚠️ tokens-tracker mirror: source missing {SRC_INDEX}")
-        return 2
+    for src in (SRC_INDEX, SRC_LIVE):
+        if not src.exists():
+            print(f"⚠️ tokens-tracker mirror: source missing {src}")
+            return 2
 
-    src_html = SRC_INDEX.read_text(encoding="utf-8")
-    new_html = transform(src_html)
-    new_html = inject_chrome(new_html)
+    new_html = inject_chrome(transform_shell(SRC_INDEX.read_text(encoding="utf-8")))
     if not guard_ok(new_html, "index.html"):
         return 2
 
-    src_js = (SRC_ASSETS / "common.js").read_text(encoding="utf-8")
-    new_js = transform_js(src_js)
-    if not guard_ok(new_js, "common.js"):
+    new_live = transform_live(SRC_LIVE.read_text(encoding="utf-8"))
+    if not guard_ok(new_live, "data/live.js"):
+        return 2
+
+    new_js = transform_js((SRC_ASSETS / "common.js").read_text(encoding="utf-8"))
+    if not guard_ok(new_js, "common.js", SENSITIVE_CONTENT):
         return 2
 
     src_css = (SRC_ASSETS / "style.css").read_bytes()
-    if not guard_ok(src_css.decode("utf-8", errors="replace"), "style.css"):
+    if not guard_ok(src_css.decode("utf-8", errors="replace"), "style.css", SENSITIVE_CONTENT):
         return 2
 
     DST_DIR.mkdir(exist_ok=True)
+    DST_LIVE.parent.mkdir(exist_ok=True)
     DST_ASSETS.mkdir(exist_ok=True)
 
     changed = False
     old_html = DST_INDEX.read_text(encoding="utf-8") if DST_INDEX.exists() else None
     if old_html != new_html:
         DST_INDEX.write_text(new_html, encoding="utf-8")
+        changed = True
+
+    old_live = DST_LIVE.read_text(encoding="utf-8") if DST_LIVE.exists() else None
+    if old_live != new_live:
+        DST_LIVE.write_text(new_live, encoding="utf-8")
         changed = True
 
     old_js = (DST_ASSETS / "common.js").read_text(encoding="utf-8") if (DST_ASSETS / "common.js").exists() else None
@@ -250,7 +316,10 @@ def main() -> int:
     if not changed:
         return 0  # silent (no_agent watchdog pattern)
 
-    subprocess.run(["git", "add", "--", "tokens-tracker/index.html", "tokens-tracker/assets"], cwd=WWW_REPO, check=False)
+    subprocess.run(
+        ["git", "add", "--", "tokens-tracker/index.html", "tokens-tracker/data/live.js", "tokens-tracker/assets"],
+        cwd=WWW_REPO, check=False,
+    )
     r = subprocess.run(
         ["git", "commit", "-m", "data@update: tokens-tracker - auto sync"],
         capture_output=True, text=True, cwd=WWW_REPO,
