@@ -4,12 +4,12 @@ window.WEB_DATA_META = {
   "filtered_breakdown": {
     "draft": 2,
     "empty": 0,
-    "kept": 10,
+    "kept": 7,
     "window": 2
   },
-  "generated_at": "2026-09-20T22:07:33+08:00",
+  "generated_at": "2026-09-21T22:01:43+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "dba7c36",
+  "generator_version": "b9e462e",
   "pages": [
     "index"
   ]
@@ -17,79 +17,53 @@ window.WEB_DATA_META = {
 window.LIVE_ITEMS = [
   {
     "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL078",
+    "number": "HERMES-MANAGER-CL085",
     "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-09-20 20:57",
-    "updated_at": "2026-09-20 21:36",
-    "desc": "词表族二期（CL078）"
+    "progress": "[4/6] ops 核查",
+    "created_at": "2026-09-21 19:41",
+    "updated_at": "2026-09-21 20:05",
+    "desc": "hm loop 报告面残余 + 测试稳健性低优批（CL085）"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL084",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-09-21 16:47",
+    "updated_at": "2026-09-21",
+    "desc": "hm loop 报告面口径收口批（CL084）"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL083",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-09-21 13:32",
+    "updated_at": "2026-09-21",
+    "desc": "hm loop 治理收口批（CL083）"
   },
   {
     "project": "hermes-manager",
     "number": "HERMES-MANAGER-CL082",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-09-20 20:30",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-09-21 11:40",
+    "updated_at": "2026-09-21",
     "desc": "汇报标识硬要求（CL082）"
   },
   {
     "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL081",
+    "number": "HERMES-MANAGER-CL078",
     "status": "done",
     "progress": "[6/6]",
-    "created_at": "2026-09-20 15:31",
-    "updated_at": "2026-09-20",
-    "desc": "检查器多文件面增强（CL081）"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL080",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-09-20 11:46",
-    "updated_at": "2026-09-20",
-    "desc": "§10 差异定性 + 检查器面口径修订（CL080）"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL079",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-09-20 13:14",
-    "updated_at": "2026-09-20",
-    "desc": "draft 轮转丢弃完成项（CL079）"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL077",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-09-20 12:15",
-    "updated_at": "2026-09-20",
-    "desc": "hm loop 步 JSON 写盘时序缺陷（CL077）"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL075",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-09-18 10:49",
-    "updated_at": "2026-09-20",
-    "desc": "`hm check server` 新检查器（CL075）"
+    "created_at": "2026-09-20 20:57",
+    "updated_at": "2026-09-21",
+    "desc": "词表族二期（CL078）"
   }
 ];
 window.BOARD_STATS = {
   "running": 1,
   "series": [
-    {
-      "api_calls": 2667,
-      "cache_read_tokens": 522739968,
-      "date": "20260914",
-      "estimated_cost_usd": 4.5714,
-      "files": 45,
-      "total_tokens": 10750646
-    },
     {
       "api_calls": 1497,
       "cache_read_tokens": 291976576,
@@ -131,12 +105,20 @@ window.BOARD_STATS = {
       "total_tokens": 0
     },
     {
-      "api_calls": 5210,
-      "cache_read_tokens": 1063749760,
+      "api_calls": 5233,
+      "cache_read_tokens": 1065237248,
       "date": "20260920",
-      "estimated_cost_usd": 6.8286,
-      "files": 46,
-      "total_tokens": 15238113
+      "estimated_cost_usd": 6.9523,
+      "files": 47,
+      "total_tokens": 15343476
+    },
+    {
+      "api_calls": 7881,
+      "cache_read_tokens": 1545778304,
+      "date": "20260921",
+      "estimated_cost_usd": 13.5267,
+      "files": 33,
+      "total_tokens": 25491168
     }
   ]
 };
