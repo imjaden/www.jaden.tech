@@ -170,6 +170,28 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-09-23 — 夜间 L2 复审（tokens-tracker 壳/数据分离重构 + data sync + daily-poetry WIP 持续）
+
+- **review者**: review/jaden-tech-review
+- **范围**: 12 commit 复审 — `4fabf05..661ddf2`（1 fix@tokens-tracker 壳/数据分离重构 CL058 + 11 data@update sync）+ 工作树未提交 `daily-poetry.html` v1.3.3（JT-SEC-016/017 防御纵深修复，dev WIP）
+- **Tracking**: 无新发现；JT-SEC-015（🟢 LOW，仍 OPEN）；JT-SEC-016/017（🟢 LOW，工作树已修复未提交）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿（diff 范围无密钥/token/PII；`total_tokens`/`cache_read_tokens` 为 1acl 用量统计字段，非凭证），shell 注入无（`subprocess.run` 全 list-form，无 `shell=True`/`os.system`/`eval`），XSS 无活跃向量（tokens-tracker 壳/数据分离后渲染全 textContent、`common.js` 注释明示「禁 innerHTML」；cache-bust `ts = Date.now()` 数值型、`location.search` 经 `replace(/[?&](?:cb|t)=\d+/g,"")` 净化，无路径注入），依赖 SRI 完整（chart.js@4.4.7 + html2canvas@1.4.1 integrity 未剥离），referrer meta 在 index/wechat/bmi-tracker/archive/daily-poetry 未回归。fix@tokens-tracker（12c69e9）壳/数据分离重构安全：`transform_live` 解析 live.js 三块（META/ITEMS/STATS）+ READY 哨兵 fail-closed（缺失即 rc=2 abort），`SENSITIVE_LEAK`（数据层，含 retro_* 字段名）vs `SENSITIVE_CONTENT`（资产层，仅内容词）双层守卫合理，镜像产物（index.html/data/live.js/assets）脱敏验证干净（无 personal-cinema/JAV/retro_*/本地路径/用户名）。data@update 仅改「生成时间」+ 体重数据，无回归：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | data@update 未剥离 referrer/SRI（bmi-tracker + archive） | PASS |
+| — | 🟢 | tokens-tracker 镜像脱敏（无敏感词/路径/用户名） | PASS |
+| — | 🟢 | JT-SEC-015 tokens-tracker/index.html 缺 referrer meta | OPEN（生成产物，修复点 mirror inject_chrome 或源页） |
+| — | 🟢 | JT-SEC-016 innerHTML 转义 / JT-SEC-017 referrer meta | ⏳ 工作树已修复（daily-poetry.html v1.3.3，未提交，dev WIP） |
+
+---
+
 ## 条目格式说明
 
 ```
