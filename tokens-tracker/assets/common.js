@@ -393,6 +393,52 @@
     document.getElementById("d-proj").textContent = projText;
   }
 
+  /* ═══ CL087 D7: 项目筛选（pill 组; URL ?pfilter= ↔ localStorage 联动）═══
+     口径: 列值 "-" = 未归属; 空串 = 全部。同一 page 维度独立记忆。 */
+  function projectFilterKey(page) { return "1acl-board:" + page + ":pfilter"; }
+  function loadProjectFilter(page) {
+    var v = "";
+    try { v = urlParams().get("pfilter") || localStorage.getItem(projectFilterKey(page)) || ""; }
+    catch (e) { v = ""; }
+    return v || "";
+  }
+  function saveProjectFilter(page, val) {
+    try {
+      if (val) { localStorage.setItem(projectFilterKey(page), val); }
+      else { localStorage.removeItem(projectFilterKey(page)); }
+    } catch (e) {}
+    try {
+      var u = new URL(location.href);
+      if (val) { u.searchParams.set("pfilter", val); } else { u.searchParams.delete("pfilter"); }
+      history.replaceState(null, "", u.toString());
+    } catch (e) {}
+  }
+  function projectValues(rows, key) {
+    /* 观测值去重（"-" 恒末尾）; rows 元素取 rows[i][key] */
+    var seen = {}, out = [];
+    (rows || []).forEach(function (r) {
+      var v = String((r || {})[key] || "-");
+      if (!seen[v]) { seen[v] = 1; out.push(v); }
+    });
+    out.sort(function (a, b) {
+      if (a === "-") { return 1; }
+      if (b === "-") { return -1; }
+      return a < b ? -1 : (a > b ? 1 : 0);
+    });
+    return out;
+  }
+  function projectPills(host, values, current, onPick) {
+    if (!host) { return; }
+    host.textContent = "";
+    [""].concat(values || []).forEach(function (v) {
+      var b = el("button", "pill" + ((current || "") === v ? " on" : ""), v || "全部");
+      b.type = "button";
+      b.title = v ? ("只看项目 " + v) : "显示全部项目";
+      b.addEventListener("click", function () { onPick(v); });
+      host.appendChild(b);
+    });
+  }
+
   window.HB = {
     el: el, copyText: copyText, copyBtn: copyBtn,
     fmtDur: fmtDur, fmtNum: fmtNum, fmtCompact: fmtCompact,
@@ -403,6 +449,8 @@
     mdToFragment: mdToFragment, mdInlineNodes: inlineNodes,
     retroSection: retroSection, expandControl: expandControl,
     loadRetro: loadRetro, retroVar: retroVar, filesCell: filesCell,
-    openPanel: openPanel, closePanel: closePanel, fillPanelHead: fillPanelHead
+    openPanel: openPanel, closePanel: closePanel, fillPanelHead: fillPanelHead,
+    loadProjectFilter: loadProjectFilter, saveProjectFilter: saveProjectFilter,
+    projectValues: projectValues, projectPills: projectPills
   };
 })();

@@ -54,6 +54,16 @@ body { font-family: var(--font-sans); background: var(--surface-950); color: var
 .switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; color: var(--text-dim); font-size: 0.72rem; }
 .switch input { accent-color: var(--cobalt-500); }
 .notice { background: rgba(250,204,21,0.08); border: 1px solid rgba(250,204,21,0.35); color: var(--accent-400); border-radius: var(--radius-md); padding: 4px 10px; font-size: 0.72rem; margin-bottom: 10px; }
+/* CL087 D7: 项目筛选条（pill 组; URL ?pfilter= ↔ localStorage 联动）—— index/history 共用 */
+.filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 10px 0; }
+.filter-label { color: #6b7280; font-size: 0.72rem; white-space: nowrap; }
+.pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { background: #16161f; color: #9ca3af; border: 1px solid #2a2a3e;
+  border-radius: var(--radius-full); padding: 2px 10px; font-size: 0.72rem;
+  cursor: pointer; font-family: inherit; }
+.pill:hover { border-color: var(--cobalt-500); color: #e0e0e0; }
+.pill.on { background: var(--cobalt-600); border-color: var(--cobalt-600); color: #fff; }
+.data-table th.col-project, .data-table td.col-project { min-width: 110px; color: var(--text-dim); font-size: 0.74rem; }
 
 /* 标准表格（html help table 模板样式） */
 .table-card { border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-900); }

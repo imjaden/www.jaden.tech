@@ -10,6 +10,7 @@
 #view-history { padding: 8px 14px 0; }
 #view-history iframe { width: 100%; height: calc(100vh - 320px); min-height: 480px;
   border: 0; border-radius: 8px; background: #0e0e16; display: block; }
+/* CL087 D7 项目筛选条样式在 assets/style.css（index/history 共用） */
 </style>
 <style>
 /* site chrome: github corner + home tab-bar (dark-theme variants) */
@@ -58,10 +59,16 @@
 
     <div class="meta-side">
       <span title="壳文件仅模板变更时更新（CL039 壳/数据分离）">静态壳</span>
+      <span id="meta-generated" title="数据生成时间（data/live.js 的 WEB_DATA_META）; 超 30 小时未刷新标 ⚠️">生成 –</span>
       <span id="meta-count">共 0 条</span>
     </div>
   </header>
   <div id="view-run">
+  <div class="filter-bar" id="filter-bar">
+    <span class="filter-label">项目</span>
+    <span class="pill-group" id="project-pills"></span>
+  </div>
+  <div id="data-alert" class="notice" style="display:none"></div>
   <div class="stats-section" id="stats-section">
     <div id="stats-root"></div>
     <div id="stats-notice" class="notice" style="display:none">统计暂不可用（stats 数据源失败; 任务表仍为最新, 下次 cron 刷新自动重试）</div>
@@ -74,6 +81,7 @@
             <thead id="th-full">
               <tr>
                 <th data-sort="number" class="sortable col-number">编号</th>
+                <th data-sort="project" class="sortable col-project">项目</th>
                 <th data-sort="status" class="sortable">状态</th>
                 <th data-sort="progress" class="sortable col-progress">进度</th>
                 <th data-sort="desc" class="sortable">描述</th>
@@ -147,6 +155,39 @@
   /* CL061 R9/E2A/O4: 默认排序 = 更新时间由近到远（生成器侧数据同序; 空值恒末尾） */
   var sortState = { key: "updated_at", dir: -1 };
   var split = null; // {number, project}
+  /* CL087 D7: 项目筛选（"" = 全部; "-" = 未归属）; URL ?pfilter= ↔ localStorage */
+  var projectFilter = HB.loadProjectFilter(PAGE);
+
+  function filtered() {
+    if (!projectFilter) { return items; }
+    return items.filter(function (it) {
+      return String(it.project || "-") === projectFilter;
+    });
+  }
+
+  function renderFilter() {
+    var host = document.getElementById("project-pills");
+    if (!host) { return; }
+    var bar = document.getElementById("filter-bar");
+    if (bar) { bar.style.display = items.length ? "" : "none"; }
+    HB.projectPills(host, HB.projectValues(items, "project"), projectFilter, function (v) {
+      projectFilter = v || "";
+      HB.saveProjectFilter(PAGE, projectFilter);
+      renderFilter();   /* CL087: 重建 pill 选中态（否则高亮停在上一次选中项） */
+      render();
+    });
+  }
+
+  /* CL087 D8: 数据时效（生成时间 + 偏旧告警; 失败横幅由 gate 负责） */
+  function renderFreshness() {
+    var m = window.WEB_DATA_META || {};
+    var g = document.getElementById("meta-generated");
+    if (!g) { return; }
+    var ts = String(m.generated_at || "");
+    var t = Date.parse(ts.replace(" ", "T"));
+    var stale = !isNaN(t) && (Date.now() - t) > 30 * 3600 * 1000;
+    g.textContent = "生成 " + (ts || "未知") + (stale ? " ⚠️ 偏旧" : "");
+  }
 
   /* CL037: stats 区渲染（DOM/textContent 构建; SEC-1） */
   function renderStats() {
@@ -239,9 +280,11 @@
     else if (sortState.key === "desc") {
       var da = String(a.desc || ""), db = String(b.desc || "");
       r = da < db ? -1 : (da > db ? 1 : 0);
-    } else if (sortState.key === "status" || sortState.key === "progress") {
+    } else if (sortState.key === "status" || sortState.key === "progress"
+               || sortState.key === "project") {
       var sa = String(a[sortState.key] || ""), sb = String(b[sortState.key] || "");
       r = sa < sb ? -1 : (sa > sb ? 1 : 0);
+      if (r === 0) { r = natCmp(a.number, b.number); }
     } else {
       var va = dateVal(a[sortState.key]), vb = dateVal(b[sortState.key]);
       /* CL061 O4: 空值（`-`）恒排末尾 —— 代码级指令: 空值分支**直接返回**,
@@ -258,6 +301,8 @@
     return r * sortState.dir;
   }
   function ordered() { return items.slice().sort(compare); }
+  /* CL087 D7: 先筛选后排序（筛选不改变排序口径） */
+  function orderedRows(rows) { return rows.slice().sort(compare); }
 
   /* 编号链接: 点同一编号=退出分栏; 点其他编号=切换详情; 无任何筛选 */
   function numLink(it) {
@@ -284,8 +329,9 @@
     document.getElementById("main-table").classList.toggle("mode-split", splitMode);
     document.querySelector(".board-main").classList.toggle("split-on", splitMode);
     var it0 = splitMode ? findItem(split.number, split.project) : null;
+    var rows = filtered();                      /* CL087 D7: 项目筛选后行集 */
 
-    ordered().forEach(function (it) {
+    orderedRows(rows).forEach(function (it) {
       var tr = HB.el("tr");
       var sel = splitMode && keyOf(it) === keyOf(it0);
       if (sel) { tr.className = "selected"; }
@@ -294,6 +340,7 @@
         tr.appendChild(HB.el("td", "progress-cell col-progress", it.progress || "-"));
       } else {
         var tdA = HB.el("td", "col-number"); tdA.appendChild(numLink(it)); tr.appendChild(tdA);
+        tr.appendChild(HB.el("td", "col-project", it.project || "-"));
         var tdS = HB.el("td"); tdS.appendChild(HB.statusBadge(it.status)); tr.appendChild(tdS);
         tr.appendChild(HB.el("td", "progress-cell col-progress", it.progress || "-"));
         tr.appendChild(HB.el("td", "col-desc", it.desc));
@@ -302,10 +349,15 @@
       }
       body.appendChild(tr);
     });
-    if (!items.length) {
-      var e = HB.el("tr"); e.appendChild(HB.el("td", "empty-row", "（无队列任务数据）")); body.appendChild(e);
+    if (!rows.length) {
+      var e = HB.el("tr");
+      e.appendChild(HB.el("td", "empty-row", projectFilter
+        ? "（项目 " + projectFilter + " 下无任务; 点「全部」清除筛选）"
+        : "（无队列任务数据）"));
+      body.appendChild(e);
     }
-    document.getElementById("meta-count").textContent = "共 " + items.length + " 条";
+    document.getElementById("meta-count").textContent = "共 " + rows.length + " 条" +
+      (projectFilter ? " · 筛选 " + projectFilter : "");
     if (splitMode) {
       showDetail(it0);
     } else {
@@ -361,6 +413,11 @@
   /* CL039 数据失败占位（J1: 壳保留, 区域显示暂不可用） */
   function dataPlaceholder() {
     items = [];
+    /* CL087: 占位 = 全量重置（含筛选 pill 组与时效标记） */
+    var pills = document.getElementById("project-pills");
+    if (pills) { pills.textContent = ""; }
+    var bar = document.getElementById("filter-bar");
+    if (bar) { bar.style.display = "none"; }
     var notice = document.getElementById("stats-notice");
     if (notice) {
       notice.textContent = "数据暂不可用（data/live.js 加载失败）; 30 分钟后自动重试";
@@ -388,8 +445,15 @@
     initFromUrl(); // URL 深链优先
     bindSort();
     bindClose();
+    renderFilter();      /* CL087 D7 */
+    renderFreshness();   /* CL087 D8 */
     renderStats();
     render();
+    var alert = document.getElementById("data-alert");
+    if (alert && window.WEB_DATA_FAILED) {
+      alert.textContent = "⚠️ data/live.js 加载失败: 表格为空壳, 30 分钟后自动重试（生成器 cron 也可能失败, 见 meta-web 页）";
+      alert.style.display = "";
+    }
   }
 
   /* CL055 gate 契约（哨兵语义, 禁改）:

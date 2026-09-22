@@ -1,77 +1,123 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 4,
+  "filtered": 2,
   "filtered_breakdown": {
     "draft": 2,
     "empty": 0,
-    "kept": 7,
-    "window": 2
+    "kept": 14,
+    "window": 0
   },
-  "generated_at": "2026-09-21T22:01:43+08:00",
+  "generated_at": "2026-09-22T21:50:46+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "b9e462e",
+  "generator_version": "886aa1f",
   "pages": [
     "index"
   ]
 };
 window.LIVE_ITEMS = [
   {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL021",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-09-22 21:11",
+    "desc": "banner 主体文案与快照陈旧尾标语义冲突修复"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL020",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-09-22 21:11",
+    "desc": "状态/只读路径异常兜底补齐（`state.py` 裸读）"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL019",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-09-22 21:11",
+    "desc": "gold-price 隔离失效修复（STATE_DB 硬编码绕过 CHECKIN…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL088",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-09-22 15:48",
+    "desc": "**1ACL 效率优化·口径修复（CL088）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL087",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-09-22",
+    "desc": "**1acl 通知链路与看板项目筛选·时效性（CL087）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL086",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-09-22 09:53",
+    "updated_at": "2026-09-22",
+    "desc": "hm loop 测试跨日耦合修复 + 判据口径批（CL086）"
+  },
+  {
     "project": "hermes-manager",
     "number": "HERMES-MANAGER-CL085",
-    "status": "active",
-    "progress": "[4/6] ops 核查",
-    "created_at": "2026-09-21 19:41",
-    "updated_at": "2026-09-21 20:05",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-09-22 07:02",
+    "updated_at": "2026-09-22",
     "desc": "hm loop 报告面残余 + 测试稳健性低优批（CL085）"
   },
   {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL084",
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL017",
     "status": "done",
     "progress": "[6/6]",
-    "created_at": "2026-09-21 16:47",
-    "updated_at": "2026-09-21",
-    "desc": "hm loop 报告面口径收口批（CL084）"
+    "created_at": "2026-09-22",
+    "updated_at": "2026-09-22",
+    "desc": "面板采集线程启动修复与快照新鲜度可见性"
   },
   {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL083",
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL016",
     "status": "done",
     "progress": "[6/6]",
-    "created_at": "2026-09-21 13:32",
-    "updated_at": "2026-09-21",
-    "desc": "hm loop 治理收口批（CL083）"
+    "created_at": "2026-09-22",
+    "updated_at": "2026-09-22",
+    "desc": "checkpoint 透明化与自助完善性"
   },
   {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL082",
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL006",
     "status": "done",
     "progress": "[6/6]",
-    "created_at": "2026-09-21 11:40",
-    "updated_at": "2026-09-21",
-    "desc": "汇报标识硬要求（CL082）"
+    "created_at": "2026-08-30",
+    "updated_at": "2026-09-22",
+    "desc": "hm-version + 1acl-scheduler 检查项"
   },
   {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL078",
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL005",
     "status": "done",
     "progress": "[6/6]",
-    "created_at": "2026-09-20 20:57",
-    "updated_at": "2026-09-21",
-    "desc": "词表族二期（CL078）"
+    "created_at": "2026-08-30",
+    "updated_at": "2026-09-22",
+    "desc": "heal 通知与留痕追溯"
   }
 ];
 window.BOARD_STATS = {
-  "running": 1,
+  "running": 0,
   "series": [
-    {
-      "api_calls": 1497,
-      "cache_read_tokens": 291976576,
-      "date": "20260915",
-      "estimated_cost_usd": 2.293,
-      "files": 18,
-      "total_tokens": 5804318
-    },
     {
       "api_calls": 7210,
       "cache_read_tokens": 1779866688,
@@ -113,12 +159,20 @@ window.BOARD_STATS = {
       "total_tokens": 15343476
     },
     {
-      "api_calls": 7881,
-      "cache_read_tokens": 1545778304,
+      "api_calls": 10478,
+      "cache_read_tokens": 2065260672,
       "date": "20260921",
-      "estimated_cost_usd": 13.5267,
-      "files": 33,
-      "total_tokens": 25491168
+      "estimated_cost_usd": 16.8813,
+      "files": 37,
+      "total_tokens": 32962547
+    },
+    {
+      "api_calls": 7917,
+      "cache_read_tokens": 1301520640,
+      "date": "20260922",
+      "estimated_cost_usd": 13.7198,
+      "files": 41,
+      "total_tokens": 27455847
     }
   ]
 };
