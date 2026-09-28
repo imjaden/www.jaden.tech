@@ -192,6 +192,27 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-09-28 — 夜间 L2 复审（data sync + daily-poetry WIP 持续）
+
+- **review者**: review/jaden-tech-review
+- **范围**: 6 commit 复审 — `d8172cb..aa70256`（6 data@update: daily-tracker 09-23~09-28 sync，仅改「生成时间」1 行时间戳）+ 工作树未提交 `daily-poetry.html` v1.3.3（JT-SEC-016/017 防御纵深修复，dev WIP）
+- **Tracking**: 无新发现；JT-SEC-015（🟢 LOW，仍 OPEN）；JT-SEC-016/017（🟢 LOW，工作树已修复未提交）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿（6 data@update diff 仅「生成时间」1 行时间戳，无密钥/token/PII），shell 注入无（本轮无 Python/shell 改动），XSS 无活跃向量（daily-poetry.html 工作树 WIP 继续：`esc()` 转义已覆盖诗词卡片/信息项全部数据驱动 innerHTML 插值，剩余 innerHTML 为静态常量/清空/SEASON_GROUPS 硬编码节气名，无 `document.write`/`eval`/`outerHTML`），依赖 SRI 完整（bmi-tracker.html + daily-tracker-archive chart.js@4.4.7 integrity 未剥离），referrer meta 在 bmi-tracker/archive 数据同步后未回归（`strict-origin-when-cross-origin` 保留）：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | data@update 未剥离 referrer/SRI（bmi-tracker + archive） | PASS |
+| — | 🟢 | JT-SEC-015 tokens-tracker/index.html 缺 referrer meta | OPEN（生成产物，修复点 mirror inject_chrome 或源页） |
+| — | 🟢 | JT-SEC-016 innerHTML 转义 / JT-SEC-017 referrer meta | ⏳ 工作树已修复（daily-poetry.html v1.3.3，未提交，dev WIP） |
+
+---
+
 ## 条目格式说明
 
 ```
