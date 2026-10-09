@@ -276,6 +276,29 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-10-09 — tokens-tracker 镜像守卫分档 + 历史明细不公开 复审
+
+- **review者**: Security Reviewer（review profile）
+- **范围**: 1 commit 复审 — `a267a55` fix@mirror: 守卫分档 + 历史明细不公开（CL072 / SCRIPT-MINER-CL072 转交件落地）— 5 文件 = `scripts/tokens-tracker-mirror.py` + 产物 `tokens-tracker/{index.html,data/live.js,assets/common.js,assets/style.css}`
+- **Tracking**: 无新 🔴/🟡；JT-SEC-018（🟢 LOW，仅记录：wc-nav 绝对内链）；JT-SEC-015（🟢 LOW，仍 OPEN）；JT-SEC-016/017（🟢 LOW，工作树 daily-poetry.html 未提交，禁夹带）
+- **状态**: ✅ PASS
+- **报告**: documents/reviews/tokens-tracker-mirror-guard-tiers-20261009.md
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+守卫分档与 HIST_TASKS 置空两项修复独立复跑全绿：`--write-only` rc=0（跑后仅剩 `M daily-poetry.html`）；四产物文件逐项 grep 6 敏感词全 0；`data/live.js` retro_* 0 处（数据面严格档），index.html/common.js 6 行 retro_* 为渲染器代码标识符（读已删除字段恒 undefined）；源 7 块 → 产物 7 块逐块闭环（投影×2 / 置空×1 / 保留×4），无未处理块；源 1.5MB → 产物 8KB，`HIST_TASKS = []` + `WEB_DATA_READY`/`web-data-ready` 哨兵保留；壳侧 `window.HIST_TASKS || []` 兜底 + `mergeStatus`/`mergeRows` null-safe，置空无新增语义错误；`node --check` 两文件 OK；`?t=1788947889` index/wechat 同值。R2 内容词跨档仍拦（脚本级单测 6 词全 PASS，仅 retro_* 字段名对资产档放宽）；R3 INLINE_DATA 注入反例实证 rc=2 中止；R5 cron `b50a871b2fc7`（23:10 wrapper 裸跑、exit 码语义不变）修复 16 天 failure_streak，今晚恢复：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | 守卫分档正确：内容词跨档拦截，仅 retro_* 代码标识符放宽 | PASS |
+| — | 🟢 | HIST_TASKS 置空 + fail-closed 命中==1，数据面 0 敏感 | PASS |
+| — | 🟢 | INLINE_DATA fail-closed（注入反例 rc=2 实证） | PASS |
+| — | 🟢 | JT-SEC-018 wc-nav 全局菜单绝对内链（Dashboard/Memory/Cron Job 新暴露，404 + 内部结构披露） | OPEN（仅记录，建议 transform_shell 后续中和 wc-nav） |
+| — | 🟢 | commit 自述「retro_* 5 处」与实际 6 行计数出入 | 记录（非安全影响） |
+
+---
+
 ## 条目格式说明
 
 ```
