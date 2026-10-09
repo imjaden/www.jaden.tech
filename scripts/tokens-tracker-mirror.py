@@ -15,7 +15,9 @@ Contract (since hermes-manager CL039/CL058 — shell + data js split):
      - Drop full-text fields entirely: requirement/acceptance/retro_*/steps/prefix/... fields
      - Drop internal-only META prose (source command string); keep structural metadata
      - Replace common.js live-detail renderer with a safe summary renderer
-  4. Shell transform: path desensitization + drop nav-tabs (history/projects/guide not mirrored) + footer marker
+  4. Shell transform: path desensitization + drop nav-tabs (history/projects/guide not mirrored)
+     + neutralise wc-nav (JT-SEC-018: root-absolute internal routes) + referrer meta (JT-SEC-015)
+     + footer marker
   5. Guards (fail-closed, rc=2): no /Users/<user>/, no "jadenli", no sensitive-word hits
      in ANY output (index.html, data/live.js, assets/common.js, assets/style.css).
      Two tiers (2026-09-20 split; index.html re-tiered 2026-10-09):
@@ -77,6 +79,18 @@ INLINE_DATA = re.compile(r"window\.(LIVE_ITEMS|WEB_DATA_META|BOARD_STATS)\s*=\s*
 HIST_TASKS_BLOCK = re.compile(r"(?m)^(\s*)window\.HIST_TASKS\s*=\s*\[[\s\S]*?(?=^\s*window\.|\Z)")
 LOCAL_PREFIX = re.compile(r"/Users/[^/]+/CodeSpace/")
 LOCAL_ANY = re.compile(r"/Users/[^/]+/|jadenli")
+
+# JT-SEC-018 (2026-10-09): the console global menu links to root-absolute internal routes
+# (/index.html, /1acl/*, /session/, /memory/, /cron/) — all 404 on the mirror AND disclose the
+# internal page map. Neutralise the block (brand kept, no links) and abort if ANY root-absolute
+# href/src survives into the published output (fail-closed; also catches upstream re-additions).
+WC_NAV_BLOCK = re.compile(r'<div class="wc-nav">.*?</div>', flags=re.S)
+WC_NAV_SAFE = '<div class="wc-nav"><span class="wc-brand">Hermes 控制台 · 公开镜像</span></div>'
+ROOT_ABS_REF = re.compile(r'(?:href|src)="(/[^"/][^"]*)"')
+
+# JT-SEC-015 (2026-10-09): every other public page on the site carries a referrer policy;
+# the mirrored board must too (injected into <head>, idempotent).
+REFERRER_META = '<meta name="referrer" content="strict-origin-when-cross-origin">'
 
 # common.js markers for the live-detail renderer replacement (fail-closed if missing).
 JS_RENDER_OPEN = "  function renderLiveDetail(root, it) {"
@@ -166,6 +180,12 @@ def inject_chrome(html: str) -> str:
     """Add github-corner + home tab-bar to the mirrored page (deterministic)."""
     if "github-corner" in html:
         raise RuntimeError("chrome already present — refusing double inject")
+    # 0) JT-SEC-015: referrer policy meta (idempotent; fail-closed if <head> anchor is gone)
+    if 'name="referrer"' not in html:
+        m = re.search(r'(<meta name="viewport"[^>]*>)', html)
+        if not m:
+            raise RuntimeError("no viewport meta — cannot inject referrer (fail-closed)")
+        html = html[: m.end()] + "\n" + REFERRER_META + html[m.end():]
     # 1) corner right after <body ...>
     m = re.search(r"(<body[^>]*>)", html)
     if not m:
@@ -213,6 +233,9 @@ def transform_shell(html: str) -> str:
     html = LOCAL_PREFIX.sub("", html)
     # 2) drop nav to non-mirrored pages (history/projects/guide → 404 otherwise)
     html = re.sub(r"\s*<nav class=\"nav-tabs\">.*?</nav>", "\n", html, flags=re.S)
+    # 2b) JT-SEC-018: neutralise the console global menu (root-absolute internal routes).
+    #     Non-fatal here — main() fails closed if any root-absolute ref survives anyway.
+    html = WC_NAV_BLOCK.sub(WC_NAV_SAFE, html)
     # 3) footer honesty marker (non-fatal if layout changed upstream)
     html = html.replace(FOOTER_OLD, FOOTER_NEW)
     return html
@@ -299,6 +322,15 @@ def main() -> int:
     new_html = inject_chrome(transform_shell(SRC_INDEX.read_text(encoding="utf-8")))
     if INLINE_DATA.search(new_html):
         print("⚠️ tokens-tracker mirror: index.html inlines a data block (shell contract regression), aborting")
+        return 2
+    # JT-SEC-018 fail-closed: no root-absolute href/src may be published (dead internal routes).
+    leftovers = sorted(set(ROOT_ABS_REF.findall(new_html)))
+    if leftovers:
+        print(f"⚠️ tokens-tracker mirror: root-absolute refs in output {leftovers} (JT-SEC-018 regression), aborting")
+        return 2
+    # JT-SEC-015 fail-closed: the published page must carry the referrer policy.
+    if REFERRER_META not in new_html:
+        print("⚠️ tokens-tracker mirror: referrer meta missing in output (JT-SEC-015 regression), aborting")
         return 2
     # index.html 是壳/资产档（数据在 data/live.js）⇒ 走内容档，严格档留给数据输出。
     # 2026-10-09 修: 此前用默认 SENSITIVE_LEAK ⇒ 壳内 JS 的 retro_name 标识符（上游 index.html:281/568）
