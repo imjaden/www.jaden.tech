@@ -299,6 +299,33 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-10-09 — daily-poetry v1.3.3 安全修复收口 (JT-SEC-016/017) 单 commit 复审
+
+- **review者**: Security Reviewer（review profile）
+- **范围**: 1 commit 复审 — `0811b7b` fix@daily-poetry: escape data fields + referrer meta (JT-SEC-016/017, v1.3.3) — 仅 `daily-poetry.html`（+48/-21），与源仓 script-miner/daily-poetry `2f82db2` 字节一致
+- **Tracking**: JT-SEC-016/017（🟢 LOW，已修复并提交闭合）；JT-SEC-015（🟢 LOW，仍 OPEN，范围外未动）；JT-SEC-018（🟢 LOW，仅记录，范围外）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+7/7 检查项通过，JT-SEC-016/017 防御纵深修复（自 2026-09-10 起 8 轮「工作树未提交」）正式收口为 commit `0811b7b` 并推送：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| 1 | 🟢 | 提交卫生：`origin/main..HEAD` 仅 1 commit，仅 daily-poetry.html（+48/-21），`type@scope` 小写、subject 英文、diff 无密钥/token/PII（无 /Users、无用户名、无凭证） | PASS |
+| 2 | 🟢 | JT-SEC-016 esc()（484-492）覆盖全部 10 处数据驱动 innerHTML 插值：info label/value（562-563）、poem reasons/paragraphs/score/title/author/dynasty/genre/tags（603-617）；其余 innerHTML 仅清空（533/576/652）/静态文本（584/685-686）/静态常量（672-678 只插 SEASON_GROUPS + jieqiData 硬编码） | ✅ 闭合 |
+| 3 | 🟢 | JT-SEC-017 `<head>` referrer meta strict-origin-when-cross-origin | ✅ 闭合 |
+| 4 | 🟢 | 同步保真：sha256 d9af1dec… 与源仓副本字节一致；版本头 v1.3.3@2026/09/10 与 changelog 一致 | PASS |
+| 5 | 🟢 | 无功能回归：4 候选路径回退链（月文件优先、源仓同目录优先）+ file://+http:// 相对路径适配 + GitHub 角标（421，rel=noopener）+ DOMContentLoaded/_poetryDataReady 双 gate（46/56/77/85） | PASS |
+| 6 | 🟢 | favicon 去掉 `?t=`：仓规一致（timestamp-manager.py 只管 index.html+wechat.html，L74-77；生成类页面无 `?t=` 为先例），无修点 | PASS（仅记录） |
+| 7 | 🟢 | 越界检查：不含 tokens-tracker / 其他项目 / 其他会话 WIP | PASS |
+| — | 🟢 | JT-SEC-015 tokens-tracker referrer meta（范围外，未动） | OPEN |
+| — | 🟢 | JT-SEC-018 wc-nav 绝对内链（范围外，已记录） | 记录 |
+
+---
+
 ## 条目格式说明
 
 ```
