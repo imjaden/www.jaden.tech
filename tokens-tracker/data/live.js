@@ -3,18 +3,189 @@ window.WEB_DATA_META = {
   "filtered": 2,
   "filtered_breakdown": {
     "draft": 2,
-    "empty": 3,
-    "kept": 14,
+    "empty": 0,
+    "kept": 24,
     "window": 0
   },
-  "generated_at": "2026-10-09T10:20:11+08:00",
+  "generated_at": "2026-10-09T21:50:25+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "671f947",
+  "generator_version": "f821c0a",
   "pages": [
     "index"
   ]
 };
 window.LIVE_ITEMS = [
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL111",
+    "status": "active",
+    "progress": "[4/6] ops 核查",
+    "created_at": "2026-10-09 19:30",
+    "updated_at": "2026-10-09 21:47",
+    "desc": "**跨profile用量收集口径**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL116",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-09 21:39",
+    "desc": "**draft 按日轮转完成节保真 + next-code 回退修复**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL115",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-09 21:39",
+    "desc": "**CLI 版本行规范 + 服务运行身份**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL114",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-09 21:39",
+    "desc": "**1acl 看板稳定入口 + 数据源 cwd/串号正确性（核验收口）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL113",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-09 21:39",
+    "desc": "**loop步骤数越界校验**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL112",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-09 21:39",
+    "desc": "**审计subject语义归一**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL044",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-09 21:35",
+    "desc": "**面板侧查看 heal 失败日志（CL044）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL109",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-09 13:18",
+    "updated_at": "2026-10-09 19:29",
+    "desc": "**1A 调度器可观测与防呆（P0 透明度 + P1 防呆 · 并入 CL106…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL110",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-09 10:43",
+    "updated_at": "2026-10-09 12:11",
+    "desc": "**门禁1 活跃弃置时间窗**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL043",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**heal 失败全量输出落盘 + `dk heal-log`（CL043 · …"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL042",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**版本行规范统一 + 服务运行身份（CL042 · 1A 闭环）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL041",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**gitleaks 第四仓 hermes-manager（CL041）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL040",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**修复：缓存回放把「真命中」改写成「扫描失败」（CL040）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL039",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**修复：测试夹具污染 gitleaks 生产缓存（CL039）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL038",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**gitleaks 豁免 / 通知口径 / 第三仓（CL038）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL037",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**gitleaks 多仓扩展（CL037）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL027",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**04-git-status 未推送超期告警阈值（CL027 · 2026-1…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL026",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**gitleaks 每日密钥扫描 checkpoint（CL026 · 202…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL025",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-09",
+    "desc": "**repo 镜像 ↔ 权威源漂移收敛（CL025 · 2026-10-09 核…"
+  },
   {
     "project": "hermes-manager",
     "number": "HERMES-MANAGER-CL102",
@@ -23,64 +194,10 @@ window.LIVE_ITEMS = [
     "created_at": "2026-09-29 21:39",
     "updated_at": "2026-10-07 14:09",
     "desc": "**draft 条目契约保真（字段解析 + 🏁 标记口径 · 已并入 CL103…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL028",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-07 13:22",
-    "updated_at": "2026-10-07 13:28",
-    "desc": "执行弹框标准化 + 重命令 checkpoint 治理（四项需求：任务板故障处置…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL109",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-06 17:09",
-    "desc": "**1A 调度器可观测与防呆（P0 透明度 + P1 防呆 · 并入 CL106…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL106",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-06 17:09",
-    "desc": "**基础设施卫生收集（非业务需求 · 先收集不实施）**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL025",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "-",
-    "desc": "repo 镜像 `skills/productivity/daily-check…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL026",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "-",
-    "desc": "gitleaks 每日密钥扫描 checkpoint（源 SCRIPT-MINE…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL027",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "-",
-    "desc": "04-git-status 未推送 commit 超期告警（阈值 5 天，上游 …"
   }
 ];
 window.BOARD_STATS = {
-  "running": 2,
+  "running": 4,
   "series": [
     {
       "api_calls": 0,
@@ -131,12 +248,12 @@ window.BOARD_STATS = {
       "total_tokens": 0
     },
     {
-      "api_calls": 0,
-      "cache_read_tokens": 0,
+      "api_calls": 3762,
+      "cache_read_tokens": 561383808,
       "date": "20261009",
-      "estimated_cost_usd": 0.0,
-      "files": 0,
-      "total_tokens": 0
+      "estimated_cost_usd": 8.858,
+      "files": 35,
+      "total_tokens": 14173792
     }
   ]
 };
@@ -285,13 +402,13 @@ window.HIST_EXTRA = {
       "round_mean": 3.23
     },
     "recent": {
-      "duration_mean": null,
-      "first_pass_rate": null,
-      "n": 0,
-      "round_mean": null
+      "duration_mean": 2561.6899687767027,
+      "first_pass_rate": 0.0,
+      "n": 5,
+      "round_mean": 3.0
     }
   },
-  "verdict": "数据不足（近2天或基线窗口无已验收任务）"
+  "verdict": "部分改善（部分指标反向）"
 };
 window.WEB_DATA_READY = true;
 if (window.dispatchEvent) { window.dispatchEvent(new Event('web-data-ready')); }
