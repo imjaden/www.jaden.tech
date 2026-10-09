@@ -1,25 +1,32 @@
 <!--
-版本说明：v1.3.2@2026/09/09
+版本说明：v1.3.3@2026/09/10
 1. 加载预生成的每日诗词数据（today-poetry-{yymm}.js 按月聚合，简体），缺失时回退 today-poetry.json.js
 2. 展示今日信息（公历/农历/节气/事件）+ 推荐诗词（单首轮播展示）
 3. 卡片顺序：诗词赏鉴 → 今日信息（含四季节气网格，移除独立标题）
 4. 诗词卡片：移除标题序号；标题/作者/正文/理由水平居中
-5. 协议适配器支持 file:// 与 http:// 直开
-6. favicon 复用 static/img/favicon.svg
-7. 移除页面顶部冗余 header，所有信息单页展示，适配移动端
-8. 右上角添加 GitHub 角标（指向 https://github.com/imjaden profile）
+5. 数据加载路径环境自适应：源仓同目录 → www static/js 双环境 4 路径回退（月文件优先于单日文件）
+6. 协议适配器支持 file:// 与 http:// 直开
+7. favicon 复用 static/img/favicon.svg（源仓本地 404 无害，不打断渲染）
+8. 右上角 GitHub 角标（指向 https://github.com/imjaden profile，全站统一）
+9. referrer 策略 strict-origin-when-cross-origin；诗词字段经 escape 渲染（防御纵深）
+10. 移除页面顶部冗余 header，所有信息单页展示，适配移动端
 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="static/img/favicon.svg?t=1788947889">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <link rel="shortcut icon" href="static/img/favicon.svg">
     <title>今日诗词</title>
     <script>
         // 按当月加载 today-poetry-{yymm}.js（window.dailyPoetryArchive）
         // onload 时把当日数据同步到 window.dailyPoetryData（统一接口）
-        // 月文件不存在则回退 today-poetry.json.js（旧单日文件）
+        // 数据路径环境自适应回退链（月文件优先于单日文件）：
+        //   1. today-poetry-{yymm}.js        源仓/本地 月文件
+        //   2. static/js/today-poetry-{yymm}.js  www 月文件
+        //   3. today-poetry.json.js          源仓/本地 单日回退
+        //   4. static/js/today-poetry.json.js    www 单日回退
         (function () {
             function getTodayISO() {
                 var d = new Date();
@@ -57,13 +64,23 @@
             }
             var now = new Date();
             var yymm = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2);
-            loadScript('static/js/today-poetry-' + yymm + '.js', function () {
-                loadScript('static/js/today-poetry.json.js', function () {
-                    // 两个文件都失败，标记就绪让 init 显示错误提示
+            // 环境自适应候选路径：先源仓同目录，再 www static/js；月文件优先
+            var candidates = [
+                'today-poetry-' + yymm + '.js',
+                'static/js/today-poetry-' + yymm + '.js',
+                'today-poetry.json.js',
+                'static/js/today-poetry.json.js'
+            ];
+            function tryNext(idx) {
+                if (idx >= candidates.length) {
+                    // 全部失败，标记就绪让 init 显示“暂无诗词数据”提示
                     window._poetryDataReady = true;
                     tryInit();
-                });
-            });
+                    return;
+                }
+                loadScript(candidates[idx], function () { tryNext(idx + 1); });
+            }
+            tryNext(0);
             document.addEventListener('DOMContentLoaded', function () {
                 window._poetryDomReady = true;
                 tryInit();
@@ -464,6 +481,16 @@
         const DYNASTY_MAP = { tang: '唐', song: '宋', pre_qin: '先秦' };
         const GENRE_MAP = { poetry: '诗', ci: '词', shijing: '经' };
 
+        // JT-SEC-016: 数据字段 HTML 转义，防御纵深（数据虽离线生成，不直接 innerHTML 注入）
+        function esc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         function getWeekday(date) {
             const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
             return weekdays[date.getDay()];
@@ -532,8 +559,8 @@
                 const div = document.createElement('div');
                 div.className = 'info-item';
                 div.innerHTML = `
-                    <div class="label">${item.label}</div>
-                    <div class="value">${item.value}</div>
+                    <div class="label">${esc(item.label)}</div>
+                    <div class="value">${esc(item.value)}</div>
                 `;
                 container.appendChild(div);
             });
@@ -573,21 +600,21 @@
             const dynasty = DYNASTY_MAP[item.dynasty] || item.dynasty;
             const genre = GENRE_MAP[item.genre] || item.genre;
             const reasons = (item.match_reasons || []).map(r =>
-                `<span class="reason">${r}</span>`
+                `<span class="reason">${esc(r)}</span>`
             ).join('');
 
-            const paragraphs = item.paragraphs.map(p => `<p>${p}</p>`).join('');
+            const paragraphs = item.paragraphs.map(p => `<p>${esc(p)}</p>`).join('');
 
             card.innerHTML = `
-                <div class="poem-score">score: ${item.score}</div>
+                <div class="poem-score">score: ${esc(item.score)}</div>
                 <div class="poem-header">
-                    <div class="poem-title">《${item.title}》</div>
-                    <div class="poem-author">—— ${item.author}</div>
+                    <div class="poem-title">《${esc(item.title)}》</div>
+                    <div class="poem-author">—— ${esc(item.author)}</div>
                 </div>
                 <div class="poem-paragraphs">${paragraphs}</div>
                 <div class="poem-meta">
-                    <span class="tag">${dynasty}${genre}</span>
-                    ${(item.tags || []).slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('')}
+                    <span class="tag">${esc(dynasty)}${esc(genre)}</span>
+                    ${(item.tags || []).slice(0, 3).map(t => `<span class="tag">${esc(t)}</span>`).join('')}
                 </div>
                 ${reasons ? `<div class="poem-reasons">${reasons}</div>` : ''}
             `;
