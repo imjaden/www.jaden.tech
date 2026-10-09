@@ -60,13 +60,64 @@
 
   /* 徽章 */
   function statusBadge(st) { return el("span", "badge badge-" + st, st); }
-  function histBadge(status) {
-    return el("span", "badge " + (status === "done" ? "badge-done" : "badge-active"),
-              status === "done" ? "已验收" : "进行中");
+  /* CL088 C4b N2: 「已核实」徽标（来源 = loop done 节 `[x]` 勾选 / 历史态 done）;
+     数据面未暴露完成日期 ⇒ 不臆造日期, 只出徽标 + 来源说明（title）。 */
+  function verifiedBadge() {
+    var b = el("span", "badge badge-verified", "已核实");
+    b.title = "已核实（来源: loop done 节 [x] 勾选核实 / 历史态已验收; 完成日期见明细）";
+    return b;
   }
-  function histProgress(t) {
-    var n = (t.steps_detail || []).length;
-    return n ? n + "/6" : "0/6";
+  /* CL088 C4b N1: 描述截断（超长截断; 全文在行内展开「详情」面） */
+  function plainText(text) {
+    return linkPlain(String(text == null ? "" : text))
+      .replace(/\*\*([^*\n]+)\*\*/g, "$1")
+      .replace(/`([^`\n]+)`/g, "$1")
+      .replace(/\*([^*\n]+)\*/g, "$1")
+      .replace(/\s+/g, " ").trim();
+  }
+  function truncate(text, n) {
+    var s = plainText(text);
+    return s.length <= n ? s : s.slice(0, n - 1) + "…";
+  }
+
+  /* ═══ OBS-1 ③（CL088 C4c 补批）: 同编号双态合并规则（Task 单表 运行态 + 历史态）═══
+     适用: D2 行键 = 编号 ⇒ 同一编号可能同时有运行态与历史态 `status`（实测 1 例
+     `done` / `active`）。规则（**可复算**: 只看数据字段, 无时钟 / 无随机）:
+       ① 时间戳 `ts(x)` = `updated_at` || `created_at` || ""（两侧同口径; 日期型补 `T00:00`）;
+       ② `ts` **严格较新**的一侧胜 ⇒ 取该侧原值（历史态 `done` 的**显示态**仍为
+          `finished`, 同 D5/N2 口径）;
+       ③ `ts` 相等 / 任一侧缺失 ⇒ **运行态胜**（运行态 = 活源, 与「非冲突时运行态覆盖
+          历史态」的既有口径一致）;
+       ④ 两侧 status 相同 / 仅一侧有值 ⇒ **非冲突**（`conflict=false`, 不标注）。
+     「不得静默丢一侧」: 返回体恒带两侧原值 + 时间戳 + 被舍弃一侧（`dropped` /
+     `dropped_source`）⇒ 由调用方在状态列 + 分栏详情**显式标注来源**（见
+     `board-index.tpl.html` 的 `statusCell` / `showDetail`）。 */
+  function statusTs(x) {
+    var s = String((x && (x.updated_at || x.created_at)) || "").trim();
+    if (!s || s === "-") { return ""; }
+    return s.length === 10 ? s + "T00:00" : s.replace(" ", "T");
+  }
+  function mergeStatus(live, hist) {
+    var ls = live ? String(live.status || "") : "";
+    var hs = hist ? String(hist.status || "") : "";
+    var lts = statusTs(live), hts = statusTs(hist);
+    var out = {
+      status: ls || (hs === "done" ? "finished" : hs),
+      source: (ls && hs) ? "both" : (ls ? "live" : (hs ? "hist" : "")),
+      conflict: false, live_status: ls, hist_status: hs,
+      live_ts: lts, hist_ts: hts, dropped: "", dropped_source: "", tie: false
+    };
+    if (!ls || !hs || ls === hs) { return out; }        /* ④ 非冲突 */
+    var hist_wins = hts > lts;                          /* ② 新者胜; ③ 并列/缺失 ⇒ 运行态 */
+    out.tie = (hts === lts);
+    out.conflict = true;
+    if (hist_wins) {
+      out.status = (hs === "done") ? "finished" : hs;    /* D5 历史态显示态 */
+      out.source = "hist"; out.dropped = ls; out.dropped_source = "live";
+    } else {
+      out.status = ls; out.source = "live"; out.dropped = hs; out.dropped_source = "hist";
+    }
+    return out;
   }
 
   /* ═══ CL061 R6/D6: 轻量 md 渲染（DOM + textContent, **禁 innerHTML**）═══ */
@@ -327,6 +378,68 @@
     } catch (e) {}
   }
 
+  /* CL088 C4a N8/M12 + C4d: 分栏比例态（"7:3" | "5:5" | "off" | 拖拽自定义 "a:b"）
+     — URL ?ratio= 优先, 落 localStorage（N3 口径; URL 显式给出时优先于 localStorage） */
+  function ratioKey(page) { return "1acl-board:" + page + ":ratio"; }
+  function ratioPrevKey(page) { return "1acl-board:" + page + ":ratio-prev"; }
+  function loadRatio(page) {
+    try {
+      return (urlParams().get("ratio") ||
+              localStorage.getItem(ratioKey(page)) || "");
+    } catch (e) { return ""; }
+  }
+  function saveRatio(page, val) {
+    try {
+      if (val) { localStorage.setItem(ratioKey(page), val); }
+      else { localStorage.removeItem(ratioKey(page)); }
+    } catch (e) {}
+    try {
+      var u = new URL(location.href);
+      if (val) { u.searchParams.set("ratio", val); }
+      else { u.searchParams.delete("ratio"); }
+      history.replaceState(null, "", u.toString());
+    } catch (e) {}
+  }
+  /* C4d ③「收起详情」可逆: 记住进入 off 之前的比例（仅 localStorage, 不进 URL） */
+  function loadRatioPrev(page) {
+    try { return localStorage.getItem(ratioPrevKey(page)) || ""; }
+    catch (e) { return ""; }
+  }
+  function saveRatioPrev(page, val) {
+    try {
+      if (val) { localStorage.setItem(ratioPrevKey(page), val); }
+      else { localStorage.removeItem(ratioPrevKey(page)); }
+    } catch (e) {}
+  }
+
+  /* ═══ CL088 C4d N8/M3: 分栏比例纯函数（拖拽几何; 浏览器面可独立复算）═══
+     口径: 比例字符串 "a:b"（整数百分比, 和 = 100）; 非法/缺省 ⇒ null ⇒ 页面回落预置 7:3。 */
+  function ratioToPct(ratio) {
+    var m = /^(\d{1,3}):(\d{1,3})$/.exec(String(ratio == null ? "" : ratio));
+    if (!m) { return null; }
+    var a = Number(m[1]), b = Number(m[2]);
+    if (!(a > 0) || !(b > 0)) { return null; }
+    return a / (a + b);
+  }
+  function pctToRatio(pct) {
+    if (pct == null || !isFinite(pct)) { return ""; }
+    var l = Math.round(pct * 100);
+    if (l < 1) { l = 1; }
+    if (l > 99) { l = 99; }
+    return l + ":" + (100 - l);
+  }
+  /* 拖拽几何: avail = 两栏可用宽度(px, 已扣固定占用), want = 期望左栏宽度(px);
+     返回左栏占比 ∈ (0,1) —— **按两侧最小宽度夹紧**;
+     可用宽度不足以同时满足两侧下限 ⇒ null（不写状态, 宁可不动也不越界）。 */
+  function splitPct(avail, want, minLeft, minRight) {
+    var a = Number(avail), w = Number(want);
+    if (!isFinite(a) || !isFinite(w) || a <= 0) { return null; }
+    if (a < minLeft + minRight) { return null; }
+    if (w < minLeft) { w = minLeft; }
+    if (w > a - minRight) { w = a - minRight; }
+    return w / a;
+  }
+
   /* 深链参数 */
   function urlParams() {
     return new URLSearchParams(location.search);
@@ -393,8 +506,40 @@
     document.getElementById("d-proj").textContent = projText;
   }
 
-  /* ═══ CL087 D7: 项目筛选（pill 组; URL ?pfilter= ↔ localStorage 联动）═══
-     口径: 列值 "-" = 未归属; 空串 = 全部。同一 page 维度独立记忆。 */
+  /* ═══ CL088 C4b N3/M12: 隐藏列状态（localStorage + URL `?cols=` 覆盖, 与 pfilter 同风格）═══
+     口径: `cols` = 逗号分隔的**可见列 key** 列表; 空/缺省 = 默认列集;
+     `alwaysOn` 内的 key（行键 编号 + M4 项目列）强制常显。URL 优先于 localStorage。 */
+  function colsKey(page) { return "1acl-board:" + page + ":cols"; }
+  function loadCols(page, defaults, alwaysOn) {
+    var raw = "";
+    try { raw = urlParams().get("cols") || localStorage.getItem(colsKey(page)) || ""; }
+    catch (e) { raw = ""; }
+    var out = [];
+    String(raw || "").split(",").forEach(function (k) {
+      k = String(k).trim();
+      if (k && out.indexOf(k) < 0) { out.push(k); }
+    });
+    if (!out.length) { out = (defaults || []).slice(); }
+    Object.keys(alwaysOn || {}).forEach(function (k) {
+      if (out.indexOf(k) < 0) { out.push(k); }
+    });
+    return out;
+  }
+  function saveCols(page, cols) {
+    var val = (cols || []).join(",");
+    try {
+      if (val) { localStorage.setItem(colsKey(page), val); }
+      else { localStorage.removeItem(colsKey(page)); }
+    } catch (e) {}
+    try {
+      var u = new URL(location.href);
+      if (val) { u.searchParams.set("cols", val); } else { u.searchParams.delete("cols"); }
+      history.replaceState(null, "", u.toString());
+    } catch (e) {}
+  }
+
+  /* ═══ CL087 D7 / CL088 C4b: 项目标签（页内 Tab 形态; 第 9 条 + M2 状态机）═══
+     口径: 列值 "-" = 未归属; 空串 = 全部。点击当前项 = 清除筛选（M2 后动覆盖）。 */
   function projectFilterKey(page) { return "1acl-board:" + page + ":pfilter"; }
   function loadProjectFilter(page) {
     var v = "";
@@ -427,23 +572,34 @@
     });
     return out;
   }
-  function projectPills(host, values, current, onPick) {
+  function projectTabs(host, values, current, onPick) {
     if (!host) { return; }
     host.textContent = "";
     [""].concat(values || []).forEach(function (v) {
-      var b = el("button", "pill" + ((current || "") === v ? " on" : ""), v || "全部");
-      b.type = "button";
-      b.title = v ? ("只看项目 " + v) : "显示全部项目";
-      b.addEventListener("click", function () { onPick(v); });
-      host.appendChild(b);
+      var a = el("a", "tab-link" + ((current || "") === v ? " active" : ""), v || "全部");
+      a.href = "#";
+      a.setAttribute("data-project", v);
+      a.title = v ? ("只看项目 " + v + "（再点 = 清除筛选）") : "显示全部项目";
+      a.addEventListener("click", function (ev) {
+        if (ev && ev.preventDefault) { ev.preventDefault(); }
+        onPick(v);
+      });
+      host.appendChild(a);
     });
   }
 
   window.HB = {
     el: el, copyText: copyText, copyBtn: copyBtn,
     fmtDur: fmtDur, fmtNum: fmtNum, fmtCompact: fmtCompact,
-    statusBadge: statusBadge, histBadge: histBadge, histProgress: histProgress,
+    statusBadge: statusBadge, verifiedBadge: verifiedBadge,
+    mergeStatus: mergeStatus,
+    plainText: plainText, truncate: truncate,
     loadSplit: loadSplit, saveSplit: saveSplit,
+    loadRatio: loadRatio, saveRatio: saveRatio,
+    loadRatioPrev: loadRatioPrev, saveRatioPrev: saveRatioPrev,
+    ratioToPct: ratioToPct, pctToRatio: pctToRatio, splitPct: splitPct,
+    SPLIT_HANDLE_ID: "split-handle",
+    loadCols: loadCols, saveCols: saveCols,
     urlParams: urlParams,
     renderLiveDetail: renderLiveDetail, renderHistDetail: renderHistDetail,
     mdToFragment: mdToFragment, mdInlineNodes: inlineNodes,
@@ -451,6 +607,6 @@
     loadRetro: loadRetro, retroVar: retroVar, filesCell: filesCell,
     openPanel: openPanel, closePanel: closePanel, fillPanelHead: fillPanelHead,
     loadProjectFilter: loadProjectFilter, saveProjectFilter: saveProjectFilter,
-    projectValues: projectValues, projectPills: projectPills
+    projectValues: projectValues, projectTabs: projectTabs
   };
 })();

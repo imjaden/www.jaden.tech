@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════
    预览样板 · 公共样式（对应 scripts/1acl-board/assets/style.css 设计）
    style-guide.css 层1 token + 组件（对齐 html-gen 标准）
-   版本: 0.3(2026-09-05)  [CL037: +stats 区/trend-bars/chip/projects-table]
+   版本: 0.4(2026-09-23)  [CL088 C4b: 单表 15 列（7 隐列）+ 项目标签 + 行内明细 + 分页]
    ═══════════════════════════════════════════ */
 :root {
   --cobalt-50: #eef2ff;
@@ -39,9 +39,24 @@
 body { font-family: var(--font-sans); background: var(--surface-950); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
 .board-wrap { max-width: 1320px; margin: 0 auto; padding: 16px; }
 
-/* 单行头部: 标题 + 页面导航(链接) + meta 居右 */
-.topbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
-.topbar h1 { font-size: 1.25rem; font-weight: 700; color: #f0f0f0; white-space: nowrap; }
+/* CL088 C4a: 页内 Tab 行（页面 Tab + 右侧 ⇔/⚙ 控件）—— 原 header.topbar 职责拆分到此 */
+.tabs-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.tabs-row .nav-tabs { margin: 0; }
+.tabs-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tabs-row .tabs-actions { margin-left: auto; }
+.tab-ctl {
+  background: var(--surface-900); color: var(--text-dim); border: 1px solid var(--line);
+  border-radius: var(--radius-md); padding: 3px 10px; font-size: 0.8rem;
+  cursor: pointer; font-family: inherit; line-height: 1.4;
+}
+.tab-ctl:hover { color: #fff; border-color: var(--cobalt-500); }
+/* 表描述（骨架第三段） */
+.table-desc { margin: -4px 0 10px; font-size: 0.78rem; line-height: 1.7; color: #9ca3af; word-break: break-word; }
+.table-desc:empty { display: none; }
+/* 底部栏（骨架第四段）: .wc-footer 内含 #wc-meta-bar */
+.wc-footer { margin-top: 12px; }
+.wc-footer-brand { padding: 4px 16px 0; }
+#wc-meta-bar > span { margin-right: 12px; white-space: nowrap; }
 .nav-tabs { display: flex; gap: 4px; }
 .tab-link {
   display: inline-block; background: var(--surface-900); color: var(--text-dim);
@@ -54,15 +69,51 @@ body { font-family: var(--font-sans); background: var(--surface-950); color: var
 .switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; color: var(--text-dim); font-size: 0.72rem; }
 .switch input { accent-color: var(--cobalt-500); }
 .notice { background: rgba(250,204,21,0.08); border: 1px solid rgba(250,204,21,0.35); color: var(--accent-400); border-radius: var(--radius-md); padding: 4px 10px; font-size: 0.72rem; margin-bottom: 10px; }
-/* CL087 D7: 项目筛选条（pill 组; URL ?pfilter= ↔ localStorage 联动）—— index/history 共用 */
-.filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 10px 0; }
-.filter-label { color: #6b7280; font-size: 0.72rem; white-space: nowrap; }
-.pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
-.pill { background: #16161f; color: #9ca3af; border: 1px solid #2a2a3e;
-  border-radius: var(--radius-full); padding: 2px 10px; font-size: 0.72rem;
+/* CL088 C4b: 项目标签（页内 Tab 形态; 原 CL087 pill 组升格; 第 9 条 + M4 常显） */
+.proj-tag { background: #16161f; color: #9ca3af; border: 1px solid #2a2a3e;
+  border-radius: var(--radius-full); padding: 1px 9px; font-size: 0.72rem;
   cursor: pointer; font-family: inherit; }
-.pill:hover { border-color: var(--cobalt-500); color: #e0e0e0; }
-.pill.on { background: var(--cobalt-600); border-color: var(--cobalt-600); color: #fff; }
+.proj-tag:hover { border-color: var(--cobalt-500); color: #e0e0e0; }
+.proj-tag.on { background: var(--cobalt-600); border-color: var(--cobalt-600); color: #fff; }
+/* CL088 C4b N3/D4: 隐藏列（默认不可见; `?cols=` / ⚙ 覆盖） */
+.data-table th.col-hidden, .data-table td.col-hidden { display: none; }
+/* CL088 C4b N2: 进度「阶段号/6」+ 完成绿标 + 已核实徽标 */
+.progress-cell .prog-num { font-family: var(--font-mono); }
+.progress-cell.is-done { color: var(--ok); }
+.badge-finished { background: #123524; color: var(--ok); border-color: #1d5138; }
+.badge-verified { background: #123524; color: var(--ok); border-color: #34d399; margin-left: 4px; }
+/* CL088 C2 / C4b: 单会话 step 指示（进度列内; 上限来自数据面 session_cap.cap） */
+.step-cap { margin-left: 6px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); }
+.step-cap.is-cap { color: var(--wait); }
+.step-cap.is-over { color: var(--run); font-weight: 600; }
+/* CL088 C4c 补批 OBS-1 ③: 同编号双态合并标注（状态列内; 来源 + 被舍弃一侧见 title/详情） */
+.status-src { margin-left: 6px; font-size: 0.68rem; color: var(--wait); cursor: help; }
+.status-conflict .detail-title { color: var(--wait); }
+/* CL088 C4b D2: 行内展开阶段明细 */
+.expander { display: inline-block; width: 12px; color: var(--text-dim); cursor: pointer; user-select: none; }
+.expander:hover { color: var(--cobalt-400); }
+.stage-row > td { background: #10101a; border-bottom: 1px solid var(--line); white-space: normal; }
+.stage-wrap { display: flex; flex-direction: column; gap: 6px; padding: 2px 0; }
+.stage-desc { font-size: 0.78rem; color: #d0d0d0; white-space: pre-wrap; word-break: break-word; }
+.stage-desc .sd-label { color: var(--text-dim); font-size: 0.68rem; text-transform: uppercase; margin-right: 6px; }
+.stage-item { display: flex; align-items: baseline; gap: 8px; font-size: 0.76rem; white-space: nowrap; }
+.stage-item .si-files { color: var(--text-dim); font-family: var(--font-mono); font-size: 0.7rem; }
+.stage-meta { font-size: 0.7rem; color: var(--text-dim); font-family: var(--font-mono); }
+.col-desc { cursor: pointer; }
+/* CL088 C4b: 分页条（N4 每页 50 + 页码） */
+.pager { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; font-size: 0.74rem; color: var(--text-dim); }
+.pg-btn { background: var(--surface-900); color: var(--text-dim); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: 2px 9px; font-size: 0.72rem; cursor: pointer; font-family: inherit; }
+.pg-btn:hover:not(:disabled) { color: #fff; border-color: var(--cobalt-500); }
+.pg-btn.on { background: var(--cobalt-600); border-color: var(--cobalt-600); color: #fff; }
+.pg-btn:disabled { opacity: 0.4; cursor: default; }
+.pg-info { margin: 0 6px; }
+/* CL088 C4b: ⚙ 列设置面板 */
+.col-panel { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: -4px 0 10px;
+  padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface-900); font-size: 0.74rem; }
+.col-item { display: inline-flex; align-items: center; gap: 5px; color: var(--text-dim); cursor: pointer; }
+.col-item input { accent-color: var(--cobalt-500); }
 .data-table th.col-project, .data-table td.col-project { min-width: 110px; color: var(--text-dim); font-size: 0.74rem; }
 
 /* 标准表格（html help table 模板样式） */
@@ -89,6 +140,8 @@ table.data-table { width: 100%; border-collapse: collapse; }
 .data-table td.col-number { min-width: 240px; max-width: none; overflow: visible; }
 /* 进度列 + 分栏列宽稳定: 两模式共用同一最小宽, 进入/退出分栏不跳变 */
 .data-table th.col-progress, .data-table td.col-progress { min-width: 190px; }
+/* CL088 C4b: 数值列（Tokens/Cache Read/Cost/耗时/跨度/三评审列）等宽右对齐 */
+.data-table th.col-num, .data-table td.col-num { text-align: right; font-family: var(--font-mono); font-size: 0.76rem; }
 .data-table.mode-split { width: auto; }
 .num-link { color: var(--cobalt-400); cursor: pointer; font-family: var(--font-mono); font-size: 0.78rem; white-space: nowrap; }
 .num-link:hover { color: var(--cobalt-500); text-decoration: underline; }
@@ -99,10 +152,24 @@ table.data-table { width: 100%; border-collapse: collapse; }
 .progress-cell { font-size: 0.76rem; color: var(--text-dim); }
 .empty-row { color: var(--text-dim); font-size: 0.78rem; text-align: center; padding: 22px 0 !important; font-style: italic; }
 
-/* 分栏: 列表(仅2列内容宽) + 详情区吃满其余宽度（参考 html-gen split view） */
-.board-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
+/* 分栏: 主表 ↔ 详情面（C4d N8/M3: 预置 7:3 / 5:5 / 收起 + 拖拽自定义; 两侧最小宽度）
+   最小宽度三处同源: 本处 CSS 变量 / web_console_lib.SPLIT_MIN_*_PX / 页内 JS MIN_* （测试互证）。
+   拖拽自定义比例由页内内联 grid-template-columns 覆盖下面的预置列（窄屏回单栏, 见文末 media）。 */
+.board-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start;
+  --split-min-left: 320px; --split-min-right: 280px; --split-handle-w: 8px; }
 .table-side { min-width: 0; }
-.board-main.split-on { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+.board-main.split-on { align-items: start;
+  grid-template-columns: minmax(var(--split-min-left), 7fr) var(--split-handle-w)
+                         minmax(var(--split-min-right), 3fr); }
+/* CL088 C4a N8/M3: ⇔ 分栏比例预置 5:5（默认 7:3 = 上面 split-on 的 7fr/3fr 口径） */
+.board-main.split-on.ratio-55 { grid-template-columns: minmax(var(--split-min-left), 5fr)
+  var(--split-handle-w) minmax(var(--split-min-right), 5fr); }
+/* CL088 C4d: 拖拽分隔条（仅分栏态可见/可拖; 收起态与单栏态 display:none） */
+.split-handle { display: none; cursor: col-resize; align-self: stretch; min-height: 120px;
+  background: var(--line-dim); border-radius: var(--radius-full); }
+.board-main.split-on .split-handle { display: block; }
+.board-main.split-on .split-handle:hover, .board-main.split-on .split-handle.dragging {
+  background: var(--cobalt-500); }
 .detail-panel {
   border: 1px solid var(--line); border-radius: var(--radius-lg);
   background: var(--surface-900); padding: 12px 14px; max-height: 80vh; overflow-y: auto;
@@ -146,6 +213,7 @@ table.data-table { width: 100%; border-collapse: collapse; }
 .btn-copy { background: var(--cobalt-600); color: #fff; border: none; border-radius: var(--radius-md); padding: 3px 12px; font-size: 0.72rem; cursor: pointer; flex: 0 0 auto; }
 .btn-copy:hover { background: var(--cobalt-500); }
 .ops-hint { font-size: 0.7rem; color: var(--text-dim); }
+.ops-next { font-size: 0.76rem; color: var(--run); margin-bottom: 4px; }
 
 /* 历史分析卡 */
 .hist-analysis { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
@@ -165,6 +233,8 @@ table.data-table { width: 100%; border-collapse: collapse; }
 footer { margin-top: 12px; color: var(--text-dim); font-size: 0.7rem; }
 @media (max-width: 960px) {
   .board-main, .board-main.split-on { grid-template-columns: minmax(0, 1fr); }
+  /* C4d: 窄屏回单栏 ⇒ 分隔条隐藏（页内 JS 同判据: 不写内联列宽, 防内联样式压过本 media） */
+  .split-handle { display: none !important; }
   .detail-panel { max-height: none; }
 }
 

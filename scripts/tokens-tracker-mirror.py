@@ -17,7 +17,14 @@ Contract (since hermes-manager CL039/CL058 — shell + data js split):
      - Replace common.js live-detail renderer with a safe summary renderer
   4. Shell transform: path desensitization + drop nav-tabs (history/projects/guide not mirrored) + footer marker
   5. Guards (fail-closed, rc=2): no /Users/<user>/, no "jadenli", no sensitive-word hits
-     in ANY output (index.html, data/live.js, assets/common.js, assets/style.css)
+     in ANY output (index.html, data/live.js, assets/common.js, assets/style.css).
+     Two tiers (2026-09-20 split; index.html re-tiered 2026-10-09):
+       - DATA outputs (data/live.js) -> SENSITIVE_LEAK (content words + retro_*/full-text field NAMES)
+       - ASSET/shell outputs (index.html, common.js, style.css) -> SENSITIVE_CONTENT (content words
+         only): retro_* there are JS code identifiers of the shared renderer, not mirrored data.
+     index.html additionally must contain NO inline data block (INLINE_DATA): if upstream inlines
+     LIVE_ITEMS/META/STATS back into the shell (CL039/CL058 contract regression) we abort rather
+     than silently downgrading the guard — the strict tier would be required again at that point.
   6. Commit only if content changed (no push; review profile pushes)
 
 Nav / cache-bust are handled by the shell contract (async loader with Date.now() cache-bust);
@@ -61,6 +68,13 @@ SENSITIVE_LEAK = re.compile(
     _SENSITIVE_WORDS + r"|retro_name|retro_slice|retro_slug|retro_path|retro_summary"
 )
 SENSITIVE_CONTENT = re.compile(_SENSITIVE_WORDS)
+# 壳内联数据探测（2026-10-09）: 壳只应 `<script src="data/live.js">` 异步取数；一旦内联，
+# retro_* 等字段名就可能随**数据**进页面 ⇒ 那时必须回严格档。故此处 fail-closed 中止。
+INLINE_DATA = re.compile(r"window\.(LIVE_ITEMS|WEB_DATA_META|BOARD_STATS)\s*=\s*[\[{]")
+# 历史明细块（2026-10-09）: 上游 live.js 自 2026-09 起追加 `window.HIST_TASKS = [ ... ]`
+# （1.5MB 全量历史，含 personal-cinema 行、retro_* 全文字段与 ~/Downloads 路径）⇒ 本镜像只公开
+# **run-state 板**，历史明细不镜像：整块置空（保留变量名，避免壳侧 JS 取 undefined 报错）。
+HIST_TASKS_BLOCK = re.compile(r"(?m)^(\s*)window\.HIST_TASKS\s*=\s*\[[\s\S]*?(?=^\s*window\.|\Z)")
 LOCAL_PREFIX = re.compile(r"/Users/[^/]+/CodeSpace/")
 LOCAL_ANY = re.compile(r"/Users/[^/]+/|jadenli")
 
@@ -204,6 +218,17 @@ def transform_shell(html: str) -> str:
     return html
 
 
+def empty_hist_tasks(tail: str) -> str:
+    """置空 HIST_TASKS 历史明细块（fail-closed：命中数必须恰为 1，否则中止）。"""
+    hits = list(HIST_TASKS_BLOCK.finditer(tail))
+    if not hits:
+        return tail          # 上游未提供该块 ⇒ 无需处理（不猜测）
+    if len(hits) != 1:
+        raise RuntimeError(f"HIST_TASKS block count != 1 ({len(hits)}) — fail-closed")
+    mm = hits[0]
+    return tail[: mm.start()] + f"{mm.group(1)}window.HIST_TASKS = [];\n" + tail[mm.end():]
+
+
 def transform_live(js: str) -> str:
     """Project the CL039 data layer to public-safe content, keeping the shell contract.
 
@@ -223,6 +248,9 @@ def transform_live(js: str) -> str:
     tail = js[m_stats.end():]
     if READY_TAIL_MARK not in tail or "web-data-ready" not in tail:
         raise RuntimeError("live.js READY sentinel / web-data-ready dispatch missing — fail-closed")
+    # 2026-10-09: 尾部不再原样透传 —— 上游追加的历史明细块（HIST_TASKS，1.5MB）必须先置空，
+    # 否则它带着 personal-cinema 行 / 全文字段进入公开页（守卫会拦，站点数据因此冻结自 09-23）。
+    tail = empty_hist_tasks(tail)
 
     meta = json.loads(m_meta.group(1))
     for field in META_DROP_FIELDS:
@@ -269,7 +297,13 @@ def main() -> int:
             return 2
 
     new_html = inject_chrome(transform_shell(SRC_INDEX.read_text(encoding="utf-8")))
-    if not guard_ok(new_html, "index.html"):
+    if INLINE_DATA.search(new_html):
+        print("⚠️ tokens-tracker mirror: index.html inlines a data block (shell contract regression), aborting")
+        return 2
+    # index.html 是壳/资产档（数据在 data/live.js）⇒ 走内容档，严格档留给数据输出。
+    # 2026-10-09 修: 此前用默认 SENSITIVE_LEAK ⇒ 壳内 JS 的 retro_name 标识符（上游 index.html:281/568）
+    # 必然命中 ⇒ 镜像自 2026-09-23 起每晚 rc=2 中止（站点数据冻结；job deliver=local 无人可见）。
+    if not guard_ok(new_html, "index.html", SENSITIVE_CONTENT):
         return 2
 
     new_live = transform_live(SRC_LIVE.read_text(encoding="utf-8"))
