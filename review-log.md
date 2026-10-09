@@ -326,6 +326,32 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-10-09 — tokens-tracker 镜像 JT-SEC-015/018 收口 单 commit 复审
+
+- **review者**: Security Reviewer（review profile）
+- **范围**: 1 commit 复审 — `4d80b0b` fix@tokens-tracker: referrer meta + wc-nav neutralisation (JT-SEC-015/018) — 仅 `scripts/tokens-tracker-mirror.py`（+34/-6）+ 产物 `tokens-tracker/index.html`（13 行）
+- **Tracking**: JT-SEC-015/018（🟢 LOW，已修复并提交闭合）；JT-SEC-016/017（🟢 LOW，保持已闭合）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+7/7 检查项通过，两条长期 OPEN/仅记录的 🟢 记录项一并收口为 commit `4d80b0b`：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| 1 | 🟢 | 提交卫生：`origin/main..HEAD` 仅 1 commit，仅 2 文件（+35/-12），`type@scope` 小写、subject 英文、diff 无密钥/token/PII（无 /Users、无 jadenli） | PASS |
+| 2 | 🟢 | JT-SEC-015 referrer meta 注入（scripts:184-188）：产物 `<head>` 第 6 行 strict-origin-when-cross-origin；幂等（源页已带时计数仍 1，单测实证）；输出断言 fail-closed rc=2（scripts:332-334） | ✅ 闭合 |
+| 3 | 🟢 | JT-SEC-018 wc-nav 中和（scripts:87-88/238）：产物仅剩品牌文案「Hermes 控制台 · 公开镜像」、0 锚点；root-abs href/src 计数 0；输出级守卫 rc=2（scripts:327-330） | ✅ 闭合 |
+| 4 | 🟢 | 反例实证：wc-nav 之外的内部路由穿过 transform_shell 被守卫抓到；`../index.html` 相对链与 `https://` 外链不误触发（ROOT_ABS_REF regex 单测 9/9 通过，`/` 根与 `//` 协议相对豁免） | PASS |
+| 5 | 🟢 | 无回归：守卫全绿（敏感词 0、/Users 0、jadenli 0；retro_* 仅存在于 index.html/common.js 的 JS 代码标识符，符合 SENSITIVE_CONTENT 分档，data/live.js 全 CLEAN）；py_compile 通过；两次 --write-only sha256 `73befc48…` 一致（确定性）；`?t=1788947889` index/wechat 同值；common.js/style.css 未触碰 | PASS |
+| 6 | 🟢 | cron 可用性：真源 --write-only rc=0（新增输出断言无误中止；data/live.js 数据同步按约定留 23:10 cron） | PASS |
+| 7 | 🟢 | 越界检查：不改 hermes-manager 源仓 / daily-poetry.html / 其他项目 / 其他会话 WIP | PASS |
+| — | 🟢 | 已知可接受残留：源壳 inline `<style>` 中 `.wc-nav a`/`.wc-pub` 规则成死 CSS（中和后无对应元素），保留为与源壳一致、避免改 assets 引入偏离 | 记录 |
+
+---
+
 ## 条目格式说明
 
 ```
