@@ -352,6 +352,27 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-10-10 — 夜间 L2 复审（4 data@update sync，无回归）
+
+- **review者**: Security Reviewer（review profile）
+- **范围**: 4 commit 复审 — `70a306c..c5e8d43`（4 data@update: daily-tracker 10-09/10-10 + tokens-tracker ×2 自动同步）
+- **Tracking**: 无新 🔴/🟡；JT-SEC-019（🟢 LOW，仅记录：tokens-tracker footer 版本披露）；JT-SEC-015/016/017/018（🟢 LOW，保持已闭合）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿（4 data@update diff 无密钥/token/PII；`total_tokens`/`cache_read_tokens`/`duration_mean` 为 1acl 用量统计字段，非凭证；`duration_mean` 浮点值命中手机号正则属误报），shell 注入无（本轮无 Python/shell 改动），XSS 无（diff 无 innerHTML/document.write/eval/outerHTML 新增），依赖 SRI 完整（bmi-tracker.html + daily-tracker-archive chart.js@4.4.7 integrity 未剥离），referrer meta 在 bmi-tracker/archive/tokens-tracker 数据同步后未回归（`strict-origin-when-cross-origin` 保留）。tokens-tracker 再同步（c5e8d43）从源壳拉入 footer 新增 `wc-footer-version`「hermes-manager · 1.9(20260905)」，但 referrer meta（JT-SEC-015）+ wc-nav 中和（JT-SEC-018）在再同步后仍保持（wc-nav 仅品牌文案、0 锚点、root-abs href/src 0、全目录敏感词 0），修复对再同步稳健。1 项 🟢 仅记录：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | data@update 未剥离 referrer/SRI（bmi-tracker + archive + tokens-tracker） | PASS |
+| — | 🟢 | JT-SEC-015 referrer meta / JT-SEC-018 wc-nav 中和 再同步后仍保持（修复稳健） | PASS |
+| 1 | 🟢 LOW | JT-SEC-019 tokens-tracker footer `wc-footer-version` 披露源项目+版本「hermes-manager · 1.9(20260905)」（c5e8d43 拉入新源壳）；建议 mirror transform_shell 中和（同 JT-SEC-018 类） | OPEN（仅记录） |
+
+---
+
 ## 条目格式说明
 
 ```
