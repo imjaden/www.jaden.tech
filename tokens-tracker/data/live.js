@@ -7,9 +7,9 @@ window.WEB_DATA_META = {
     "kept": 7,
     "window": 0
   },
-  "generated_at": "2026-10-10T22:09:14+08:00",
+  "generated_at": "2026-10-11T21:52:46+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "a68cc14",
+  "generator_version": "389e90b",
   "pages": [
     "index"
   ]
@@ -17,11 +17,20 @@ window.WEB_DATA_META = {
 window.LIVE_ITEMS = [
   {
     "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL115",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-10 21:01",
+    "updated_at": "2026-10-10 23:00",
+    "desc": "**CLI 版本行规范 + 服务运行身份**"
+  },
+  {
+    "project": "hermes-manager",
     "number": "HERMES-MANAGER-CL117",
     "status": "pending",
     "progress": "-",
     "created_at": "2026-10-10",
-    "updated_at": "2026-10-10 22:03",
+    "updated_at": "2026-10-10 09:18",
     "desc": "**commit 链读侧匹配放宽 · daily-checker CL028 O…"
   },
   {
@@ -30,7 +39,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-10 22:03",
+    "updated_at": "2026-10-10 09:18",
     "desc": "**draft 按日轮转完成节保真 + next-code 回退修复**"
   },
   {
@@ -39,30 +48,13 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-10 22:03",
+    "updated_at": "2026-10-10 09:18",
     "desc": "**loop步骤数越界校验**"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL115",
-    "status": "active",
-    "progress": "[3/6] dev 实施",
-    "created_at": "2026-10-10 21:01",
-    "updated_at": "2026-10-10 21:40",
-    "desc": "**CLI 版本行规范 + 服务运行身份**"
   }
 ];
 window.BOARD_STATS = {
   "running": 1,
   "series": [
-    {
-      "api_calls": 0,
-      "cache_read_tokens": 0,
-      "date": "20261004",
-      "estimated_cost_usd": 0.0,
-      "files": 0,
-      "total_tokens": 0
-    },
     {
       "api_calls": 0,
       "cache_read_tokens": 0,
@@ -104,18 +96,32 @@ window.BOARD_STATS = {
       "total_tokens": 32069087
     },
     {
-      "api_calls": 232,
-      "cache_read_tokens": 24030208,
+      "api_calls": 740,
+      "cache_read_tokens": 102982656,
       "date": "20261010",
-      "estimated_cost_usd": 1.7069,
-      "files": 5,
-      "total_tokens": 1331997
+      "estimated_cost_usd": 2.3543,
+      "files": 9,
+      "total_tokens": 2856590
+    },
+    {
+      "api_calls": 0,
+      "cache_read_tokens": 0,
+      "date": "20261011",
+      "estimated_cost_usd": 0.0,
+      "files": 0,
+      "total_tokens": 0
     }
   ]
 };
 window.HIST_TASKS = [];
 window.HIST_SESSION_CAP = {
-  "at_cap_sessions": [],
+  "at_cap_sessions": [
+    {
+      "refs": 5,
+      "session_id": "20260930_175010_2a8ebc",
+      "state": "at_cap"
+    }
+  ],
   "cap": 5,
   "max_refs": 26,
   "over_cap_sessions": [
@@ -261,27 +267,32 @@ window.HIST_SESSION_CAP = {
       "refs": 6,
       "session_id": "20261006_161545_70b7e7",
       "state": "over"
+    },
+    {
+      "refs": 5,
+      "session_id": "20260930_175010_2a8ebc",
+      "state": "at_cap"
     }
   ],
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260911"
+    "start": "20260912"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 30122.154056152518,
-      "first_pass_rate": 0.3877551020408163,
-      "n": 98,
-      "round_mean": 3.2244897959183674
+      "duration_mean": 28254.273997426033,
+      "first_pass_rate": 0.3627450980392157,
+      "n": 102,
+      "round_mean": 3.2254901960784315
     },
     "recent": {
-      "duration_mean": 2139.088015900718,
+      "duration_mean": 2884.856656908989,
       "first_pass_rate": 0.0,
-      "n": 9,
-      "round_mean": 3.3333333333333335
+      "n": 2,
+      "round_mean": 4.0
     }
   },
   "verdict": "部分改善（部分指标反向）"
