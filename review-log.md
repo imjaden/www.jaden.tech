@@ -373,6 +373,27 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-10-11 — 夜间 L2 复审（2 data@update sync，无回归）
+
+- **review者**: Security Reviewer（review profile）
+- **范围**: 2 commit 复审 — `680fb3f..b446028`（2 data@update: daily-tracker 10-11 + tokens-tracker 自动同步）
+- **Tracking**: 无新 🔴/🟡；JT-SEC-019（🟢 LOW，仍 OPEN：tokens-tracker footer 版本披露，无变化）；JT-SEC-015/016/017/018（🟢 LOW，保持已闭合）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿（2 data@update diff 无密钥/token/PII；`cache_read_tokens`/`total_tokens` 为 1acl 用量统计字段非凭证；`duration_mean` 浮点值命中手机号正则属误报），shell 注入无（本轮无 Python/shell 改动），XSS 无（diff 无 innerHTML/document.write/eval/outerHTML 新增；bmi-tracker.html 与 daily-tracker-archive 仅「生成时间」1 行时间戳；tokens-tracker/data/live.js 为 1acl 数据同步，LIVE_ITEMS/BOARD_STATS/HIST_SESSION_CAP/HIST_EXTRA 均脱敏，session_id 为 `YYYYMMDD_HHMMSS_hex` 会话号非 PII），依赖 SRI 完整（bmi-tracker.html + daily-tracker-archive chart.js@4.4.7 integrity 未剥离），referrer meta 在 bmi-tracker/archive/tokens-tracker 数据同步后未回归（`strict-origin-when-cross-origin` 保留）。tokens-tracker 再同步（b446028）仅改 data/live.js，index.html 未动：referrer meta（JT-SEC-015）+ wc-nav 中和（JT-SEC-018，仅品牌文案 + 死 CSS、0 锚点、root-abs href/src 0）保持；footer 版本披露（JT-SEC-019）不变（未恶化）。数据层敏感词全 0（personal-cinema/JAV/retro_/jadenli//Users//email/手机号）：
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | data@update 未剥离 referrer/SRI（bmi-tracker + archive） | PASS |
+| — | 🟢 | tokens-tracker 数据同步脱敏（live.js 敏感词 0；index.html 未动，JT-SEC-015/018 保持） | PASS |
+| 1 | 🟢 LOW | JT-SEC-019 tokens-tracker footer `wc-footer-version` 披露源项目+版本「hermes-manager · 1.9(20260905)」（无变化，未恶化） | OPEN（仅记录） |
+
+---
+
 ## 条目格式说明
 
 ```
