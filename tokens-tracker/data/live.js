@@ -4,12 +4,12 @@ window.WEB_DATA_META = {
   "filtered_breakdown": {
     "draft": 2,
     "empty": 0,
-    "kept": 7,
+    "kept": 6,
     "window": 0
   },
-  "generated_at": "2026-10-12T21:50:59+08:00",
+  "generated_at": "2026-10-13T21:50:52+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "d5906636",
+  "generator_version": "7a532505",
   "pages": [
     "index"
   ]
@@ -17,30 +17,21 @@ window.WEB_DATA_META = {
 window.LIVE_ITEMS = [
   {
     "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL117",
+    "number": "HERMES-MANAGER-CL119",
     "status": "active",
     "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-12 21:26",
-    "updated_at": "2026-10-12 21:39",
-    "desc": "**commit 链读侧匹配放宽 · daily-checker CL028 O…"
+    "created_at": "2026-10-13",
+    "updated_at": "2026-10-13 21:26",
+    "desc": "**存量红收敛（CL055 dev 步 sha 断言 abbrev-agnost…"
   },
   {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL116",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-12 19:45",
-    "updated_at": "2026-10-12 20:34",
-    "desc": "**draft 按日轮转完成节保真 + next-code 回退修复**"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL113",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-12 17:57",
-    "updated_at": "2026-10-12 19:06",
-    "desc": "**loop步骤数越界校验**"
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL045",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-13 12:34",
+    "desc": "**补齐 §2-15 运行实例一致性（stale 检测）**"
   },
   {
     "project": "hermes-manager",
@@ -53,16 +44,8 @@ window.LIVE_ITEMS = [
   }
 ];
 window.BOARD_STATS = {
-  "running": 4,
+  "running": 2,
   "series": [
-    {
-      "api_calls": 2211,
-      "cache_read_tokens": 334368640,
-      "date": "20261006",
-      "estimated_cost_usd": 3.9315,
-      "files": 14,
-      "total_tokens": 8357674
-    },
     {
       "api_calls": 4076,
       "cache_read_tokens": 583168128,
@@ -110,6 +93,14 @@ window.BOARD_STATS = {
       "estimated_cost_usd": 4.2232,
       "files": 26,
       "total_tokens": 9625167
+    },
+    {
+      "api_calls": 573,
+      "cache_read_tokens": 72115968,
+      "date": "20261013",
+      "estimated_cost_usd": 1.0678,
+      "files": 6,
+      "total_tokens": 2317701
     }
   ]
 };
@@ -161,11 +152,6 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 7,
-      "session_id": "20260913_174411_5672fb",
-      "state": "over"
-    },
-    {
-      "refs": 7,
       "session_id": "20260922_114618_5e33bb",
       "state": "over"
     },
@@ -177,11 +163,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 6,
       "session_id": "20260821_185753_577706",
-      "state": "over"
-    },
-    {
-      "refs": 6,
-      "session_id": "20260913_101346_d1f949",
       "state": "over"
     },
     {
@@ -239,11 +220,6 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 7,
-      "session_id": "20260913_174411_5672fb",
-      "state": "over"
-    },
-    {
-      "refs": 7,
       "session_id": "20260922_114618_5e33bb",
       "state": "over"
     },
@@ -255,11 +231,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 6,
       "session_id": "20260821_185753_577706",
-      "state": "over"
-    },
-    {
-      "refs": 6,
-      "session_id": "20260913_101346_d1f949",
       "state": "over"
     },
     {
@@ -276,22 +247,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260913"
+    "start": "20260914"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 31127.137718965718,
-      "first_pass_rate": 0.32967032967032966,
-      "n": 91,
-      "round_mean": 3.208791208791209
+      "duration_mean": 32912.75756481588,
+      "first_pass_rate": 0.325,
+      "n": 80,
+      "round_mean": 3.2375
     },
     "recent": {
-      "duration_mean": 2848.826620578766,
-      "first_pass_rate": 0.0,
-      "n": 3,
-      "round_mean": 4.666666666666667
+      "duration_mean": 2423.831433057785,
+      "first_pass_rate": 0.25,
+      "n": 4,
+      "round_mean": 4.25
     }
   },
   "verdict": "部分改善（部分指标反向）"
