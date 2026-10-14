@@ -1,20 +1,65 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 2,
+  "filtered": 3,
   "filtered_breakdown": {
-    "draft": 2,
+    "draft": 3,
     "empty": 0,
-    "kept": 6,
+    "kept": 9,
     "window": 0
   },
-  "generated_at": "2026-10-13T21:50:52+08:00",
+  "generated_at": "2026-10-14T21:50:05+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "7a532505",
+  "generator_version": "5fac210d",
   "pages": [
     "index"
   ]
 };
 window.LIVE_ITEMS = [
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL123",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-14 18:44",
+    "desc": "**hm-project.py"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL049",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-14",
+    "desc": "**`/api/*` 5 端点补同源门（SEC-1 / RIG-021/034 …"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL048",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-14",
+    "desc": "**CL047 实现审计 RIG-042 健壮性修复 + RIG-049 测试覆…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL047",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-14 09:52",
+    "updated_at": "2026-10-14",
+    "desc": "**其余 16 项 checkpoint「常用指令」对齐 daily-track…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL045",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-14 11:50",
+    "updated_at": "2026-10-14",
+    "desc": "**补齐 §2-15 运行实例一致性（stale 检测）**"
+  },
   {
     "project": "hermes-manager",
     "number": "HERMES-MANAGER-CL119",
@@ -23,15 +68,6 @@ window.LIVE_ITEMS = [
     "created_at": "2026-10-13",
     "updated_at": "2026-10-13 21:26",
     "desc": "**存量红收敛（CL055 dev 步 sha 断言 abbrev-agnost…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL045",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-13 12:34",
-    "desc": "**补齐 §2-15 运行实例一致性（stale 检测）**"
   },
   {
     "project": "hermes-manager",
@@ -46,14 +82,6 @@ window.LIVE_ITEMS = [
 window.BOARD_STATS = {
   "running": 2,
   "series": [
-    {
-      "api_calls": 4076,
-      "cache_read_tokens": 583168128,
-      "date": "20261007",
-      "estimated_cost_usd": 10.2622,
-      "files": 22,
-      "total_tokens": 15824519
-    },
     {
       "api_calls": 0,
       "cache_read_tokens": 0,
@@ -95,12 +123,20 @@ window.BOARD_STATS = {
       "total_tokens": 9625167
     },
     {
-      "api_calls": 573,
-      "cache_read_tokens": 72115968,
+      "api_calls": 592,
+      "cache_read_tokens": 72783488,
       "date": "20261013",
-      "estimated_cost_usd": 1.0678,
-      "files": 6,
-      "total_tokens": 2317701
+      "estimated_cost_usd": 1.086,
+      "files": 7,
+      "total_tokens": 2375899
+    },
+    {
+      "api_calls": 4693,
+      "cache_read_tokens": 686907520,
+      "date": "20261014",
+      "estimated_cost_usd": 10.4324,
+      "files": 36,
+      "total_tokens": 19836275
     }
   ]
 };
@@ -117,12 +153,12 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 19,
-      "session_id": "20260914_165612_4d8f00",
+      "session_id": "20260928_113939_746d8e",
       "state": "over"
     },
     {
-      "refs": 19,
-      "session_id": "20260928_113939_746d8e",
+      "refs": 18,
+      "session_id": "20260914_165612_4d8f00",
       "state": "over"
     },
     {
@@ -143,6 +179,11 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 11,
       "session_id": "20261009_102314_f18ce4",
+      "state": "over"
+    },
+    {
+      "refs": 9,
+      "session_id": "20261014_110802_f7bb3f",
       "state": "over"
     },
     {
@@ -185,12 +226,12 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 19,
-      "session_id": "20260914_165612_4d8f00",
+      "session_id": "20260928_113939_746d8e",
       "state": "over"
     },
     {
-      "refs": 19,
-      "session_id": "20260928_113939_746d8e",
+      "refs": 18,
+      "session_id": "20260914_165612_4d8f00",
       "state": "over"
     },
     {
@@ -211,6 +252,11 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 11,
       "session_id": "20261009_102314_f18ce4",
+      "state": "over"
+    },
+    {
+      "refs": 9,
+      "session_id": "20261014_110802_f7bb3f",
       "state": "over"
     },
     {
@@ -247,22 +293,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260914"
+    "start": "20260915"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 32912.75756481588,
-      "first_pass_rate": 0.325,
-      "n": 80,
-      "round_mean": 3.2375
+      "duration_mean": 34005.2172897729,
+      "first_pass_rate": 0.33766233766233766,
+      "n": 77,
+      "round_mean": 3.2857142857142856
     },
     "recent": {
-      "duration_mean": 2423.831433057785,
-      "first_pass_rate": 0.25,
-      "n": 4,
-      "round_mean": 4.25
+      "duration_mean": 4120.897639104298,
+      "first_pass_rate": 0.42857142857142855,
+      "n": 7,
+      "round_mean": 3.4285714285714284
     }
   },
   "verdict": "部分改善（部分指标反向）"
