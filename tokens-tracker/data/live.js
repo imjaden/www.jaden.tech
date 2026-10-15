@@ -1,15 +1,15 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 3,
+  "filtered": 18,
   "filtered_breakdown": {
-    "draft": 3,
+    "draft": 18,
     "empty": 0,
-    "kept": 9,
+    "kept": 36,
     "window": 0
   },
-  "generated_at": "2026-10-14T21:50:05+08:00",
+  "generated_at": "2026-10-15T21:50:29+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "5fac210d",
+  "generator_version": "83e19098",
   "pages": [
     "index"
   ]
@@ -17,48 +17,246 @@ window.WEB_DATA_META = {
 window.LIVE_ITEMS = [
   {
     "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL123",
+    "number": "HERMES-MANAGER-CL132",
     "status": "pending",
     "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-14 18:44",
-    "desc": "**hm-project.py"
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15 21:43",
+    "desc": "**R-8 信号「丢数」两轴"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL131",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15 21:43",
+    "desc": "**R-7 `hm sessions check`/`sweep` 基名口径同源…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL130",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15 21:43",
+    "desc": "**R-6 `handoff_all` 同一 role 行两口径（设计已出, 待…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL129",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15 21:43",
+    "desc": "**R-5 `test_cl094` live.js/draft 一致性断言并发…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL128",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15 21:43",
+    "desc": "**R-4 `hm loop artifacts` retro 判据误报 · 设…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL127",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15 21:43",
+    "desc": "**R-3 `_format_path` relpath 基准与双份定义 · 设…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL126",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15 21:43",
+    "desc": "**R-2 `hm handoff check --project` 静默吞 f…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL125",
+    "status": "active",
+    "progress": "[1/6] 方案",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15 21:43",
+    "desc": "**R-1 两段 handoff 基名口径分叉 · 进行中 [2/6-r2] 闭…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "-（直接修正: 免 1A 闭环, 用户「继续执行剩余任务项」授权）",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15 21:43",
+    "desc": "**`hm sessions check` 建议命令缺 `--project`（…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL124",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15",
+    "desc": "**hm project check --all 增「只输出需关注项目」的过滤开…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL123",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-15",
+    "desc": "**hm-project.py 行 1214 子进程消费者的 cwd 归属**"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL049",
+    "number": "DAILY-CHECKER-CL088",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 21:00",
+    "updated_at": "2026-10-15",
+    "desc": "**CL088 评审派生收口（RIG-119 / RIG-120 / RIG-1…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL086",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 18:55",
+    "updated_at": "2026-10-15",
+    "desc": "**CL086 钉住 07 stdout 纯净性（评审 RIG-118 收口）*…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL085",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 18:49",
+    "updated_at": "2026-10-15",
+    "desc": "**CL085 处置确认门 fail-closed 收口（评审 RIG-113 …"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL084",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 18:21",
+    "updated_at": "2026-10-15",
+    "desc": "**CL084 处置通道读 `act.confirm`（评审 RIG-107 收…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL083",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 18:21",
+    "updated_at": "2026-10-15",
+    "desc": "**CL083 评审派生文档口径订正（RIG-104/105/106）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL082（派生）",
     "status": "done",
     "progress": "[6/6]",
     "created_at": "-",
-    "updated_at": "2026-10-14",
-    "desc": "**`/api/*` 5 端点补同源门（SEC-1 / RIG-021/034 …"
+    "updated_at": "2026-10-15",
+    "desc": "**RIG-099 回写 profile 权威源（跨 profile，用户点名授…"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL048",
+    "number": "DAILY-CHECKER-CL082",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 17:45",
+    "updated_at": "2026-10-15",
+    "desc": "**CL082 07 wrapper 精简为纯透传（DT-CL020 跨仓件「精…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL081",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 17:45",
+    "updated_at": "2026-10-15",
+    "desc": "**CL081 评审派生订正（RIG-098 / RIG-100）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL080",
     "status": "done",
     "progress": "[6/6]",
     "created_at": "-",
-    "updated_at": "2026-10-14",
-    "desc": "**CL047 实现审计 RIG-042 健壮性修复 + RIG-049 测试覆…"
+    "updated_at": "2026-10-15",
+    "desc": "**CL080 工具栏 CSV 导出「有意停用」钉住**"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL047",
+    "number": "DAILY-CHECKER-CL079",
     "status": "done",
     "progress": "[6/6]",
-    "created_at": "2026-10-14 09:52",
-    "updated_at": "2026-10-14",
-    "desc": "**其余 16 项 checkpoint「常用指令」对齐 daily-track…"
+    "created_at": "-",
+    "updated_at": "2026-10-15",
+    "desc": "**CL079 跨仓配合 DT-CL017 A 档（07 分栏「常用指令」4→6…"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL045",
+    "number": "DAILY-CHECKER-CL078",
     "status": "done",
     "progress": "[6/6]",
-    "created_at": "2026-10-14 11:50",
-    "updated_at": "2026-10-14",
-    "desc": "**补齐 §2-15 运行实例一致性（stale 检测）**"
+    "created_at": "-",
+    "updated_at": "2026-10-15",
+    "desc": "**CL078 展示名单源化（CL042 单源扩展）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL077",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 17:45",
+    "updated_at": "2026-10-15",
+    "desc": "**CL077 件1+件2 落地（面板/检查输出可读性）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL066",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 16:52",
+    "updated_at": "2026-10-15",
+    "desc": "**CL066 CL052 小数秒两例时间炸弹修复（时间无关化）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL065",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 16:52",
+    "updated_at": "2026-10-15",
+    "desc": "**CL065 分栏详情页块顺序统一 + `dc-cmd-desc` label…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL064",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 16:52",
+    "updated_at": "2026-10-15",
+    "desc": "**CL064 memory-health 可发现性改进（message 点名串…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL063",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-15 16:52",
+    "updated_at": "2026-10-15",
+    "desc": "**CL063 评审派生收口批（RIG-092 守卫逐文件审拥有者 + RIG-…"
   },
   {
     "project": "hermes-manager",
@@ -80,16 +278,8 @@ window.LIVE_ITEMS = [
   }
 ];
 window.BOARD_STATS = {
-  "running": 2,
+  "running": 3,
   "series": [
-    {
-      "api_calls": 0,
-      "cache_read_tokens": 0,
-      "date": "20261008",
-      "estimated_cost_usd": 0.0,
-      "files": 0,
-      "total_tokens": 0
-    },
     {
       "api_calls": 8805,
       "cache_read_tokens": 1363025280,
@@ -137,6 +327,14 @@ window.BOARD_STATS = {
       "estimated_cost_usd": 10.4324,
       "files": 36,
       "total_tokens": 19836275
+    },
+    {
+      "api_calls": 8884,
+      "cache_read_tokens": 1408421888,
+      "date": "20261015",
+      "estimated_cost_usd": 12.8436,
+      "files": 97,
+      "total_tokens": 39419004
     }
   ]
 };
@@ -157,13 +355,13 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 18,
-      "session_id": "20260914_165612_4d8f00",
+      "refs": 15,
+      "session_id": "20260922_094600_e83378",
       "state": "over"
     },
     {
-      "refs": 15,
-      "session_id": "20260922_094600_e83378",
+      "refs": 14,
+      "session_id": "20260914_165612_4d8f00",
       "state": "over"
     },
     {
@@ -182,8 +380,13 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 9,
+      "refs": 11,
       "session_id": "20261014_110802_f7bb3f",
+      "state": "over"
+    },
+    {
+      "refs": 10,
+      "session_id": "20261014_112946_f0330d",
       "state": "over"
     },
     {
@@ -202,6 +405,16 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
+      "refs": 7,
+      "session_id": "20261014_131132_7196ef",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20261015_182157_f3cd84",
+      "state": "over"
+    },
+    {
       "refs": 6,
       "session_id": "20260821_185753_577706",
       "state": "over"
@@ -214,6 +427,11 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 6,
       "session_id": "20261006_161545_70b7e7",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20261015_204022_7cfad0",
       "state": "over"
     }
   ],
@@ -230,13 +448,13 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 18,
-      "session_id": "20260914_165612_4d8f00",
+      "refs": 15,
+      "session_id": "20260922_094600_e83378",
       "state": "over"
     },
     {
-      "refs": 15,
-      "session_id": "20260922_094600_e83378",
+      "refs": 14,
+      "session_id": "20260914_165612_4d8f00",
       "state": "over"
     },
     {
@@ -255,8 +473,13 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 9,
+      "refs": 11,
       "session_id": "20261014_110802_f7bb3f",
+      "state": "over"
+    },
+    {
+      "refs": 10,
+      "session_id": "20261014_112946_f0330d",
       "state": "over"
     },
     {
@@ -275,6 +498,16 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
+      "refs": 7,
+      "session_id": "20261014_131132_7196ef",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20261015_182157_f3cd84",
+      "state": "over"
+    },
+    {
       "refs": 6,
       "session_id": "20260821_185753_577706",
       "state": "over"
@@ -288,27 +521,32 @@ window.HIST_SESSION_CAP = {
       "refs": 6,
       "session_id": "20261006_161545_70b7e7",
       "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20261015_204022_7cfad0",
+      "state": "over"
     }
   ],
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260915"
+    "start": "20260916"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 34005.2172897729,
-      "first_pass_rate": 0.33766233766233766,
-      "n": 77,
-      "round_mean": 3.2857142857142856
+      "duration_mean": 34386.54634525274,
+      "first_pass_rate": 0.35526315789473684,
+      "n": 76,
+      "round_mean": 3.25
     },
     "recent": {
-      "duration_mean": 4120.897639104298,
-      "first_pass_rate": 0.42857142857142855,
-      "n": 7,
-      "round_mean": 3.4285714285714284
+      "duration_mean": 1548.728496366077,
+      "first_pass_rate": 0.05555555555555555,
+      "n": 36,
+      "round_mean": 1.75
     }
   },
   "verdict": "部分改善（部分指标反向）"
