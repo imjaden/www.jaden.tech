@@ -1,28 +1,28 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 12,
+  "filtered": 22,
   "filtered_breakdown": {
-    "draft": 12,
-    "empty": 0,
-    "kept": 19,
-    "window": 0
+    "draft": 21,
+    "empty": 1,
+    "kept": 16,
+    "window": 1
   },
-  "generated_at": "2026-10-16T21:51:07+08:00",
+  "generated_at": "2026-10-17T21:50:38+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "57f40631",
+  "generator_version": "9ba7075d",
   "pages": [
     "index"
   ]
 };
 window.LIVE_ITEMS = [
   {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL126",
-    "status": "active",
-    "progress": "[3/6] dev 实施",
-    "created_at": "2026-10-16 20:47",
-    "updated_at": "2026-10-16 21:37",
-    "desc": "**R-2 `hm handoff check --project` 静默吞 f…"
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL90",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-17 21:46",
+    "desc": "**profile 侧 5 个技能处于 curator 归档态（待裁）**"
   },
   {
     "project": "hermes-manager",
@@ -30,8 +30,71 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "2026-10-16",
-    "updated_at": "2026-10-16 21:06",
+    "updated_at": "2026-10-17 13:36",
     "desc": "**R-9 全量红集 J9 首屏合并表断言并发漂移（设计待出）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL132",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-17 12:36",
+    "updated_at": "2026-10-17 13:36",
+    "desc": "**R-8 信号「丢数」两轴"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "-（直接修正: 免 1A 闭环, 用户「继续执行剩余任务项」授权）",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-17 13:36",
+    "desc": "**`hm sessions check` 建议命令缺 `--project`（…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL131",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-17 11:32",
+    "updated_at": "2026-10-17 12:31",
+    "desc": "**R-7 `hm sessions check`/`sweep` 基名口径同源…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL130",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-17 10:41",
+    "updated_at": "2026-10-17 11:25",
+    "desc": "**R-6 `handoff_all` 同一 role 行两口径（设计已出, 待…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL128",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-16 20:47",
+    "updated_at": "2026-10-17 09:44",
+    "desc": "**CL128 甲② 跨 profile 镜像转交（ops profile · …"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL127",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-17 01:04",
+    "desc": "**R-3 `_format_path` relpath 基准与双份定义 · 设…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL126",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-15",
+    "updated_at": "2026-10-16 22:13",
+    "desc": "**R-2 `hm handoff check --project` 静默吞 f…"
   },
   {
     "project": "hermes-manager",
@@ -44,106 +107,17 @@ window.LIVE_ITEMS = [
   },
   {
     "project": "hermes-manager",
-    "number": "-（直接修正: 免 1A 闭环, 用户「继续执行剩余任务项」授权）",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "2026-10-15",
-    "updated_at": "2026-10-16 21:06",
-    "desc": "**`hm sessions check` 建议命令缺 `--project`（…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL132",
-    "status": "active",
-    "progress": "[2/6] 设计评审",
-    "created_at": "2026-10-16 20:47",
-    "updated_at": "2026-10-16 20:47",
-    "desc": "**R-8 信号「丢数」两轴"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL131",
-    "status": "active",
-    "progress": "[2/6] 设计评审",
-    "created_at": "2026-10-16 20:47",
-    "updated_at": "2026-10-16 20:47",
-    "desc": "**R-7 `hm sessions check`/`sweep` 基名口径同源…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL130",
-    "status": "active",
-    "progress": "[2/6] 设计评审",
-    "created_at": "2026-10-16 20:47",
-    "updated_at": "2026-10-16 20:47",
-    "desc": "**R-6 `handoff_all` 同一 role 行两口径（设计已出, 待…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL129",
-    "status": "active",
-    "progress": "[2/6] 设计评审",
-    "created_at": "2026-10-16 20:47",
-    "updated_at": "2026-10-16 20:47",
-    "desc": "**R-5 `test_cl094` live.js/draft 一致性断言并发…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL128",
-    "status": "active",
-    "progress": "[2/6] 设计评审",
-    "created_at": "2026-10-16 20:47",
-    "updated_at": "2026-10-16 20:47",
-    "desc": "**R-4 `hm loop artifacts` retro 判据误报 · 设…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL127",
-    "status": "active",
-    "progress": "[2/6] 设计评审",
-    "created_at": "2026-10-16 20:47",
-    "updated_at": "2026-10-16 20:47",
-    "desc": "**R-3 `_format_path` relpath 基准与双份定义 · 设…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL90",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-16 19:57",
-    "desc": "**profile 侧 5 个技能处于 curator 归档态（待裁）**"
-  },
-  {
-    "project": "hermes-manager",
     "number": "HERMES-MANAGER-CL119",
     "status": "active",
     "progress": "[6/6] 收尾复盘",
     "created_at": "2026-10-13",
     "updated_at": "2026-10-13 21:26",
     "desc": "**存量红收敛（CL055 dev 步 sha 断言 abbrev-agnost…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL115",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-10 21:01",
-    "updated_at": "2026-10-10 23:00",
-    "desc": "**CLI 版本行规范 + 服务运行身份**"
   }
 ];
 window.BOARD_STATS = {
-  "running": 10,
+  "running": 8,
   "series": [
-    {
-      "api_calls": 740,
-      "cache_read_tokens": 102982656,
-      "date": "20261010",
-      "estimated_cost_usd": 2.3543,
-      "files": 9,
-      "total_tokens": 2856590
-    },
     {
       "api_calls": 0,
       "cache_read_tokens": 0,
@@ -185,24 +159,26 @@ window.BOARD_STATS = {
       "total_tokens": 39571418
     },
     {
-      "api_calls": 363,
-      "cache_read_tokens": 27031936,
+      "api_calls": 546,
+      "cache_read_tokens": 41227008,
       "date": "20261016",
-      "estimated_cost_usd": 0.5763,
-      "files": 14,
-      "total_tokens": 1887179
+      "estimated_cost_usd": 0.8098,
+      "files": 33,
+      "total_tokens": 2629901
+    },
+    {
+      "api_calls": 2493,
+      "cache_read_tokens": 285162236,
+      "date": "20261017",
+      "estimated_cost_usd": 3.2497,
+      "files": 44,
+      "total_tokens": 9719769
     }
   ]
 };
 window.HIST_TASKS = [];
 window.HIST_SESSION_CAP = {
-  "at_cap_sessions": [
-    {
-      "refs": 5,
-      "session_id": "20260914_165612_4d8f00",
-      "state": "at_cap"
-    }
-  ],
+  "at_cap_sessions": [],
   "cap": 5,
   "max_refs": 26,
   "over_cap_sessions": [
@@ -283,17 +259,22 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 6,
-      "session_id": "20260917_100907_6aa641",
-      "state": "over"
-    },
-    {
-      "refs": 6,
       "session_id": "20261006_161545_70b7e7",
       "state": "over"
     },
     {
       "refs": 6,
+      "session_id": "20261014_111910_ac695b",
+      "state": "over"
+    },
+    {
+      "refs": 6,
       "session_id": "20261015_204022_7cfad0",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20261016_202615_aad5bd",
       "state": "over"
     }
   ],
@@ -376,12 +357,12 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 6,
-      "session_id": "20260917_100907_6aa641",
+      "session_id": "20261006_161545_70b7e7",
       "state": "over"
     },
     {
       "refs": 6,
-      "session_id": "20261006_161545_70b7e7",
+      "session_id": "20261014_111910_ac695b",
       "state": "over"
     },
     {
@@ -390,30 +371,30 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 5,
-      "session_id": "20260914_165612_4d8f00",
-      "state": "at_cap"
+      "refs": 6,
+      "session_id": "20261016_202615_aad5bd",
+      "state": "over"
     }
   ],
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260917"
+    "start": "20260918"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 34690.298779512705,
-      "first_pass_rate": 0.32894736842105265,
-      "n": 76,
-      "round_mean": 3.3552631578947367
+      "duration_mean": 26689.032314890563,
+      "first_pass_rate": 0.1919191919191919,
+      "n": 99,
+      "round_mean": 2.757575757575758
     },
     "recent": {
-      "duration_mean": 747.666438530653,
-      "first_pass_rate": 0.02564102564102564,
-      "n": 39,
-      "round_mean": 1.2307692307692308
+      "duration_mean": 2359.7776040037475,
+      "first_pass_rate": 0.3333333333333333,
+      "n": 12,
+      "round_mean": 3.0833333333333335
     }
   },
   "verdict": "部分改善（部分指标反向）"
