@@ -394,6 +394,44 @@ r1 三项 findings 全部验证修复，6/6 常规检查 + 3/3 回归通过，�
 
 ---
 
+## 2026-10-17 — 夜间 L2 复审（13× data sync + 1× data@manual + 1× docs@handoff；无代码回归，新增 JT-SEC-020 仅记录）
+
+- **review者**: Security Reviewer（review profile）
+- **范围**: 15 commit 复审 — `d46f264..093aa3f`（13× data@update 站点数据自动同步 + 1× data@manual bmi-tracker 归档换数据 + 1× docs@handoff 自动生成 ops 交接文档；无 JS/Python 源码改动）
+- **Tracking**: 无新 🔴/🟡；新增 JT-SEC-020（🟢 LOW，仅记录：handoff 文档本地绝对路径披露）；JT-SEC-019（🟢 LOW，仍 OPEN：tokens-tracker footer 版本披露，随源壳升至 1.11）；JT-SEC-015/016/017/018（🟢 LOW，保持已闭合）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿。Pass 1（sk-/ghp_/gho_/github_pat_/AKIA/AIza/xox 高置信前缀）0 命中；Pass 2（`api_key|secret|password|token|private_key|bearer` 引号赋值式）0 命中；Pass 3（宽口径关键词）仅命中 `.review-level.yaml` 自述 tracking 文本、`index.html` 的 `Tokens-Tracker` 卡片文案、`cache/closed-loop/*.json` 的 `input_tokens|cache_read_tokens|total_tokens` 用量统计字段（`cache/` 已在 `.gitignore`，未入库）；Pass 4（注释幽灵键：迁移后旧 key 值残留在注释）0 命中。PII 正则唯一命中 `tokens-tracker/data/live.js:389` 的 `first_pass_rate: 0.1919191919191919`，属浮点值命中手机号正则的误报（同 10-11 轮 `duration_mean` 类）。
+
+shell 注入无：本轮无 Python/shell 改动，`scripts/` 三个脚本（ssl-manager.py / timestamp-manager.py / tokens-tracker-mirror.py）自 10-09 后未变更，`ssl-manager.py` 仍为 list-form 参数、注释明示「不使用 shell=True」。
+
+XSS 无活跃向量：变更文件（`bmi-tracker.html`、`daily-tracker-archive-202607-202608.html`、`tokens-tracker/index.html`、`tokens-tracker/data/live.js`、`tokens-tracker/assets/common.js`）`innerHTML|outerHTML|document.write|insertAdjacentHTML|eval(` 全 0 命中；`common.js` 仍保留「CL061 R6/D6 轻量 md 渲染（DOM + textContent, **禁 innerHTML**）」注释。data@manual `6b1245f` 仅替换归档表 51→30 行静态 `<tr>` 字面量与 Chart.js 数据字面量，无 JS 渲染路径变更；唯一 `onclick` 为静态常量 toggle（`tbl.classList.toggle`，无数据拼接）。
+
+依赖安全：CDN 资源仍为 chart.js@4.4.7（bmi-tracker / daily-tracker-archive / daily-poetry）与 html2canvas@1.4.1（wechat.html），`integrity` + `crossorigin` 全部保留、未被数据同步剥离；Snyk / deps.dev 查证两版本直接漏洞 0（chart.js 历史唯一 CVE-2020-7746 影响 <2.9.4，当前 4.4.7 不受影响）。无 SRI 的外部 tag 仅同源 `static/js/index.js`、`assets/common.js` 与 favicon（SRI 对同源资源不适用）。
+
+回归检查（data@update 触碰 HTML 的既有风险面）：`<meta name="referrer" content="strict-origin-when-cross-origin">` 在 index / wechat / bmi-tracker / daily-tracker-archive / daily-poetry / tokens-tracker 全部保留；Chart.js SRI 未被剥离。→ 无 REGRESSION。
+
+tokens-tracker 公开镜像脱敏：`data/live.js` 敏感词（personal-cinema / retro_* / JAV / magnet / torrent / `/Users/` / `~/` / 邮箱 / 手机号）0 命中；`WEB_DATA_META` 自述 `filtered: 22`（draft 21 + empty 1）；`session_id` 为 `YYYYMMDD_HHMMSS_hex` 会话号，非 PII。JT-SEC-018 收敛保持（root-abs `href|src` 0 命中，仅 favicon 一个同源绝对 URL 常量）。
+
+新增记录项 JT-SEC-020：`docs@handoff`（dd5827c）首次把自动生成 ops 交接文档纳入公开仓库 — `documents/handoff/handoff-www.jaden.tech-ops.md` 含本地绝对路径 `/Users/jadenli/CodeSpace/...` 3 处、内部项目路径（`hermes-manager/web/1acl/*`、`script-miner/daily-poetry/*`）、会话号 `20260906_222752_2d7428`；无凭证/密钥/邮箱/手机号。定级 🟢（主机名与公开 GitHub 用户名一致，涉及的内部门均为公开镜像仓，实际可利用信息量低；且 `handoff.enabled: true` 属 `.hermes-project.yaml` 的既定产品决策）。但同一文档内路径风格不一致（`~/CodeSpace/...` 与 `/Users/jadenli/...` 混用），建议镜像生成器统一输出 `~/` 相对形式，或将 `documents/handoff/` 纳入 `.gitignore`。
+
+计分口径：🟢 仅记录项沿用本项目 10-10 起口径 — 计入 `tracking` + `findings_open`，不计入 `findings_total`。
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | data@update 未剥离 referrer / SRI（bmi-tracker + archive + 6× HTML 同步） | PASS |
+| — | 🟢 | data@manual 6b1245f 归档表静态替换，无 JS/渲染路径变更 | PASS |
+| — | 🟢 | tokens-tracker 镜像数据脱敏（live.js 敏感词 0；JT-SEC-015/018 保持） | PASS |
+| — | 🟢 | 依赖 SRI + 版本查证（chart.js@4.4.7 / html2canvas@1.4.1，0 直接漏洞） | PASS |
+| 1 | 🟢 LOW | JT-SEC-019 tokens-tracker footer `wc-footer-version` 披露「hermes-manager · 1.11(20261015)」（随源壳升级，仍 OPEN，未恶化） | OPEN（仅记录） |
+| 2 | 🟢 LOW | JT-SEC-020 `documents/handoff/handoff-www.jaden.tech-ops.md` 披露本地绝对路径 + 内部项目路径（首次入库，无凭证） | OPEN（仅记录） |
+
+---
+
 ## 条目格式说明
 
 ```
