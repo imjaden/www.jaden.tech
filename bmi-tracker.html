@@ -333,7 +333,7 @@ h2 .toggle:hover{background:#21262d;color:#e6edf3}
 <li><strong>黑咖啡可空腹喝</strong>：提升运动表现 + 抑制食欲</li>
 <li><strong>青汁粉</strong>：饥饿感时冲 1 杯，填充胃部</li>
 </ul></div>
-<div class="footer">OMAD Plan v1.0 · <a href="javascript:switchTab('faq')">❓ FAQ</a></div>
+<div class="footer">OMAD Plan v1.0 · </div>
 </div>
 
 <!-- ═══════ FAQ TAB ═══════ -->
@@ -358,6 +358,7 @@ function switchTab(name) {
   if(saved!=='archived' && saved!=='omad') saved='archived';
   if(saved==='omad' && document.getElementById('tab-omad')) switchTab('omad');
 })();
+
 // OMAD tab auto-highlight (portal 原样)
 (function(){
   var d=new Date();
