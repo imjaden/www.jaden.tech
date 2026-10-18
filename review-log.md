@@ -432,6 +432,47 @@ tokens-tracker 公开镜像脱敏：`data/live.js` 敏感词（personal-cinema /
 
 ---
 
+## 2026-10-18 — 夜间 L2 复审（4× data sync + 1× data@fix；bmi 归档扩容 98 行 + CL028 跑量双轴，无回归）
+
+- **review者**: Security Reviewer（review profile）
+- **范围**: 5 commit 复审 — `230ca71..7183045`（4× data@update：bmi-tracker/archive 归档扩容 51→98 行 + CL028 跑量柱状双轴、daily-tracker 10-18 同步、tokens-tracker 自动镜像；1× data@fix：bmi-tracker canonical Step 6 装配、剥离 OMAD FAQ 死链；无 Python/JS 源码改动）
+- **Tracking**: 无新 🔴/🟡；JT-SEC-019（🟢 LOW，仍 OPEN：tokens-tracker footer 版本披露 1.11(20261015)）；JT-SEC-020（🟢 LOW，仍 OPEN：documents/handoff 本地绝对路径披露）；JT-SEC-015/016/017/018（🟢 LOW，保持已闭合）
+- **状态**: ✅ PASS
+- **报告**: 无（green batch，跳正式报告；single-log 约定）
+- **实现 prompt**: ⬜ 无需生成
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿。Pass 1（sk-/sk-ant-/ghp_/gho_/github_pat_/AKIA/AIza/xox 高置信前缀，HTML/JS/PY/JSON/YAML/MD 全量）0 命中；Pass 2（`api_key|apikey|secret|password|passwd|private_key|bearer|access_token` 引号赋值式）0 命中；Pass 3（宽口径关键词）0 命中；Pass 4（注释幽灵键：迁移后旧 key 值残留注释）0 命中。PII 正则（邮箱/手机号）在 3 个变更文件 0 命中。
+
+shell 注入无：本轮无 Python/shell 改动。`scripts/ssl-manager.py` 仍为 list-form 参数、仅注释提及「不使用 shell=True」；`timestamp-manager.py` / `tokens-tracker-mirror.py` 本轮未变更。
+
+XSS 无活跃向量：变更文件（`bmi-tracker.html`、`daily-tracker-archive-202607-202610.html`、`tokens-tracker/data/live.js`）`innerHTML|outerHTML|document.write|insertAdjacentHTML|eval(|new Function` 全 0 命中。`onclick` 4 处全部为静态常量（`switchTab('archived')` / `switchTab('omad')` / `tbl.classList.toggle`），无数据拼接。`tokens-tracker/data/live.js` 通过 `node --check` 语法校验（数据层若出现未转义引号会被该检查暴露；本轮 PASS）。
+
+正向收敛（data@fix `b1d4df1`）：剥离的 OMAD FAQ 死链本质是 `href="javascript:switchTab('faq')"` — 该 `javascript:` URI 为上一轮遗留的唯一 javascript-scheme 锚点（归档页 0 处），移除后 bmi-tracker 内 `javascript:` URI 归零。属安全面改善，非回归。剩 `index.html:38` 的 `href="javascript:void(0);"` 为未变更的 inert 占位（无脚本参数），维持既有基线，不计新发现。
+
+依赖安全：CDN 资源与版本本轮无变更 — chart.js@4.4.7（bmi-tracker / daily-tracker-archive，`integrity` sha384 + `crossorigin="anonymous"` 均在）、html2canvas@1.4.1（wechat.html，integrity 在）。历史 CVE-2020-7746 影响 chart.js <2.9.4，当前 4.4.7 不受影响。`daily-poetry.html` 为全内联自包含（无外部 `<script src>`/CDN），SRI 不适用（更正 10-17 条目中「daily-poetry 引 chart.js」的表述偏差）。
+
+回归检查（data 同步触碰 HTML 的既有风险面）：`<meta name="referrer" content="strict-origin-when-cross-origin">` 在 index / wechat / bmi-tracker / daily-tracker-archive / daily-poetry / tokens-tracker 全部保留；`integrity`/`crossorigin` 未被数据管线剥离 → 无 REGRESSION。
+
+数据一致性：bmi-tracker.html 与 daily-tracker-archive-202607-202610.html 均为 98 行记录（`<tr>` 计数 98/98），月度卡片同口径（7/8/9/10 月，跑量 114.1/142.6/152.1/107.9 km）；归档改名 `-202607-202608` → `-202607-202610` 后，全仓 HTML/MD 对旧文件名的引用 0 命中，无断链。tokens-tracker 镜像脱敏：`data/live.js` 敏感词（personal-cinema / JAV / retro_ / `/Users/` / 邮箱）0 命中，`WEB_DATA_META.filtered: 12`（draft 11 + empty 1）与 LIVE_ITEMS 缩减一致；`index.html` 本轮未动，JT-SEC-015 referrer + JT-SEC-018 wc-nav 中和保持。
+
+JT-SEC-020 复检：`documents/handoff/handoff-www.jaden.tech-ops.md` 仍在库（`/Users/jadenli/` 绝对路径 + 内部项目路径），无凭证，无变化，维持 🟢 仅记录。
+
+计分口径：🟢 仅记录项沿用本项目 10-10 起口径 — 计入 `tracking` + `findings_open`，不计入 `findings_total`。
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | data@update 未剥离 referrer / SRI（bmi-tracker + archive + tokens-tracker 同步） | PASS |
+| — | 🟢 | CL028 跑量双轴柱状 = 静态数值字面量，无渲染路径/注入面变更 | PASS |
+| — | 🟢 | data@fix b1d4df1 移除 `javascript:` URI 死链（安全面改善） | PASS |
+| — | 🟢 | 归档改名后旧文件名引用 0 命中，98/98 行数据一致 | PASS |
+| — | 🟢 | tokens-tracker 镜像数据脱敏（live.js 敏感词 0，node --check PASS） | PASS |
+| 1 | 🟢 LOW | JT-SEC-019 tokens-tracker footer `wc-footer-version` 披露「hermes-manager · 1.11(20261015)」（无变化，未恶化） | OPEN（仅记录） |
+| 2 | 🟢 LOW | JT-SEC-020 `documents/handoff/handoff-www.jaden.tech-ops.md` 本地绝对路径 + 内部项目路径披露（无凭证，无变化） | OPEN（仅记录） |
+
+---
+
 ## 条目格式说明
 
 ```
