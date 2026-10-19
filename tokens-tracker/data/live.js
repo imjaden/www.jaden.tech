@@ -1,28 +1,37 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 12,
+  "filtered": 9,
   "filtered_breakdown": {
-    "draft": 11,
+    "draft": 8,
     "empty": 1,
-    "kept": 16,
+    "kept": 19,
     "window": 1
   },
-  "generated_at": "2026-10-18T21:50:38+08:00",
+  "generated_at": "2026-10-19T22:01:53+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "3caab709",
+  "generator_version": "6bc4b3df",
   "pages": [
     "index"
   ]
 };
 window.LIVE_ITEMS = [
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL90",
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL142",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-18 11:37",
-    "desc": "**profile 侧 5 个技能处于 curator 归档态（待裁）**"
+    "updated_at": "2026-10-19 17:49",
+    "desc": "**hm project check 退役面可读性清理 + 协议对齐（CL142…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL136",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-19 17:49",
+    "desc": "**CL136 入口页机器段与 live draft 脱钩（rows=0）**"
   },
   {
     "project": "hermes-manager",
@@ -30,7 +39,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "2026-10-16",
-    "updated_at": "2026-10-18 10:54",
+    "updated_at": "2026-10-19 17:49",
     "desc": "**R-9 全量红集 J9 首屏合并表断言并发漂移（设计待出）**"
   },
   {
@@ -39,7 +48,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "2026-10-15",
-    "updated_at": "2026-10-18 10:54",
+    "updated_at": "2026-10-19 17:49",
     "desc": "**`hm sessions check` 建议命令缺 `--project`（…"
   },
   {
@@ -65,14 +74,6 @@ window.BOARD_STATS = {
   "running": 6,
   "series": [
     {
-      "api_calls": 3419,
-      "cache_read_tokens": 530356992,
-      "date": "20261012",
-      "estimated_cost_usd": 4.2232,
-      "files": 26,
-      "total_tokens": 9625167
-    },
-    {
       "api_calls": 592,
       "cache_read_tokens": 72783488,
       "date": "20261013",
@@ -97,20 +98,20 @@ window.BOARD_STATS = {
       "total_tokens": 39571418
     },
     {
-      "api_calls": 546,
-      "cache_read_tokens": 41227008,
+      "api_calls": 652,
+      "cache_read_tokens": 52214784,
       "date": "20261016",
-      "estimated_cost_usd": 0.8098,
-      "files": 33,
-      "total_tokens": 2629901
+      "estimated_cost_usd": 1.0188,
+      "files": 41,
+      "total_tokens": 3296002
     },
     {
-      "api_calls": 2448,
-      "cache_read_tokens": 282079740,
+      "api_calls": 2872,
+      "cache_read_tokens": 314119548,
       "date": "20261017",
-      "estimated_cost_usd": 3.2115,
-      "files": 58,
-      "total_tokens": 9595679
+      "estimated_cost_usd": 3.9274,
+      "files": 82,
+      "total_tokens": 11867417
     },
     {
       "api_calls": 44,
@@ -119,6 +120,14 @@ window.BOARD_STATS = {
       "estimated_cost_usd": 0.0377,
       "files": 41,
       "total_tokens": 115462
+    },
+    {
+      "api_calls": 4001,
+      "cache_read_tokens": 608945664,
+      "date": "20261019",
+      "estimated_cost_usd": 4.1801,
+      "files": 26,
+      "total_tokens": 8228405
     }
   ]
 };
@@ -171,6 +180,11 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 10,
       "session_id": "20261014_112946_f0330d",
+      "state": "over"
+    },
+    {
+      "refs": 10,
+      "session_id": "20261017_213915_adcaab",
       "state": "over"
     },
     {
@@ -277,6 +291,11 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
+      "refs": 10,
+      "session_id": "20261017_213915_adcaab",
+      "state": "over"
+    },
+    {
       "refs": 8,
       "session_id": "20260917_222643_ce7e33",
       "state": "over"
@@ -335,22 +354,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260919"
+    "start": "20260920"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 26509.790228583814,
-      "first_pass_rate": 0.21,
-      "n": 100,
-      "round_mean": 2.77
+      "duration_mean": 24495.72396830576,
+      "first_pass_rate": 0.20535714285714285,
+      "n": 112,
+      "round_mean": 2.919642857142857
     },
     "recent": {
-      "duration_mean": 5738.31032799085,
-      "first_pass_rate": 0.13333333333333333,
-      "n": 15,
-      "round_mean": 3.933333333333333
+      "duration_mean": 3.6373882558610706,
+      "first_pass_rate": 0.0,
+      "n": 9,
+      "round_mean": 3.888888888888889
     }
   },
   "verdict": "部分改善（部分指标反向）"
