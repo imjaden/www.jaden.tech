@@ -120,6 +120,11 @@ h2 .toggle:hover{background:#21262d;color:#e6edf3}
 
 /* ── archive-extra: Archived tab 补充（portal style 之外）── */
 .sub{margin-bottom:18px}
+/* CL033：portal style 提取失败时的 Progress 兜底（与自带 style 同值） */
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem;margin:.75rem 0}
+.meta-item{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.6rem .8rem;font-size:13px;color:#8b949e}
+.progress-bar{height:6px;background:#21262d;border-radius:4px;margin:.5rem 0 1rem;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#7ee787,#58a6ff);transition:width .5s}
 
 .github-corner{position:fixed;top:0;right:0;z-index:999;width:72px;height:72px}
 .github-corner svg{fill:#fff;color:#151b23;position:absolute;top:0;border:0;right:0}
