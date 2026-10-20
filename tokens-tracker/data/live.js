@@ -2,14 +2,14 @@
 window.WEB_DATA_META = {
   "filtered": 9,
   "filtered_breakdown": {
-    "draft": 8,
+    "draft": 7,
     "empty": 1,
-    "kept": 19,
-    "window": 1
+    "kept": 13,
+    "window": 2
   },
-  "generated_at": "2026-10-19T22:01:53+08:00",
+  "generated_at": "2026-10-20T21:50:11+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "6bc4b3df",
+  "generator_version": "a3f24162",
   "pages": [
     "index"
   ]
@@ -21,7 +21,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-19 17:49",
+    "updated_at": "2026-10-20 17:05",
     "desc": "**hm project check 退役面可读性清理 + 协议对齐（CL142…"
   },
   {
@@ -30,7 +30,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-19 17:49",
+    "updated_at": "2026-10-20 17:05",
     "desc": "**CL136 入口页机器段与 live draft 脱钩（rows=0）**"
   },
   {
@@ -39,7 +39,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "2026-10-16",
-    "updated_at": "2026-10-19 17:49",
+    "updated_at": "2026-10-20 17:05",
     "desc": "**R-9 全量红集 J9 首屏合并表断言并发漂移（设计待出）**"
   },
   {
@@ -48,7 +48,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "2026-10-15",
-    "updated_at": "2026-10-19 17:49",
+    "updated_at": "2026-10-20 17:05",
     "desc": "**`hm sessions check` 建议命令缺 `--project`（…"
   },
   {
@@ -59,28 +59,11 @@ window.LIVE_ITEMS = [
     "created_at": "2026-10-16 20:47",
     "updated_at": "2026-10-17 09:44",
     "desc": "**CL128 甲② 跨 profile 镜像转交（ops profile · …"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL119",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-13",
-    "updated_at": "2026-10-13 21:26",
-    "desc": "**存量红收敛（CL055 dev 步 sha 断言 abbrev-agnost…"
   }
 ];
 window.BOARD_STATS = {
-  "running": 6,
+  "running": 5,
   "series": [
-    {
-      "api_calls": 592,
-      "cache_read_tokens": 72783488,
-      "date": "20261013",
-      "estimated_cost_usd": 1.086,
-      "files": 7,
-      "total_tokens": 2375899
-    },
     {
       "api_calls": 4693,
       "cache_read_tokens": 686907520,
@@ -128,20 +111,29 @@ window.BOARD_STATS = {
       "estimated_cost_usd": 4.1801,
       "files": 26,
       "total_tokens": 8228405
+    },
+    {
+      "api_calls": 3034,
+      "cache_read_tokens": 497748726,
+      "date": "20261020",
+      "estimated_cost_usd": 3.655,
+      "files": 16,
+      "total_tokens": 9333848
     }
   ]
 };
 window.HIST_TASKS = [];
 window.HIST_SESSION_CAP = {
-  "at_cap_sessions": [],
-  "cap": 5,
-  "max_refs": 26,
-  "over_cap_sessions": [
+  "at_cap_sessions": [
     {
-      "refs": 26,
-      "session_id": "20260920_111536_2b3d89",
-      "state": "over"
-    },
+      "refs": 5,
+      "session_id": "20261014_112906_913ac4",
+      "state": "at_cap"
+    }
+  ],
+  "cap": 5,
+  "max_refs": 21,
+  "over_cap_sessions": [
     {
       "refs": 21,
       "session_id": "20261017_230827_f01df4",
@@ -150,6 +142,11 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 19,
       "session_id": "20260928_113939_746d8e",
+      "state": "over"
+    },
+    {
+      "refs": 15,
+      "session_id": "20260920_111536_2b3d89",
       "state": "over"
     },
     {
@@ -246,11 +243,6 @@ window.HIST_SESSION_CAP = {
   "refs_scope": "registered",
   "rotate_sessions": [
     {
-      "refs": 26,
-      "session_id": "20260920_111536_2b3d89",
-      "state": "over"
-    },
-    {
       "refs": 21,
       "session_id": "20261017_230827_f01df4",
       "state": "over"
@@ -258,6 +250,11 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 19,
       "session_id": "20260928_113939_746d8e",
+      "state": "over"
+    },
+    {
+      "refs": 15,
+      "session_id": "20260920_111536_2b3d89",
       "state": "over"
     },
     {
@@ -349,27 +346,32 @@ window.HIST_SESSION_CAP = {
       "refs": 6,
       "session_id": "20261016_202615_aad5bd",
       "state": "over"
+    },
+    {
+      "refs": 5,
+      "session_id": "20261014_112906_913ac4",
+      "state": "at_cap"
     }
   ],
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260920"
+    "start": "20260921"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 24495.72396830576,
-      "first_pass_rate": 0.20535714285714285,
+      "duration_mean": 24393.419147042292,
+      "first_pass_rate": 0.1875,
       "n": 112,
       "round_mean": 2.919642857142857
     },
     "recent": {
-      "duration_mean": 3.6373882558610706,
+      "duration_mean": 656.5401288986207,
       "first_pass_rate": 0.0,
-      "n": 9,
-      "round_mean": 3.888888888888889
+      "n": 5,
+      "round_mean": 4.4
     }
   },
   "verdict": "部分改善（部分指标反向）"
