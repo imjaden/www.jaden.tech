@@ -473,6 +473,51 @@ JT-SEC-020 复检：`documents/handoff/handoff-www.jaden.tech-ops.md` 仍在库�
 
 ---
 
+## 2026-10-21 — 夜间 L2 复审（17 commit：14× data sync + 2× fix@ui + 1× fix@site；`javascript:` 死链「移除→重渲染再生→再移除」循环，新增 JT-SEC-021 生成器级根因）
+
+- **review者**: Security Reviewer（review profile，cron）
+- **范围**: 17 commit — `cb988bf..0360661`（14× data@update：bmi-tracker/archive 的 CL033/CL036 progress 区块 + 归档页标题英文重渲染 + daily-tracker 10-19/10-20/10-21 同步 + tokens-tracker 自动镜像；2× fix@ui `224b3a5`/`86607c0` 标题与间距；1× fix@site `ed4cf33` 移除 OMAD FAQ 死链。无 Python/shell 源码改动，`tokens-tracker/data/live.js` 仅数据层）
+- **Tracking**: JT-SEC-021（🟡 MEDIUM，新 OPEN）；JT-SEC-019、JT-SEC-020（🟢 LOW，仍 OPEN，无变化）；JT-SEC-015/016/017/018（🟢 LOW，保持已闭合）
+- **状态**: ✅ PASS（95 / 100，Rating A）
+- **报告**: 无（nightly re-audit，single-log 约定；本条目即报告）
+- **实现 prompt**: ⬜ 无需生成（PASS 但含 1 项 🟡 建议修，见下）
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿：Pass 1（`sk-`/`sk-ant-`/`ghp_`/`AKIA`/`AIza`/`xox` 高置信前缀）0 命中；Pass 2（`api_key|secret|password|access_token` 引号赋值式）0 命中；Pass 3（`os.environ|process.env|localStorage` 宽口径）仅命中 bmi-tracker 的 `dt_active_tab` 标签持久化与 tokens-tracker 的列宽/比例偏好，均为非敏感 UI 状态且经 `try/catch` 包裹；Pass 4（注释幽灵键）本轮 `cb988bf..HEAD` 全量 `git log -p` 复扫 0 命中。
+
+PII：3 个变更文件邮箱/手机号正则 0 命中（`live.js` 的 2 处命中经人工核验为浮点小数 `0.1818…`/`3.4166…` 的假阳性，非号码）。
+
+shell 注入：`scripts/` 本轮 0 变更（`git diff --name-only cb988bf..HEAD -- scripts/` 为空）；`ssl-manager.py:75` 仅注释声明「不使用 shell=True」，无 `shell=True|os.system|f-string` 命令构造。
+
+XSS：3 个变更文件 `innerHTML|outerHTML|document.write|insertAdjacentHTML|eval(|new Function` 全 0 命中；`bmi-tracker` 3 处 + archive 1 处 `onclick` 全为静态常量（`switchTab('archived')`/`switchTab('omad')`/`tbl.classList.toggle`），无数据拼接。`tokens-tracker/data/live.js` 通过 `node --check` 语法校验（461 行、`function|=>` 0 命中 ⇒ 纯数据赋值，无渲染/执行路径）；`common.js` md 渲染维持「DOM + textContent、禁 innerHTML」（CL061 R6/D6）。`index.html:38` 的 `href="javascript:void(0);"` 为未变更的 inert 占位（无脚本参数），维持既有基线，不计新发现。
+
+依赖安全：CDN 资源版本与上轮一致 — chart.js@4.4.7（bmi-tracker + archive，`integrity` sha384 + `crossorigin="anonymous"` 均在）、html2canvas@1.4.1（wechat.html，integrity 在）。外部查证（Snyk / deps.dev / cybersecurity-help，2026-03 数据）：两版本 direct vulnerabilities 均 0，latest 分别为 4.5.1 / 1.4.1 ⇒ 无已知 CVE 暴露面。
+
+回归检查（data 同步重写 HTML 的既有风险面）：`<meta name="referrer" content="strict-origin-when-cross-origin">` 在 index / wechat / bmi-tracker / daily-tracker-archive / daily-poetry / tokens-tracker 6 页全部保留；SRI `integrity`/`crossorigin` 未被数据管线剥离 ⇒ 无 referrer/SRI 类 REGRESSION。
+
+🟡 新发现 JT-SEC-021（生成器级根因，需待确认）：`bmi-tracker.html` 的 OMAD FAQ 死链 `href="javascript:switchTab('faq')"` 呈「移除→再生→再移除」循环。pickaxe 证据链：`2033d6d`（数据装配时已在）→ `b1d4df1 data@fix`（10-18，剥离，上轮据此记录「javascript: URI 归零」）→ `2e59c01 data@update`（10-20 CL036 重渲染，**重新引入**）→ `ed4cf33 fix@site`（10-20，再次剥离，引用上游 `DT-SEC-166`）。即 data@update 的站点页生成器仍会按模板产出该 URI，artifact 级修复每次被下一次重渲染覆盖。当前 HEAD 该 URI 为 0（`git grep 'javascript:'` 仅剩 `index.html:38` inert 占位），故**不是当前可利用漏洞**（无用户输入、静态硬编码调用、无 XSS 前置条件），定为 🟡 而非 🔴；但这是已修项的重复回归 + 防护缺口（缺 artifact 级回归门禁），根因须在 daily-tracker 仓的页面模板/`update.py` 装配段修正，否则每轮复审都会复现。
+
+数据一致性：`archiveTbl` 数据行 `bmi-tracker.html` 101 行 / `daily-tracker-archive-202607-202610.html` 101 行（`<tr` 计数 114 vs 102，差额 12 为 bmi 页 OMAD 区两张 `danger-table` 静态行），口径一致，无数据错位。标题 `BMI Tracker · 202607 ~ 202610` 在模板与归档页同源同步，全仓对旧标题 `DailyTracker 归档 · 2026-07 ~ 2026-10` 残留引用 0 命中。
+
+`target="_blank"` 未带 `rel="noopener"` 的 3 处（`index.html:42/45` 归档项目图标、`wechat.html:533` 站点回链）为长期既有基线：现代浏览器对 `target=_blank` 默认隐含 `noopener`，且均为站内/自有归档域，不升格为发现，维持既往不计口径。
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | 凭证扫描 Pass 1-4 全绿（17 commit 全量 diff 复扫 + 注释幽灵键 0） | PASS |
+| — | 🟢 | 3 个变更文件无 `innerHTML/eval` 类 sink；onclick 4 处静态常量；live.js 纯数据 + `node --check` PASS | PASS |
+| — | 🟢 | data@update 重渲染未剥离 referrer meta / SRI（6 页全保留） | PASS |
+| — | 🟢 | 依赖 chart.js@4.4.7 + html2canvas@1.4.1 外部查证 0 已知 CVE，SRI 完整 | PASS |
+| — | 🟢 | `ed4cf33` 剥离 `javascript:` FAQ 死链 = 安全面改善（当前 HEAD 归零） | PASS |
+| — | 🟢 | 数据一致性 101/101 行，归档标题同源同步，旧标题残留 0 | PASS |
+| 1 | 🟡 MEDIUM | JT-SEC-021 `javascript:` FAQ 死链由 data@update 重渲染反复再生（`b1d4df1`→`2e59c01`→`ed4cf33`），生成器侧根因未修，缺 artifact 级回归门禁 | OPEN（建议修：改 daily-tracker 生成器模板） |
+| 2 | 🟢 LOW | JT-SEC-019 tokens-tracker footer `wc-footer-version` 披露「hermes-manager · 1.11(20261015)」（无变化，未恶化） | OPEN（仅记录） |
+| 3 | 🟢 LOW | JT-SEC-020 `documents/handoff/handoff-www.jaden.tech-ops.md` 本地绝对路径 + 内部项目路径披露（无凭证，无变化） | OPEN（仅记录） |
+
+计分：100 − 5（1× 🟡）= **95 / 100 → A → PASS**；🟢 仅记录项沿用本项目口径（计入 `tracking` + `findings_open`，不计入 `findings_total`）。
+
+---
+
 ## 条目格式说明
 
 ```
