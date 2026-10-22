@@ -4,12 +4,12 @@ window.WEB_DATA_META = {
   "filtered_breakdown": {
     "draft": 7,
     "empty": 1,
-    "kept": 23,
+    "kept": 21,
     "window": 0
   },
-  "generated_at": "2026-10-21T22:30:57+08:00",
+  "generated_at": "2026-10-22T22:30:38+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "10de240c",
+  "generator_version": "e4ce8274",
   "pages": [
     "index"
   ]
@@ -17,11 +17,38 @@ window.WEB_DATA_META = {
 window.LIVE_ITEMS = [
   {
     "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL128",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-22 22:29",
+    "desc": "**DAILY-CHECKER-CL128 CL124 审计 4🟡+3🟢 小批*…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL127",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-22 22:29",
+    "desc": "**DAILY-CHECKER-CL127 通知面小缺陷（诊断§4-3）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL122",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-22 22:29",
+    "desc": "**DAILY-CHECKER-CL122 上游 rc 语义（转交 script…"
+  },
+  {
+    "project": "daily-checker",
     "number": "DAILY-CHECKER-CL119",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-21 18:42",
+    "updated_at": "2026-10-22 22:29",
     "desc": "**DAILY-CHECKER-CL119 开侧迟到 open 守卫**"
   },
   {
@@ -30,7 +57,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-21 18:42",
+    "updated_at": "2026-10-22 22:29",
     "desc": "**DAILY-CHECKER-CL118 hint 到期表 per-key 化…"
   },
   {
@@ -39,120 +66,67 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-21 18:42",
+    "updated_at": "2026-10-22 22:29",
     "desc": "**DAILY-CHECKER-CL117 坏行静默跳过**"
   },
   {
     "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL126",
+    "status": "active",
+    "progress": "[6/6] 收尾复盘",
+    "created_at": "2026-10-22 18:27",
+    "updated_at": "2026-10-22 22:14",
+    "desc": "**DAILY-CHECKER-CL126 生产缺陷：warning 项 del…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL125",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-22 12:57",
+    "updated_at": "2026-10-22",
+    "desc": "**DAILY-CHECKER-CL125 CL121 审计 8🟡 收口**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL124",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-22 17:06",
+    "updated_at": "2026-10-22",
+    "desc": "**DAILY-CHECKER-CL124 CL116 审计 5🟡 小批**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL123",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-22 09:08",
+    "updated_at": "2026-10-22",
+    "desc": "**DAILY-CHECKER-CL123 分栏名称高亮 + 分栏行命中按 id…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL121",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-22 11:43",
+    "updated_at": "2026-10-22",
+    "desc": "**DAILY-CHECKER-CL121 通知排程面（P0）**"
+  },
+  {
+    "project": "daily-checker",
     "number": "DAILY-CHECKER-CL116",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-21 18:42",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-22 10:47",
+    "updated_at": "2026-10-22",
     "desc": "**DAILY-CHECKER-CL116 测试隔离（P0）**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL110",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-21 18:42",
-    "updated_at": "2026-10-21 18:42",
-    "desc": "**DAILY-CHECKER-CL110 ack/刷新流的覆盖态守卫**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL111",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-21 18:06",
-    "updated_at": "2026-10-21 18:06",
-    "desc": "**DAILY-CHECKER-CL111 hint TTL 调度路径判据**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL112",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-21 17:31",
-    "updated_at": "2026-10-21 17:31",
-    "desc": "**DAILY-CHECKER-CL112 CL109 收口批**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL115",
-    "status": "active",
-    "progress": "[6/6] 收尾复盘",
-    "created_at": "2026-10-21 16:56",
-    "updated_at": "2026-10-21 16:56",
-    "desc": "**DAILY-CHECKER-CL115 jobs 读失败降级可见性**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL114",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-21 16:31",
-    "updated_at": "2026-10-21",
-    "desc": "**DAILY-CHECKER-CL114 job 生命周期兜底**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL113",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-21 15:56",
-    "updated_at": "2026-10-21",
-    "desc": "**DAILY-CHECKER-CL113 collect timeout 类型…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL109",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-21 13:23",
-    "updated_at": "2026-10-21",
-    "desc": "**DAILY-CHECKER-CL109 执行倒计时（已执行 / 待超时剩余）…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL108",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-21 12:58",
-    "updated_at": "2026-10-21",
-    "desc": "**DAILY-CHECKER-CL108 关闭后的后台执行可观测**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL107",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-21 12:04",
-    "updated_at": "2026-10-21",
-    "desc": "**DAILY-CHECKER-CL107 补 B2 第 7 例判别式**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL106",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-21 10:02",
-    "updated_at": "2026-10-21",
-    "desc": "**DAILY-CHECKER-CL106 执行弹框关闭语义收口**"
   }
 ];
 window.BOARD_STATS = {
-  "running": 8,
+  "running": 5,
   "series": [
-    {
-      "api_calls": 8908,
-      "cache_read_tokens": 1410045184,
-      "date": "20261015",
-      "estimated_cost_usd": 12.8887,
-      "files": 102,
-      "total_tokens": 39571418
-    },
     {
       "api_calls": 652,
       "cache_read_tokens": 52214784,
@@ -194,12 +168,20 @@ window.BOARD_STATS = {
       "total_tokens": 9333848
     },
     {
-      "api_calls": 377,
-      "cache_read_tokens": 13652224,
+      "api_calls": 463,
+      "cache_read_tokens": 18880768,
       "date": "20261021",
-      "estimated_cost_usd": 0.2537,
-      "files": 61,
-      "total_tokens": 863329
+      "estimated_cost_usd": 0.3195,
+      "files": 67,
+      "total_tokens": 1066457
+    },
+    {
+      "api_calls": 225,
+      "cache_read_tokens": 12622720,
+      "date": "20261022",
+      "estimated_cost_usd": 0.1925,
+      "files": 34,
+      "total_tokens": 613864
     }
   ]
 };
@@ -231,13 +213,13 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 15,
-      "session_id": "20260922_094600_e83378",
+      "refs": 14,
+      "session_id": "20260929_212828_7c112c",
       "state": "over"
     },
     {
-      "refs": 14,
-      "session_id": "20260929_212828_7c112c",
+      "refs": 12,
+      "session_id": "20260922_094600_e83378",
       "state": "over"
     },
     {
@@ -263,11 +245,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 10,
       "session_id": "20261017_213915_adcaab",
-      "state": "over"
-    },
-    {
-      "refs": 8,
-      "session_id": "20260917_222643_ce7e33",
       "state": "over"
     },
     {
@@ -318,6 +295,11 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 6,
       "session_id": "20261016_202615_aad5bd",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "local-527c18babb2490798c0de83a5faab7f0fcc79f73d4b5bdf1c19130ae8a37b159",
       "state": "over"
     }
   ],
@@ -334,13 +316,13 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 15,
-      "session_id": "20260922_094600_e83378",
+      "refs": 14,
+      "session_id": "20260929_212828_7c112c",
       "state": "over"
     },
     {
-      "refs": 14,
-      "session_id": "20260929_212828_7c112c",
+      "refs": 12,
+      "session_id": "20260922_094600_e83378",
       "state": "over"
     },
     {
@@ -366,11 +348,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 10,
       "session_id": "20261017_213915_adcaab",
-      "state": "over"
-    },
-    {
-      "refs": 8,
-      "session_id": "20260917_222643_ce7e33",
       "state": "over"
     },
     {
@@ -424,6 +401,11 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
+      "refs": 6,
+      "session_id": "local-527c18babb2490798c0de83a5faab7f0fcc79f73d4b5bdf1c19130ae8a37b159",
+      "state": "over"
+    },
+    {
       "refs": 5,
       "session_id": "20261014_112906_913ac4",
       "state": "at_cap"
@@ -437,25 +419,25 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260922"
+    "start": "20260923"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 24835.337218143723,
-      "first_pass_rate": 0.18181818181818182,
-      "n": 110,
-      "round_mean": 2.9272727272727272
+      "duration_mean": 25615.16606196761,
+      "first_pass_rate": 0.17307692307692307,
+      "n": 104,
+      "round_mean": 2.951923076923077
     },
     "recent": {
-      "duration_mean": 313.40226662158966,
-      "first_pass_rate": 0.75,
-      "n": 12,
-      "round_mean": 3.4166666666666665
+      "duration_mean": 622.9398620128632,
+      "first_pass_rate": 0.7222222222222222,
+      "n": 18,
+      "round_mean": 2.6666666666666665
     }
   },
-  "verdict": "部分改善（部分指标反向）"
+  "verdict": "改善"
 };
 window.WEB_DATA_READY = true;
 if (window.dispatchEvent) { window.dispatchEvent(new Event('web-data-ready')); }
