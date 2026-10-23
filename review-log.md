@@ -518,6 +518,49 @@ XSS：3 个变更文件 `innerHTML|outerHTML|document.write|insertAdjacentHTML|e
 
 ---
 
+## 2026-10-23 — 夜间 L2 复审（4× data@update sync：2× daily-tracker 10-22/10-23 + 2× tokens-tracker；无代码变更、无回归）
+
+- **review者**: Security Reviewer（review profile，cron）
+- **范围**: 4 commit — `5e26cab..593bfbe`（`6460346` daily-tracker 10-22 + `913188c` tokens-tracker auto sync + `e52e762` daily-tracker 10-23 + `593bfbe` tokens-tracker auto sync）；变更面仅 3 文件 = `bmi-tracker.html`(20 行) / `daily-tracker-archive-202607-202610.html`(22 行) / `tokens-tracker/data/live.js`(222 行，纯数据层)。`git log 5e26cab..HEAD | grep -v 'audit@review:' | grep -v 'data@update:'` 为空 ⇒ 无代码/脚本/依赖改动。
+- **Tracking**: JT-SEC-021（🟡 MEDIUM，仍 OPEN，无再生）；JT-SEC-019、JT-SEC-020（🟢 LOW，仍 OPEN，无变化）；JT-SEC-015/016/017/018（🟢 LOW，保持已闭合）
+- **状态**: ✅ PASS（95 / 100，Rating A）
+- **报告**: 无（nightly re-audit，single-log 约定；本条目即报告）
+- **实现 prompt**: ⬜ 无需生成（无新增可实施项；JT-SEC-021 待确认项沿用上轮建议）
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿：Pass 1（`sk-`/`ghp_`/`gho_`/`AKIA`/`Bearer ` 高置信前缀）对全仓 0 命中；Pass 2（`api_key|secret|password|Bearer <token>` 引号赋值式）0 命中；Pass 3（`/Users/|~/|/home/|token|credential|BEGIN *PRIVATE KEY`）仅命中既有 `scripts/*.py` 与 `documents/handoff/*` 的本地路径（JT-SEC-020 既有记录），无凭证；Pass 4（注释幽灵键）对本轮 4 commit 全量 `git log -p` 复扫 0 命中。
+
+PII：3 个变更文件邮箱/手机号正则 0 命中；`tokens-tracker/data/live.js` 敏感词扫描（`personal-cinema|retro_summary|myvideos|/Users/|jadenli|passwd|api[_-]?key|sk-`）0 命中 ⇒ 镜像脱敏维持（`filtered: 10` 较上轮 7 增加，`kept: 18` 减少，过滤方向正确）。
+
+XSS：3 个变更文件 `innerHTML|outerHTML|document.write|insertAdjacentHTML|eval(|new Function` 全 0 命中；`onclick` 2 处（`tbl.classList.toggle` 静态常量）无数据拼接。`tokens-tracker/data/live.js` 通过 `node --check` 语法校验（379 行，`function|=>` 0 命中 ⇒ 纯数据赋值，无渲染/执行路径）；`tokens-tracker/assets/common.js` 本轮未改动，md 渲染维持「DOM + textContent、禁 innerHTML」（CL061 R6/D6）。`index.html:38` 的 `href="javascript:void(0);"` 为未变更的 inert 占位，维持既有基线口径，不计新发现。
+
+回归检查（data 同步重写 HTML 的核心风险面）：
+1. JT-SEC-021 未再生 — `git grep 'javascript:'` 在 bmi-tracker / archive / index（仅 inert 占位）/ wechat / daily-poetry / tokens-tracker 中，脚本 URI 命中 0；本轮 4 commit 的新增行 `javascript:` 亦 0（`git log -p | grep '^\+.*javascript:'` 空）。上轮 `ed4cf33` 的剥离在本轮两次重渲染（`e52e762`/`6460346`）后仍保持。
+2. referrer meta 6/6 页全保留（index / wechat / bmi-tracker / archive / daily-poetry / tokens-tracker，均 `strict-origin-when-cross-origin`）。
+3. SRI 完整未剥离：chart.js@4.4.7 `integrity="sha384-vsrfe…"` + `crossorigin="anonymous"` 在 bmi-tracker + archive 均在；html2canvas@1.4.1 `integrity="sha384-ZZ1pn…"` + `crossorigin` 在 wechat.html 在。
+4. 数据一致性：`archiveTbl` 数据行 bmi 104 tr / archive 104 tr（含 1 表头 ⇒ 103 数据行），两页 h2 均标 `103 rows`，`<title>` 均 `BMI Tracker · 202607 ~ 202610` ⇒ 无行数/标题错位；全文件 tr 116 vs 104，差额 12 为 bmi 页 OMAD 区两张 `danger-table` 静态行（与上轮口径一致）。
+
+依赖安全：本轮无依赖变更；chart.js@4.4.7 / html2canvas@1.4.1 版本与上轮一致（上轮已外部查证 direct vulnerabilities 0），SRI 在位 ⇒ 无新增 CVE 暴露面。
+
+提交卫生：`git status --short` 干净；本轮唯一本地待推送 commit 为 `593bfbe data@update`（数据层），无 `fix@`/`feat@` 未审代码；4 commit 的 subject 均 `type@scope` 小写 + 英文 subject。
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | 凭证扫描 Pass 1-4 全绿（diff 复扫 + 注释幽灵键 0） | PASS |
+| — | 🟢 | 3 变更文件无 `innerHTML/eval` 类 sink；onclick 静态常量；live.js 纯数据 + `node --check` PASS | PASS |
+| — | 🟢 | data@update 重渲染未剥离 referrer meta（6/6）/ SRI（chart.js + html2canvas）⇒ 无 REGRESSION | PASS |
+| — | 🟢 | JT-SEC-021 脚本 URI 未再生（新增行 0 命中），上轮剥离在 2 次重渲染后仍有效 | PASS |
+| — | 🟢 | 镜像脱敏维持（live.js 敏感词 0；filtered 7→10 / kept 23→18 为过滤加强） | PASS |
+| — | 🟢 | 数据一致性 103/103 行、标题同源，Δ12 静态行口径一致 | PASS |
+| 1 | 🟡 MEDIUM | JT-SEC-021 `javascript:` FAQ 死链生成器侧根因未修（artifact 当前 0 命中，缺 artifact 级回归门禁） | OPEN（无变化，建议修：daily-tracker 生成器模板） |
+| 2 | 🟢 LOW | JT-SEC-019 tokens-tracker footer `wc-footer-version` 披露「hermes-manager · 1.11(20261015)」（无变化） | OPEN（仅记录） |
+| 3 | 🟢 LOW | JT-SEC-020 `documents/handoff/handoff-www.jaden.tech-ops.md` 本地绝对路径披露（无凭证，无变化） | OPEN（仅记录） |
+
+计分：100 − 5（1× 🟡 结转）= **95 / 100 → A → PASS**；🟢 仅记录项沿用本项目口径（计入 `tracking` + `findings_open`，不计入 `findings_total`）。
+
+---
+
 ## 条目格式说明
 
 ```
