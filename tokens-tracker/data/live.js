@@ -1,15 +1,15 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 10,
+  "filtered": 1,
   "filtered_breakdown": {
-    "draft": 8,
+    "draft": 1,
     "empty": 1,
-    "kept": 18,
-    "window": 2
+    "kept": 29,
+    "window": 0
   },
-  "generated_at": "2026-10-23T21:50:52+08:00",
+  "generated_at": "2026-10-24T21:50:30+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "1bee357f",
+  "generator_version": "57fad93a",
   "pages": [
     "index"
   ]
@@ -17,70 +17,152 @@ window.WEB_DATA_META = {
 window.LIVE_ITEMS = [
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL122",
+    "number": "DAILY-CHECKER-CL155",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-23 21:46",
-    "desc": "**DAILY-CHECKER-CL122 上游 rc 语义（转交 script…"
+    "updated_at": "2026-10-24 21:10",
+    "desc": "**DAILY-CHECKER-CL155 同一条链路的三处预算同源（收 CL1…"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL128",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-23 12:25",
-    "updated_at": "2026-10-23",
-    "desc": "**DAILY-CHECKER-CL128 CL124 审计 4🟡+3🟢 小批*…"
+    "number": "DAILY-CHECKER-CL150",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-24 21:10",
+    "desc": "**DAILY-CHECKER-CL150 hermes-manager 历史夹…"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL127",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-23 08:52",
-    "updated_at": "2026-10-23",
-    "desc": "**DAILY-CHECKER-CL127 通知面小缺陷（诊断§4-3）**"
+    "number": "DAILY-CHECKER-CL140",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-24 21:10",
+    "desc": "**DAILY-CHECKER-CL140 FlClash 阈值变更同步**"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL119",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-23 10:42",
-    "updated_at": "2026-10-23",
-    "desc": "**DAILY-CHECKER-CL119 开侧迟到 open 守卫**"
+    "number": "DAILY-CHECKER-CL139",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-24 21:10",
+    "desc": "**DAILY-CHECKER-CL139 上游 rc 语义落地后的下游收口**"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL118",
+    "number": "DAILY-CHECKER-CL154",
     "status": "done",
     "progress": "[6/6]",
-    "created_at": "2026-10-23 11:29",
-    "updated_at": "2026-10-23",
-    "desc": "**DAILY-CHECKER-CL118 hint 到期表 per-key 化…"
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL154 restart-flclash 超时…"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL117",
+    "number": "DAILY-CHECKER-CL152",
     "status": "done",
     "progress": "[6/6]",
-    "created_at": "2026-10-23 09:53",
-    "updated_at": "2026-10-23",
-    "desc": "**DAILY-CHECKER-CL117 坏行静默跳过**"
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL152 收 CL151 门禁 2🔴/4🟡/3…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL151",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL151 FlClash 生命周期口径 v2（…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL149",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL149 收第二轮门禁 1🔴+9🟡**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL148",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL148 gitleaks 扫描面按仓分档**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL147",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL147 CL144-S3 claim 双写者…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL146",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL146 收 CL145 门禁 6🟡**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL145",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL145 收 CL144 门禁 6🟡 + S2…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL144",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL144 通知统一化第二批**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL143",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL143 CL142 门禁 4🟡 收口 + o…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL142",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL142 FlClash 通知四槽模板定稿**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL138",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "-",
+    "updated_at": "2026-10-24",
+    "desc": "**DAILY-CHECKER-CL138 hm 任务板 checks[] 逐项…"
   }
 ];
 window.BOARD_STATS = {
   "running": 0,
   "series": [
-    {
-      "api_calls": 2872,
-      "cache_read_tokens": 314119548,
-      "date": "20261017",
-      "estimated_cost_usd": 3.9274,
-      "files": 82,
-      "total_tokens": 11867417
-    },
     {
       "api_calls": 44,
       "cache_read_tokens": 2539648,
@@ -128,6 +210,14 @@ window.BOARD_STATS = {
       "estimated_cost_usd": 0.0125,
       "files": 23,
       "total_tokens": 51117
+    },
+    {
+      "api_calls": 0,
+      "cache_read_tokens": 0,
+      "date": "20261024",
+      "estimated_cost_usd": 0.0,
+      "files": 0,
+      "total_tokens": 0
     }
   ]
 };
@@ -191,11 +281,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 8,
       "session_id": "20261015_221750_2f42ad",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20260922_114618_5e33bb",
       "state": "over"
     },
     {
@@ -293,11 +378,6 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 7,
-      "session_id": "20260922_114618_5e33bb",
-      "state": "over"
-    },
-    {
-      "refs": 7,
       "session_id": "20261009_121011_122598",
       "state": "over"
     },
@@ -355,22 +435,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260924"
+    "start": "20260925"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 2414.931727479089,
-      "first_pass_rate": 0.2641509433962264,
-      "n": 106,
-      "round_mean": 2.9150943396226414
+      "duration_mean": 2323.0302618113433,
+      "first_pass_rate": 0.2545454545454545,
+      "n": 110,
+      "round_mean": 2.8636363636363638
     },
     "recent": {
-      "duration_mean": 846.4839714555179,
-      "first_pass_rate": 0.17647058823529413,
-      "n": 17,
-      "round_mean": 1.1176470588235294
+      "duration_mean": 246.92542521953584,
+      "first_pass_rate": 0.0,
+      "n": 10,
+      "round_mean": 0.4
     }
   },
   "verdict": "部分改善（部分指标反向）"
