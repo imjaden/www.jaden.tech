@@ -14,7 +14,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<link rel="shortcut icon" href="static/img/favicon.png?t=1792914453">
+<link rel="shortcut icon" href="static/img/favicon.png?t=1792919065">
 <meta name="keywords" content="Jaden Li, 李俊杰, Solutions Architect, AIOps, Enterprise AI, Hermes Agent, Shanghai">
 <meta name="description" content="Jaden Li (李俊杰), Solutions Architect. 14yrs: 8 Dev + 6 Presales. Enterprise AIOps delivery for China Telecom, China Mobile, UnionPay.">
 <meta property="og:title" content="Jaden Li">
@@ -22,10 +22,10 @@
 <meta property="og:image" content="https://www.jaden.tech/static/img/favicon.png">
 <meta property="og:url" content="https://www.jaden.tech">
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="static/css/index.css?t=1792914453"/>
+<link rel="stylesheet" href="static/css/index.css?t=1792919065"/>
 </head>
 <body>
-  <img id="background" src="static/img/bear01.jpg?t=1792914453" alt="Polar bear background"/>
+  <img id="background" src="static/img/bear01.jpg?t=1792919065" alt="Polar bear background"/>
   <a href="https://github.com/imjaden" class="github-corner" target="_blank" rel="noopener" aria-label="View source on Github">
       <svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" fill="rgba(0,0,0,0.41)"></path>
@@ -36,18 +36,19 @@
 <section id="main">
   <div class="container">
     <a href="javascript:void(0);" id="logo-link">
-        <img id="logo" type="image/svg+xml" src="static/img/favicon.svg?t=1792914453" alt="Jaden Li"/>
+        <img id="logo" type="image/svg+xml" src="static/img/favicon.svg?t=1792919065" alt="Jaden Li"/>
     </a>
     <div class="icon-links">
       <a href="https://intfocus.archived.jaden.tech/" target="_blank" title="Intfocus">
-        <img src="static/img/icons/intfocus.png?t=1792914453" alt="Intfocus"/>
+        <img src="static/img/icons/intfocus.png?t=1792919065" alt="Intfocus"/>
       </a>
       <a href="https://cloudwise.archived.jaden.tech" target="_blank" title="Cloudwise">
-        <img src="static/img/icons/cloudwise.png?t=1792914453" alt="Cloudwise"/>
+        <img src="static/img/icons/cloudwise.png?t=1792919065" alt="Cloudwise"/>
       </a>
     </div>
   </div> 
 </section>
+<div class="bottom-stack">
 <section class="now-section" aria-label="Currently working on">
   <h2 class="now-title" id="nowTitle" data-zh="我正在做的事项" data-en="What I'm Doing Now">我正在做的事项</h2>
   <div class="now-cards">
@@ -65,12 +66,15 @@
   </div>
 </section>
 <section class="poetry-section" aria-label="Today's Poetry">
-  <span class="poetry-label" id="poetryTitle"
-        data-zh="今日诗词鉴赏" data-en="Today's Poetry">今日诗词鉴赏</span>
-  <span class="poetry-sep" aria-hidden="true">·</span>
-  <a class="poetry-link" id="poetryName" href="./daily-poetry.html" target="_blank" rel="noopener"
-     data-zh="加载中…" data-en="Loading…">加载中…</a>
+  <h2 class="now-title" id="poetryTitle" data-zh="今日诗词鉴赏" data-en="Today's Poetry">今日诗词鉴赏</h2>
+  <div class="now-cards">
+    <a class="now-card" id="poetryName" href="./daily-poetry.html" target="_blank" rel="noopener">
+      <span class="now-emoji" aria-hidden="true">📜</span>
+      <span class="now-name" data-zh="加载中…" data-en="Loading…">加载中…</span>
+    </a>
+  </div>
 </section>
+</div>
 <div class="footer">
   <div class="wrap">
     <div class="ft-copy">
@@ -90,29 +94,26 @@
     var m = window.location.search.match(/[?&]t=(\d+)/);
     return m ? '?t=' + m[1] : '';
   }
+  // 诗词区已改为「标题 + 药丸卡」结构与 Now 区一致，诗词标题落在 .now-name 上
+  function setPoetryName(text) {
+    var nameEl = document.querySelector('#poetryName .now-name');
+    if (!nameEl) return;
+    nameEl.textContent = text;
+    nameEl.setAttribute('data-zh', text);
+    nameEl.setAttribute('data-en', text);
+  }
   function renderPoetry() {
     var iso = getTodayISO();
     var data = null;
     if (typeof window.dailyPoetryArchive === 'object' && window.dailyPoetryArchive) {
       data = window.dailyPoetryArchive[iso];
     }
-    var nameEl = document.getElementById('poetryName');
-    if (!nameEl) return;
     if (data && data.recommendations && data.recommendations[0]) {
-      // 取 score 最高的第一首（CLI 已按 score 降序）
-      var poem = data.recommendations[0];
-      var title = '《' + poem.title + '》';
-      // 诗词标题保持中文，data-zh 与 data-en 均写中文标题
-      nameEl.textContent = title;
-      nameEl.setAttribute('data-zh', title);
-      nameEl.setAttribute('data-en', title);
-      nameEl.removeAttribute('aria-disabled');
+      // 取 score 最高的第一首（CLI 已按 score 降序）；标题保持中文，两语言同一份
+      setPoetryName('《' + data.recommendations[0].title + '》');
     } else {
-      // 缺失时移除跳转能力，仅展示占位文案
-      nameEl.textContent = '暂无诗词数据';
-      nameEl.setAttribute('data-zh', '暂无诗词数据');
-      nameEl.setAttribute('data-en', '暂无诗词数据');
-      nameEl.setAttribute('aria-disabled', 'true');
+      // 缺失时不隐藏入口：药丸仍可点，进入 daily-poetry.html 归档页
+      setPoetryName('暂无诗词数据');
     }
   }
   function loadScript(src, onError) {
@@ -129,11 +130,10 @@
   var yymm = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2);
   var cb = getCacheBust();
   loadScript('static/js/today-poetry-' + yymm + '.js' + cb, function () {
-    var nameEl = document.getElementById('poetryName');
-    if (nameEl) nameEl.textContent = '暂无诗词数据';
+    setPoetryName('暂无诗词数据');
   });
 })();
 </script>
-<script type="text/javascript" src="static/js/index.js?t=1792914453"></script>
+<script type="text/javascript" src="static/js/index.js?t=1792919065"></script>
 </body>
 </html>

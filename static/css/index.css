@@ -228,14 +228,20 @@ body {
 }
 
 /* ===== What I'm Doing Now (i18n cards) ===== */
-.now-section {
+/* 底部栈: Now 区 + 诗词区统一锚在 footer 之上（绝对定位只留这一层, 避免 bottom 数值互相压叠） */
+.bottom-stack {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 96px;
+    bottom: 80px;
     z-index: 2;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     padding: 0 16px;
+}
+.now-section {
+    text-align: center;
 }
 .now-title {
     font-size: 12px;
@@ -295,9 +301,6 @@ body {
     letter-spacing: .02em;
 }
 @media screen and (max-width: 767px) {
-    .now-section {
-        bottom: 74px;
-    }
     .now-card {
         min-width: 0;
         max-width: none;
@@ -317,52 +320,14 @@ body {
     }
 }
 
-/* ===== Today's Poetry (紧贴 footer 上方的一行文本 + github icon) ===== */
+/* ===== Today's Poetry（与 What I'm Doing Now 同结构同样式: 小字标题 + 药丸卡） ===== */
 .poetry-section {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 64px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 0 16px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, .82);
-    text-shadow: 0 1px 4px rgba(0, 0, 0, .55);
+    text-align: center;
 }
-.poetry-label {
-    letter-spacing: .12em;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, .78);
-}
-.poetry-sep {
-    opacity: .5;
-}
-.poetry-link {
-    color: #9ecbff;
-    text-decoration: none;
-    font-weight: 700;
-    letter-spacing: .02em;
-    transition: color .18s ease;
-}
-.poetry-link:hover {
-    color: #c5e1ff;
-    text-decoration: underline;
-}
-.poetry-link[aria-disabled="true"] {
-    color: rgba(255, 255, 255, .55);
-    pointer-events: none;
-    cursor: default;
-    font-weight: 500;
-}
+
 @media screen and (max-width: 767px) {
-    .poetry-section {
-        bottom: 52px;
-        font-size: 12px;
-        gap: 8px;
+    .bottom-stack {
+        bottom: 72px;
+        gap: 14px;
     }
 }
