@@ -755,6 +755,51 @@ XSS：3 个变更文件 `innerHTML|outerHTML|document.write|insertAdjacentHTML|e
 
 ---
 
+## 2026-10-25 — 夜间 L2 复审（自 10ad383 共 17 commit：3× `fix@site` 首页诗词区/入口精简 + 1× `docs@handoff` 根级交接页 + 2× `data@update` + 11× 审计/文档笔；无回归，新增 JT-SEC-022 仅记录）
+
+- **review者**: Security Reviewer（review profile，cron）
+- **范围**: 17 commit — `10ad383..83fa692`。代码面 = `5ebd981`（诗词区同构）/ `d0d09b2`（矮视口收敛 + noopener + 双语 title）/ `7f9779f`（FU-01/FU-02 收口），三笔均恰 3 文件（`index.html` / `static/css/index.css` / `wechat.html` 换戳）；数据面 = `efe7971` + `c37cc48`（`bmi-tracker.html` / `daily-tracker-archive-202607-202610.html` 各 105 行）；文档面 = `83fa692`（新增根级 `TODO-handoff.md` + `documents/README.md` 索引）。`git log 10ad383..HEAD | grep -v 'audit@review:' | grep -v 'data@update:'` **非空**（3 笔 `fix@site` + `docs@handoff`）⇒ 本轮不适用 SILENT，执行全量扫描。
+- **Tracking**: JT-SEC-022（🟢 LOW，**新增**，仅记录）；JT-SEC-021（🟡 MEDIUM，仍 OPEN，无再生）；JT-SEC-019、JT-SEC-020（🟢 LOW，仍 OPEN，无变化）；JT-SEC-015/016/017/018（🟢 LOW，保持已闭合）
+- **状态**: ✅ PASS（95 / 100，Rating A）
+- **报告**: 无（nightly re-audit，single-log 约定；本条目即报告）
+- **实现 prompt**: ⬜ 无需生成（唯一新增为 🟢 仅记录项，两条既有 🟡/🟢 建议沿用上轮口径）
+
+### 发现摘要
+
+凭证扫描 Pass 1-4 全绿：Pass 1（`sk-`/`ghp_`/`gho_`/`AKIA`/`AIza`/`xox[baprs]-`/`-----BEGIN *PRIVATE KEY-----` 高置信前缀）对 54 个 tracked 文件 0 命中；Pass 2（`api_key|apikey|secret_key|access_token|password` 引号赋值式）0 命中，仅 `documents/archive/` 中审计方法论自述文本命中（非凭证）；Pass 3（`/Users/|~/|/home/|.hermes|localhost|127.0.0.1|192.168|10.x`）对本轮新增行命中 **仅 `TODO-handoff.md` 的 `~/CodeSpace/www.jaden.tech` 1 处**（⇒ JT-SEC-022），其余命中均在 `cache/scratch/**` 会话产物（.gitignore 覆盖、不入库）与既有 `documents/handoff/*`；Pass 4（注释幽灵键）对 17 commit 全量 `git log -p` 新增行复扫，凭证前缀 **0**。PII：变更文件邮箱/手机号正则 0 命中。
+
+XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|document.write|eval(|new Function` **0 命中**。`index.html` 新脚本逐行复核：新增 `poetryLang()` 只读 `documentElement.lang`；`setPoetryName()` 走 `setAttribute('data-zh'|'data-en')` + **`textContent`** 落值（`poetryLang() === 'en' ? enText : zh`），诗名来源 `data.recommendations[0].title` 全程不进 HTML 解析器；两卡新增 `title` 属性为静态字面量且裸 `&` 已转义为 `&amp;`（D09 修复已落地）。`getCacheBust()` 仍仅接受 `\d+`，`loadScript` 拼接的 `yymm` 来自 `Date` ⇒ 无 URL/脚本注入面。全仓 tracked 文件 `innerHTML` 仅存 `daily-poetry.html`（561/608/672，本轮未改，JT-SEC-016 转义口径维持）与 `tokens-tracker/assets/common.js:123` 的「禁 innerHTML」注释。
+
+回归检查（code fixes + data 重写 HTML 的核心风险面）：
+1. **JT-SEC-021 未再生** — `git grep 'javascript:'` 全仓 tracked 仅 `index.html:38` inert 占位；bmi/archive/wechat/daily-poetry/tokens-tracker 脚本 URI **0**；本轮 17 commit 新增行 `javascript:` **0**。`ed4cf33` 的 artifact 级剥离在 `efe7971`/`c37cc48` 两次 data@update 重渲染（累计第 5 次）后仍保持。
+2. **referrer meta 6/6 页全保留**（index / wechat / bmi-tracker / archive / daily-poetry / tokens-tracker，均 `strict-origin-when-cross-origin`）。
+3. **SRI 完整未剥离**：chart.js@4.4.7 `integrity="sha384-vsrfe…"` + `crossorigin="anonymous"` 在 bmi-tracker + archive 均在；html2canvas@1.4.1 `integrity="sha384-ZZ1pn…"` + `crossorigin` 在 wechat.html 在。
+4. **`noopener` 面扩张而非收缩**：`d0d09b2` 给 Intfocus / Cloudwise 两外链补 `rel="noopener"`，`index.html` 现 6/6 `target=_blank` 全带 noopener；全仓唯一未带 noopener 的 `wechat.html:533` 指向 `https://www.jaden.tech` **本域**（同源，反向 tabnabbing 不成立），属既有零风险观察项。
+5. **数据一致性**：两页数据行均 **105**（`<tr><td>MM-DD</td>` 计数），h2 均标 `105 rows`，`Array(105).fill(65.0)` 同步，`lbs` 末项 `10-25`，`wd`/`run` 各 105 项（`run` 末项 11.22 与表内 `running 11.22km` 一致）⇒ 无行数/序列错位。
+6. **戳一致性**：`timestamp-manager.py check` ⇒ index.html 与 wechat.html 同值 `1792938635`，rc=0。
+
+依赖安全：本轮无依赖变更与新增外部域（外链域集合仍 7 个：github.com / www.jaden.tech / cdn.jsdelivr.net / w3.org / 两个 archived 子域 / beian.miit.gov.cn）。外部查证：chart.js 唯一在册 direct CVE 为 CVE-2020-7746（prototype pollution，影响 `< 2.9.4`），本仓 4.4.7 不受影响且图表配置全为静态字面量（无攻击者可控 options）；html2canvas@1.4.1 未见在册 CVE。SRI 在位 ⇒ 无新增供应链暴露面。
+
+**新增 🟢 仅记录 — JT-SEC-022**：`83fa692` 将 `TODO-handoff.md` 提交在**仓库根目录**（此前交接文档统一在 `documents/handoff/`）。该文件含本地绝对路径 `~/CodeSpace/www.jaden.tech`、会话产物路径 `cache/draft/TODO-20261025.md` / `cache/scratch/JT-CL001/check.py`、内部工具调用（`hm loop list` / `hm check readme`）与未推送 commit 清单；仓库为公开仓（首页 GitHub corner 直链），Pages 亦会以 Markdown 渲染根级 `.md`。**无凭证、无 PII、无内网地址**，仅开发环境/内部工作流信息轻度披露，与 JT-SEC-020 同类。建议：移入 `documents/handoff/` 或列入 `.gitignore`（其自身头部标注 generated from `cache/draft/`，属可再生产物）。
+
+提交卫生：`git status --short` 干净；本轮 17 commit subject 均 `type@scope:` 小写前缀 + 英文/中文摘要，无空提交；3 笔 `fix@site` 的改动面与 3 份已出评审报告的授权面逐笔一致（`5ebd981` +45/−80、`d0d09b2` +57/−17、`7f9779f` +15/−10，`wechat.html` 均仅 `?t=` 一行）。
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | 凭证扫描 Pass 1-4 全绿（新增行 Pass 1/2/4 全 0；Pass 3 仅 1 处 `~/` 入 JT-SEC-022） | PASS |
+| — | 🟢 | 三笔代码笔变更面无 `innerHTML/eval/document.write`；诗名/tooltip 走 `textContent` + 静态字面量 | PASS |
+| — | 🟢 | 3 笔 fix 未剥离 referrer(6/6) / SRI(3/3)，`noopener` 由 4/6 → 6/6 ⇒ 无 REGRESSION | PASS |
+| — | 🟢 | JT-SEC-021 脚本 URI 未再生（artifact 0 / 新增行 0），第 5 次重渲染后剥离仍有效 | PASS |
+| — | 🟢 | 数据一致性 105/105 行、h2/Array/lbs/run 四处同源 | PASS |
+| 1 | 🟡 MEDIUM | JT-SEC-021 `javascript:` FAQ 死链生成器侧根因未修（artifact 当前 0 命中，缺 artifact 级回归门禁） | OPEN（无变化，建议修：daily-tracker 生成器模板） |
+| 2 | 🟢 LOW | JT-SEC-019 tokens-tracker footer `wc-footer-version` 披露「hermes-manager · 1.11(20261015)」（该页本轮未改动） | OPEN（仅记录） |
+| 3 | 🟢 LOW | JT-SEC-020 `documents/handoff/handoff-www.jaden.tech-ops.md` 本地绝对路径披露（3 处 `/Users/`，无凭证） | OPEN（仅记录） |
+| 4 | 🟢 LOW | JT-SEC-022 **新增**：根级 `TODO-handoff.md` 公开本地绝对路径 `~/CodeSpace/...` + 内部工作流/harness 路径（无凭证/PII） | OPEN（仅记录，建议移入 `documents/handoff/` 或 gitignore） |
+
+计分：100 − 5（1× 🟡 结转）= **95 / 100 → A → PASS**；🟢 仅记录项沿用本项目口径（计入 `tracking` + `findings_open`，不计入 `findings_total`，故 `findings_total: 1` / `findings_open: 4`）。
+
+---
+
 ## 条目格式说明
 
 ```
