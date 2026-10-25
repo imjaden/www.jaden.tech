@@ -296,3 +296,11 @@ review_history:
       65 字符含 ｜, 四态×两语 8/8 恒等); POETRY-FU-G4 (安全面零新增: textContent 无注入面 / 零新增外链 / 戳仅 数字
       / console 0 error); POETRY-FU-G5 (S12 静态面不覆盖 P-04 en 参数, R3 下 12/12 仍全绿) — 报告
       documents/reviews/poetry-parity-followup-review-v1.0-20261025.md'
+  - date: 2026-10-25
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: PASS
+    score: 95
+    findings_total: 1
+    findings_open: 4
+    tracking: "JT-SEC-021 (🟡 MEDIUM, 仍 OPEN 无变化: javascript: FAQ 死链生成器侧根因未修; artifact 本轮 0 命中, 第 5 次 data@update 重渲染后未再生, 无 REGRESSION); JT-SEC-022 (🟢 LOW, 新增仅记录: 根级 TODO-handoff.md 公开本地绝对路径 ~/CodeSpace/... 与 harness 路径, 无凭证无 PII); JT-SEC-019 (🟢 LOW, 仍 OPEN: tokens-tracker footer 版本披露 1.11(20261015), 无变化); JT-SEC-020 (🟢 LOW, 仍 OPEN: documents/handoff 本地绝对路径披露, 无变化); JT-SEC-015/016/017/018 (🟢 LOW, 已闭合)"
