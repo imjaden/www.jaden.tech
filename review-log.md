@@ -637,6 +637,41 @@ XSS：3 个变更文件 `innerHTML|outerHTML|document.write|insertAdjacentHTML|e
 
 ---
 
+## 2026-10-25 — JT-CL001 设计评审复查（闭合判定轮）
+
+- **review者**: review/Security Reviewer（`jaden-tech-review`，design 复查/闭合判定，[2/6] 第二轮）
+- **范围**: `documents/design/JT-CL001-index-now-entries-compact-design-v1.1-20261025.md`（commit `5afd3b2`，168 行，v1.0 完整替换稿）：只判 D01-D09 是否闭合 + 是否引入新缺陷（六档真机几何复测 + V3 反例 + V0 假绿复现 + 4 项必做扫描）
+- **Tracking**: JT-CL001-D01 ~ D09 全闭合（9/9）；新缺陷 JT-CL001-N01 ~ N03（🟡 ×3，pin 级）
+- **状态**: ✅ PASS with notes（**85 / 100**）—— 可直派 [3/6]；3 条 🟡 带入 [5/6] 复核
+- **报告**: `documents/reviews/JT-CL001-index-now-entries-compact-design-rereview-v1.0-20261025.md`
+- **实现 prompt**: ✅ 可生成（PASS 分支；3 条 pin 级备注随 [3/6] 任务书下发）
+
+### 发现摘要
+
+**D01-D03 三条机制级 🔴 全部闭合（真机复测，非读稿判断）：**
+
+1. **D01 闭合**。注入 §3 行 5/7 最终值 + 按行 1/2 改 DOM 后六档实测：360/375/390/414/**1280 两卡 `top` 完全相等且 `scrollWidth === innerWidth`**；**320 换行**（top 638.4/692.2）且 `scrollWidth 320 === innerWidth`、两卡右界 230.6/242.2 均 < 320（零横向溢出）。合计 313.6px。
+2. **D02 闭合且判据有判别力**。正确实现 `Target` 前/后：原 tab URL 不变、page target `delta=+1`、新 URL 含 `bmi-tracker.html`；**反例实测**（仅把 `target` 改 `_self` 模拟误删 `_blank`）⇒ 原 tab 导航到 `bmi-tracker.html`、`delta=0` ⇒ 判据转红。
+3. **D03 闭合**。375 档改后 `.now-section` 高 **66.2 < 305** ✓、`.ft-copy p`.top **768.2 ≥ poetry.bottom 760.0** ✓；被删的旧子句复核仍红（`footer.top 748.2 < 760`）⇒ 删除正确。
+
+**D04-D09 六条 🟡 全部闭合**：F1=7 / F2=13 / V9 4-6 / 删 4 条（283/291/297/304，无第 5 条）；F4+V9 已含 `now-body`；V8 改 `timestamp-manager.py check`（实测 rc=0 + 「✅ 所有文件使用相同时间戳: 1788947889」+ ≠ 旧值）；V0 前置拦得住假绿（`display:none` ⇒ naive V4 绿 / V0 门 false）、V4 六档、V10 三向齐；D08 选 (c) 三处一致（现存两卡本无 `aria-label`，实施动作=不新增）；D09 字面量已写 `&amp;`。
+
+**三条 pin 级新缺陷（全 🟡，不要求改任何 CSS 数值）：**
+
+1. **N01 F8/Q4′ 数值口径 4px 偏差**：F8 表头假设「容器 gap 12 / 卡内 gap 8」与 §3 行 5（卡内 gap 10）+ 行 7（容器 gap 8）不一致 ⇒ 实测 P2 **313.6**（非 309.6）、P1 **392.7**（非 384.7），360 档余量 **14.4px**（非 18.4）；且「≤359 堆叠」与实测相反（359 仍并排，真实阈值 **346px**）。风险：14.4px < 经典滚动条 15px（实测 `inner−client=15`）⇒ Windows/桌面窄窗 360 档会换行。
+2. **N02 V6「不含裸 `&`」在 DOM 探针下恒红**：`&amp;` 解析后 `getAttribute` 必返裸 `&`（实测 `a & b`）⇒ 须写死为源码 grep（`grep -o 'title="[^"]*"' index.html | grep '&' | grep -v '&amp;'` 期望 0；判别力已自证）。
+3. **N03 V7 的 `card.focus()` 不命中 `:focus-visible`**：干净页连续两次实测 `false` / `outline:none`，键盘 Tab 才 `true` / `solid 2px` ⇒ 探针须走键盘路径，否则 [4/6] 自检假红且 V10③ 空过；§8 D10 的 🟢「程序化 focus() 即命中」应更正（[2/6] 那次有键盘模态污染）。
+
+**必做扫描**：① 数值自洽 —— 方向一致、数字失真（N01）；② 删除规则穷尽（10 选择器全覆盖、4 条待删、`.now-card{text-align:left}` 被行 5 覆盖、旧 `width:100%` 被行 7 覆盖）✓；③ V0-V11 均可一条命令/一段探针完成（V6/V7 两处写法需收紧）；④ v1.0 过期数字残留 **0 处**。
+
+**安全面**：无回退 —— `target=_blank`+`rel=noopener` 保留且 V3 新增「新 tab URL + 原 tab 不变」验证（本轮实测通过）；无 `innerHTML`/`eval` 引入；生成产物与依赖零变更；信息暴露净减少。
+
+**待确认（交 [4/6]/[5/6]）**：① 360 档 + 经典滚动条真机复测（macOS overlay 无法自证）；② F4 的「仅两文件」在审查侧台账（`review-log.md` / `.review-level.yaml`）出现后不可复现，排除集需补这两文件；③ V6 缺「两卡无 `aria-label`」负向断言；④ §0「省约 235px」实测 238.8px，属「约」的合理范围。
+
+计分：100 − 3×🟡(5) = **85 / 100 → PASS with notes**；D01-D09 全闭合不计分。**未改源码/设计稿（v1.0、v1.1 均未动）／未执行 `force`／未 push／未勾选 draft。**
+
+---
+
 ## 条目格式说明
 
 ```
