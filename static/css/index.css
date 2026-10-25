@@ -331,3 +331,40 @@ body {
         gap: 14px;
     }
 }
+
+/* ===== 矮视口（横屏手机 / 矮窗口）：收敛纵向占用，避免底部栈压住归档图标行（review P-03） ===== */
+@media screen and (max-height: 680px) {
+    #main {
+        padding-top: 16px;
+        padding-bottom: 150px;
+    }
+    #logo {
+        height: 88px;
+        width: 88px;
+        margin-bottom: 0;
+    }
+    .icon-links {
+        margin-top: 10px;
+    }
+    .icon-links img {
+        width: 40px;
+        height: 40px;
+    }
+    .bottom-stack {
+        bottom: 52px;
+        gap: 10px;
+    }
+    .now-card {
+        padding: 7px 16px;
+        gap: 8px;
+    }
+    .now-emoji {
+        font-size: 18px;
+    }
+    .now-name {
+        font-size: 14px;
+    }
+    .ft-copy {
+        padding: 10px 0;
+    }
+}
