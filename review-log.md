@@ -726,6 +726,35 @@ XSS：3 个变更文件 `innerHTML|outerHTML|document.write|insertAdjacentHTML|e
 
 ---
 
+## 2026-10-25 — 诗词区同构「后续小修」（P-03/04/05/06 收口笔）
+
+- **review者**: review/security-reviewer (Hermes Agent / deepseek-flash)
+- **范围**: `d0d09b2` — `index.html`（noopener / 双语 title / `setPoetryName(zh,en)`）、`static/css/index.css`（`@media max-height:680px` 收敛块）、`wechat.html`（换戳）
+- **Tracking**: POETRY-FU-01 ~ FU-02（🟡）；POETRY-FU-G1 ~ G5（🟢）
+- **状态**: ✅ PASS with notes（90 / 100；🔴 0 / 🟡 2 / 🟢 5）
+- **报告**: `documents/reviews/poetry-parity-followup-review-v1.0-20261025.md`
+- **实现 prompt**: ⬜ 无需生成（两条 🟡 均给出 worktree 已验证的一行级修复，随下一批处置）
+
+### 发现摘要
+
+**改动面 = 授权面**：`git show --stat d0d09b2` 恰 3 文件（+57/−17）；`wechat.html` 仅 `?t=1792919065 → 1792937726` 一行；生成产物（`bmi-tracker.html` / `tokens-tracker/` / `daily-tracker-archive-*`）diff 行数 0；`static/js/` 零改动；两文件戳同值 1792937726。
+
+**P-03 达成**：CDP 9 档带高度维度实测 `clearance = container.bottom − stack.top`，改前 **6 档重叠**（812×375 **+136.54**、667×375 +108.75、1280×500 +11.54、1280×430 +81.54、375×420 +63.75、320×480 +12.55）→ 改后 **9/9 全负**（最小 −22.25，812×375 / 667×375 / 1280×500 / 1280×430 / 1280×600 / 375×500 / 375×420 / 320×480 / 320×568 依次 −22.25 / −22.25 / −147.25 / −77.25 / −247.25 / −147.25 / −67.25 / −79.45 / −167.45）；矮视口下 `.icon-links` 可见且 `icon.bottom ≤ stack.top`，noX/noY 18/18。与 ops 自报 9/9 一致（≤0.05 舍入位差）。
+
+**七档回归**：vh>680 五档（1280×900/800、390×844、375×812、360×780）＋414×736＋360×681 **零退化**（gap 20/14、两区高差 0.00、stackToFoot 16.2/8.2、logo 130/100、padding 12×22 / 10×12）；媒体查询边界 360×680 触发 / 360×681 不触发，语义精确。
+
+**两条 🟡（本笔新引入/未真正兑现）**：**FU-01** 收敛块按 `max-height:680px` 且排在 `max-width` 块之后 ⇒ 竖屏 vh≤680 机型（375×667 / 360×640 / 345×667 / 320×568 / 768×640）一并收敛；345×667 因横向 padding 12→16 使两卡合计 309.62→323.62 > 可用 313 ⇒ **折行**、两区高差 0→47.79、gap 14→10，与「七档不退化」判据冲突；提交信息「320x568 未受影响（vh>680 不触发收敛）」与实测相反（568≤680 必触发）。修复：块内 `padding:7px 12px`（实测 rows=1 且 812×375 仍 −22.25），或限定 `(orientation: landscape)`。**FU-02** P-04 双语空态只在 `onerror` 路径兑现：`empty_else en-US` 可见文案仍「暂无诗词数据」（`data-en=No poem data` 正确），根因是 `applyLanguage()` 仅执行一次且无 MutationObserver，`renderPoetry` 的 `textContent` 恒写 zh 且晚于 i18n ⇒ en 用户在主路径仍见中文（PAR-04 只半闭合）。
+
+**四态**：有数据 zh/en 均 `《登高》`（D6）；空态 onerror zh「暂无诗词数据」/ en「No poem data」；tooltip 65 字符含 `｜`、四态 × 两语 8/8 逐字符相等（P-05 ✅）；`_blank` 6/6 带 `noopener` 且集合精确（P-06 ✅）。
+
+**harness 与反转**：`check.py --mode post` **12/12 rc=0**（仓库树与 worktree @d0d09b2 各一次）；`--selftest` **11/13 rc=1**（S1/S6 红、S10 绿）；`timestamp-manager.py check` 同值。R1（摘 intfocus noopener）→ S12 红（`no_rel=1`，DOM 5/6）；R2（删整块）→ S12 红 且 812×375 回 **+136.54**；R4（删诗词卡 title）→ S12 红（`title=''`）；**R3（去 en 参数）S12 仍 12/12 全绿**（静态 guard 不覆盖该参数），但运行时探针检出 `data-en`/`textContent` 双双回中文 ⇒ 取法有判别力、判据有覆盖缺口（FU-G5）。四轮复原后 `git status --short` 全空，两处 worktree 已移除。
+
+**安全面**：`noopener` 4/6 → 6/6（阻断 `window.opener` 反向引用）；诗名与 tooltip 均走 `textContent`/静态字面量（无 `innerHTML`/`eval`/`document.write`）；零新增外链与供应链面；`getCacheBust()` 仅 `\d+`；normal 档 console 0 error。
+
+**push**：`git push origin d0d09b2:main`（ff-only，`5ebd981..d0d09b2`）后 ① `rev-parse d0d09b2` == `ls-remote main` = `d0d09b2a15258da29e7eafd46f163dc77e6d158c`；② `origin/main..d0d09b2` 空；③ push 后、评审笔落盘前 `git status --porcelain` 空（评审笔单独本地 commit、未推送）；④ `git diff d0d09b2 origin/main` 空。随推 `b921187` + `efe7971`（预期内）；他线并发笔 `c37cc48`（仅生成产物）未代推。
+
+---
+
 ## 条目格式说明
 
 ```
