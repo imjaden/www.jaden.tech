@@ -279,3 +279,20 @@ review_history:
     findings_total: 6
     findings_open: 6
     tracking: "POETRY-PAR-01 (🟡 几何判据缺「vh - stack.bottom == 80/72」断言: R1 删 .bottom-stack 的 position:absolute 后四项断言仍全绿, 栈上移 148.46px); POETRY-PAR-02 (🟡 空态判据只测 onerror 兜底, renderPoetry 的 else 分支无守卫, 须用 Fetch 返空 archive 取法才转红); POETRY-PAR-03 (🟡 矮视口 vh<511.5/465.4 底部栈压归档图标行: 改前横屏已重叠 59px, 本笔上移 78.6px 放大到 137px; 七档标准高度全绿, 建议 @media max-height:680px 收敛或登记已知限制); POETRY-PAR-04 (🟢 en 档空态占位文案仍中文, 既有); POETRY-PAR-05 (🟢 诗词药丸缺 title, 勿加 aria-label 以免带偏 S3 口径); POETRY-PAR-06 (🟢 Intfocus/Cloudwise _blank 无 noopener, 既有债非本笔) — 报告 documents/reviews/poetry-section-parity-review-v1.0-20261025.md"
+  - date: '2026-10-25'
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: PASS with notes
+    score: 90
+    findings_total: 7
+    findings_open: 7
+    tracking: 'POETRY-FU-01 (🟡 矮视口收敛块按 max-height:680px 生效且排在 max-width 块之后 ⇒ 竖屏 vh<=680
+      机型 375x667/360x640/345x667/320x568/768x640 一并收敛; 345x667 横向 padding 12->16 使两卡
+      309.62->323.62 > 可用 313 而折行, 两区高差 0->47.79, gap 14->10, 与七档回归判据冲突; 提交信息「320x568
+      未受影响」与实测相反); POETRY-FU-02 (🟡 P-04 双语空态仅 onerror 路径兑现, renderPoetry else 路径 en
+      可见文案仍中文, data-en 正确而 textContent 后置写 zh; applyLanguage 仅执行一次且无 MutationObserver);
+      POETRY-FU-G1 (P-03 9 档矮视口 clearance 6 正 -> 9/9 全负, 最小 -22.25, 图标行可见且不相交, noX/noY
+      18/18); POETRY-FU-G2 (P-06 _blank 6/6 noopener 集合精确); POETRY-FU-G3 (P-05 tooltip
+      65 字符含 ｜, 四态×两语 8/8 恒等); POETRY-FU-G4 (安全面零新增: textContent 无注入面 / 零新增外链 / 戳仅 数字
+      / console 0 error); POETRY-FU-G5 (S12 静态面不覆盖 P-04 en 参数, R3 下 12/12 仍全绿) — 报告
+      documents/reviews/poetry-parity-followup-review-v1.0-20261025.md'
