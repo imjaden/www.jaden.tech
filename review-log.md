@@ -672,6 +672,31 @@ XSS：3 个变更文件 `innerHTML|outerHTML|document.write|insertAdjacentHTML|e
 
 ---
 
+## 2026-10-25 — JT-CL001 实现审计（[5/6]）
+
+- **review者**: review/Security Reviewer（`jaden-tech-review`，实现审计 / 自报件复核 + 反转法，[5/6]）
+- **范围**: 实现笔 `fff34e2`（`index.html` / `static/css/index.css` / `wechat.html`）对设计 v1.1 §3 八行授权面的一致性；`documents/reports/JT-CL001-ops-check-v1.0-20261025.md` 自报结论的独立复跑；R1-R6 反转法覆盖度
+- **Tracking**: JT-CL001-AUD-01 ~ AUD-03（🟡 ×3，判据/探针级）；AUD-04 ~ AUD-05（🟢 ×2，措辞/既有债）
+- **状态**: ✅ PASS with notes（**85 / 100**）—— 可进 [6/6] 收尾，不返工
+- **报告**: `documents/reviews/JT-CL001-impl-audit-v1.0-20261025.md`
+- **实现 prompt**: ⬜ 无需生成（审计轮；实现已在库，不派 [6/6]、禁 push）
+
+### 发现摘要
+
+**改动面 = 授权面（零越界）**：`git show --name-only fff34e2` 恰 3 文件；`wechat.html` 仅 `?t=` 一行；生成产物 diff 行数 0；`now-desc|now-action|now-body` 与 4 个死 ID 均 0/0；设计 §3 行 1-8 逐行对差命中；唯一超出字面值 = 移动档 `.now-card{gap:8px}`（= 已授权 N01(a)）。`git diff fff34e2 HEAD` 空 ⇒ 审计适用于当前部署态。
+
+**ops 自报结论独立复跑全部成立**：静态 `check.py --mode post` **8/8 rc=0**（selftest 7/9，S1+S6 转红、S10 绿）；七档真机 **320 换行零溢出 / 345-414 并排 / 1280 并排**，两卡 `top` 相等、`scrollWidth===innerWidth`、V0 全非退化；375 档 section 高 **66.2 < 305**、`ft-copy p`.top **856.2 ≥ poetry.bottom 848.0**（余量 8.2，与复查件一致）；`aria-label` 两卡 **null**；`title` 含全角 `｜`；en(`en-US`)/zh(`zh-CN`) 两档 `body.innerText` 无描述/动作残留；点击 **真实鼠标事件 delta=+1、新 tab `/bmi-tracker.html`、原 tab URL 不变**；自然键盘 Tab 第 5/6 停落两卡 `:focus-visible=true` + `outline solid 2px`；console 零错误；**ops 唯一未实测的 `:hover` 本轮用 `CSS.forcePseudoState` 补测通过**（translateY(-1) / border .50 / bg .55）。改前树（`01ae0d9`）同脚本 **1/8**、375 堆叠 `top=544.8/694.4`、section 305、双语含描述+动作 ⇒ 判据「改前必红」全部复现。
+
+**反转法 R1-R6**：R2（删 `:focus-visible`）→ S4 红 + `outline auto 1px`；R3（`width:100%`）→ S7 红 + 375/390 堆叠；R4（重加 `.now-desc`）→ S1/S6 红 + `desc=1`；R5（卡内 gap 10px）→ **345 档换行（V4 红）但静态 8/8 绿**（证 N01(a) 必要，也暴露静态 gap 断言被子句满足）；R6（`_self`）→ S2 红 + `delta=0`/原 tab 导航；**R1（圆角 999→14px）无人转红 = 覆盖缺口**。六轮复原后 `git status --short` 全空，worktree 已移除。
+
+**三条 🟡（判据级，不要求改源码）**：AUD-01 纯视觉声明（圆角/桌面 padding/卡内 gap）无机器判据（R1 全绿）；AUD-02 V7 的 `cursor==='pointer'` 对 `<a href>` 恒真（改前实测亦 pointer）；AUD-03 ① S7 的 `gap:8px` 被 `.now-cards{gap:8px}` 满足、N01(a) 卡内 gap 无静态守卫 ② 设计 V4 宽度集缺 **345**，而 R5 只在 345 转红。**AUD-04**（🟢）N03「程序化 `focus()` 不命中」非普遍真（本轮干净页实测 `true`）；**AUD-05**（🟢）`index.html:42,45` Intfocus/Cloudwise 既有 `_blank` 无 `noopener`（非本笔）。
+
+**安全面**：两卡 `rel="noopener"` 在；`innerHTML`/`eval(`/`document.write`/`new Function` 零命中；新增/删除行外链集合均空；凭证/PII 模式零命中；运行态首页文本净减（section 305→66.2，−238.8px）；生成产物零漂移；换戳纪律正确（`1792914453` ≠ 旧值）。
+
+计分：100 − 3×🟡(5) = **85 / 100 → PASS with notes**。**未改源码/设计稿/生成产物／未跑 `force`／未 push／未勾选 draft／未派 [6/6]。**
+
+---
+
 ## 条目格式说明
 
 ```
