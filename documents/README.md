@@ -7,8 +7,10 @@
 | 路径 | 说明 |
 |:-----|:-----|
 | `README.md` | 本索引（归档索引 + 根目录现状） |
+| `design/JT-CL001-index-now-entries-compact-design-v1.0-20261025.md` | 首页 Now 入口精简（胶囊可点击）设计方案 v1.0（2026-10-25，闭环 JT-CL001） |
 | `plan-omad-v1.0.html` | 站点规划图 v1.0（2026-07-16） |
 | `handoff/handoff-www.jaden.tech-ops.md` | ops 会话交接文档（2026-09-06） |
+| `reviews/tokens-tracker-mirror-guard-tiers-20261009.md` | Tokens 看板镜像守卫分档评审（2026-10-09，SCRIPT-MINER-CL072 转交） |
 
 当前根目录无过程性评审文档。
 
