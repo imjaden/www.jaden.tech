@@ -271,3 +271,11 @@ review_history:
     findings_total: 5
     findings_open: 5
     tracking: "JT-CL001 [5/6] 实现审计: 改动面=授权面(3 文件 / 设计 v1.1 §3 八行 + 已授权 N01(a) 卡内 gap:8px); ops 静态 8/8 与七档真机/双语/点击/键盘/console/hover 全部独立复跑成立; 改前树 01ae0d9 同脚本 1/8 证判据有判别力; 反转法 R2-R6 均转红, R1 (border-radius 999px->14px) 无人转红=覆盖缺口; AUD-01~AUD-03 (🟡 视觉声明无机器判据 / V7 cursor 恒真 / V4 缺 345 档 + S7 gap 作用域), AUD-04~AUD-05 (🟢 N03 措辞绝对化 / 既有 intfocus+cloudwise _blank 无 noopener) — 报告 documents/reviews/JT-CL001-impl-audit-v1.0-20261025.md"
+  - date: 2026-10-25
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: PASS with notes
+    score: 85
+    findings_total: 6
+    findings_open: 6
+    tracking: "POETRY-PAR-01 (🟡 几何判据缺「vh - stack.bottom == 80/72」断言: R1 删 .bottom-stack 的 position:absolute 后四项断言仍全绿, 栈上移 148.46px); POETRY-PAR-02 (🟡 空态判据只测 onerror 兜底, renderPoetry 的 else 分支无守卫, 须用 Fetch 返空 archive 取法才转红); POETRY-PAR-03 (🟡 矮视口 vh<511.5/465.4 底部栈压归档图标行: 改前横屏已重叠 59px, 本笔上移 78.6px 放大到 137px; 七档标准高度全绿, 建议 @media max-height:680px 收敛或登记已知限制); POETRY-PAR-04 (🟢 en 档空态占位文案仍中文, 既有); POETRY-PAR-05 (🟢 诗词药丸缺 title, 勿加 aria-label 以免带偏 S3 口径); POETRY-PAR-06 (🟢 Intfocus/Cloudwise _blank 无 noopener, 既有债非本笔) — 报告 documents/reviews/poetry-section-parity-review-v1.0-20261025.md"
