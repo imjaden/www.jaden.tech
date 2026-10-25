@@ -247,3 +247,11 @@ review_history:
     findings_total: 1
     findings_open: 3
     tracking: "JT-SEC-021 (🟡 MEDIUM, 仍 OPEN 无变化: javascript: FAQ 死链生成器侧根因未修; artifact 本轮 0 命中, 第 3 次 data@update 重渲染后未再生, 无 REGRESSION); JT-SEC-019 (🟢 LOW, 仍 OPEN: tokens-tracker footer 版本披露 1.11(20261015), 无变化); JT-SEC-020 (🟢 LOW, 仍 OPEN: documents/handoff 本地绝对路径披露, 无变化); JT-SEC-015/016/017/018 (🟢 LOW, 已闭合)"
+  - date: 2026-10-25
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: COND
+    score: 25
+    findings_total: 9
+    findings_open: 9
+    tracking: "JT-CL001-D01 (🔴 改动面 5/6/7 与 Q4 移动端并排数学互斥·实测 375 档 392.7px > 343px 全档 WRAP); JT-CL001-D02 (🔴 V3 恒红·target=_blank 下当前页 URL 不变); JT-CL001-D03 (🔴 V5 footer 子句改前即红·footer.top 748.2 < poetry.bottom 760); JT-CL001-D04~D09 (🟡 计数不符/now-body 漏扫描/V8 命令集不成立/V4 假绿+宽度档不足/lang=en 依据错/title 裸 &); JT-CL001-D10~D12 (🟢 仅记录: V7 实测可用·title 触屏不可达·force 改写面) — 报告 documents/reviews/JT-CL001-index-now-entries-compact-design-review-v1.0-20261025.md"
