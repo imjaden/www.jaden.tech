@@ -604,6 +604,39 @@ XSS：3 个变更文件 `innerHTML|outerHTML|document.write|insertAdjacentHTML|e
 
 ---
 
+## 2026-10-25 — JT-CL001 设计评审（首页 Now 入口精简 · 胶囊可点击 v1.0）
+
+- **review者**: review/Security Reviewer（`jaden-tech-review`，design 评审，[2/6]）
+- **范围**: `documents/design/JT-CL001-index-now-entries-compact-design-v1.0-20261025.md`（commit `8a80efb`，132 行）：事实卡 F1-F7 复跑 + 反向找漏 + 判据 V1-V10 强度审查 + 决策 Q1-Q7 一致性 + 可实施性三问（含 6 档宽度真机实测）
+- **Tracking**: JT-CL001-D01 ~ D12（D01-D03 🔴 / D04-D09 🟡 / D10-D12 🟢）
+- **状态**: ⛔ COND（**25 / 100**）—— 交回 ops 写 v1.1，不派 [3/6]
+- **报告**: `documents/reviews/JT-CL001-index-now-entries-compact-design-review-v1.0-20261025.md`
+- **实现 prompt**: ⬜ 无需生成（COND 停在此处；v1.1 通过后再出 [3/6] prompt）
+
+### 发现摘要
+
+**三条 🔴 折断 [3/6] 可实施性：**
+
+1. **D01（机制级）改动面 5/6/7 与 Q4「移动端并排」数学互斥**。真机实测（Chromium @127.0.0.1:8127，注入设计原值 CSS + 按改动面 1/2 改 DOM）：375 档两卡 `177.1 + 203.6 + gap 12 = 392.7px` vs 容器可用 `343px` ⇒ **WRAP（并排失败）**，414/390/360/320 全档同样 wrap；1280 单行 FIT（卡 177.1/203.6，高 53.2）。成因 `flex:0 0 auto`（行 7）禁收缩 + `.now-cards{flex-wrap:wrap}`（L253）未在改动面内。⇒ V4 移动端子句必红。实测可行档位已给出：P2（`name 14 / emoji 20 / padding 10×12 / gap 8` ⇒ 305.6px，375+360 FIT）、P3（`14/18/8×10/6` ⇒ 293.6px，仍差 320 档 5.6px）。
+2. **D02 V3 恒红**：`target="_blank"` 下当前页永不导航 —— 实测点击后 `location.href` 完全不变、page target +1。V3 与 Q5/V2 自相矛盾，正确实现也判红。
+3. **D03 V5 第二子句恒红**：375 档实测 `footer.top=748.2 < poetry.bottom=760`，**改前即红**（设计稿反证列称「改前成立」）；且 `.now-section`/`.poetry-section` 均 `position:absolute` 底锚定，缩高不可能造成该重叠 ⇒ 零判别力。改判 `.ft-copy p` 的 top（实测 768.2 ≥ 760 ✅）。
+
+**六条 🟡：** D04 事实卡/判据计数与实测不符（F1 13→**7**、F2 12→**13**、V9 反证 5组/8处→**4/6**、改动面 6「五组」→**4 条**）；D05 F4 关键词集漏 `now-body`（恰是改动面 6 的删除对象）；D06 V8 命令集不成立（`wechat.html` 不引用 `index.css`，该 grep 0 命中；index.html 首个 `?t=` 属 favicon，另有内联 JS 的裸 `?t=` 污染）⇒ 改用 `timestamp-manager.py check`；D07 V4 缺非退化断言（实测两卡 `display:none` ⇒ `tops=[0,0]` 全绿）+ 只测 375 未覆盖 320/360/414；D08 §6.3 依据与运行时相反（实测 `documentElement.lang="en"`，`index.js:127` 覆写）⇒ en 档中文 `aria-label` 违反 WCAG 3.1.2；D09 改动面 1 的 `title` 字面量含裸 `&`（应 `&amp;`）。
+
+**三条 🟢 仅记录：** D10 V7 实测可用（程序化 `focus()` 即命中 `:focus-visible`，`outline solid 2px`，三条规则文本命中，Tab 第 5 停落在卡片）；D11 `title` 触屏不可达（符合「精简」意图，`aria-label` 兜底）；D12 `force` 实改 `index.html` 7 处 + `wechat.html` 1 处 `?t=`（含未变更资源），与 AGENTS.md 共用戳纪律一致。
+
+**反向找漏结论：零代码漏项。** 除 `index.html`(13) / `static/css/index.css`(12) 外，全仓（不限 include，排除 `cache`/`.git`/`documents`）无第三消费者：`static/js/index.js` 无 `now-*` 选择器、生成产物 `bmi-tracker.html`/`tokens-tracker/**`/`daily-poetry.html`/archive 均 0 命中、`scripts/**` 0 命中、`wechat.html` 不引用 index.css。F3 的「删 `[data-zh][data-en]` 节点安全」论证成立。缺口仅在证据闭合度：`now-body` 未入关键词集（D05）、4 个死 ID `#c1desc/#c1act/#c2desc/#c2act` 与 `#nowTitle` 无消费者但未纳入判据（🟢 补记）。
+
+**事实卡可信度**：F7 基线 6 项几何全部复现（误差 ≤0.8px），F6 的两文件同戳 `1788947889` 与 `handle_force` 无条件重写行为（:308-313 → :285 `int(time.time())`）经读码确认；F1/F2 两个计数为串行口径错（把 F4 的 13/12 抄给了 F1/F2 自己的命令）。
+
+**安全面**：无新增攻击面 —— `rel="noopener"` 两卡保留（V2 覆盖，无 reverse tabnabbing）、仅删节点 + 静态 `title`/`aria-label`（无 `innerHTML`/`eval` 引入）、生成产物零改动（不破坏 `data@update` 重渲染契约）、无依赖变更、无凭证/PII/内网路径。`index.html:38` 的 inert `javascript:void(0)` 属 JT-SEC-021 既有口径，本批未触及。
+
+**可实施性三问**：① 改动面 8 行**定位全部命中**（`sed -n` 抽 4 处：`index.html` 54-55/60-62、`index.css` 255-256/277-278/283/307），但**自洽性不成立**（D01）+ 行 5 插规则后行号下移（语义编辑则无碍）；② **无第三源文件**，但 `index.css` 存在改动面外的**必需改动**（并排兑现需新增 `≤359px` 档或调 `.now-section` padding/`.now-cards` gap），若要让 `aria-label` 随语言切换还需 `static/js/index.js`（设计明令禁止）；③ 断言下限 **21 项**（静态 7 + 真机探针 14），当前设计覆盖约 11 项且 3 项恒红。
+
+计分：100 − 3×🔴(15) − 6×🟡(5) = **25 / 100 → COND**；🟢 仅记录项沿用本项目口径（计入 `tracking`，不计入 `findings_total`）。**未执行 `force`／未改源码／未 push／未勾选 draft。** 转 PASS 条件：D01-D03 落入 v1.1 + D04-D09 顺手修正（单次修订可闭合）。
+
+---
+
 ## 条目格式说明
 
 ```
