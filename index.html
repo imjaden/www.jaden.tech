@@ -14,7 +14,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<link rel="shortcut icon" href="static/img/favicon.png?t=1792919065">
+<link rel="shortcut icon" href="static/img/favicon.png?t=1792937726">
 <meta name="keywords" content="Jaden Li, 李俊杰, Solutions Architect, AIOps, Enterprise AI, Hermes Agent, Shanghai">
 <meta name="description" content="Jaden Li (李俊杰), Solutions Architect. 14yrs: 8 Dev + 6 Presales. Enterprise AIOps delivery for China Telecom, China Mobile, UnionPay.">
 <meta property="og:title" content="Jaden Li">
@@ -22,10 +22,10 @@
 <meta property="og:image" content="https://www.jaden.tech/static/img/favicon.png">
 <meta property="og:url" content="https://www.jaden.tech">
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="static/css/index.css?t=1792919065"/>
+<link rel="stylesheet" href="static/css/index.css?t=1792937726"/>
 </head>
 <body>
-  <img id="background" src="static/img/bear01.jpg?t=1792919065" alt="Polar bear background"/>
+  <img id="background" src="static/img/bear01.jpg?t=1792937726" alt="Polar bear background"/>
   <a href="https://github.com/imjaden" class="github-corner" target="_blank" rel="noopener" aria-label="View source on Github">
       <svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" fill="rgba(0,0,0,0.41)"></path>
@@ -36,14 +36,14 @@
 <section id="main">
   <div class="container">
     <a href="javascript:void(0);" id="logo-link">
-        <img id="logo" type="image/svg+xml" src="static/img/favicon.svg?t=1792919065" alt="Jaden Li"/>
+        <img id="logo" type="image/svg+xml" src="static/img/favicon.svg?t=1792937726" alt="Jaden Li"/>
     </a>
     <div class="icon-links">
-      <a href="https://intfocus.archived.jaden.tech/" target="_blank" title="Intfocus">
-        <img src="static/img/icons/intfocus.png?t=1792919065" alt="Intfocus"/>
+      <a href="https://intfocus.archived.jaden.tech/" target="_blank" rel="noopener" title="Intfocus">
+        <img src="static/img/icons/intfocus.png?t=1792937726" alt="Intfocus"/>
       </a>
-      <a href="https://cloudwise.archived.jaden.tech" target="_blank" title="Cloudwise">
-        <img src="static/img/icons/cloudwise.png?t=1792919065" alt="Cloudwise"/>
+      <a href="https://cloudwise.archived.jaden.tech" target="_blank" rel="noopener" title="Cloudwise">
+        <img src="static/img/icons/cloudwise.png?t=1792937726" alt="Cloudwise"/>
       </a>
     </div>
   </div> 
@@ -68,7 +68,8 @@
 <section class="poetry-section" aria-label="Today's Poetry">
   <h2 class="now-title" id="poetryTitle" data-zh="今日诗词鉴赏" data-en="Today's Poetry">今日诗词鉴赏</h2>
   <div class="now-cards">
-    <a class="now-card" id="poetryName" href="./daily-poetry.html" target="_blank" rel="noopener">
+    <a class="now-card" id="poetryName" href="./daily-poetry.html" target="_blank" rel="noopener"
+       title="查看今日推荐的诗词 · 进入诗词归档 ｜ Today's poem picks · open the poetry archive">
       <span class="now-emoji" aria-hidden="true">📜</span>
       <span class="now-name" data-zh="加载中…" data-en="Loading…">加载中…</span>
     </a>
@@ -95,12 +96,14 @@
     return m ? '?t=' + m[1] : '';
   }
   // 诗词区已改为「标题 + 药丸卡」结构与 Now 区一致，诗词标题落在 .now-name 上
-  function setPoetryName(text) {
+  // en 缺省时沿用 zh（诗词标题属专有名词，两语言同一份，见决策 D6）
+  function setPoetryName(zh, en) {
     var nameEl = document.querySelector('#poetryName .now-name');
     if (!nameEl) return;
-    nameEl.textContent = text;
-    nameEl.setAttribute('data-zh', text);
-    nameEl.setAttribute('data-en', text);
+    var enText = (typeof en === 'string' && en) ? en : zh;
+    nameEl.textContent = zh;
+    nameEl.setAttribute('data-zh', zh);
+    nameEl.setAttribute('data-en', enText);
   }
   function renderPoetry() {
     var iso = getTodayISO();
@@ -113,7 +116,7 @@
       setPoetryName('《' + data.recommendations[0].title + '》');
     } else {
       // 缺失时不隐藏入口：药丸仍可点，进入 daily-poetry.html 归档页
-      setPoetryName('暂无诗词数据');
+      setPoetryName('暂无诗词数据', 'No poem data');
     }
   }
   function loadScript(src, onError) {
@@ -130,10 +133,10 @@
   var yymm = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2);
   var cb = getCacheBust();
   loadScript('static/js/today-poetry-' + yymm + '.js' + cb, function () {
-    setPoetryName('暂无诗词数据');
+    setPoetryName('暂无诗词数据', 'No poem data');
   });
 })();
 </script>
-<script type="text/javascript" src="static/js/index.js?t=1792919065"></script>
+<script type="text/javascript" src="static/js/index.js?t=1792937726"></script>
 </body>
 </html>
