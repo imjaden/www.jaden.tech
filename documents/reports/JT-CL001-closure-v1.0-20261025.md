@@ -75,6 +75,7 @@ impl_commit: fff34e2
 - 未动：`bmi-tracker.html`、`tokens-tracker/**`（生成产物）、`static/js/index.js`、`AGENTS.md`、`scripts/**`。
 - 回退方式：`git revert --no-commit fff34e2 && git commit`（或 `git checkout fff34e2~1 -- index.html static/css/index.css wechat.html`）。
 - 说明：`hm loop report` 的「审计（缺: .review-level.yaml 无 impl_audit 条目）」是工具对专用键的期望；审计结论已按既有 schema 落在 `review_history`（2026-10-25 / PASS with notes / 85 / tracking 串），属**取数口径差异**，非缺件。
+- `hm loop artifacts` 收尾 = **✅ 四件套齐全且无占位（rc=0）**，余 4 条取证告警均为口径性、不阻断：① `design: commit 5afd3b2 非本步产物（应为 8a80efb）`——[1/6] 两笔（v1.0/v1.1）中工具取最早，本报告以 v1.1 为准；② 三条「裸用量转储，缺 number/step/role」——本批走 `dispatch-cross-repo.sh`（裸 `--usage-file`，元数据注入是 `1acl-run.sh` 的能力），用量已按 state.db 归集到 profile 级（$0.014/$0.042/$0.041/$0.056），dev-impl 与 impl-audit 已用 `step-done` 补写元数据。
 
 ## 六、本批教训
 
