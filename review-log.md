@@ -697,6 +697,35 @@ XSS：3 个变更文件 `innerHTML|outerHTML|document.write|insertAdjacentHTML|e
 
 ---
 
+## 2026-10-25 — 诗词区同构（Today's Poetry = What I'm Doing Now 结构+样式）
+
+- **review者**: review/Security Reviewer（`jaden-tech-review`，诗词区同构评审 + 按结论执行 push）
+- **范围**: 实现笔 `5ebd981`（`index.html` / `static/css/index.css` / `wechat.html` 换戳）对用户 8 项决策 D1-D8 的一致性；七档真机同构/几何/交互/三态独立复跑；JT-CL001 回归面（`check.py`）不被打破；R1-R4 反转法
+- **Tracking**: POETRY-PAR-01 ~ PAR-03（🟡 ×3，判据/覆盖/矮视口）；PAR-04 ~ PAR-06（🟢 ×3，i18n 占位文案 / title 齐整 / 既有 noopener 债）
+- **状态**: ✅ PASS with notes（**85 / 100**）—— 已按授权 ff-only push，远端 tip = `5ebd981`
+- **报告**: `documents/reviews/poetry-section-parity-review-v1.0-20261025.md`
+- **实现 prompt**: ⬜ 无需生成（本笔即实现笔且已入库+上线；🟡 属判据/既有债，下一批处置）
+
+### 发现摘要
+
+**改动面 = 决策面**：`git show --stat 5ebd981` 恰 3 文件（+45/−80）；`wechat.html` 仅 `?t=` 一行；生成产物 diff 行数 0；`static/js/index.js`、`AGENTS.md`、`scripts/` 零改动；`poetry-label|poetry-sep|poetry-link` 在 html/css 均 0，旧 `[aria-disabled]` 禁用分支已删。
+
+**同构度 = 空差集（非「看起来像」）**：七档 `getComputedStyle` 对差全空（card borderRadius 999px / pad 12×22→10×12 / gap 10→8 / cursor pointer / bg .42 / blur(8px)；title 12px·500·ls 3.36px·uppercase；name 16→14px·700；emoji 26→20px）。两区高度逐档相等：**73.58 = 73.58（1280）、66.19 = 66.19（414-345）**；320 档 Now 两卡换行（119.98 = 66.19+8+45.8）仍 `now.bot 647.81 ≤ po.top 661.81`。间距 **20/14**、诗词→footer **16.2/8.2**、七档 `scrollWidth === innerWidth`、`.bottom-stack` 锚定 `vh−80/72` 7/7 —— 与 ops 自报值一致（仅四舍五入位差）。
+
+**交互/状态**：自然 Tab 第 **7** 停落诗词药丸、`:focus-visible=true`、`outline solid 2px rgb(158,203,255)` offset 2px；真实鼠标点击 **delta=+1**、新 tab `daily-poetry.html`、原 tab URL 不变；有数据 `📜 《登高》`、空态（阻断脚本 / Fetch 返空 archive 两法）均 `暂无诗词数据` 且 `aria-disabled=null`+`cursor:pointer`+可点（delta +1）；zh/en 标题四串正确、诗名恒中文（D6）、卡名不变；console 0 error。
+
+**回归**：`check.py --mode post` **10/10 rc=0**；`--selftest` **S1/S6 红 + S10 绿**（9/11，rc=1）；`timestamp-manager.py check` 两文件同值 **1792919065**。S1/S1b/S2/S3 作用域化经逐行复核为**精确等值**（now 作用域 emoji=2/name=2/card=2，诗词侧 S9 cards=1/emoji=1/name=1 ⇒ 合计精确分解页面 3 卡），非 `>=`。
+
+**反转法 R1-R4**：R2（诗词卡换回 `poetry-link`）→ S9 红（legacy=1）；R3（gap 20→0）→ 1280 `gap_np=0.0` 转红；**R1（删 `.bottom-stack` 的 `position:absolute`）四项断言仍全绿**（栈上移 148.46px、诗词→footer 16.2→164.67 都不触发）⇒ 判据缺「锚定」断言（PAR-01）；**R4（else 分支改 `return`）路径 A「阻断脚本」仍绿**（`onerror` 兜底写同一文案掩盖），改用 Fetch 返空 archive 才转红（PAR-02）。各轮复原后 `git status --short` 全空，两处 worktree 已移除。
+
+**三条 🟡（均判据/既有债，不改源码）**：PAR-01 几何判据无「`vh − stack.bottom == 80/72`」断言（R1 全绿）；PAR-02 空态判据只测 `onerror`，生产中常态的 `renderPoetry` else 分支无守卫；PAR-03 矮视口（横屏 812/667×375、1280×500、375×420、320×480）底部栈压住归档图标行 —— 改前已重叠 59px、本笔上移 **78.6px** 放大到 137px（阈值 vh<511.5/465.4），七档标准高度全绿，故判 🟡 且建议 `@media (max-height:680px)` 收敛或登记为已知限制。**🟢**：PAR-04 空态占位文案 en 档仍中文（既有）；PAR-05 诗词药丸缺 `title`（勿加 `aria-label`，会带偏 S3 口径）；PAR-06 Intfocus/Cloudwise 既有 `_blank` 无 `noopener`。
+
+**安全面**：三处 `rel="noopener"` 齐备；诗名走 `textContent`（无 `innerHTML`/`eval`/`document.write`）；`getCacheBust()` 仅 `\d+`；零新增外链；console 0 error。
+
+计分：100 − 3×🟡(5) = **85 / 100 → PASS with notes**。**push**：`git push origin 5ebd981:main`（ff-only）后远端 tip = `5ebd981`、`origin/main..5ebd981` 空、本地仅剩本评审笔未推。**未改源码/生成产物／未跑 `force`／未勾选 draft／未派后续步骤。**
+
+---
+
 ## 条目格式说明
 
 ```
