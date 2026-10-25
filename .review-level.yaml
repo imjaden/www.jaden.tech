@@ -255,3 +255,11 @@ review_history:
     findings_total: 9
     findings_open: 9
     tracking: "JT-CL001-D01 (🔴 改动面 5/6/7 与 Q4 移动端并排数学互斥·实测 375 档 392.7px > 343px 全档 WRAP); JT-CL001-D02 (🔴 V3 恒红·target=_blank 下当前页 URL 不变); JT-CL001-D03 (🔴 V5 footer 子句改前即红·footer.top 748.2 < poetry.bottom 760); JT-CL001-D04~D09 (🟡 计数不符/now-body 漏扫描/V8 命令集不成立/V4 假绿+宽度档不足/lang=en 依据错/title 裸 &); JT-CL001-D10~D12 (🟢 仅记录: V7 实测可用·title 触屏不可达·force 改写面) — 报告 documents/reviews/JT-CL001-index-now-entries-compact-design-review-v1.0-20261025.md"
+  - date: 2026-10-25
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: PASS with notes
+    score: 85
+    findings_total: 3
+    findings_open: 3
+    tracking: "JT-CL001 [2/6] 设计评审复查（闭合判定轮）: D01-D09 全闭合 9/9（D01 六档实测 360/375/390/414/1280 并排+320 换行零溢出; D02 V3 改新 tab 口径并给出 _self 反例; D03 V5 改 ft-copy p top 768.2>=760 且 section 高 66.2<305）; 新缺陷 N01 (F8/Q4' 数值口径 4px 偏差: 实测 313.6/392.7, 360 档余量 14.4px < 滚动条 15px, 359 实际仍并排阈值 346), N02 (V6 裸 & 断言须源码 grep, DOM 探针恒红), N03 (V7 card.focus() 不命中 focus-visible, 须键盘 Tab) — 报告 documents/reviews/JT-CL001-index-now-entries-compact-design-rereview-v1.0-20261025.md"
