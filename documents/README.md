@@ -11,6 +11,9 @@
 | `design/JT-CL001-index-now-entries-compact-design-v1.1-20261025.md` | 同题设计方案 v1.1（折入 [2/6] 评审 COND：D01 双档尺码 / D02-D03 判据修正 / D08 去 aria-label）——**实施以本版为准** |
 | `reviews/JT-CL001-index-now-entries-compact-design-review-v1.0-20261025.md` | JT-CL001 [2/6] 设计评审 v1.0（COND 25 分，3🔴/6🟡/3🟢） |
 | `reviews/JT-CL001-index-now-entries-compact-design-rereview-v1.0-20261025.md` | JT-CL001 [2/6] 设计评审复查（闭合判定轮，PASS with notes 85） |
+| `reviews/JT-CL001-impl-audit-v1.0-20261025.md` | JT-CL001 [5/6] 实现审计 v1.0（PASS with notes 85；AUD-01~03 + OPS-01 登记） |
+| `reviews/poetry-section-parity-review-v1.0-20261025.md` | 诗词区与 Now 区同构评审 v1.0（PASS with notes 85；P-01~P-06，已 push `5ebd981`） |
+| `reviews/poetry-parity-followup-review-v1.0-20261025.md` | 诗词区同构后续小修评审 v1.0（PASS with notes 90；FU-01/FU-02，已 push `d0d09b2`） |
 | `reports/JT-CL001-ops-check-v1.0-20261025.md` | JT-CL001 [4/6] ops 独立核查报告（pre 6/6 + post 8/8 + 七档真机几何，PASS） |
 | `reports/JT-CL001-closure-v1.0-20261025.md` | JT-CL001 [6/6] 闭环收尾报告（PASS，A 表 7 条 + 观察项处置 + 验收指引） |
 | `plan-omad-v1.0.html` | 站点规划图 v1.0（2026-07-16） |
