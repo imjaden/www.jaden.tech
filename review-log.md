@@ -891,6 +891,27 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-10-26 — JT-CL002 收尾复盘「关账复检」（RETRO-04/05 关闭确认 → PASS 95）
+
+- **review者**: Security Reviewer（review profile，CLI 关账收口轮）
+- **范围**: `f063240..HEAD` 2 笔 —— `f30029a`（上一轮复审件本身，含 rereview 报告/review-log/.review-level）、`836883a`（`docs@report: JT-CL002 retro v1.0.4`：RETRO-04/05 校正 + `git mv` 改名 `-v1.0-` → `-v1.0.4-`）；对照基线 `f063240`（远端上一 tip）
+- **Tracking**: JT-CL002-RETRO-04（🟡 → **✅ CLOSED (836883a)**：§八 由「origin/main 仍 4a72b27」改为**时间锚定**——开工 `4a72b27` → 11:11:03 他线 `8f9845b` → 11:31:03 nightly `76831e1` → 11:32:14 `f063240`「本文件定稿时」；`git log` 逐值复核 `76831e1=11:31:03` / `f063240=11:32:14` / `4a72b27..8f9845b` 恰为 §五 所列 4 笔，终值与 frontmatter/§五 一致、三处「本会话未 push」同口径）；JT-CL002-RETRO-05（🟡 → **✅ CLOSED (836883a)**：`hm loop status` 实测 `[4/6] ✅(ops-check.json)` + `[6/6] ✅(retro.json)` + 评审笔入库后多出 `[2/6] ✅(audit@review 8b154ff) ⚠️ 缺步骤 JSON（推断）`，全文无 `⏳ 待回填`，与 A1 新写法逐行相符；`hm loop artifacts` 实测 ①✅(`documents/reviews/JT-CL002-retro-audit-*.md`)/②✅/③✅/④⚠️(2/6，缺件=方案·设计评审·dev 实施·实现审计) == §二 声明不适用四步集合，与 A2 新写法逐行相符；无任何行被推翻）；JT-CL002-RETRO-01~03 已于上一轮 `f30029a` 记 ✅ CLOSED (ed06fa8/cc582d7)，本轮判据面 0 行改动、无复发；G1（🟢 frontmatter `origin_tip` 为压缩谱系，省略 `76831e1` 一跳且把 `f063240` 标 nightly L2，非矛盾仅精度，待 ops 确认是否回改）；G2（🟢 §五 11:11:03 为推送时刻，`8f9845b` commit 时刻 11:06:21，git 不自证 push 时间）；G3（🟢 旧文件名评审面共 7 处引用 —— audit 3 + rereview 3 + review-log 1，任务书估 5，均属历史路径不改旧件）；G4（🟢 任务书前提偏差：开工 `origin/main` 已为 `836883a`，非 `f063240`，故本轮 push 仅承载评审笔）；G5（🟢 reflog `d07bcd2 → reset → 836883a` 重建，终态 sha == 远端 ⇒ 无分歧）；G6（🟢 安全面 16 组模式 0 命中，`token` 唯一命中为产品路径 `tokens-tracker/data/live.js` 误报）；G7（🟢 `hm loop status` 的 `⏳ 待办`/「下一步 [1/6]」为工具自身模型输出，与「四步不适用」两套口径，A1 判据已排除）
+- **状态**: ✅ PASS（95 / 100，Rating A；🔴 0 / 🟡 0 / 🟢 7）
+- **报告**: `documents/reviews/JT-CL002-retro-audit-rerecheck2-v1.0-20261026.md`
+- **实现 prompt**: ⬜ 无需生成（无代码面；RED/YELLOW 均为 0，无待改项）
+
+### 发现摘要
+
+**两条 🟡 真关闭，且修法直接命中缺陷根因**：`RETRO-04` 的缺陷是「用固定 sha 断言 `origin/main`」，v1.0.4 改为**时间锚定**（"本文件定稿时"）—— 这使结论在远端后续前移时不失效（本轮远端从 `f063240` 前移到 `836883a` 即为活证：文档未被新事实推翻）。`RETRO-05` 的缺陷是「把随入库时点变化的行写成固定预期」，v1.0.4 改为**只取稳定判据行**（A1 取 `[4/6]`/`[6/6]`、A2 只取「④ 缺件集合 == §二 不适用四步」），并把变化面写成条件式 —— 本轮实测每一行都落进该口径，无一行被推翻。
+
+**改名干净、无夹带**：`git show -M --stat` 呈 `{old => new}` rename 形式（+18/−10），`git show --diff-filter=D` 该笔零命中（无删除记录），`ls-tree` 只剩 `-v1.0.4-` 与 `-postpush-verify-`；`f063240..HEAD` 仅 4 文件（3 评审面 + 1 report），代码面（`index.html`/`static/**`/`wechat.html`）0 行，`git status --porcelain` 空。口径校正：任务书给的 `git log --diff-filter=D -1 836883a` 会回溯历史命中 `3164cb9 Delete CNAME`，属命令形态误用，本报告统一改用 `git show`。
+
+**安全面无新增**：`836883a` 18 行新增，凭证前缀（`sk-`/`ghp_`/`AKIA`/`AIza`/`xox…`/`BEGIN … PRIVATE KEY`）、凭证语义（`api_key`/`secret`/`password`/`Bearer`）、本地路径（`/Users/`、`~/CodeSpace`、`.hermes`）、PII（IPv4/email/手机号）**全 0 命中**；唯一 `token` 命中为产品路径 `tokens-tracker/data/live.js`（误报）⇒ **未触发 `JT-SEC-020` 扩面**。
+
+**收口推送**：唯一形态 `git push origin HEAD:main`（ff-only，无 force/`--all`/`--tags`/历史改写）；推送前远端已是 `836883a`（两笔已在线），本次 ff 只追加本评审笔，实现「不留本地尾巴」。三验（`rev-parse HEAD` == `ls-remote`、`origin/main..HEAD` 空、`status --porcelain` 空）全部通过，实测值见报告 §6 三验补记。
+
+---
+
 ## 条目格式说明
 
 ```
