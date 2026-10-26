@@ -800,6 +800,33 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-10-26 — JT-CL002 [6/6] 收尾复盘评审（verify-only 4 笔文档笔：复盘 md + 复验报告 + 自动 handoff + tokens 生成物）
+
+- **review者**: Security Reviewer（review profile，CLI）
+- **范围**: 4 commit — `4a72b27..8f9845b`：`a94f46f`（`tokens-tracker/data/live.js` +153/−71，他线生成物）/ `85163d2`（`documents/handoff/handoff-www.jaden.tech-ops.md` +28/−31，自动生成）/ `c5abc51`（复盘 md 133 行 + 复验报告 v1.1 232 行，均为新文件）/ `8f9845b`（复盘 md +7/−6，A2/A5 复跑行校正）。判据面 `index.html` / `static/**` / `wechat.html` / `bmi-tracker.html` diff **0 行**，`AGENTS.md` / `.env*` 0 行，工作区评审前干净。**核心断言 verify-only 成立**：`7f9779f` 已在 `origin/main`（`--is-ancestor` OK，恰 3 文件 +15/−10），本号未再改代码。
+- **Tracking**: JT-CL002-RETRO-01（🟡 A5 把 `etag`/`last-modified` 当「长期有效」判据，本轮推送后已变：`6adec4e7-1dc7` / `26 Oct 03:11:35 GMT`，而内容 sha256 双等不变 ⇒ 头≠内容）；JT-CL002-RETRO-02（🟡 §五「10:42:38 [4/6] --init 落盘」不可复核：台账 `created_at`=11:11:57 已被 clobber 改写、`hm loop status` 显示 11:11、1acl 日志无 10:42 痕迹）；JT-CL002-RETRO-03（🟡 用量「52.5% 白耗」「合计 ~$0.05」不可复算：两轮分母 56.22%、三会话分母 39.08%、三会话合计 $0.066130）；JT-SEC-020 **扩面**（本批 3 文档新增 8 处本地绝对路径，🟢 OPEN 仅记录，无凭证/PII）
+- **状态**: ✅ PASS with notes（85 / 100）
+- **报告**: documents/reviews/JT-CL002-retro-audit-v1.0-20261026.md
+- **实现 prompt**: ⬜ 无需生成（3 条 🟡 全在文档可复核性面，逐条处置建议见报告 §6；无代码面故无 impl 任务）
+
+### 发现摘要
+
+六条复跑清单 **A1–A6 逐条自己跑、6/6 复现**：A1 `[4/6] ✅ 完成 (ops-check.json)` + `[6/6] ✅ 完成 (retro.json)`，两步均无「⏳ 待回填」；A2 ①②③ ❌ / ④ ⚠️ 2/6，`rc=1` 告警语义，**缺件精确等于**声明不适用的四步（方案 / 设计评审 / dev 实施 / 实现审计）无额外缺件；A3 `origin/main..HEAD` 判据面 diff 空；A4 `OK`；A5 `.now-card {` / `padding: 7px 12px;` / `gap: 8px;`；A6 两行 35 / 29 calls。复验报告 §7 的行号自证亦真实：线上 CSS 全行 CRLF（370/370），断点 **336** 行、选择器 **357** 行、声明 **358** 行，故 `tr -d '\r'` 与 `-A25` 确为必要。
+
+`[5/6]` 不适用**引证成立（非规避）**：`review-log.md:761` 范围原文 `10ad383..83fa692`、`rev-list --count` = **17** 笔、代码面明文含 `7f9779f`，`:785` 给出其 +15/−10 逐笔面，`:763` 判 PASS 95/100；`merge-base --is-ancestor 7f9779f 83fa692` ⇒ `in-range` 而 `… 10ad383` ⇒ `not-in-pre-range`，双向无缝隙。
+
+台账与事件流独立复算全中：两件 JSON 均 `role=ops`、`commit=c5abc51`、`clobbered=true` + reason 有痕；state.db `35 / 0.025844` 与 `29 / 0.020127`；`JT-CL002.jsonl` 6 条 = 10:05:26 dispatch+spawn(pid 97546) 其后无 exit ⇒ 10:10:49 dispatch+spawn(pid 1273) ⇒ 10:14:41 `exit rc=0 duration_s=232` + `classify ok`，与 §三 双派叙述逐字段一致；`1acl-state.json` `paused ["JT-CL002"] / stale_count 0`，`hm 1acl status` ⇒ 空闲 ⇒ 防误派成立。
+
+**安全面**：4 笔新增行凭证前缀（`sk-`/`ghp_`/`AKIA`/`AIza`/`xox[baprs]-`/`BEGIN *PRIVATE KEY`/引号赋值式）**0 命中**，PII（邮箱/手机号）**0 命中**；`live.js` 三处 `token` 命中全为用量计数（`cache_read_tokens` / `total_tokens`），非凭证；`live.js` 新增行绝对路径 0。**→ 无新增注入面、无供应链面、无凭证泄露。**
+
+**口径修正（本报告最关键的一条实质发现）**：任务书「部署面无变化 ⇒ 线上免重验」**不成立**。`a94f46f` 的 `tokens-tracker/data/live.js` 是线上资产，实测线上 `275074f3…` = 本地新版、≠ 批前 `d7108b79…`，Pages 亦于 `26 Oct 03:11:35 GMT` 重部署。准确表述应为「**CL002 判据面**（`index.html` `05e3b1a6…` / `index.css` `14f3bf1f…`）逐字节未变 ⇒ 免重跑真机 AC」，而非「部署面未变」。报告已按此改写，并据此把 Y1 落成 🟡 而非放过。
+
+**push**：本任务书假定 `origin/main = 4a72b27`、本地领先 4 笔待推 —— **实测不符**：评审开始时本批 4 笔**已在线**（`ls-remote` = `8f9845b`，`origin/main` reflog `8f9845b … update by push`，`FETCH_HEAD` @ 11:11:03）。`git push origin 8f9845b:main` 回 `Everything up-to-date`（rc=0，no-op，为预期正确结果非跳过）。三验照跑：① `rev-parse 8f9845b` == `ls-remote` = `8f9845b26a05fccfd64741c2fe38e6fe6fc7111d`；② `origin/main..8f9845b` 空；③ push 时刻 `git status --porcelain` 空，落笔后仅 3 个评审件待提交，本评审笔保持本地领先 1 笔不推。
+
+计分：`100 − 5×3 = 85 / 100 → PASS with notes`；🟢 仅记录项沿用本项目口径（计入 `tracking` + `findings_open`，不计入 `findings_total`，故 `findings_total: 3` / `findings_open: 3`）。
+
+---
+
 ## 条目格式说明
 
 ```

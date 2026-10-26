@@ -304,3 +304,11 @@ review_history:
     findings_total: 1
     findings_open: 4
     tracking: "JT-SEC-021 (🟡 MEDIUM, 仍 OPEN 无变化: javascript: FAQ 死链生成器侧根因未修; artifact 本轮 0 命中, 第 5 次 data@update 重渲染后未再生, 无 REGRESSION); JT-SEC-022 (🟢 LOW, 新增仅记录: 根级 TODO-handoff.md 公开本地绝对路径 ~/CodeSpace/... 与 harness 路径, 无凭证无 PII); JT-SEC-019 (🟢 LOW, 仍 OPEN: tokens-tracker footer 版本披露 1.11(20261015), 无变化); JT-SEC-020 (🟢 LOW, 仍 OPEN: documents/handoff 本地绝对路径披露, 无变化); JT-SEC-015/016/017/018 (🟢 LOW, 已闭合)"
+  - date: 2026-10-26
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: PASS with notes
+    score: 85
+    findings_total: 3
+    findings_open: 3
+    tracking: "JT-CL002-RETRO-01 (🟡 A5 把 etag/last-modified 当长期有效判据, 本轮推送后已变 6adec4e7-1dc7 / 26 Oct 03:11:35 GMT, 而 index.html 05e3b1a6.. 与 index.css 14f3bf1f.. sha256 双等不变 => 头 != 内容, etag 首段与内容无函数关系, 后缀 -1dc7 = content-length 7623 十六进制); JT-CL002-RETRO-02 (🟡 复盘 §五 时间线 10:42:38 [4/6] --init 落盘 不可复核: 台账 created_at=updated_at=11:11:57 已被 clobber 回填改写, hm loop status 显示 10-26 11:11, 1acl 日志仅存 10:10:49 dispatch 与 10:14 exit 无 10:42 痕迹); JT-CL002-RETRO-03 (🟡 用量口径不可复算: 52.5% 白耗 无任何已列分母可得出 (两轮 $0.045971 => 56.22%, 三会话 $0.066130 => 39.08%), 合计 ~$0.05 若含收尾应为 $0.066130); JT-SEC-020 扩面 (🟢 LOW 仍 OPEN: 本批 3 文档新增 8 处本地绝对路径 handoff 3 / verify 3 / retro 2, 含跨仓 hermes-manager 路径, 无凭证无 PII); GREEN: A1-A6 全 6/6 复现, [5/6] 不适用引证成立 (review-log.md:761 范围 10ad383..83fa692 = 17 笔含 7f9779f, in-range 且 not-in-pre-range 双向), 台账两件 role=ops commit=c5abc51 clobbered 有痕, 双派事件流 6 条逐字段一致, 凭证/PII 扫描 0 命中; push 实测为 no-op (本批 4 笔评审开始时已在线 8f9845b), 三验通过; 报告 documents/reviews/JT-CL002-retro-audit-v1.0-20261026.md"
