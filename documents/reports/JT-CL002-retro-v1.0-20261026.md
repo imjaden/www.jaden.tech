@@ -1,8 +1,8 @@
 ---
-title: JT-CL002 post-push 复验 · verify-only 收尾复盘 v1.0
+title: JT-CL002 post-push 复验 · verify-only 收尾复盘 v1.0.1
 topic: index-short-viewport-poetry-empty-state
 type: retro
-version: 1.0
+version: 1.0.1
 date: 2026-10-26
 author: jaden-tech-ops
 closure: JT-CL002
@@ -77,10 +77,10 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 | # | 命令（`cd ~/CodeSpace/www.jaden.tech`） | 预期 | 断言 |
 |:--|:--|:--|:--|
 | A1 | `hm loop status JT-CL002` | `[4/6] ✅ 完成 (ops-check.json)`、`[6/6] ✅ 完成 (retro.json)` | 两步有效步骤在账 |
-| A2 | `hm loop artifacts JT-CL002` | 报告/评审面列出 `documents/reports/JT-CL002-postpush-verify-20261026.md` | 证据文件可达（缺件告警属 [1/6]–[3/6]、[5/6] 不适用，见 §二） |
+| A2 | `hm loop artifacts JT-CL002` | ①②③ ❌、④ ⚠️（2/6 步），缺件 = 方案 / 设计评审 / dev 实施 / 实现审计（exit 1 = 告警语义，只读不阻断） | verify-only 号的**预期形态**：review 面无对应条目、缺件步恰为 §二 声明不适用的四步，无额外缺件 |
 | A3 | `git diff --stat origin/main..HEAD -- index.html static/css/index.css wechat.html static/js` | 空输出 | 本号零代码变更 |
 | A4 | `git merge-base --is-ancestor 7f9779f origin/main && echo OK` | `OK` | 被复验笔已在线 |
-| A5 | `curl -sS https://www.jaden.tech/static/css/index.css \| grep -A3 "max-height: 680px" \| grep "now-card"` | 命中 `.now-card{...padding:7px 12px...}` | 线上仍是复验时的内容（长期有效） |
+| A5 | `curl -sS https://www.jaden.tech/static/css/index.css \| tr -d '\r' \| grep -A25 "max-height: 680px" \| grep -A2 "now-card"` | `.now-card {` / `padding: 7px 12px;` / `gap: 8px;`（线上 CSS 为 CRLF，须先 `tr -d '\r'`；块内 `.now-card` 在断点后第 22 行，故 `-A25` 而非 `-A3`） | 线上仍是复验时的内容（长期有效） |
 | A6 | `sqlite3 ~/.hermes/profiles/ops/state.db "select id,api_call_count from sessions where title like 'JT-CL002%'"` | 两行（35 / 29 calls） | 双派用量可复核 |
 
 完整 4/4 AC 复现步骤（含 CDP 真机探针）：复验报告 `documents/reports/JT-CL002-postpush-verify-20261026.md` §6。
@@ -115,9 +115,9 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 | # | 归属 | 项 | 状态 |
 |:--|:--|:--|:--|
 | 1 | 本仓 | draft `cache/draft/TODO-20261026.md:10` 状态仍写「停在 [5/6]·待评审+push」，实际已推送+复验 PASS | 待用户核实后 `hm loop verify JT-CL002`（AI 不自标完成） |
-| 2 | 本仓 | `7f9779f` 之后无代码变更，故本文件为唯一新增交付物（另含未入库的复验报告，随本次提交入库） | 已随本步 commit |
+| 2 | 本仓 | `7f9779f` 之后无代码变更，故本文件为唯一新增交付物（另含未入库的复验报告，随本次提交入库） | 首版落仓笔 `c5abc51`（`documents/reports/` 两文件） |
 | 3 | 跨仓（hermes-manager） | stale-check 增「产物已落盘 ⇒ already-produced 只清锁不重派」第二证据源 | 已登记 `TODO-20261026.md`，本仓不代改 |
-| 4 | 跨仓（hermes-manager） | `hm 1acl status` 仍显示 `[5/6] 实现审计 🔄 进行中`（按 draft 状态派生，非真实在跑；编号已 `paused`） | 登记为展示口径待收敛，不改判据 |
+| 4 | 跨仓（hermes-manager） | `hm 1acl status` 在 [6/6] 落账前按未勾选 draft 派生出「▶ 编号 JT-CL002・[5/6] 实现审计 🔄 进行中」（实际无进程在跑，编号已 `paused`）；本步落账后已变为「▶ 当前: 空闲」 | 观察项（展示口径依赖 draft 勾选状态），不改判据 |
 
 ## 八、红线遵守
 
@@ -131,3 +131,4 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 | 版本 | 日期 | 变更 |
 |:-----|:-----|:-----|
 | v1.0 | 2026-10-26 | 首版：verify-only 定性 + 不适用步骤理由（含 `4a72b27` 审计覆盖引证）+ 双派事故与两次会话 id/用量 + A1–A6 复跑清单 + 教训 + 分仓待处置 |
+| v1.0.1 | 2026-10-26 | 复跑清单校正（首版落仓后实测反查）：A2 改为 `hm loop artifacts` 实测形态（原写「报告面列出」与工具口径不符 —— 该命令只认 `documents/reviews/**` 与步骤 JSON evidence 指针）；A5 补 `tr -d '\r'` + `-A25`（线上 CSS 为 CRLF，且块内 `.now-card` 距断点 21 行，原 `-A3` 零命中）；§七#4 按落账后实测改写。文件名保留 `v1.0` 以稳住既有引用路径，版本以本 frontmatter 为准 |
