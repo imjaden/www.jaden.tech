@@ -1,8 +1,8 @@
 ---
-title: JT-CL002 post-push 复验 · verify-only 收尾复盘 v1.0.3
+title: JT-CL002 post-push 复验 · verify-only 收尾复盘 v1.0.4
 topic: index-short-viewport-poetry-empty-state
 type: report
-version: 1.0.3
+version: 1.0.4
 date: 2026-10-26
 author: jaden-tech-ops
 closure: JT-CL002
@@ -10,8 +10,8 @@ verdict: PASS
 review_report: documents/reviews/JT-CL002-retro-audit-v1.0-20261026.md（PASS with notes 85）
 nature: verify-only（[4/6] + [6/6] 两步有效）
 verify_report: documents/reports/JT-CL002-postpush-verify-20261026.md
-impl_commit: 7f9779f（复验时刻 origin/main = 4a72b27 内；现 tip = 8f9845b，本号未再改代码）
-origin_tip: 4a72b27（复验时刻）→ 8f9845b（11:11:03 推送本批后）
+impl_commit: 7f9779f（复验时刻 origin/main = 4a72b27 内；现 tip = f063240，本号未再改代码）
+origin_tip: 4a72b27（复验时刻）→ 8f9845b（11:11:03 他线推送）→ f063240（11:32:14 nightly L2）；本会话未 push
 retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652cf1a5f
 ---
 
@@ -88,8 +88,8 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 
 | # | 命令（`cd ~/CodeSpace/www.jaden.tech`） | 预期 | 断言 |
 |:--|:--|:--|:--|
-| A1 | `hm loop status JT-CL002` | `[4/6] ✅ 完成 (ops-check.json)`、`[6/6] ✅ 完成 (retro.json)` | 两步有效步骤在账 |
-| A2 | `hm loop artifacts JT-CL002` | ①②③ ❌、④ ⚠️（2/6 步），缺件 = 方案 / 设计评审 / dev 实施 / 实现审计（exit 1 = 告警语义，只读不阻断） | verify-only 号的**预期形态**：review 面无对应条目、缺件步恰为 §二 声明不适用的四步，无额外缺件 |
+| A1 | `hm loop status JT-CL002` | 恒有 `[4/6] ✅ 完成 (ops-check.json)`、`[6/6] ✅ 完成 (retro.json)`；**评审笔入库后**还会多出一行 `[2/6] ✅ 完成 (audit@review <sha>) ⚠️ 缺步骤 JSON（推断）` —— 工具按 commit 反推步类型，不是真实跑过设计评审 | 判据只取 `[4/6]`/`[6/6]` 两行「有台账且无 `⏳ 待回填`」；其余行随评审面入库状态变化，**不作判据**（§二 已声明四步不适用） |
+| A2 | `hm loop artifacts JT-CL002` | ④ 恒为 ⚠️（2/6 步，缺件 = 方案 / 设计评审 / dev 实施 / 实现审计）；①②③ 随评审面是否入库而变 —— **评审笔入库后转 ✅**（① 指向 `documents/reviews/JT-CL002-retro-audit-*.md`），入库前为 ❌（exit 1 = 告警语义，只读不阻断） | 判据只取「④ 缺件步 == §二 声明不适用的四步」；①②③ **不作固定预期**（取决评审面入库时点，避免「预期被工具输出推翻」） |
 | A3 | `git diff --stat origin/main..HEAD -- index.html static/css/index.css wechat.html static/js` | 空输出 | 本号零代码变更 |
 | A4 | `git merge-base --is-ancestor 7f9779f origin/main && echo OK` | `OK` | 被复验笔已在线 |
 | A5 | `curl -sS https://www.jaden.tech/static/css/index.css \| tr -d '\r' \| grep -A25 "max-height: 680px" \| grep -A2 "now-card"` | `.now-card {` / `padding: 7px 12px;` / `gap: 8px;`（线上 CSS 为 CRLF，须先 `tr -d '\r'`；块内 `.now-card` 在断点后第 22 行，故 `-A25` 而非 `-A3`） | 线上仍是复验时的**内容**：判据面 sha256 双等（`curl -sS … \| shasum -a 256` vs 本地 `static/css/index.css` = `14f3bf1f…`、`index.html` = `05e3b1a6…`）。**响应头不作长期判据**：`etag` / `last-modified` 只是取样时刻快照，11:11 推送后已变 `6adec4e7-1dc7` / `26 Oct 03:11:35 GMT`，而内容未变（头 ≠ 内容） |
@@ -107,7 +107,10 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 | 10:42:38 | [4/6] 台账 `--init` 落盘（role=ops，usage 注入）。**此为该台账首次落盘时刻**；11:11:57 因 commit 回填被 clobber，`created_at` / `updated_at` 已被整体改写为 `11:11:57`（`hm loop status` 现显示 `10-26 11:11`，属改写后值；`1acl-JT-CL002.log` 无 10:42 痕迹，复跑 A1 会看到 11:11，非矛盾） | — |
 | 11:01 | `85163d2 docs@handoff` 自动生成 ops handoff（他线，未动） | — |
 | 11:0x | [6/6] 收尾复盘（本文件） | `local-3213666f…` |
-| 11:11:03 | 本批 4 笔（`a94f46f` / `85163d2` / `c5abc51` / `8f9845b`）推至 `origin/main = 8f9845b`；Pages 随之重部署（`last-modified 26 Oct 03:11:35 GMT`）—— 因 `tokens-tracker/data/live.js` 属线上资产，**部署面确有变化**；但 CL002 判据面（`index.html` / `index.css`）内容 sha256 未变，[4/6] 真机结论仍成立 | 非本会话动作 |
+| 11:11:03 | 本批 4 笔（`a94f46f` / `85163d2` / `c5abc51` / `8f9845b`）推至 `origin/main = 8f9845b`；Pages 随之重部署（`last-modified 26 Oct 03:11:35 GMT`）—— 因 `tokens-tracker/data/live.js` 属线上资产，**部署面确有变化**；但 CL002 判据面（`index.html` / `index.css`）内容 sha256 未变，[4/6] 真机结论仍成立 | 他线（用户判定：hermes-manager 仓侧） |
+| 11:31:03 | nightly L2 复审推送并判 PASS 95（范围本批 6 笔，`RETRO-01~03` 记 CLOSED） | review cron（`76831e1`） |
+| 11:32:14 | L2 addendum：补审并发笔 `cc582d7`（docs-only，0 findings） | review cron（`f063240`） |
+| 11:33:41 | 本文件复审（ops 派 review oneshot）⇒ **COND 90**：Y1/Y2/Y3 全 CLOSED，另开 RETRO-04/05（文档口径面） | `f30029a`（本地未推） |
 
 用量（分母显式，源 state.db + 台账 `usage`）：
 
@@ -137,16 +140,21 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 
 ## 八、红线遵守
 
-- 未 push、未 force、未改写历史；`origin/main` 仍 `4a72b27`；未动 `a94f46f` 与他线 `85163d2`；
+- **本会话未执行任何 push / force / 历史改写**。`origin/main` 轨迹（时间锚定，避免与 frontmatter/§五 冲突）：
+  开工时 `4a72b27` → **11:11:03 他线推至 `8f9845b`**（用户判定为 hermes-manager 仓侧动作，本会话未参与，也未持有该 push 的调用记录）
+  → 11:31:03 nightly L2 推至 `76831e1` → 11:32:14 `f063240`（review cron 侧）；**本文件定稿时 `origin/main = f063240`**，
+  另有本地领先 1 笔 `f30029a`（本次复审笔，未推）。
+- 未动 `a94f46f` 与他线 `85163d2`（两笔内容原样在线，未改写）；
 - 未改 hermes-manager 任何文件（仅只读引用 dispatch jsonl / draft / state.json）；
 - 未重跑线上复验与全量测试（零代码变更，复用 v1.1 证据）；
-- `git add` 仅 path-scoped 两文件，无 `-A`。
+- `git add` 仅 path-scoped，无 `-A`。
 
 ## 九、修订记录
 
 | 版本 | 日期 | 变更 |
 |:-----|:-----|:-----|
 | v1.0 | 2026-10-26 | 首版：verify-only 定性 + 不适用步骤理由（含 `4a72b27` 审计覆盖引证）+ 双派事故与两次会话 id/用量 + A1–A6 复跑清单 + 教训 + 分仓待处置 |
-| v1.0.1 | 2026-10-26 | 复跑清单校正（首版落仓后实测反查）：A2 改为 `hm loop artifacts` 实测形态（原写「报告面列出」与工具口径不符 —— 该命令只认 `documents/reviews/**` 与步骤 JSON evidence 指针）；A5 补 `tr -d '\r'` + `-A25`（线上 CSS 为 CRLF，且块内 `.now-card` 距断点 21 行，原 `-A3` 零命中）；§七#4 按落账后实测改写。文件名保留 `v1.0` 以稳住既有引用路径，版本以本 frontmatter 为准 |
+| v1.0.1 | 2026-10-26 | 复跑清单校正（首版落仓后实测反查）：A2 改为 `hm loop artifacts` 实测形态（原写「报告面列出」与工具口径不符 —— 该命令只认 `documents/reviews/**` 与步骤 JSON evidence 指针）；A5 补 `tr -d '\r'` + `-A25`（线上 CSS 为 CRLF，且块内 `.now-card` 距断点 21 行，原 `-A3` 零命中）；§七#4 按落账后实测改写（当时文件名保留 `v1.0` 以稳住引用路径；**v1.0.4 起已随版本改名为 `-v1.0.4-`**，此说明仅存历史） |
 | v1.0.2 | 2026-10-26 | 按 review 评审件 `documents/reviews/JT-CL002-retro-audit-v1.0-20261026.md`（PASS with notes 85 / 0🔴3🟡）三条 🟡 对症校正：**Y1** A5 判据改为判据面内容 sha256 双等、响应头降级为取样快照（实测头已变 `6adec4e7-1dc7` / `26 Oct 03:11:35 GMT`）；**Y2** §五 `10:42:38` 一行注明该值 11:11:57 因 clobber 被改写（复跑 A1 见 11:11 非矛盾）；**Y3** 用量改显式分母（两轮 $0.045971 / 首派 56.22%；三会话 $0.066130 / 首派 39.08%）。另补 11:11:03 推送 + Pages 重部署事实（部署面有变、判据面未变）。结论不变：PASS |
 | v1.0.3 | 2026-10-26 | `type: retro` → `type: report`（用户指示「描述 retro 场景，建议选用已有 type」）：不新增枚举，场景与选用理由见 §一 口径注；「复盘/收尾」语义留在 `title` + `closure`。正文无实质变更 |
+| v1.0.4 | 2026-10-26 | 按复审件 `documents/reviews/JT-CL002-retro-audit-rereview-v1.0-20261026.md`（COND 90，Y1/Y2/Y3 已 CLOSED）两条新 🟡 校正：**RETRO-04** §八 改为时间锚定（本会话未 push；origin 轨迹 4a72b27 → 8f9845b → 76831e1 → f063240，与 frontmatter/§五 不再冲突）；**RETRO-05** A1/A2「预期」改为「只取稳定判据行、其余随评审面入库时点变化」（原 A2 断言「review 面无对应条目」已被工具输出推翻）。§五 补 11:31:03 / 11:32:14 / 11:33:41 三行。**文件名随版本改为 `-v1.0.4-`**（用户 2026-10-26 指示统一） |
