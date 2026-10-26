@@ -1,15 +1,15 @@
 ---
-title: Handoff - ops/20260906_222752_2
-date: 2026-10-14
-source_session: 20260906_222752_2d7428
-generated_by: hermes-0.21.3
-topic: hermes-manager
+title: Handoff - www.jaden.tech/ops
+date: 2026-10-26
+source_session: 20261014_114505_fc2dbe
+generated_by: hermes-0.19.1
+topic: www.jaden.tech
 type: handoff
 version: 1.0
 author: ops
-summary: "daily-poetry v1.3.3 与镜像 JT-SEC-015/018 收口:提交经 review PASS 并推送,四项 JT-SEC 全闭合(HEAD"
-next: rc 码本仓小改 + 死 CSS 打印 prompt 转他仓,合一轮 review;2) 收口 JT-SEC-019;3
-risk: JT-SEC-019(镜像 footer 版本披露,🟢 OPEN);死 CSS `.wc-nav a`/`.wc-pub
+summary: 诗词区同构与矮视口/空态修复已随 L2 复审上线（远端 4a72b27 含 7f9779f），harness 13/13，post-push 复验报告已出。
+next: path-scoped 提交该报告并把 draft 改为已推送·待核实；逐条处置四个 SEC 项；他线保持只 commi
+risk: 复验报告 v1.1 仍未跟踪未提交；draft 20261026 仍挂 JT-CL002「停在 [5/6]」旧态；JT-
 ---
 
 # Handoff: jaden-tech-ops
@@ -17,50 +17,47 @@ risk: JT-SEC-019(镜像 footer 版本披露,🟢 OPEN);死 CSS `.wc-nav a`/`.wc-
 📌 语义摘要
 
 **已完成**
-daily-poetry v1.3.3 与镜像 JT-SEC-015/018 收口:提交经 review PASS 并推送,四项 JT-SEC 全闭合(HEAD cf219ca,0/0 工作树净);镜像 cron 恢复 ok,referrer/内链修复已在生产产物生效。
+诗词区同构与矮视口/空态修复已随 L2 复审上线（远端 4a72b27 含 7f9779f），harness 13/13，post-push 复验报告已出。
 **未完成**
-JT-SEC-019(镜像 footer 版本披露,🟢 OPEN);死 CSS `.wc-nav a`/`.wc-pub` 清理须改 hermes-manager 源壳;`inject_chrome` 异常路径 rc=1 未统一为 rc=2;skill-mirror-sync 周一 job gitee push 失败。
+复验报告 v1.1 仍未跟踪未提交；draft 20261026 仍挂 JT-CL002「停在 [5/6]」旧态；JT-SEC-019/020/021/022 待处置；a94f46f 他线 sync 按口径未推。
 **下一步建议**
-1) rc 码本仓小改 + 死 CSS 打印 prompt 转他仓,合一轮 review;2) 收口 JT-SEC-019;3) 查 gitee 推送。三件均待放行。
+path-scoped 提交该报告并把 draft 改为已推送·待核实；逐条处置四个 SEC 项；他线保持只 commit 不 push。
 
 ## 目标
-按治理规范(按需) commit 当前项目所有修改的文档与源码，使用 hermes cli 交由 review role 评审+push
+working directory 切换至 /Users/jadenli/CodeSpace/www.jaden.tech
 
 ## 输入
 - profile: ops
-- session: 20260906_222752_2d7428
-- 消息数: 136
+- session: 20261014_114505_fc2dbe
+- 消息数: 220
 
 ## 输出 / 关键路径
-- /Users/
+- /Users/jadenli/CodeSpace/hermes-manager
 - /Users/jadenli/CodeSpace/www.jaden.tech
-- /Users/jadenli/CodeSpace/www.jaden.tech/AGENTS.md
-- ~/.local/bin/review
-- ~/CodeSpace/hermes-manager/web/1acl/assets/common.js
-- ~/CodeSpace/hermes-manager/web/1acl/data/live.js
-- ~/CodeSpace/hermes-manager/web/1acl/index.html
-- ~/CodeSpace/script-miner/daily-poetry/daily-poetry.html
-- ~/CodeSpace/www.jaden.tech
-- ~/CodeSpace/www.jaden.tech/AGENTS.md
+- /Users/jadenli/CodeSpace/www.jaden.tech/index.html
 
 ## 边界
-- started: 1788704872.9831018, messages: 136
+- started: 1791949505.480733, messages: 220
 
 ## 确认点（历史输入, 非待办）
-- > 补充：当前 7 个 commit 尚未 push，此泄露**尚未上线**。阻断 push 正是把泄露挡在发布前，属于有效拦截。
-- `94c71e3` 只 rename 文件，未同步引用：
-- - `AGENTS.md:9` — `- daily-tracker.html — Daily habit tracker` 未更新为 `bmi-tracker.html`。
-- - 不 push。7 个 commit 保留本地未推送状态，等 ops 修复后复审。
-- - 未写 review-log / .review-level.yaml（按本批「非 PASS → 输出 findings 交回 ops」惯例，复审 PASS 时再一并追加+commit+push）。
+- 基于以上信息，复述整体需求及解决方案，罗列待决策清单（若有，附推荐项）、下一步行动计划（不要直接执行）
+- 2) 走不到 [6/6] 的停在可续点：不造复盘、不勾完成，在 live draft 标“停在 [N/6] + 下一步 + 待用户核实”。
+- 3) 未开工任务按串行顺序进清单：改 cache/draft/TODO-<今日>.md 待办节（编号 + 范围 + 前置依赖），再 hm loop entry-page --write 同步 TODO…
+- 6) review 评审+push 可延后：能一次派发就 hm review-prep . + review chat --query-file <f> --oneshot -Q --in /User…
+- 7) 报告四行：结论 / 在途停点 / 清单已写条数 / 待明早编号。
 
 ## 权限
 - [无]
 
 ## 来源
-- (无)
+- 10ad383 audit@review: L2 re-audit PASS 2026-10-24
+- fff34e2 fix@site: JT-CL001 [3/6] 首页 Now 入口精简为胶囊（em
+- 788feaf audit@review: JT-CL001 [2/6] 设计评审 v1.0 ——
+- 01ae0d9 audit@review: JT-CL001 [2/6] 设计评审复查 v1.0 —
+- 165997b audit@review: JT-CL001 [5/6] 实现审计 v1.0 ——
 
 ## 下一步清单
 1. 真值见 live draft 待办节（cache/draft/TODO-YYYYMMDD.md · 入口页机器段）
 
 ## 建议技能
-assets, daily-tracker, references, scripts
+daily-tracker, references, scripts
