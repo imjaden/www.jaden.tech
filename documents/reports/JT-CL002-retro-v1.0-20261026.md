@@ -1,16 +1,17 @@
 ---
-title: JT-CL002 post-push 复验 · verify-only 收尾复盘 v1.0.1
+title: JT-CL002 post-push 复验 · verify-only 收尾复盘 v1.0.2
 topic: index-short-viewport-poetry-empty-state
 type: retro
-version: 1.0.1
+version: 1.0.2
 date: 2026-10-26
 author: jaden-tech-ops
 closure: JT-CL002
 verdict: PASS
+review_report: documents/reviews/JT-CL002-retro-audit-v1.0-20261026.md（PASS with notes 85）
 nature: verify-only（[4/6] + [6/6] 两步有效）
 verify_report: documents/reports/JT-CL002-postpush-verify-20261026.md
-impl_commit: 7f9779f（远端 origin/main 4a72b27 内，本号未再改代码）
-origin_tip: 4a72b27
+impl_commit: 7f9779f（复验时刻 origin/main = 4a72b27 内；现 tip = 8f9845b，本号未再改代码）
+origin_tip: 4a72b27（复验时刻）→ 8f9845b（11:11:03 推送本批后）
 retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652cf1a5f
 ---
 
@@ -80,7 +81,7 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 | A2 | `hm loop artifacts JT-CL002` | ①②③ ❌、④ ⚠️（2/6 步），缺件 = 方案 / 设计评审 / dev 实施 / 实现审计（exit 1 = 告警语义，只读不阻断） | verify-only 号的**预期形态**：review 面无对应条目、缺件步恰为 §二 声明不适用的四步，无额外缺件 |
 | A3 | `git diff --stat origin/main..HEAD -- index.html static/css/index.css wechat.html static/js` | 空输出 | 本号零代码变更 |
 | A4 | `git merge-base --is-ancestor 7f9779f origin/main && echo OK` | `OK` | 被复验笔已在线 |
-| A5 | `curl -sS https://www.jaden.tech/static/css/index.css \| tr -d '\r' \| grep -A25 "max-height: 680px" \| grep -A2 "now-card"` | `.now-card {` / `padding: 7px 12px;` / `gap: 8px;`（线上 CSS 为 CRLF，须先 `tr -d '\r'`；块内 `.now-card` 在断点后第 22 行，故 `-A25` 而非 `-A3`） | 线上仍是复验时的内容（长期有效） |
+| A5 | `curl -sS https://www.jaden.tech/static/css/index.css \| tr -d '\r' \| grep -A25 "max-height: 680px" \| grep -A2 "now-card"` | `.now-card {` / `padding: 7px 12px;` / `gap: 8px;`（线上 CSS 为 CRLF，须先 `tr -d '\r'`；块内 `.now-card` 在断点后第 22 行，故 `-A25` 而非 `-A3`） | 线上仍是复验时的**内容**：判据面 sha256 双等（`curl -sS … \| shasum -a 256` vs 本地 `static/css/index.css` = `14f3bf1f…`、`index.html` = `05e3b1a6…`）。**响应头不作长期判据**：`etag` / `last-modified` 只是取样时刻快照，11:11 推送后已变 `6adec4e7-1dc7` / `26 Oct 03:11:35 GMT`，而内容未变（头 ≠ 内容） |
 | A6 | `sqlite3 ~/.hermes/profiles/ops/state.db "select id,api_call_count from sessions where title like 'JT-CL002%'"` | 两行（35 / 29 calls） | 双派用量可复核 |
 
 完整 4/4 AC 复现步骤（含 CDP 真机探针）：复验报告 `documents/reports/JT-CL002-postpush-verify-20261026.md` §6。
@@ -92,12 +93,16 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 | 2026-10-25 22:3x | 用户「交 review 推」→ 评审 PASS → push，`7f9779f` 进 `origin/main` | — |
 | 10:05:26 | [4/6] 首派（pid 97546），产 v1.0 后夭折 | `local-9fc0d254…` |
 | 10:10:49 | stale 删锁重认，第二派（pid 1273），232s | `local-e5dc25a4…` |
-| 10:42:38 | [4/6] 台账 `--init` 落盘（role=ops，usage 注入） | — |
+| 10:42:38 | [4/6] 台账 `--init` 落盘（role=ops，usage 注入）。**此为该台账首次落盘时刻**；11:11:57 因 commit 回填被 clobber，`created_at` / `updated_at` 已被整体改写为 `11:11:57`（`hm loop status` 现显示 `10-26 11:11`，属改写后值；`1acl-JT-CL002.log` 无 10:42 痕迹，复跑 A1 会看到 11:11，非矛盾） | — |
 | 11:01 | `85163d2 docs@handoff` 自动生成 ops handoff（他线，未动） | — |
 | 11:0x | [6/6] 收尾复盘（本文件） | `local-3213666f…` |
+| 11:11:03 | 本批 4 笔（`a94f46f` / `85163d2` / `c5abc51` / `8f9845b`）推至 `origin/main = 8f9845b`；Pages 随之重部署（`last-modified 26 Oct 03:11:35 GMT`）—— 因 `tokens-tracker/data/live.js` 属线上资产，**部署面确有变化**；但 CL002 判据面（`index.html` / `index.css`）内容 sha256 未变，[4/6] 真机结论仍成立 | 非本会话动作 |
 
-用量合计（本号两轮核查 + 本轮收尾）：**~$0.05**（35 + 29 calls 已计，收尾会话量见 `hm loop step-done` 回显）。
-其中 **52.5%**（$0.0258）由双派事故白耗。
+用量（分母显式，源 state.db + 台账 `usage`）：
+
+- 两轮 `[4/6] ops-check` 合计 **$0.045971**（首派 35 calls / **$0.025844** + 次派 29 calls / **$0.020127**）；
+  首派 **56.22%** 为双派事故白耗（$0.025844）。
+- 含收尾会话（25 calls / $0.020159，11:05 落账时值）三会话合计 **$0.066130** / **89 calls**，首派占比 **39.08%**。
 
 ## 六、教训
 
@@ -132,3 +137,4 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 |:-----|:-----|:-----|
 | v1.0 | 2026-10-26 | 首版：verify-only 定性 + 不适用步骤理由（含 `4a72b27` 审计覆盖引证）+ 双派事故与两次会话 id/用量 + A1–A6 复跑清单 + 教训 + 分仓待处置 |
 | v1.0.1 | 2026-10-26 | 复跑清单校正（首版落仓后实测反查）：A2 改为 `hm loop artifacts` 实测形态（原写「报告面列出」与工具口径不符 —— 该命令只认 `documents/reviews/**` 与步骤 JSON evidence 指针）；A5 补 `tr -d '\r'` + `-A25`（线上 CSS 为 CRLF，且块内 `.now-card` 距断点 21 行，原 `-A3` 零命中）；§七#4 按落账后实测改写。文件名保留 `v1.0` 以稳住既有引用路径，版本以本 frontmatter 为准 |
+| v1.0.2 | 2026-10-26 | 按 review 评审件 `documents/reviews/JT-CL002-retro-audit-v1.0-20261026.md`（PASS with notes 85 / 0🔴3🟡）三条 🟡 对症校正：**Y1** A5 判据改为判据面内容 sha256 双等、响应头降级为取样快照（实测头已变 `6adec4e7-1dc7` / `26 Oct 03:11:35 GMT`）；**Y2** §五 `10:42:38` 一行注明该值 11:11:57 因 clobber 被改写（复跑 A1 见 11:11 非矛盾）；**Y3** 用量改显式分母（两轮 $0.045971 / 首派 56.22%；三会话 $0.066130 / 首派 39.08%）。另补 11:11:03 推送 + Pages 重部署事实（部署面有变、判据面未变）。结论不变：PASS |
