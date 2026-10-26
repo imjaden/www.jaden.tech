@@ -830,7 +830,7 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 ## 2026-10-26 — 夜间 L2 复审（自 4a72b27 共 6 commit：4 笔文档/数据笔已被本日 JT-CL002 复盘评审覆盖、`8b154ff` 为评审笔、`ed06fa8` 为复盘文档 v1.0.2 校正；判据面零变更、无回归，RETRO-01~03 闭合）
 
 - **review者**: Security Reviewer（review profile，cron）
-- **范围**: 6 commit — `4a72b27..ed06fa8`。文档面 = `c5abc51`（复盘 md + 复验报告新增）/ `8f9845b`（A2·A5 行校正）/ `ed06fa8`（v1.0.2 Y1/Y2/Y3 校正）/ `85163d2`（自动 ops handoff +28/−31）；数据面 = `a94f46f`（`tokens-tracker/data/live.js` +153/−71）；评审面 = `8b154ff`（3 评审件）。**判据面 `index.html` / `static/**` / `wechat.html` / `bmi-tracker.html` / `daily-tracker-archive-202607-202610.html` / `tokens-tracker/index.html` diff 均为 0 行**（`git show --stat` 六笔逐笔核）。`git log 4a72b27..HEAD | grep -v 'audit@review:' | grep -v 'data@update:'` 非空（4 笔 `docs@*`）⇒ 不适用 SILENT，执行全量扫描。
+- **范围**: 6 commit — `4a72b27..ed06fa8`（审计期间另有 1 笔并发落仓 `cc582d7`，补记见末；本次实际推送 tip `76831e1`）。文档面 = `c5abc51`（复盘 md + 复验报告新增）/ `8f9845b`（A2·A5 行校正）/ `ed06fa8`（v1.0.2 Y1/Y2/Y3 校正）/ `85163d2`（自动 ops handoff +28/−31）；数据面 = `a94f46f`（`tokens-tracker/data/live.js` +153/−71）；评审面 = `8b154ff`（3 评审件）。**判据面 `index.html` / `static/**` / `wechat.html` / `bmi-tracker.html` / `daily-tracker-archive-202607-202610.html` / `tokens-tracker/index.html` diff 均为 0 行**（`git show --stat` 六笔逐笔核）。`git log 4a72b27..HEAD | grep -v 'audit@review:' | grep -v 'data@update:'` 非空（4 笔 `docs@*`）⇒ 不适用 SILENT，执行全量扫描。
 - **Tracking**: JT-SEC-021（🟡 MEDIUM，仍 OPEN，无再生）；JT-SEC-019 / 020 / 022（🟢 LOW，仍 OPEN，020 已含本批 3 文档扩面）；JT-CL002-RETRO-01 ~ RETRO-03（🟡 → **CLOSED by `ed06fa8`**，逐条实测复核见下）
 - **状态**: ✅ PASS（95 / 100，Rating A；🔴 0 / 🟡 1 结转 / 🟢 3 结转，新增 0）
 - **报告**: 无（nightly re-audit，single-log 约定；本条目即报告）
@@ -863,6 +863,8 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 | 2 | 🟢 LOW | JT-SEC-019 tokens-tracker footer `wc-footer-version` 披露「hermes-manager · 1.11(20261015)」（该页本轮未改动） | OPEN（仅记录） |
 | 3 | 🟢 LOW | JT-SEC-020 文档面本地绝对路径披露（本批扩至 `documents/handoff/` 4 处 + `documents/reports/` 4 处 + `documents/reviews/` 3 处，无凭证/PII） | OPEN（仅记录，建议生成器脱敏） |
 | 4 | 🟢 LOW | JT-SEC-022 根级 `TODO-handoff.md` 公开 `~/CodeSpace/...` + harness 路径（无凭证/PII） | OPEN（仅记录，建议移入 `documents/handoff/` 或 gitignore） |
+
+**并发笔补记（`cc582d7 docs@report: JT-CL002 retro v1.0.3`）**：本评审扫描完成与 `git commit` 之间（11:29:01）由他线落仓，成为本评审笔的 parent 并随本次 `push` 一并上线（`8f9845b..76831e1`）。补扫结论：仅 1 文件 `documents/reports/JT-CL002-retro-v1.0-20261026.md`（+16/−4），内容为 `type: retro` → `type: report` 的选型口径注 + §七#1 状态改写 + 变更表一行；新增行 Pass 1/2/3 **全 0 命中**（无凭证、无 `/Users/` 绝对路径、无邮箱），判据面 / 依赖面 / 供应链面零变化 ⇒ **无新增发现、不改判分**。（同类并发落仓为已知模式：本笔已按「commit 前 re-check `git status`」口径事后复核，未回滚未改写历史。）
 
 计分：100 − 5（1× 🟡 结转）= **95 / 100 → A → PASS**；🟢 仅记录项沿用本项目口径（计入 `tracking` + `findings_open`，不计入 `findings_total`，故 `findings_total: 1` / `findings_open: 4`）。
 
