@@ -320,3 +320,11 @@ review_history:
     findings_total: 1
     findings_open: 4
     tracking: "JT-SEC-021 (🟡 MEDIUM, 仍 OPEN 无变化: javascript: FAQ 死链生成器侧根因未修; artifact 本轮 0 命中, 第 6 次 pages 重部署后未再生, 无 REGRESSION); JT-SEC-019 (🟢 LOW, 仍 OPEN: tokens-tracker footer 版本披露 1.11(20261015), 该页本轮未改动); JT-SEC-020 (🟢 LOW, 仍 OPEN: 文档面本地绝对路径披露, 本批扩至 handoff 4 / reports 4 / reviews 3 处, 无凭证无 PII); JT-SEC-022 (🟢 LOW, 仍 OPEN: 根级 TODO-handoff.md 公开 ~/CodeSpace 与 harness 路径); JT-CL002-RETRO-01~03 (🟡 CLOSED by ed06fa8: Y1 A5 改判据面 sha256 双等(本地实算 14f3bf1f../05e3b1a6.. 逐字节吻合, 响应头降级为取样快照), Y2 10:42:38 补注 clobber 改写至 11:11:57, Y3 用量四式实算全对 0.045971/0.066130/56.218%/39.0805%); GREEN: 57 tracked 文件 Pass1/2 凭证 0 命中, ed06fa8 新增行 Pass3 0 命中, 无代码变更(判据面 diff 0 行), referrer 6/6 + SRI 3/3 + noopener 6/6 无回归, live.js 纯数据(node --check OK, 0 外链 0 路径 0 PII), 无依赖变更, timestamp 双文件同值 1792938635"
+  - date: 2026-10-26
+    reviewer: Security Reviewer
+    review_level: L2
+    verdict: COND
+    score: 90
+    findings_total: 2
+    findings_open: 2
+    tracking: "JT-CL002 复盘【复审关账轮】(ed06fa8 v1.0.2 + cc582d7 v1.0.3): RETRO-01 (🟡 A5 把头指纹当长期判据) ✅ CLOSED (ed06fa8/cc582d7) — 判据改判据面内容 sha256 双等, 实测 05e3b1a6../14f3bf1f.. 两对全等, 头 6adec4e7-1dc7 / 26 Oct 03:11:35 GMT 与快照注记一致; RETRO-02 (🟡 §五 10:42:38 不可复核) ✅ CLOSED (ed06fa8/cc582d7) — 补注首次落盘时刻 + 11:11:57 clobber 改写, 台账 created_at=updated_at=11:11:57 clobbered=true 与 hm loop status 10-26 11:11 三方一致; RETRO-03 (🟡 用量口径无分母) ✅ CLOSED (ed06fa8/cc582d7) — 四式实算 0.045971 / 56.218% / 0.066130 / 39.0806% 全落允许误差; RETRO-04 (🟡 新 OPEN: §八 红线句 origin/main 仍 4a72b27 与 frontmatter origin_tip→8f9845b 及 §五 11:11:03 行自相矛盾, 该行自 c5abc51 未回改; 建议改述为本会话未改 origin/main 并注明他线推至 8f9845b); RETRO-05 (🟡 新 OPEN: §四 A2 预期 ①②③❌ 实测为 ①②③✅ (① 指向 documents/reviews/**), 断言『review 面无对应条目』被推翻; A1 多出 [2/6] ✅ (audit@review 8b154ff, 缺步骤 JSON 推断) 行与下一步 [1/6] 提示, 成因=评审件入库后按 commit 前缀推断; 建议 A2 断言只取 ④ 缺件集合); G7 (🟢 提示: 三会话合计 0.066130/89calls 为 11:05 retro.json 快照, state.db 现值 76 calls/0.067261 已因会话续作增长, 建议补现值指向); type 口径: retro→report 可接受 (取值集合不含 retro, 先例 JT-CL001-closure=report, README 无枚举, 全仓 py/sh/js 0 消费者); GREEN: 判据面 0 行改动, 无夹带, 新增行凭证/PII/绝对路径 0 命中, 依赖/外链无变更; 并发笔 76831e1 (nightly L2 PASS 95, 自限『未重审全文表述』) 互补不重复, 未回退; findings_open 仅计本轮新增未闭 2 条, JT-SEC-019/020/021/022 结转见前条; 报告 documents/reviews/JT-CL002-retro-audit-rereview-v1.0-20261026.md"

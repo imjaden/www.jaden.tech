@@ -870,6 +870,27 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-10-26 — JT-CL002 收尾复盘「复审关账」（Y1/Y2/Y3 关闭复核 + `type` 口径 + 新增 2 🟡）
+
+- **review者**: Security Reviewer（review profile，CLI 复审关账轮）
+- **范围**: `8f9845b..HEAD` 6 笔中的复审对象 2 笔 —— `ed06fa8`（v1.0.2，按 `8b154ff` 三条 🟡 校正，+14/−8）、`cc582d7`（v1.0.3，`type: retro`→`report` + §一 口径注 + §七#1 改写，+16/−4）；对照笔 = `8b154ff`（上一轮评审件）、`76831e1`（nightly L2，本轮期间并发落库）
+- **Tracking**: JT-CL002-RETRO-01 / -02 / -03（🟡 → **✅ CLOSED (ed06fa8/cc582d7)**，判据面逐条实测复现：A5 判据面 sha256 双等 `05e3b1a6…`/`14f3bf1f…` 两对全等且头 `6adec4e7-1dc7`/`26 Oct 03:11:35 GMT` 与快照注记一致；§五 `10:42:38` 补注「首次落盘 / 11:11:57 clobber 改写」与台账 `created_at=updated_at=11:11:57`+`clobbered=true`+`hm loop status 10-26 11:11` 三方一致；用量四式实算 0.045971 / 56.218% / 0.066130 / 39.0806%）；JT-CL002-RETRO-04（🟡 新 OPEN：§八 红线句「origin/main 仍 4a72b27」与 frontmatter `origin_tip→8f9845b` 及 §五 `11:11:03` 行自相矛盾，该行自 `c5abc51` 未回改）；JT-CL002-RETRO-05（🟡 新 OPEN：§四 A2 预期「①②③❌」实测为「①②③✅（① 指向 documents/reviews/** 评审件）」，断言子句「review 面无对应条目」被推翻；A1 多出 `[2/6] ✅（audit@review 8b154ff，⚠️ 缺步骤 JSON 推断）` 行与「下一步 [1/6]」提示，成因=评审件入库后工具按 commit 前缀推断）；G7（🟢 提示：三会话合计 $0.066130/89calls 为 11:05 `retro.json` 快照，state.db 现值 76 calls/$0.067261 已因会话续作增长，建议补现值指向）
+- **状态**: ⚠️ CONDITIONAL（90 / 100，Rating A−；🔴 0 / 🟡 2 新增（均 OPEN）/ 🟢 7）
+- **报告**: `documents/reviews/JT-CL002-retro-audit-rereview-v1.0-20261026.md`
+- **实现 prompt**: ⬜ 无需生成（无代码面；RETRO-04/05 各一行文档改法已写入报告 §4，归 ops v1.0.4）
+
+### 发现摘要
+
+**三条 🟡 全部真关闭，而非「删字免责」**：三条修复均落在**判据面**（内容 sha256、clobber 注记、显式分母），本轮全部重跑而非沿用 ops 自述 —— sha256 两对全等、`hm loop status`/台账/日志三方一致、四式用量落允许误差内。`type: retro`→`report` **可接受**：`grep -rh "^type:" documents/` 取值集合 `{audit,design,handoff,report,review,verify}` 不含 `retro`、同位先例 `JT-CL001-closure` 即 `report`、`documents/README.md` 无枚举定义、全仓 py/sh/js 搜 frontmatter/`type:` **0 消费者** ⇒ 纯人读字段，改值不触任何解析路径。
+
+**新增 2 🟡 全在「文档可复核性」，不动结论**：① `RETRO-04` §八 与同文三处冲突（`git rev-parse origin/main` = `8f9845b26a05…`），首版为真、`ed06fa8` 增补 §五推送行时未回改；② `RETRO-05` §四 复跑清单冻结于评审件入库前，`hm loop artifacts` 现为「①②③✅ / ④⚠️(2/6)」，A2 断言子句被工具输出直接推翻，A1 多一行 `[2/6]` 推断 —— 与上一轮 RETRO-02 同类（读者复跑即见矛盾），且 A2 是**断言**被推翻，比 RETRO-02 更硬。
+
+**安全面无新增**：`ed06fa8`+`cc582d7` 新增行 `grep -nE '/Users/|~/CodeSpace|\.hermes|sk-|ghp_|AKIA|AIza|xox…|BEGIN .*PRIVATE KEY|api[_-]?key|secret|password|<email>|手机号'` ⇒ **rc=1（0 命中）**；首轮关键词 `token` 的唯一命中为产品路径名 `tokens-tracker/data/live.js`（误报）。无代码面改动（`git diff --stat origin/main..HEAD -- . ':!documents' …` 空），无外链/依赖变更，未触及 `referrer`/SRI/`noopener`。
+
+**并发笔处理**：`76831e1`（nightly L2，11:31:03）已判 PASS 95 并记 RETRO-01~03 CLOSED，但其自述「仅复核三条判据面断言，未重审文档全文表述」——本轮补的正是该排除面，故 verdict 差异有据（判据面 PASS ≠ 全文表述 COND），未重复开条、未回退其 commit。另该 cron 于 11:32:14 又落 `f063240`（addendum，补扫 `cc582d7` +3/−1）并 **push**，故 `origin/main` 已从开工时 `8f9845b` 前移至 `f063240`（`rev-list --left-right --count` ⇒ `0 0`）；本笔按任务书**不 push**，落库后本地领先 1 笔。
+
+---
+
 ## 条目格式说明
 
 ```
