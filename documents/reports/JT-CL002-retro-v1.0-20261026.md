@@ -1,8 +1,8 @@
 ---
-title: JT-CL002 post-push 复验 · verify-only 收尾复盘 v1.0.2
+title: JT-CL002 post-push 复验 · verify-only 收尾复盘 v1.0.3
 topic: index-short-viewport-poetry-empty-state
-type: retro
-version: 1.0.2
+type: report
+version: 1.0.3
 date: 2026-10-26
 author: jaden-tech-ops
 closure: JT-CL002
@@ -33,6 +33,17 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 - 核查台账：`cache/closed-loop/20261026-jaden-tech-ops-JT-CL002-ops-check.json`（role=ops，
   usage 29 calls / $0.0201，gitignored）
 - 复盘台账：`cache/closed-loop/20261026-jaden-tech-ops-JT-CL002-retro.json`（本步落盘，gitignored）
+
+### 口径注：为什么 `type: report`（不新增 `retro`）
+
+- **本文件场景**：verify-only 编号的 `[6/6] 收尾复盘` —— 无 design、无 dev、无 impl-audit，本号只承载 `[4/6]` post-push 复验
+  与本收尾。交付内容与 `[4/6]` 的独立核查报告同类（结论 + 可复跑清单 + 时间线/用量 + 待处置），仅阶段号不同；
+  也不属 `documents/reviews/**`（评审面 → 裁定 + 计分）。
+- **仓内现状**：`type` 无权威枚举（`documents/README.md` 未定义），现存取值 `review / verify / design / report / handoff / audit`；
+  同位先例 `documents/reports/JT-CL001-closure-v1.0-20261025.md` 用 `report`。
+- **决定（用户 2026-10-26：「描述 retro 场景，建议选用已有 type」）**：**不新增 `retro` 首例**，改用既有 `report`；
+  「复盘 / 收尾」语义由 `title` + `closure` 承载，verify-only 定性由 `nature` + §二 承载。
+  若将来确需独立区分「收尾复盘」：先在 `documents/README.md` 立枚举，再一次性迁移全部同位文档，不在单文件里造首例。
 
 ## 二、为什么是 verify-only：`[1/6]`–`[3/6]` 与 `[5/6]` 不适用
 
@@ -119,7 +130,7 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 
 | # | 归属 | 项 | 状态 |
 |:--|:--|:--|:--|
-| 1 | 本仓 | draft `cache/draft/TODO-20261026.md:10` 状态仍写「停在 [5/6]·待评审+push」，实际已推送+复验 PASS | 待用户核实后 `hm loop verify JT-CL002`（AI 不自标完成） |
+| 1 | 本仓 | draft `cache/draft/TODO-20261026.md:10` 的正文仍留着写入时的「停在 [5/6]·待评审+push」措辞（历史陈述） | **已完成**：用户 11:11「已核实」→ `hm loop verify JT-CL002` 已 `[x]` 移入完成节并写 `完成: 2026-10-26`；`hm loop list` ⇒ `✅ integrated`。正文措辞保留不改（写明当时状态，非现状） |
 | 2 | 本仓 | `7f9779f` 之后无代码变更，故本文件为唯一新增交付物（另含未入库的复验报告，随本次提交入库） | 首版落仓笔 `c5abc51`（`documents/reports/` 两文件） |
 | 3 | 跨仓（hermes-manager） | stale-check 增「产物已落盘 ⇒ already-produced 只清锁不重派」第二证据源 | 已登记 `TODO-20261026.md`，本仓不代改 |
 | 4 | 跨仓（hermes-manager） | `hm 1acl status` 在 [6/6] 落账前按未勾选 draft 派生出「▶ 编号 JT-CL002・[5/6] 实现审计 🔄 进行中」（实际无进程在跑，编号已 `paused`）；本步落账后已变为「▶ 当前: 空闲」 | 观察项（展示口径依赖 draft 勾选状态），不改判据 |
@@ -138,3 +149,4 @@ retro_session: local-3213666f21d03714b98ee7546be059bfe20f139e17be185db17ee93652c
 | v1.0 | 2026-10-26 | 首版：verify-only 定性 + 不适用步骤理由（含 `4a72b27` 审计覆盖引证）+ 双派事故与两次会话 id/用量 + A1–A6 复跑清单 + 教训 + 分仓待处置 |
 | v1.0.1 | 2026-10-26 | 复跑清单校正（首版落仓后实测反查）：A2 改为 `hm loop artifacts` 实测形态（原写「报告面列出」与工具口径不符 —— 该命令只认 `documents/reviews/**` 与步骤 JSON evidence 指针）；A5 补 `tr -d '\r'` + `-A25`（线上 CSS 为 CRLF，且块内 `.now-card` 距断点 21 行，原 `-A3` 零命中）；§七#4 按落账后实测改写。文件名保留 `v1.0` 以稳住既有引用路径，版本以本 frontmatter 为准 |
 | v1.0.2 | 2026-10-26 | 按 review 评审件 `documents/reviews/JT-CL002-retro-audit-v1.0-20261026.md`（PASS with notes 85 / 0🔴3🟡）三条 🟡 对症校正：**Y1** A5 判据改为判据面内容 sha256 双等、响应头降级为取样快照（实测头已变 `6adec4e7-1dc7` / `26 Oct 03:11:35 GMT`）；**Y2** §五 `10:42:38` 一行注明该值 11:11:57 因 clobber 被改写（复跑 A1 见 11:11 非矛盾）；**Y3** 用量改显式分母（两轮 $0.045971 / 首派 56.22%；三会话 $0.066130 / 首派 39.08%）。另补 11:11:03 推送 + Pages 重部署事实（部署面有变、判据面未变）。结论不变：PASS |
+| v1.0.3 | 2026-10-26 | `type: retro` → `type: report`（用户指示「描述 retro 场景，建议选用已有 type」）：不新增枚举，场景与选用理由见 §一 口径注；「复盘/收尾」语义留在 `title` + `closure`。正文无实质变更 |
