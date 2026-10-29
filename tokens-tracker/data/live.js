@@ -1,15 +1,15 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 7,
+  "filtered": 21,
   "filtered_breakdown": {
-    "draft": 1,
-    "empty": 8,
-    "kept": 11,
-    "window": 6
+    "draft": 13,
+    "empty": 1,
+    "kept": 19,
+    "window": 8
   },
-  "generated_at": "2026-10-28T21:50:52+08:00",
+  "generated_at": "2026-10-29T22:56:39+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "7996c9fa",
+  "generator_version": "d5cbea11",
   "pages": [
     "index"
   ]
@@ -17,57 +17,21 @@ window.WEB_DATA_META = {
 window.LIVE_ITEMS = [
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL139",
+    "number": "DAILY-CHECKER-CL195",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "-",
-    "desc": "**DAILY-CHECKER-CL139 上游 rc 语义落地后的下游收口**"
+    "updated_at": "2026-10-29 21:59",
+    "desc": "**DAILY-CHECKER-CL195 draft 形态不匹配修复（`hm …"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL140",
+    "number": "DAILY-CHECKER-CL194",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "-",
-    "desc": "**DAILY-CHECKER-CL140 FlClash 阈值变更同步**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL183",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "-",
-    "desc": "**DAILY-CHECKER-CL183 hm project commit …"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL184",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "-",
-    "desc": "**DAILY-CHECKER-CL184 CL182 复审 3🟢 收口（观测项…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL185",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "-",
-    "desc": "**DAILY-CHECKER-CL185 通知文案带数据采集时刻（collec…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL186",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "-",
-    "desc": "**DAILY-CHECKER-CL186 MEMORY 上限配置异常静默假绿（…"
+    "updated_at": "2026-10-29 21:59",
+    "desc": "**DAILY-CHECKER-CL194 通知面同批判定（只读）+ sessi…"
   },
   {
     "project": "daily-checker",
@@ -75,21 +39,67 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "-",
+    "updated_at": "2026-10-29 21:59",
     "desc": "**CROSS-REPO daily-tracker dt today 五项全空…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL186",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-29 21:59",
+    "desc": "**DAILY-CHECKER-CL186 MEMORY 上限配置异常静默假绿（…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL185",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-29 21:59",
+    "desc": "**DAILY-CHECKER-CL185 通知文案带数据采集时刻（collec…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL184",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-29 21:59",
+    "desc": "**DAILY-CHECKER-CL184 CL182 复审 3🟢 收口（观测项…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL183",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-29 21:59",
+    "desc": "**DAILY-CHECKER-CL183 hm project commit …"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL140",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-29 21:59",
+    "desc": "**DAILY-CHECKER-CL140 FlClash 阈值变更同步**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL139",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-29 21:59",
+    "desc": "**DAILY-CHECKER-CL139 上游 rc 语义落地后的下游收口**"
   }
 ];
 window.BOARD_STATS = {
   "running": 6,
   "series": [
-    {
-      "api_calls": 225,
-      "cache_read_tokens": 12622720,
-      "date": "20261022",
-      "estimated_cost_usd": 0.1925,
-      "files": 35,
-      "total_tokens": 613864
-    },
     {
       "api_calls": 45,
       "cache_read_tokens": 483968,
@@ -131,12 +141,20 @@ window.BOARD_STATS = {
       "total_tokens": 14504738
     },
     {
-      "api_calls": 0,
-      "cache_read_tokens": 0,
+      "api_calls": 22746,
+      "cache_read_tokens": 4943788800,
       "date": "20261028",
-      "estimated_cost_usd": 0.0,
-      "files": 0,
-      "total_tokens": 0
+      "estimated_cost_usd": 36.8509,
+      "files": 21,
+      "total_tokens": 101503683
+    },
+    {
+      "api_calls": 17338,
+      "cache_read_tokens": 3660669184,
+      "date": "20261029",
+      "estimated_cost_usd": 27.1427,
+      "files": 21,
+      "total_tokens": 76188480
     }
   ]
 };
@@ -160,8 +178,13 @@ window.HIST_SESSION_CAP = {
     }
   ],
   "cap": 5,
-  "max_refs": 21,
+  "max_refs": 36,
   "over_cap_sessions": [
+    {
+      "refs": 36,
+      "session_id": "local-7285fb6485454e6425d7dde21d524f122fdb98774323ad43024b5855396c42a6",
+      "state": "over"
+    },
     {
       "refs": 21,
       "session_id": "20261017_230827_f01df4",
@@ -173,7 +196,7 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 14,
+      "refs": 13,
       "session_id": "20260929_212828_7c112c",
       "state": "over"
     },
@@ -210,11 +233,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 8,
       "session_id": "20261015_221750_2f42ad",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20260928_113939_746d8e",
       "state": "over"
     },
     {
@@ -276,6 +294,11 @@ window.HIST_SESSION_CAP = {
   "refs_scope": "registered",
   "rotate_sessions": [
     {
+      "refs": 36,
+      "session_id": "local-7285fb6485454e6425d7dde21d524f122fdb98774323ad43024b5855396c42a6",
+      "state": "over"
+    },
+    {
       "refs": 21,
       "session_id": "20261017_230827_f01df4",
       "state": "over"
@@ -286,7 +309,7 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 14,
+      "refs": 13,
       "session_id": "20260929_212828_7c112c",
       "state": "over"
     },
@@ -323,11 +346,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 8,
       "session_id": "20261015_221750_2f42ad",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20260928_113939_746d8e",
       "state": "over"
     },
     {
@@ -404,22 +422,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260929"
+    "start": "20260930"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 2611.6482657159077,
-      "first_pass_rate": 0.25,
-      "n": 136,
-      "round_mean": 2.713235294117647
+      "duration_mean": 2571.513972201209,
+      "first_pass_rate": 0.2536231884057971,
+      "n": 138,
+      "round_mean": 2.710144927536232
     },
     "recent": {
-      "duration_mean": 681.2957303126653,
-      "first_pass_rate": 0.16666666666666666,
+      "duration_mean": 3.255163788795471,
+      "first_pass_rate": 1.0,
       "n": 6,
-      "round_mean": 2.1666666666666665
+      "round_mean": 3.0
     }
   },
   "verdict": "部分改善（部分指标反向）"
