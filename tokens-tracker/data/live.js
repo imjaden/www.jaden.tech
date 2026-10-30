@@ -1,15 +1,15 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 21,
+  "filtered": 11,
   "filtered_breakdown": {
-    "draft": 13,
+    "draft": 8,
     "empty": 1,
-    "kept": 19,
-    "window": 8
+    "kept": 42,
+    "window": 3
   },
-  "generated_at": "2026-10-29T22:56:39+08:00",
+  "generated_at": "2026-10-30T22:59:11+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "d5cbea11",
+  "generator_version": "24494efa",
   "pages": [
     "index"
   ]
@@ -17,21 +17,57 @@ window.WEB_DATA_META = {
 window.LIVE_ITEMS = [
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL195",
+    "number": "DAILY-CHECKER-CL214",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-29 21:59",
-    "desc": "**DAILY-CHECKER-CL195 draft 形态不匹配修复（`hm …"
+    "updated_at": "2026-10-30 22:50",
+    "desc": "**DAILY-CHECKER-CL214 `documents/README.…"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL194",
+    "number": "DAILY-CHECKER-CL213",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-29 21:59",
-    "desc": "**DAILY-CHECKER-CL194 通知面同批判定（只读）+ sessi…"
+    "updated_at": "2026-10-30 22:50",
+    "desc": "**DAILY-CHECKER-CL213 draft 台账对账（CL202–C…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL212",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:50",
+    "desc": "**DAILY-CHECKER-CL212 汽油 92# 预算常量断言弱（SEC…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL211",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:50",
+    "desc": "**DAILY-CHECKER-CL211 `action_style` 门禁对…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL210",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:50",
+    "desc": "**DAILY-CHECKER-CL210 存量行号锚清零（tests/** +…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL205",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:50",
+    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
   },
   {
     "project": "daily-checker",
@@ -39,26 +75,8 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-29 21:59",
+    "updated_at": "2026-10-30 22:50",
     "desc": "**CROSS-REPO daily-tracker dt today 五项全空…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL186",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-29 21:59",
-    "desc": "**DAILY-CHECKER-CL186 MEMORY 上限配置异常静默假绿（…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL185",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-29 21:59",
-    "desc": "**DAILY-CHECKER-CL185 通知文案带数据采集时刻（collec…"
   },
   {
     "project": "daily-checker",
@@ -66,7 +84,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-29 21:59",
+    "updated_at": "2026-10-30 22:50",
     "desc": "**DAILY-CHECKER-CL184 CL182 复审 3🟢 收口（观测项…"
   },
   {
@@ -75,7 +93,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-29 21:59",
+    "updated_at": "2026-10-30 22:50",
     "desc": "**DAILY-CHECKER-CL183 hm project commit …"
   },
   {
@@ -84,7 +102,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-29 21:59",
+    "updated_at": "2026-10-30 22:50",
     "desc": "**DAILY-CHECKER-CL140 FlClash 阈值变更同步**"
   },
   {
@@ -93,21 +111,148 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-29 21:59",
+    "updated_at": "2026-10-30 22:50",
     "desc": "**DAILY-CHECKER-CL139 上游 rc 语义落地后的下游收口**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL91",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:50",
+    "desc": "**DAILY-CHECKER-CL91 基线单源门禁（评审提问 Q3，已裁：落…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "待开（SEC-571-16）",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:48",
+    "desc": "**SEC-571-16 deepseek 现役 key 轮换（先前「暂不操作」…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL160",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:48",
+    "desc": "**SM 回执处理：V6/V7 输出 + 「draft 有号但台账无 loop_…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL159",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:48",
+    "desc": "**CL021 的 ③ 补 `loop_id`（跨仓守护查出的一处假绿）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL155",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:48",
+    "desc": "**看板 live.js `script-miner/166` 双行（CL166…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL152",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:48",
+    "desc": "**`hm check` 侧补 §2-17 / §2-17a 页面文档与运行时通…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL151",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:48",
+    "desc": "**SM 侧 cli-args-reference v1.23 回流复核（在途等…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL150",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:48",
+    "desc": "**C3 首次真实触发核验（观察项，不立项）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL149",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:48",
+    "desc": "**§C3 实证段补「正例样本」+ §C2 一句口径**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL146",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-10-30 22:48",
+    "desc": "**TODO-handoff 第 65 行旧协议名残留致 test_cl010_…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL158",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-30",
+    "updated_at": "2026-10-30",
+    "desc": "**他仓编号字面不再充当本号锚点（跨仓假绿，②③ + report 绑定）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL157",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-30",
+    "updated_at": "2026-10-30",
+    "desc": "**③ 判据增 `loop_id` 锚点（裁定 C）+ 汇报面 strict 绑…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL156",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-30",
+    "updated_at": "2026-10-30",
+    "desc": "**§2-17a「服务状态运行时通道」条文补录（v1.24）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL154",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-30",
+    "updated_at": "2026-10-30",
+    "desc": "**`hm loop artifacts` ②③ 判据结构化（编号须为本号条目）…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL153",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-10-30",
+    "updated_at": "2026-10-30",
+    "desc": "**handoff 生成器两缺陷（frontmatter 三键丢失 / titl…"
   }
 ];
 window.BOARD_STATS = {
   "running": 6,
   "series": [
-    {
-      "api_calls": 45,
-      "cache_read_tokens": 483968,
-      "date": "20261023",
-      "estimated_cost_usd": 0.0125,
-      "files": 23,
-      "total_tokens": 51117
-    },
     {
       "api_calls": 0,
       "cache_read_tokens": 0,
@@ -121,7 +266,7 @@ window.BOARD_STATS = {
       "cache_read_tokens": 154015360,
       "date": "20261025",
       "estimated_cost_usd": 1.6512,
-      "files": 40,
+      "files": 45,
       "total_tokens": 39040039
     },
     {
@@ -155,6 +300,14 @@ window.BOARD_STATS = {
       "estimated_cost_usd": 27.1427,
       "files": 21,
       "total_tokens": 76188480
+    },
+    {
+      "api_calls": 2084,
+      "cache_read_tokens": 342913280,
+      "date": "20261030",
+      "estimated_cost_usd": 2.8126,
+      "files": 23,
+      "total_tokens": 35316344
     }
   ]
 };
@@ -196,11 +349,6 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 13,
-      "session_id": "20260929_212828_7c112c",
-      "state": "over"
-    },
-    {
       "refs": 12,
       "session_id": "20260930_175010_2a8ebc",
       "state": "over"
@@ -237,6 +385,11 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 7,
+      "session_id": "20260929_212828_7c112c",
+      "state": "over"
+    },
+    {
+      "refs": 7,
       "session_id": "20261009_121011_122598",
       "state": "over"
     },
@@ -248,11 +401,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 7,
       "session_id": "20261015_182157_f3cd84",
-      "state": "over"
-    },
-    {
-      "refs": 6,
-      "session_id": "20260821_185753_577706",
       "state": "over"
     },
     {
@@ -309,11 +457,6 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 13,
-      "session_id": "20260929_212828_7c112c",
-      "state": "over"
-    },
-    {
       "refs": 12,
       "session_id": "20260930_175010_2a8ebc",
       "state": "over"
@@ -350,6 +493,11 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 7,
+      "session_id": "20260929_212828_7c112c",
+      "state": "over"
+    },
+    {
+      "refs": 7,
       "session_id": "20261009_121011_122598",
       "state": "over"
     },
@@ -361,11 +509,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 7,
       "session_id": "20261015_182157_f3cd84",
-      "state": "over"
-    },
-    {
-      "refs": 6,
-      "session_id": "20260821_185753_577706",
       "state": "over"
     },
     {
@@ -422,22 +565,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20260930"
+    "start": "20261001"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 2571.513972201209,
-      "first_pass_rate": 0.2536231884057971,
-      "n": 138,
-      "round_mean": 2.710144927536232
+      "duration_mean": 2322.564203672272,
+      "first_pass_rate": 0.2805755395683453,
+      "n": 139,
+      "round_mean": 2.7050359712230216
     },
     "recent": {
-      "duration_mean": 3.255163788795471,
-      "first_pass_rate": 1.0,
-      "n": 6,
-      "round_mean": 3.0
+      "duration_mean": 636.114828995296,
+      "first_pass_rate": 0.7142857142857143,
+      "n": 7,
+      "round_mean": 3.142857142857143
     }
   },
   "verdict": "部分改善（部分指标反向）"
