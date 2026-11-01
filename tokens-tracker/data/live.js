@@ -1,15 +1,15 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 7,
+  "filtered": 8,
   "filtered_breakdown": {
     "draft": 4,
-    "empty": 1,
-    "kept": 46,
-    "window": 3
+    "empty": 15,
+    "kept": 35,
+    "window": 4
   },
-  "generated_at": "2026-10-31T22:55:30+08:00",
+  "generated_at": "2026-11-01T22:59:09+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "a60e69c3",
+  "generator_version": "5a4a4d62",
   "pages": [
     "index"
   ]
@@ -21,17 +21,17 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
+    "updated_at": "2026-11-01 17:11",
     "desc": "**SEC-571-16 deepseek 现役 key 轮换（先前「暂不操作」…"
   },
   {
     "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL166",
+    "number": "HERMES-MANAGER-CL168",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
-    "desc": "**治理规范条款级术语索引（A 案，已选型待实施）**"
+    "updated_at": "2026-11-01 17:11",
+    "desc": "**backfill-loopid 登记 tool registry（R1 ③ …"
   },
   {
     "project": "hermes-manager",
@@ -39,8 +39,8 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
-    "desc": "**解除 push 门禁（19 笔待推的阻塞项）**"
+    "updated_at": "2026-11-01 17:11",
+    "desc": "**解除 push 门禁（笔数不写死，取 `git rev-list --cou…"
   },
   {
     "project": "hermes-manager",
@@ -48,7 +48,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
+    "updated_at": "2026-11-01 17:11",
     "desc": "**②/③ 存量残余判定（评审 HM-572-3 残留）**"
   },
   {
@@ -57,17 +57,8 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
+    "updated_at": "2026-11-01 17:11",
     "desc": "**观察项：`hm loop report` 的 `loop_id`⇒stric…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL159",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
-    "desc": "**CL021 的 ③ 补 `loop_id`（跨仓守护查出的一处假绿）**"
   },
   {
     "project": "hermes-manager",
@@ -75,17 +66,8 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
+    "updated_at": "2026-11-01 17:11",
     "desc": "**看板 live.js `script-miner/166` 双行（CL166…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL152",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
-    "desc": "**`hm check` 侧补 §2-17 / §2-17a 页面文档与运行时通…"
   },
   {
     "project": "hermes-manager",
@@ -93,7 +75,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
+    "updated_at": "2026-11-01 17:11",
     "desc": "**SM 侧 cli-args-reference v1.23 回流复核（在途等…"
   },
   {
@@ -102,7 +84,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
+    "updated_at": "2026-11-01 17:11",
     "desc": "**C3 首次真实触发核验（观察项，不立项）**"
   },
   {
@@ -111,7 +93,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
+    "updated_at": "2026-11-01 17:11",
     "desc": "**§C3 实证段补「正例样本」+ §C2 一句口径**"
   },
   {
@@ -120,125 +102,98 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:36",
+    "updated_at": "2026-11-01 17:11",
     "desc": "**TODO-handoff 第 65 行旧协议名残留致 test_cl010_…"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL217",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL217 页面文档三件套（跨仓转交件，仅登记不…"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL181",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**TUI `/details` Unknown 根因更正 + 配置热加载事实（…"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL216",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL216 资讯统一推送（天气 / 黄金 / 9…"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL180",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**下一批四项（O-1 sweep 退出码 / 后缀归一 / 单文件 rel /…"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL214",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL214 `documents/README.…"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL179",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**第五批 review 链收口：用户裁定接收 95/A（不再追加复审）**"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL213",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL213 draft 台账对账（CL202–C…"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL178",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**v1.4 复审 HM-576-16 收口（候选 id 判据回前缀，与参与集同…"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL212",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL212 汽油 92# 预算常量断言弱（SEC…"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL177",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**v1.3 复审两条 blocking 收口（HM-576-14/15）+ G…"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL211",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL211 `action_style` 门禁对…"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL175",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**close 前置判据：四件套全绿 或 draft 显式记改判理由（HM-57…"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL210",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL210 存量行号锚清零（tests/** +…"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL174",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**review r5（HM-DESIGN-SEC-576，37 笔）CONDI…"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL205",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL170",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**review v1.0（HM-DESIGN-SEC-575，25 笔）CON…"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL189",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**CROSS-REPO daily-tracker dt today 五项全空…"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL167",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**review v1.0（HM-DESIGN-SEC-574，22 笔）CON…"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL184",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL184 CL182 复审 3🟢 收口（观测项…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL183",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL183 hm project commit …"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL140",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL140 FlClash 阈值变更同步**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL139",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
-    "desc": "**DAILY-CHECKER-CL139 上游 rc 语义落地后的下游收口**"
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL162",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-01",
+    "updated_at": "2026-11-01",
+    "desc": "**②/③ 存量残余逐号判定（评审 HM-572-3 残留）**"
   },
   {
     "project": "daily-checker",
@@ -246,39 +201,130 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-10-31 22:31",
+    "updated_at": "-",
     "desc": "**DAILY-CHECKER-CL91 基线单源门禁（评审提问 Q3，已裁：落…"
   },
   {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL164",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-31",
-    "updated_at": "2026-10-31",
-    "desc": "**re-review v1.1（HM-DESIGN-SEC-573）3🟡 收敛…"
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL139",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL139 上游 rc 语义落地后的下游收口**"
   },
   {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL163",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "2026-10-31",
-    "updated_at": "2026-10-31",
-    "desc": "**review v1.0（HM-DESIGN-SEC-572）CONDITIO…"
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL140",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL140 FlClash 阈值变更同步**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL183",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL183 hm project commit …"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL184",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL184 CL182 复审 3🟢 收口（观测项…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL189",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**CROSS-REPO daily-tracker dt today 五项全空…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL205",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL210",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL210 存量行号锚清零（tests/** +…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL211",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL211 `action_style` 门禁对…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL212",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL212 汽油 92# 预算常量断言弱（SEC…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL213",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL213 draft 台账对账（CL202–C…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL214",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL214 `documents/README.…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL216",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL216 资讯统一推送（天气 / 黄金 / 9…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL217",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL217 页面文档三件套（跨仓转交件，仅登记不…"
   }
 ];
 window.BOARD_STATS = {
   "running": 6,
   "series": [
-    {
-      "api_calls": 1474,
-      "cache_read_tokens": 154015360,
-      "date": "20261025",
-      "estimated_cost_usd": 1.6512,
-      "files": 45,
-      "total_tokens": 39040039
-    },
     {
       "api_calls": 5954,
       "cache_read_tokens": 1052935040,
@@ -326,6 +372,14 @@ window.BOARD_STATS = {
       "estimated_cost_usd": 0.9435,
       "files": 15,
       "total_tokens": 2305124
+    },
+    {
+      "api_calls": 0,
+      "cache_read_tokens": 0,
+      "date": "20261101",
+      "estimated_cost_usd": 0.0,
+      "files": 0,
+      "total_tokens": 0
     }
   ]
 };
@@ -583,22 +637,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20261002"
+    "start": "20261003"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 2273.562169358764,
-      "first_pass_rate": 0.29577464788732394,
-      "n": 142,
-      "round_mean": 2.711267605633803
+      "duration_mean": 2241.7070418726908,
+      "first_pass_rate": 0.3013698630136986,
+      "n": 146,
+      "round_mean": 2.7260273972602738
     },
     "recent": {
-      "duration_mean": 1640.356941461563,
+      "duration_mean": 2699.3707921504974,
       "first_pass_rate": 0.5,
-      "n": 6,
-      "round_mean": 3.5
+      "n": 2,
+      "round_mean": 4.0
     }
   },
   "verdict": "部分改善（部分指标反向）"
