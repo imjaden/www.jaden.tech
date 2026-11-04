@@ -48,6 +48,15 @@ risk: bmi-tracker.html 与 tokens-tracker/index.html 均是自动覆盖产物（
   而 `daily-tracker-archive-202607-202610.html:194` 是**顶层内联 `new Chart(...)`**，直接加 defer 会 ReferenceError → 图表空白（历史「有图框无线条」形态）。
   要铺到归档页/快照页，必须同批把顶层 `new Chart` 包进 `DOMContentLoaded`。
 
+- 📌 **CL058 实施回执（2026-11-04 · daily-tracker 仓）**：两处模板 head 的 chart.js 已加 `defer`，`integrity`/`crossorigin` 逐字保留；归档页顶层 `new Chart` 同批包进 `DOMContentLoaded`（新增 `_wrap_chart_domready()`），自测 26 断言 + 两条变异自证全绿。
+  回执件（他仓，只登记不复制）：`~/CodeSpace/daily-tracker/documents/handoff/20261104-daily-tracker-bmi-chart-defer-receipt.md`
+  **生效时点**：等下一次 Step 6 渲染（23:00 班次或当日字段齐全）写盘；本仓复验命令：
+  ```
+  grep -c 'crossorigin="anonymous" defer' bmi-tracker.html                              # 预期 1
+  grep -c "DOMContentLoaded', renderChart" daily-tracker-archive-202607-202610.html      # 预期 ≥1
+  ```
+  快照页（`snapshots/*.html`）本次明确不在范围，仍为同步加载且无 SRI。
+
 ## 2. tokens-tracker/ → hermes-manager 仓（web/1acl 壳）
 
 现状已符合 CL039/CL058「壳/数据分离」，剩余可做：
