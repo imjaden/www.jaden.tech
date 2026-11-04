@@ -346,6 +346,14 @@ def main() -> int:
     if not guard_ok(new_js, "common.js", SENSITIVE_CONTENT):
         return 2
 
+    # CL212: 壳内渲染块已外置成独立资产（上游 web/1acl/assets/shell-render.js, defer 加载）。
+    # 镜像必须同步拷贝，否则线上 <script src="assets/shell-render.js"> 404 ⇒ 页面不 init。
+    # 纯 JS 代码、无数据块 ⇒ 走内容档守卫（与 common.js 同级），不做 transform_js（无 retro 明细注入点）。
+    render_src = SRC_ASSETS / "shell-render.js"
+    new_render = render_src.read_text(encoding="utf-8") if render_src.exists() else None
+    if new_render is not None and not guard_ok(new_render, "shell-render.js", SENSITIVE_CONTENT):
+        return 2
+
     src_css = (SRC_ASSETS / "style.css").read_bytes()
     if not guard_ok(src_css.decode("utf-8", errors="replace"), "style.css", SENSITIVE_CONTENT):
         return 2
@@ -369,6 +377,13 @@ def main() -> int:
     if old_js != new_js:
         (DST_ASSETS / "common.js").write_text(new_js, encoding="utf-8")
         changed = True
+
+    if new_render is not None:
+        dst_render = DST_ASSETS / "shell-render.js"
+        old_render = dst_render.read_text(encoding="utf-8") if dst_render.exists() else None
+        if old_render != new_render:
+            dst_render.write_text(new_render, encoding="utf-8")
+            changed = True
 
     old_css = (DST_ASSETS / "style.css").read_bytes() if (DST_ASSETS / "style.css").exists() else None
     if old_css != src_css:
