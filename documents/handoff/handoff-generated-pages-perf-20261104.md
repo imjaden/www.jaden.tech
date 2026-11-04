@@ -13,6 +13,9 @@ risk: bmi-tracker.html 与 tokens-tracker/index.html 均是自动覆盖产物（
 
 # 交接：三个生成物页面的首屏优化（本仓实测基线）
 
+> 回执（bmi 侧 · daily-tracker 仓 `DAILY-TRACKER-CL058`）：`documents/handoff/receipt-generated-pages-perf-bmi-20261104.md`
+> 回执要点：基线复核一致；判据已按回执校正（见 §1）；`defer` 对「顶层内联 `new Chart`」的归档页/快照页不安全，范围待定 A/B/C。
+
 ## 实测体积（2026-11-04，gzip = 线上传输量）
 
 | 页面 / 资源 | raw | gzip | 备注 |
@@ -37,8 +40,13 @@ risk: bmi-tracker.html 与 tokens-tracker/index.html 均是自动覆盖产物（
   或改为「图表区进入视口再注入」（IntersectionObserver + 首次 `new Chart(...)` 前 await 加载）。
   保留 SRI `integrity` + `crossorigin`。
 - 表格 111 行全量渲染可接受，但 `▶ expand` 折叠态建议保持默认折叠（现状已折叠）。
-- 改完后回本仓：`python3 scripts/perf-check.py` 只覆盖 index/wechat，bmi 侧请在
-  daily-tracker 仓自测首屏请求数 ≤ 5。
+- 改完之后自测判据（2026-11-04 承接方回执校正，原「首屏请求数 ≤ 5」无区分力 —— 该页外部请求恒为 1）：
+  1. **首屏阻塞字节**：修复前 ≈ 10.9 KB gz（HTML 全量 + 69.8 KB gz 的 chart.js 同处阻塞路径）；目标 ≈ 4.5 KB gz（`id="wtChart"` 之前的 HTML，本仓实测前缀 13 776 B / 4 479 B gz）。
+  2. **head 内无阻塞脚本**：`<script src=…>` 不带 `defer`/`async`/`type="module"` 的命中数 = 0（本仓 `bmi-tracker.html` 现为 1）。
+
+- ⚠️ **`defer` 只能用在「`function renderChart()` + `DOMContentLoaded` 监听」形态的页面**。本仓 `bmi-tracker.html`（renderChart :410 / 监听 :441）安全；
+  而 `daily-tracker-archive-202607-202610.html:194` 是**顶层内联 `new Chart(...)`**，直接加 defer 会 ReferenceError → 图表空白（历史「有图框无线条」形态）。
+  要铺到归档页/快照页，必须同批把顶层 `new Chart` 包进 `DOMContentLoaded`。
 
 ## 2. tokens-tracker/ → hermes-manager 仓（web/1acl 壳）
 
