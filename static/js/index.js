@@ -77,7 +77,7 @@
      * Switch between logo and QR code on click
      */
     var originalLogoSrc = logo.src;
-    var qrCodeSrc = 'static/img/wechat-qr.png';
+    var qrCodeSrc = 'static/img/wechat-qr-400.png';
     var qrTimer = null;
 
     function toggleQRCode(event) {
