@@ -72,7 +72,7 @@ html, body {
     overflow: hidden;
 }
 body {
-    background: #fff;
+    background: #b0b2b8;
     background-size: cover;
     font: 16px/1.7 "Microsoft YaHei", arial, sans-serif;
     position: relative;
@@ -99,28 +99,61 @@ body {
     text-align: center;
 }
 
-/* Icon Links */
-.icon-links {
+/* 功能入口带（单一分组：归档站 + 追踪器 + 诗词） */
+.app-band {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    margin-top: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 22px;
     position: relative;
     z-index: 999;
 }
-.icon-links a {
-    display: inline-block;
-    transition: transform 0.2s ease;
+.app-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 11px 18px;
+    border-radius: 999px;
+    text-decoration: none;
+    color: #fff;
+    background: rgba(8, 12, 20, .42);
+    border: 1px solid rgba(255, 255, 255, .20);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .28);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: transform .18s ease, border-color .18s ease, background .18s ease;
 }
-.icon-links a:hover {
-    transform: scale(1.1);
+.app-pill:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, .50);
+    background: rgba(12, 18, 30, .55);
 }
-.icon-links img {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.app-pill:focus-visible {
+    outline: 2px solid #9ecbff;
+    outline-offset: 2px;
+}
+.app-pill:active {
+    transform: scale(.98);
+}
+.app-pill-img {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    flex: none;
+}
+.app-pill-emoji {
+    font-size: 20px;
+    line-height: 1;
+    flex: none;
+}
+.app-pill-name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    white-space: nowrap;
 }
 
 /* ===== Main page (index.html) ===== */
@@ -134,11 +167,11 @@ body {
 }
 #main {
     padding-top: 50px;
-    padding-bottom: 240px;
+    padding-bottom: 120px;
 }
 #main .container {
     text-align: center;
-    max-width: 700px;
+    max-width: 880px;
     margin: 0 auto;
     transform-origin: top;
 }
@@ -198,7 +231,7 @@ body {
     }
     #main {
         padding-top: 65px;
-        padding-bottom: 210px;
+        padding-bottom: 110px;
     }
 }
 @media (max-width: 1300px) {
@@ -227,142 +260,65 @@ body {
     }
 }
 
-/* ===== What I'm Doing Now (i18n cards) ===== */
-/* 底部栈: Now 区 + 诗词区统一锚在 footer 之上（绝对定位只留这一层, 避免 bottom 数值互相压叠） */
-.bottom-stack {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 80px;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 0 16px;
+/* ===== 诗词药丸：数据到达前的骨架（避免文字跳动） ===== */
+.app-pill-name.is-loading {
+    display: inline-block;
+    width: 5.4em;
+    height: 1em;
+    border-radius: 4px;
+    color: transparent;
+    overflow: hidden;
+    background: linear-gradient(90deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .44), rgba(255, 255, 255, .16));
+    background-size: 200% 100%;
+    animation: pill-shimmer 1.2s ease-in-out infinite;
 }
-.now-section {
-    text-align: center;
+@keyframes pill-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
-.now-title {
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: .28em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, .78);
-    text-shadow: 0 1px 4px rgba(0, 0, 0, .55);
-    /* margin: 0 0 14px; */
-}
-.now-cards {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-.now-card {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-width: 0;
-    max-width: none;
-    padding: 12px 22px;
-    border-radius: 999px;
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
-    color: #fff;
-    background: rgba(8, 12, 20, .42);
-    border: 1px solid rgba(255, 255, 255, .20);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, .28);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transition: transform .18s ease, border-color .18s ease, background .18s ease;
-}
-.now-card:hover {
-    transform: translateY(-1px);
-    border-color: rgba(255, 255, 255, .50);
-    background: rgba(12, 18, 30, .55);
-}
-.now-card:focus-visible {
-    outline: 2px solid #9ecbff;
-    outline-offset: 2px;
-}
-.now-card:active {
-    transform: scale(.98);
-}
-.now-emoji {
-    font-size: 26px;
-    line-height: 1;
-    flex: none;
-}
-.now-name {
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: .02em;
-}
-@media screen and (max-width: 767px) {
-    .now-card {
-        min-width: 0;
-        max-width: none;
-        width: auto;
-        flex: 0 0 auto;
-        padding: 10px 12px;
-        gap: 8px;
-    }
-    .now-emoji {
-        font-size: 20px;
-    }
-    .now-name {
-        font-size: 14px;
-    }
-    .now-cards {
-        gap: 8px;
-    }
-}
-
-/* ===== Today's Poetry（与 What I'm Doing Now 同结构同样式: 小字标题 + 药丸卡） ===== */
-.poetry-section {
-    text-align: center;
+@media (prefers-reduced-motion: reduce) {
+    .app-pill-name.is-loading { animation: none; }
 }
 
 @media screen and (max-width: 767px) {
-    .bottom-stack {
-        bottom: 72px;
-        gap: 14px;
+    .app-band {
+        gap: 8px;
+        margin-top: 16px;
+    }
+    .app-pill {
+        padding: 9px 13px;
+        gap: 7px;
+    }
+    .app-pill-emoji {
+        font-size: 17px;
+    }
+    .app-pill-name {
+        font-size: 13px;
     }
 }
 
-/* ===== 矮视口（横屏手机 / 矮窗口）：收敛纵向占用，避免底部栈压住归档图标行（review P-03） ===== */
+/* ===== 矮视口（横屏手机 / 矮窗口）：收敛纵向占用 ===== */
 @media screen and (max-height: 680px) {
     #main {
         padding-top: 16px;
-        padding-bottom: 150px;
+        padding-bottom: 90px;
     }
     #logo {
         height: 88px;
         width: 88px;
         margin-bottom: 0;
     }
-    .icon-links {
+    .app-band {
         margin-top: 10px;
     }
-    .icon-links img {
-        width: 40px;
-        height: 40px;
-    }
-    .bottom-stack {
-        bottom: 52px;
-        gap: 10px;
-    }
-    .now-card {
+    .app-pill {
         padding: 7px 12px;
-        gap: 8px;
     }
-    .now-emoji {
-        font-size: 18px;
+    .app-pill-emoji {
+        font-size: 16px;
     }
-    .now-name {
-        font-size: 14px;
+    .app-pill-name {
+        font-size: 13px;
     }
     .ft-copy {
         padding: 10px 0;

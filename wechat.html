@@ -13,7 +13,7 @@ WeChat Moment Background Generator
 <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="description" content="WeChat Moments background generator — 1080×1800px, 5 themes, PNG export.">
     <title>朋友圈背景图生成器</title>
-    <link rel="shortcut icon" href="static/img/favicon.png?t=1792938635">
+    <link rel="shortcut icon" href="static/img/favicon.png?t=1793789834">
     <script>
         /**
          * URL Parameter Utility
@@ -59,8 +59,7 @@ WeChat Moment Background Generator
         }
 
     </script>
-    <!-- 外部依赖 -->
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+    <!-- 外部依赖：html2canvas 改为点击「保存为图片」时懒加载（见 ensureHtml2Canvas），首屏不付 ~199 KB -->
     
     <style>
         /* 【1】全局重置与基础样式 */
@@ -697,6 +696,32 @@ WeChat Moment Background Generator
         })();
 
         /**
+         * html2canvas 懒加载：首屏不付 ~199 KB 的 CDN 代价，首次点击导出时才注入。
+         * 保留原 SRI + crossorigin，加载失败时允许下一次点击重试。
+         */
+        var __h2cPromise = null;
+        function ensureHtml2Canvas() {
+            if (window.html2canvas) return Promise.resolve(window.html2canvas);
+            if (__h2cPromise) return __h2cPromise;
+            __h2cPromise = new Promise(function (resolve, reject) {
+                var s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+                s.integrity = 'sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H';
+                s.crossOrigin = 'anonymous';
+                s.onload = function () {
+                    if (window.html2canvas) { resolve(window.html2canvas); }
+                    else { __h2cPromise = null; reject(new Error('html2canvas 未挂载到 window')); }
+                };
+                s.onerror = function () {
+                    __h2cPromise = null;
+                    reject(new Error('html2canvas CDN 加载失败'));
+                };
+                document.head.appendChild(s);
+            });
+            return __h2cPromise;
+        }
+
+        /**
          * 图片导出器
          * 负责将卡片导出为PNG图片
          */
@@ -740,8 +765,8 @@ WeChat Moment Background Generator
                 // 强制浏览器重绘
                 void card.offsetWidth;
                 
-                // 使用html2canvas导出图片
-                html2canvas(card, { 
+                // 使用html2canvas导出图片（懒加载：首次点击才拉 CDN）
+                ensureHtml2Canvas().then(() => html2canvas(card, { 
                     width: 1080, 
                     height: 1800, 
                     scale: 1, 
@@ -750,7 +775,7 @@ WeChat Moment Background Generator
                     logging: false,
                     allowTaint: false,
                     imageTimeout: 0
-                }).then(canvas => {
+                })).then(canvas => {
                     const link = document.createElement('a');
                     link.download = `wechat-${(new Date()).valueOf()}.png`;
                     link.href = canvas.toDataURL('image/png');
