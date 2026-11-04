@@ -33,8 +33,8 @@ BUDGETS = {
     "static/css/index.css": 3_500,
     "static/js/index.js": 2_500,
     "static/js/poetry-titles-202611.js": 1_500,   # any month, matched by glob below
-    "static/img/bear01-1600.avif": 60_000,
-    "static/img/bear01-800.avif": 25_000,
+    "static/img/bear01-1600.avif": 100_000,
+    "static/img/bear01-1600.webp": 85_000,
     "static/img/logo-260.webp": 15_000,
     "static/img/favicon-64.png": 15_000,
     "static/img/wechat-qr-400.png": 45_000,
@@ -91,6 +91,17 @@ def main():
     check(re.search(r'<img id="background"[^>]*width="\d+"[^>]*height="\d+"', index) is not None,
           "hero <img> carries intrinsic width/height", "avoids CLS")
     check("<picture>" in index, "hero served through <picture>", "avif → webp → jpg")
+
+    # 3b. layout contract (上一版布局：48px 归档图标行 + 底部药丸栈；5 个入口 / 2 个区块标题)
+    check('class="icon-links"' in index and 'class="bottom-stack"' in index,
+          "layout: icon-links row + bottom pill stack present")
+    check('class="app-band"' not in index, "layout: no app-band drift")
+    n_band = index.count('<a class="now-card"')
+    m_icons = re.search(r'<div class="icon-links">(.*?)</div>', index, re.S)
+    n_icon = m_icons.group(1).count("<a ") if m_icons else 0
+    check(n_band + n_icon == 5, "layout: exactly 5 entries", f"pills={n_band} + icon-links={n_icon}")
+    n_titles = index.count('class="now-title"')
+    check(n_titles == 2, "layout: 2 section titles", f"found {n_titles}")
 
     # 4. ?t= parity
     stamps = {}
