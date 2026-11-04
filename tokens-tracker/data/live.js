@@ -1,100 +1,100 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 16,
+  "filtered": 44,
   "filtered_breakdown": {
-    "draft": 6,
+    "draft": 34,
     "empty": 1,
-    "kept": 44,
+    "kept": 32,
     "window": 10
   },
-  "generated_at": "2026-11-03T22:57:39+08:00",
+  "generated_at": "2026-11-04T22:59:08+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "fcba7d35",
+  "generator_version": "6946bfbe",
   "pages": [
     "index"
   ]
 };
 window.LIVE_ITEMS = [
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL229",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-03 17:08",
-    "desc": "**DAILY-CHECKER-CL229 CL228 评审残余 3🟢 登记**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL228",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-03 17:08",
-    "desc": "**DAILY-CHECKER-CL228 复审 🟢 文档口径打包**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL227",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-03 17:08",
-    "desc": "**DAILY-CHECKER-CL227 SEC-205-2 DNS 报表分母…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL226",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-03 17:08",
-    "desc": "**DAILY-CHECKER-CL226 SEC-205-3 采样接线零判据*…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL224",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-03 17:08",
-    "desc": "**DAILY-CHECKER-CL224 SEC-205-1 DNS 采样点位…"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL205",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-03 17:08",
-    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL189",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-03 17:08",
-    "desc": "**DAILY-CHECKER-CL189 跨仓 daily-tracker `…"
-  },
-  {
-    "project": "llm-radar",
-    "number": "LLM-RADAR-CL007",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-03 13:35",
-    "desc": "CLI 中断收敛（KeyboardInterrupt 守卫）"
-  },
-  {
     "project": "hermes-manager",
     "number": "待开（SEC-571-16）",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-03 10:55",
+    "updated_at": "2026-11-04 22:27",
     "desc": "**SEC-571-16 deepseek 现役 key 轮换（先前「暂不操作」…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL215",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-11-04",
+    "updated_at": "2026-11-04 22:27",
+    "desc": "**交接文档同步 2026-11-04 收口（TODO-handoff.md 第…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL214",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-04 22:27",
+    "desc": "**CL212 复审 4 条 notes 收口（壳空白板兜底 / 生成器正则 /…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL213",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-11-04",
+    "updated_at": "2026-11-04 22:27",
+    "desc": "**AGENTS.md 增「禁贴 diff 明细」硬约束**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL212",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-11-04",
+    "updated_at": "2026-11-04 22:27",
+    "desc": "**tokens-tracker 壳首屏瘦身（接 www 转交件 §2）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL211",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-11-04",
+    "updated_at": "2026-11-04 22:27",
+    "desc": "**handoff 生成失败会删掉旧 doc（unlink 的破坏面，改原子替换…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL210",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-11-04",
+    "updated_at": "2026-11-04 22:27",
+    "desc": "**`hm handoff generate` 丢弃 handle_handof…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL209",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-11-04",
+    "updated_at": "2026-11-04 22:27",
+    "desc": "**handoff 的 session 定位用精确 title，标题漂移即静默失…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL209",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "2026-11-04",
+    "updated_at": "2026-11-04 22:27",
+    "desc": "**`hm sessions sweep` 人读模式丢弃失败原因（\"see 上方…"
   },
   {
     "project": "hermes-manager",
@@ -102,7 +102,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-03 10:55",
+    "updated_at": "2026-11-04 22:27",
     "desc": "**backfill-loopid 登记 tool registry（R1 ③ …"
   },
   {
@@ -111,7 +111,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-03 10:55",
+    "updated_at": "2026-11-04 22:27",
     "desc": "**观察项：`hm loop report` 的 `loop_id`⇒stric…"
   },
   {
@@ -120,7 +120,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-03 10:55",
+    "updated_at": "2026-11-04 22:27",
     "desc": "**C3 首次真实触发核验（观察项，不立项）**"
   },
   {
@@ -129,7 +129,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-03 10:55",
+    "updated_at": "2026-11-04 22:27",
     "desc": "**§C3 实证段补「正例样本」+ §C2 一句口径**"
   },
   {
@@ -138,21 +138,85 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-03 10:55",
+    "updated_at": "2026-11-04 22:27",
     "desc": "**TODO-handoff 第 65 行旧协议名残留致 test_cl010_…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL229",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-04 19:09",
+    "desc": "**DAILY-CHECKER-CL229 CL228 评审残余 3🟢 登记**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL228",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-04 19:09",
+    "desc": "**DAILY-CHECKER-CL228 复审 🟢 文档口径打包**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL227",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-04 19:09",
+    "desc": "**DAILY-CHECKER-CL227 SEC-205-2 DNS 报表分母…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL226",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-04 19:09",
+    "desc": "**DAILY-CHECKER-CL226 SEC-205-3 采样接线零判据*…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL224",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-04 19:09",
+    "desc": "**DAILY-CHECKER-CL224 SEC-205-1 DNS 采样点位…"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL205",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-04 19:09",
+    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL189",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-04 19:09",
+    "desc": "**DAILY-CHECKER-CL189 跨仓 daily-tracker `…"
+  },
+  {
+    "project": "llm-radar",
+    "number": "LLM-RADAR-CL007",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-04 15:30",
+    "desc": "CLI 中断收敛（KeyboardInterrupt 守卫）"
   }
 ];
 window.BOARD_STATS = {
   "running": 0,
   "series": [
-    {
-      "api_calls": 22746,
-      "cache_read_tokens": 4943788800,
-      "date": "20261028",
-      "estimated_cost_usd": 36.8509,
-      "files": 21,
-      "total_tokens": 101503683
-    },
     {
       "api_calls": 17338,
       "cache_read_tokens": 3660669184,
@@ -197,6 +261,14 @@ window.BOARD_STATS = {
       "api_calls": 0,
       "cache_read_tokens": 0,
       "date": "20261103",
+      "estimated_cost_usd": 0.0,
+      "files": 0,
+      "total_tokens": 0
+    },
+    {
+      "api_calls": 0,
+      "cache_read_tokens": 0,
+      "date": "20261104",
       "estimated_cost_usd": 0.0,
       "files": 0,
       "total_tokens": 0
@@ -457,7 +529,7 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20261005"
+    "start": "20261006"
   }
 };
 window.HIST_EXTRA = {
