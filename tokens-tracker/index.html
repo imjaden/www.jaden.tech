@@ -143,7 +143,26 @@
   "use strict";
   function init() { window.ONEACL_RENDER.init(); }
   function dataPlaceholder() {
-    if (window.ONEACL_RENDER) { window.ONEACL_RENDER.dataPlaceholder(); }
+    if (window.ONEACL_RENDER) { window.ONEACL_RENDER.dataPlaceholder(); return; }
+    /* CL214 / SEC-212-02: 渲染器未加载（assets/shell-render.js 404 或解析失败）⇒
+       直接写静态占位; 否则 init 与 5s 兜底双双 no-op, 页面留白且零提示。 */
+    var body = document.getElementById("board-body");
+    if (body) {
+      body.textContent = "";
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      td.className = "empty-row";
+      td.textContent = "页面脚本加载失败（assets/shell-render.js）; 请刷新或稍后重试";
+      tr.appendChild(td);
+      body.appendChild(tr);
+    }
+    var notice = document.getElementById("stats-notice");
+    if (notice) {
+      notice.textContent = "页面脚本加载失败（assets/shell-render.js）; 刷新重试";
+      notice.style.display = "";
+    }
+    var cnt = document.getElementById("meta-count");
+    if (cnt) { cnt.textContent = "脚本加载失败"; }
   }
   function initOnce() {
     if (window.__PAGE_INITED) { return; }

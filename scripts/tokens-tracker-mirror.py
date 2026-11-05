@@ -350,9 +350,17 @@ def main() -> int:
     # 镜像必须同步拷贝，否则线上 <script src="assets/shell-render.js"> 404 ⇒ 页面不 init。
     # 纯 JS 代码、无数据块 ⇒ 走内容档守卫（与 common.js 同级），不做 transform_js（无 retro 明细注入点）。
     render_src = SRC_ASSETS / "shell-render.js"
-    new_render = render_src.read_text(encoding="utf-8") if render_src.exists() else None
-    if new_render is not None and not guard_ok(new_render, "shell-render.js", SENSITIVE_CONTENT):
-        return 2
+    if render_src.exists():
+        new_render = render_src.read_text(encoding="utf-8")
+        if not guard_ok(new_render, "shell-render.js", SENSITIVE_CONTENT):
+            return 2
+    else:
+        # CL214 / SEC-212-04: 壳引用该资产而上游缺失 ⇒ 静默跳过会让线上 404（页面白板）。
+        # 只有「壳自己没引用」时才允许跳过（兼容旧版壳），否则 fail-closed。
+        if "assets/shell-render.js" in new_html:
+            print("⚠️ tokens-tracker mirror: 壳引用 assets/shell-render.js 但上游缺失, aborting")
+            return 2
+        new_render = None
 
     src_css = (SRC_ASSETS / "style.css").read_bytes()
     if not guard_ok(src_css.decode("utf-8", errors="replace"), "style.css", SENSITIVE_CONTENT):
