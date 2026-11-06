@@ -1,27 +1,54 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 19,
+  "filtered": 23,
   "filtered_breakdown": {
-    "draft": 8,
+    "draft": 13,
     "empty": 8,
-    "kept": 15,
-    "window": 11
+    "kept": 55,
+    "window": 10
   },
-  "generated_at": "2026-11-05T23:03:47+08:00",
+  "generated_at": "2026-11-06T22:59:41+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "4b243656",
+  "generator_version": "47a7621f",
   "pages": [
     "index"
   ]
 };
 window.LIVE_ITEMS = [
   {
+    "project": "llm-radar",
+    "number": "LLM-RADAR-CL010",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-06 22:02",
+    "desc": "documents/README.md 索引漂移（hm check readme…"
+  },
+  {
+    "project": "llm-radar",
+    "number": "LLM-RADAR-CL008",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-06 22:02",
+    "desc": "X 登录巡检落 cron（llm-radar-twitter-login-loc…"
+  },
+  {
+    "project": "llm-radar",
+    "number": "LLM-RADAR-CL007",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-06 22:02",
+    "desc": "CLI 中断收敛（KeyboardInterrupt 守卫）"
+  },
+  {
     "project": "hermes-manager",
     "number": "待开（r1 非阻断项）",
     "status": "pending",
     "progress": "-",
     "created_at": "2026-11-05",
-    "updated_at": "2026-11-05 22:38",
+    "updated_at": "2026-11-06 21:56",
     "desc": "**评审 r1 的非阻断项（接受延后，登记备查）**"
   },
   {
@@ -30,8 +57,53 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-05 22:38",
-    "desc": "**SEC-571-16 deepseek 现役 key 轮换（先前「暂不操作」…"
+    "updated_at": "2026-11-06 21:56",
+    "desc": "**SEC-571-16：深探 key 轮换**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "待开（G-3）",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-06 21:56",
+    "desc": "**G-3：SEC-595 黄项判据面收紧**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "待开（G-2）",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-06 21:56",
+    "desc": "**G-2：评审报告落点统一**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "待开（G-1）",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-06 21:56",
+    "desc": "**G-1：`fix@` 类型入 handbook §5 类型枚举**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "待开（AC-4）",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-06 21:56",
+    "desc": "**AC-4：镜像守卫跨仓执行**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "待开（594-7a）",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-06 21:56",
+    "desc": "**594-7a：测试侧双实例收口**"
   },
   {
     "project": "hermes-manager",
@@ -39,7 +111,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "2026-11-04",
-    "updated_at": "2026-11-05 22:38",
+    "updated_at": "2026-11-06 21:56",
     "desc": "**`hm sessions sweep` 人读模式丢弃失败原因（\"see 上方…"
   },
   {
@@ -48,7 +120,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-05 22:38",
+    "updated_at": "2026-11-06 21:56",
     "desc": "**观察项：`hm loop report` 的 `loop_id`⇒stric…"
   },
   {
@@ -57,7 +129,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-05 22:38",
+    "updated_at": "2026-11-06 21:56",
     "desc": "**C3 首次真实触发核验（观察项，不立项）**"
   },
   {
@@ -66,8 +138,269 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-05 22:38",
+    "updated_at": "2026-11-06 21:56",
     "desc": "**§C3 实证段补「正例样本」+ §C2 一句口径**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL255",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**评审黄项钉子批（SEC-594-1/2/4/5/6）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL254",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**CL247-CL253 未推 7 笔 SEC-593 修复批复审（PASS …"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL253",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**推送断言判据面修正（SEC-593-2/593-3）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL252",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**复评阻断批修复（SEC-593-1/4/5/6/7/8）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL251",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**CL247-CL250 治理专批 4 笔 Design Document R…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL250",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**文档推送状态断言对账清零（SEC-592-8）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL249",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**memory 档位单点化（SEC-592-9）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL248",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**web 模块单一加载器（SEC-592-12）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL247",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**tc16 宽屏判据补盲（SEC-592-7）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL246",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**复评黄项收口（SEC-592-13/15/16/17）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL245",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**CL226–CL244 未推 20 笔批次 SEC-592 修复批复审（PA…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL244",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**review 阻断批修复（SEC-592-1/2 + 5 黄）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL243",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**CL226–CL242 未推 18 笔批次 Design Document …"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL242",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**memory 健康度与 daily-checker 对齐（id/label/…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL241",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**curated skill 镜像漂移收口（page-docs-triplet…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL238",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**TC-b2 治理钉对齐异常优先排序**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL237",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**页容器 gutter 统一 16px + 治理钉同步**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL236",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**LIVE_ANOMALY 行位修正（保住 LIVE_ITEMS→BOARD_…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL235",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**阈值一致性守卫（防两处漂移）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL234",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**Session 页：Usage 降序 + 用量档位 + 优化指令复制（需求 …"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL233",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**Task 页异常优先视图（圆点 + 行底色 + 计数条，不加列）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL232",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**超时口径收窄：改按「最近一次步骤推进」判定**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL231",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**Dashboard 使用率四卡 + 修复指令一键复制（W3 / D5-A 配…"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL230",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**CL230 回执的 AC-4 登记进 TODO-handoff「待执行」**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL230",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**1acl 壳首屏瘦身转交件：核验 + 验收回执（AC-1..AC-6）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL229",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**Dashboard 任务表数据域（W2 数据层）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL228",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**阈值单点 + 任务异常判定层（D3-A/D4-A/D5-A/D6-A）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL227",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**Web 壳宽统一：nav 与内容区左右边界对齐（W1 / D1-A）**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL226",
+    "status": "done",
+    "progress": "[6/6]",
+    "created_at": "2026-11-06",
+    "updated_at": "2026-11-06",
+    "desc": "**CL221 测试跨日假红修复（日期硬编码）**"
   },
   {
     "project": "daily-checker",
@@ -134,16 +467,8 @@ window.LIVE_ITEMS = [
   }
 ];
 window.BOARD_STATS = {
-  "running": 1,
+  "running": 0,
   "series": [
-    {
-      "api_calls": 2084,
-      "cache_read_tokens": 342913280,
-      "date": "20261030",
-      "estimated_cost_usd": 2.8126,
-      "files": 23,
-      "total_tokens": 35316344
-    },
     {
       "api_calls": 719,
       "cache_read_tokens": 112401536,
@@ -189,10 +514,28 @@ window.BOARD_STATS = {
       "cache_read_tokens": 0,
       "date": "20261105",
       "estimated_cost_usd": 0.0,
-      "files": 1,
+      "files": 3,
+      "total_tokens": 0
+    },
+    {
+      "api_calls": 0,
+      "cache_read_tokens": 0,
+      "date": "20261106",
+      "estimated_cost_usd": 0.0,
+      "files": 6,
       "total_tokens": 0
     }
   ]
+};
+window.LIVE_ANOMALY = {
+  "anomaly_total": 30,
+  "doc_missing": 30,
+  "idle": 0,
+  "ledger_total": 63,
+  "skipped": 10,
+  "timeout": 0,
+  "total": 53,
+  "unknown": 0
 };
 window.HIST_TASKS = [];
 window.HIST_SESSION_CAP = {
@@ -428,22 +771,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20261007"
+    "start": "20261008"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 2300.652764639361,
-      "first_pass_rate": 0.296551724137931,
-      "n": 145,
-      "round_mean": 2.7517241379310344
+      "duration_mean": 2339.263919059659,
+      "first_pass_rate": 0.2887323943661972,
+      "n": 142,
+      "round_mean": 2.73943661971831
     },
     "recent": {
-      "duration_mean": 0.0,
+      "duration_mean": 19013.094487667084,
       "first_pass_rate": 0.0,
-      "n": 1,
-      "round_mean": 0.0
+      "n": 3,
+      "round_mean": 2.0
     }
   },
   "verdict": "部分改善（部分指标反向）"

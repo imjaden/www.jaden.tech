@@ -154,6 +154,10 @@
         desc_from_draft: (!descText && !!draftFirst),
         created_at: (l && l.created_at) || (h && h.created_at) || "-",
         updated_at: (l && l.updated_at) || (h && h.updated_at) || "-",
+        /* CL233: 异常判定随运行态行走（历史态无判定 ⇒ 空, 前端不画点） */
+        anomaly_level: (l && l.anomaly_level) || null,
+        anomaly_signals: (l && l.anomaly_signals) || [],
+        anomaly_cmd: (l && l.anomaly_cmd) || "",
         tokens: h ? ((h.input_tokens || 0) + (h.output_tokens || 0) +
                      (h.reasoning_tokens || 0)) : null,
         cache_read: h ? (h.cache_read_tokens || 0) : null,
@@ -252,7 +256,57 @@
     }
     return r * sortState.dir;
   }
-  function orderedRows(list) { return list.slice().sort(compare); }
+  function orderedRows(list) {
+    var out = list.slice().sort(compare);
+    /* CL233: 默认视图（updated_at 倒序）下异常优先置顶; 用户点列头显式排序时以该排序为准。
+       同档内保留 compare 的顺序（Array.sort 稳定）。 */
+    if (sortState.key === "updated_at" && sortState.dir === -1) {
+      out.sort(function (a, b) { return anomalyRank(a) - anomalyRank(b); });
+    }
+    return out;
+  }
+
+  function anomalyRank(r) {
+    var lv = r && r.anomaly_level;
+    if (lv === "critical") { return 0; }
+    if (lv === "warn") { return 1; }
+    if (lv === "unknown") { return 2; }
+    return 3;
+  }
+
+  function anomalyTitle(r) {
+    var sig = (r && r.anomaly_signals) || [];
+    var map = { "timeout": "实施停滞超阈值", "doc-missing": "复盘文档缺失",
+                "idle": "长时间搁置", "timeout-unknown": "无步骤时间戳（不可判定）" };
+    var txt = sig.map(function (s) { return map[s] || s; }).join(" · ");
+    return (txt || "无异常") + (r && r.anomaly_cmd ? "\n修复: " + r.anomaly_cmd : "");
+  }
+
+  function renderAnomBar() {
+    var host = document.getElementById("anom-bar");
+    if (!host) { return; }
+    host.textContent = "";
+    var c = window.LIVE_ANOMALY || {};
+    if (!Object.keys(c).length) { return; }
+    var defs = [
+      ["timeout", "实施超时", "critical"],
+      ["doc_missing", "文档不全", "critical"],
+      ["idle", "长时间搁置", "warn"],
+      ["unknown", "不可判定", "unknown"]
+    ];
+    defs.forEach(function (d) {
+      var n = Number(c[d[0]] || 0);
+      if (!n) { return; }
+      var chip = HB.el("span", "anom-chip lv-" + d[2], d[1] + " " + n);
+      chip.title = d[1] + "：" + n + " 条（阈值见 scripts/web-console/thresholds.yaml）";
+      host.appendChild(chip);
+    });
+    var total = Number(c.total || 0);
+    /* SEC-592-10: 异常总数由 Python 侧给（counts.anomaly_total）, 壳内不自求和 */
+    var sum = Number(c.anomaly_total || 0);
+    host.appendChild(HB.el("span", "anom-chip lv-info",
+      "异常 " + sum + " / 台账 " + total));
+  }
 
   /* ── 筛选状态机（第 9 条 / M2: 单值态, 后动覆盖, 再点当前项 = 清除）── */
   function pickProject(p) {
@@ -462,8 +516,17 @@
 
   function rowTr(r, splitMode) {
     var tr = HB.el("tr");
+    if (r.anomaly_level === "critical") { tr.className = "anom-critical"; }
+    else if (r.anomaly_level === "warn") { tr.className = "anom-warn"; }
     if (splitMode && split && split.number === r.number) { tr.className = "selected"; }
     var tdN = HB.el("td", colClass("number"));
+    /* CL233: 异常圆点（不加列; critical 红 / warn 橙 / unknown 灰; ok 不画点） */
+    var lv = r.anomaly_level;
+    if (lv === "critical" || lv === "warn" || lv === "unknown") {
+      var dot = HB.el("span", "anom-dot lv-" + lv);
+      dot.title = anomalyTitle(r);
+      tdN.appendChild(dot);
+    }
     var caret = HB.el("span", "expander", expanded[r.number] ? "▾" : "▸");
     caret.title = "展开/收起 6 阶段明细";
     caret.addEventListener("click", function () { toggleExpand(r.number); });
@@ -541,6 +604,7 @@
     document.getElementById("main-table").classList.toggle("mode-split", splitMode);
     document.querySelector(".board-main").classList.toggle("split-on", splitMode);
     applyLayout();                           /* C4d: 分栏列宽随分栏态/比例同步 */
+    renderAnomBar();                         /* CL233: 异常计数条（无数据则空） */
 
     var list = orderedRows(filtered());
     var pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));

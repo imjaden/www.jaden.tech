@@ -37,7 +37,24 @@
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font-sans); background: var(--surface-950); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
-.board-wrap { max-width: 1320px; margin: 0 auto; padding: 16px; }
+.board-wrap { max-width: 1400px; margin: 0 auto; padding: 16px 16px; }
+
+/* CL233: 任务页异常优先视图（圆点 + 行底色 + 顶部计数条） */
+.anom-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; }
+.anom-bar:empty { display: none; }
+.anom-chip { font-size: 0.72rem; padding: 2px 8px; border-radius: 999px;
+  border: 1px solid #374151; color: #9ca3af; background: #15151f; white-space: nowrap; }
+.anom-chip.lv-critical { border-color: #ef4444; color: #fca5a5; }
+.anom-chip.lv-warn { border-color: #f59e0b; color: #fcd34d; }
+.anom-chip.lv-unknown { border-color: #6b7280; color: #9ca3af; }
+.anom-chip.lv-info { border-color: #374151; color: #6b7280; }
+.anom-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  margin-right: 5px; vertical-align: middle; flex: 0 0 auto; }
+.anom-dot.lv-critical { background: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, .18); }
+.anom-dot.lv-warn { background: #f59e0b; }
+.anom-dot.lv-unknown { background: #6b7280; }
+tr.anom-critical > td { background: rgba(239, 68, 68, .055); }
+tr.anom-warn > td { background: rgba(245, 158, 11, .045); }
 
 /* CL088 C4a: 页内 Tab 行（页面 Tab + 右侧 ⇔/⚙ 控件）—— 原 header.topbar 职责拆分到此 */
 .tabs-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
