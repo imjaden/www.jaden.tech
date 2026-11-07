@@ -131,13 +131,15 @@ tr.anom-warn > td { background: rgba(245, 158, 11, .045); }
   background: var(--surface-900); font-size: 0.74rem; }
 .col-item { display: inline-flex; align-items: center; gap: 5px; color: var(--text-dim); cursor: pointer; }
 .col-item input { accent-color: var(--cobalt-500); }
-.data-table th.col-project, .data-table td.col-project { min-width: 110px; color: var(--text-dim); font-size: 0.74rem; }
+.data-table th.col-project, .data-table td.col-project { min-width: 96px; color: var(--text-dim); font-size: 0.74rem; }
 
 /* 标准表格（html help table 模板样式） */
 .table-card { border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-900); }
 .table-wrap { overflow-x: auto; }
 table.data-table { width: 100%; border-collapse: collapse; }
 .data-table th {
+  overflow: hidden;            /* CL272 / SEC-598-2: 列窄时表头文字必须裁切, 不得压到相邻列 */
+  text-overflow: ellipsis;
   background: var(--surface-900); border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left;
   font-size: 0.7rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase;
   letter-spacing: 0.05em; white-space: nowrap; user-select: none;
@@ -153,13 +155,26 @@ table.data-table { width: 100%; border-collapse: collapse; }
 .data-table tbody tr:hover { background: rgba(79,70,229,0.08); }
 .data-table tbody tr.selected { background: rgba(79,70,229,0.15); }
 /* 编号列: 加宽 ≈1.5×, 完整展示不截断 */
-.data-table th.col-number { min-width: 240px; }
-.data-table td.col-number { min-width: 240px; max-width: none; overflow: visible; }
+.data-table td.col-number { max-width: none; overflow: visible; }
 /* 进度列 + 分栏列宽稳定: 两模式共用同一最小宽, 进入/退出分栏不跳变 */
-.data-table th.col-progress, .data-table td.col-progress { min-width: 190px; }
+/* CL262/CL270/CL271: 六列固定占比（编号15 / 进度15 / 描述30 / 耗时10 / Tokens10 / 更新时间15），
+   此处百分比为**无 JS 时的退路**；真实宽度由 tpl 的 `applyColWidths()` 按
+   `(table.clientWidth - 96px)` 计算 px 落盘 —— Chromium 在 table-layout:fixed 下会丢弃
+   「百分比 − 像素」混合单位 calc（CL271 评审实测六列被回落成等宽）。隐藏列不占宽 */
+table.data-table { table-layout: fixed; }
+.data-table .col-project { width: 96px; min-width: 0; }
+.data-table th.col-number, .data-table td.col-number { width: 15.79%; min-width: 0; }
+.data-table th.col-progress, .data-table td.col-progress { width: 15.79%; min-width: 0; }
+.data-table th.col-desc, .data-table td.col-desc { width: 31.58%; min-width: 0; }
+.data-table th.col-time, .data-table td.col-time { width: 15.79%; }
+.data-table th.col-num[data-col="tokens"], .data-table td.col-num[data-col="tokens"],
+.data-table th.col-num[data-col="duration"], .data-table td.col-num[data-col="duration"] {
+  width: 10.53%;
+}
+.data-table.mode-split { width: 100%; }
+.data-table.mode-split .col-number { width: 100%; min-width: 0; }
 /* CL088 C4b: 数值列（Tokens/Cache Read/Cost/耗时/跨度/三评审列）等宽右对齐 */
 .data-table th.col-num, .data-table td.col-num { text-align: right; font-family: var(--font-mono); font-size: 0.76rem; }
-.data-table.mode-split { width: auto; }
 .num-link { color: var(--cobalt-400); cursor: pointer; font-family: var(--font-mono); font-size: 0.78rem; white-space: nowrap; }
 .num-link:hover { color: var(--cobalt-500); text-decoration: underline; }
 .badge { display: inline-block; padding: 1px 8px; border-radius: var(--radius-full); font-size: 0.7rem; margin: 1px; border: 1px solid transparent; }
@@ -173,12 +188,12 @@ table.data-table { width: 100%; border-collapse: collapse; }
    最小宽度三处同源: 本处 CSS 变量 / web_console_lib.SPLIT_MIN_*_PX / 页内 JS MIN_* （测试互证）。
    拖拽自定义比例由页内内联 grid-template-columns 覆盖下面的预置列（窄屏回单栏, 见文末 media）。 */
 .board-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start;
-  --split-min-left: 320px; --split-min-right: 280px; --split-handle-w: 8px; }
+  --split-min-left: 140px; --split-min-right: 280px; --split-handle-w: 8px; }
 .table-side { min-width: 0; }
 .board-main.split-on { align-items: start;
-  grid-template-columns: minmax(var(--split-min-left), 7fr) var(--split-handle-w)
-                         minmax(var(--split-min-right), 3fr); }
-/* CL088 C4a N8/M3: ⇔ 分栏比例预置 5:5（默认 7:3 = 上面 split-on 的 7fr/3fr 口径） */
+  grid-template-columns: minmax(var(--split-min-left), 15fr) var(--split-handle-w)
+                         minmax(var(--split-min-right), 85fr); }
+/* CL088 C4a N8/M3: ⇔ 分栏比例预置 5:5（默认 15:85 = 上面 split-on 的 15fr/85fr 口径; CL270 改） */
 .board-main.split-on.ratio-55 { grid-template-columns: minmax(var(--split-min-left), 5fr)
   var(--split-handle-w) minmax(var(--split-min-right), 5fr); }
 /* CL088 C4d: 拖拽分隔条（仅分栏态可见/可拖; 收起态与单栏态 display:none） */
@@ -287,3 +302,29 @@ footer { margin-top: 12px; color: var(--text-dim); font-size: 0.7rem; }
 @media (max-width: 1100px) {
   .stats-strip { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* CL263 §2-17 页面文档三件套：版本行入口 + 同页抽屉（尺寸固定 60vw×90vh，内容区独立滚动） */
+.docs-entry { background: none; border: 0; color: inherit; font: inherit; cursor: pointer;
+  text-decoration: underline dotted; padding: 0; }
+.docs-entry:hover { color: var(--cobalt-400, #818cf8); }
+.docs-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 90; }
+.docs-panel { position: fixed; top: 5vh; left: 20vw; width: 60vw; height: 90vh;
+  overflow: hidden; background: #15151f; border: 1px solid #2a2a3e; border-radius: 10px;
+  z-index: 91; display: flex; flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.docs-panel[hidden], .docs-overlay[hidden] { display: none; }
+.docs-head { display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+  border-bottom: 1px solid #2a2a3e; }
+.docs-title { font-weight: 600; font-size: 0.86rem; }
+.docs-sub { margin-left: auto; color: #6b7280; font-size: 0.72rem; }
+.docs-close { background: none; border: 0; color: #9ca3af; font-size: 1rem; cursor: pointer; }
+.docs-close:hover { color: #e5e7eb; }
+.docs-tabs { display: flex; gap: 4px; padding: 6px 14px; border-bottom: 1px solid #2a2a3e; }
+.docs-tab { background: #16161f; color: #9ca3af; border: 1px solid #2a2a3e; border-radius: 6px;
+  padding: 3px 10px; font-size: 0.75rem; cursor: pointer; font-family: inherit; }
+.docs-tab.active { background: var(--cobalt-600, #4f46e5); color: #fff; border-color: var(--cobalt-600, #4f46e5); }
+.docs-body { flex: 1; overflow: auto; padding: 12px 14px; text-align: left; }
+.docs-entry-item { margin-bottom: 12px; }
+.docs-entry-head { font-size: 0.8rem; margin: 0 0 4px; color: #e5e7eb; }
+.docs-entry-line { margin: 0 0 3px; color: #9ca3af; font-size: 0.76rem; line-height: 1.5; }
+.docs-empty { color: #6b7280; font-size: 0.78rem; }

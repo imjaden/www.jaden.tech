@@ -15,7 +15,7 @@
         ③ 同编号双态 ⇒ `HB.mergeStatus` 合并（更新时间新者胜; 相等/缺失取运行态）
            + 状态列 / 分栏详情显式标注来源（**不得静默丢一侧**）
     CL088 C4d（OBS-2 收口）: N8/M3「分栏比例」落地为可交互 ——
-        ㈠ 三档预置循环 7:3 → 5:5 → 收起详情（off）; ㈡ 分隔条可拖拽, 自定义比例 "a:b"
+        ㈠ 四档预置循环 15:85 → 7:3 → 5:5 → 收起详情（off）; ㈡ 分隔条可拖拽, 自定义比例 "a:b"
             （两侧最小宽度约束 = MIN_LEFT/MIN_RIGHT, 与 style.css 变量 + web_console_lib
              常量三处同源）; ㈢ 持久化 = N3 口径（localStorage + URL `?ratio=` 覆盖, URL 优先）,
             off 态记忆上次非 off 比例（`…:ratio-prev`）⇒ 收起可逆且主表占满。
@@ -37,7 +37,7 @@
   var COLS = [
     ["number", "编号", false],
     ["project", "项目", false],
-    ["status", "状态", false],
+    ["status", "状态", true],
     ["progress", "进度", false],
     ["desc", "描述", false],
     ["created_at", "创建时间", true],
@@ -64,19 +64,19 @@
   /* CL088 C4a N8/M3 + C4d: ⇔ 分栏比例
      态值 = 三档预置 "7:3" | "5:5" | "off"（收起详情）+ 拖拽自定义 "a:b"; URL ?ratio= 优先（N3/M12）。
      收起可逆: `off` 的记忆源 = **上次拖拽自定义比例**（预置不入记忆 ⇒ 三档预置恒可达, 不成死循环）。 */
-  var RATIOS = ["7:3", "5:5", "off"];
+  var RATIOS = ["15:85", "7:3", "5:5", "off"];   // CL270: 默认档 15:85 纳入预置, 四档恒可达
   /* 最小宽度/分隔条轨道 = 三处同源常量（style.css `--split-min-*` / web_console_lib.SPLIT_*_PX） */
-  var SPLIT = { minLeft: 320, minRight: 280, handle: 8, gap: 12 };
+  var SPLIT = { minLeft: 140, minRight: 280, handle: 8, gap: 12 };
   var HANDLE_ID = HB.SPLIT_HANDLE_ID;
   var QS0 = HB.urlParams();
   var ratio = (function () {
     var v = HB.loadRatio(PAGE);
-    return (v === "off" || HB.ratioToPct(v) !== null) ? v : "7:3";
+    return (v === "off" || HB.ratioToPct(v) !== null) ? v : "15:85";
   })();
   var dragRatio = (function () {
     var p = HB.loadRatioPrev(PAGE);
     return (p !== "off" && HB.ratioToPct(p) !== null && RATIOS.indexOf(p) < 0)
-      ? p : "7:3";
+      ? p : "15:85";
   })();
   var collapsed = ratio === "off";
   /* M16 深链 ?number= 明确要详情面: 未显式 ?ratio=off 时忽略持久化的收起态（不改写 URL/localStorage） */
@@ -391,7 +391,7 @@
   }
 
   function statusCell(r) {
-    var td = HB.el("td", "col-status");
+    var td = HB.el("td", colClass("status"));   /* CL271: 与表头同步 hidden, 防表头/表体错位 */
     td.appendChild(HB.statusBadge(r.status));
     /* OBS-1 ③（CL088 C4c 补批）: 同编号双态 ⇒ 状态列**显式标注来源**（不静默丢一侧;
        完整依据（两侧原值 + 时间戳 + 规则）= title, 分栏详情另给一节）。 */
@@ -533,13 +533,7 @@
     tdN.appendChild(caret);
     tdN.appendChild(numLink(r));
     tr.appendChild(tdN);
-    if (splitMode) {
-      var tdP = HB.el("td", "progress-cell col-progress");
-      tdP.appendChild(HB.el("span", "prog-num", r.stageText));
-      if (r.verified) { tdP.appendChild(HB.verifiedBadge()); }
-      tr.appendChild(tdP);
-      return tr;
-    }
+    if (splitMode) { return tr; }   /* CL262: 分栏左栏只留编号列（15%），详情占 85% */
     /* 第 9 条 + M4: 项目列常显; 标签点击 = 同项目筛选（M2 后动覆盖） */
     var tdProj = HB.el("td", colClass("project"));
     var tag = HB.el("button", "proj-tag" + (projectFilter === projectOf(r) ? " on" : ""),
@@ -695,6 +689,81 @@
     var m = mainEl();
     return m ? (m.getBoundingClientRect().width - (SPLIT.handle + 2 * SPLIT.gap)) : 0;
   }
+
+  /* CL271 / SEC-597-1: 六列固定占比的**真实**落地。
+     Chromium 在 `table-layout: fixed` 下丢弃「百分比 − 像素」混合单位 calc（列宽回落 auto ⇒ 六等分），
+     故改为按 table.clientWidth 计算 px 后写 th.style.width（fixed 布局只认首行/表头宽度, td 自动跟随）。
+     口径: 项目列 96px; 六列权重 15/15/30/15/10/10（sum=0.95）; 若还有其它可见列, 六列按原权重占 95%,
+     其余 5% 均分给它们（默认无其它可见列 ⇒ 六列按 /0.95 归一占满）。 */
+  /* CL272 / SEC-598-1..3: 列宽 px 落盘（CL271 引入）必须**先清内联再测**，
+     否则 fixed 布局下 table.clientWidth 已被上一次写入的 px 撑大 ⇒ 列宽棘轮（缩窗不回收、右侧列被裁）。
+     另: 额外可见列的最小宽 80px 由六列按比例让出，避免 5% 均分低于 padding 造成表头重叠。 */
+  function applyColWidths() {
+    var thead = document.getElementById("th-full");
+    var tbl = document.getElementById("main-table");
+    if (!thead || !tbl) { return; }
+    var ths = thead.querySelectorAll("th");
+    for (var i = 0; i < ths.length; i++) { ths[i].style.width = ""; }   /* ① 清内联 */
+    var box = tbl.parentElement;
+    var total = (box && box.clientWidth) || tbl.clientWidth || 0;        /* ② 以容器宽为基准 */
+    if (!total) { return; }
+    var avail = total - 96;                        /* 项目列 */
+    if (avail < 0) { avail = 0; }
+    var W = { number: 0.15, progress: 0.15, desc: 0.30,
+              updated_at: 0.15, tokens: 0.10, duration: 0.10 };
+    var sumSix = 0; Object.keys(W).forEach(function (k) { sumSix += W[k]; });
+    var others = visible.filter(function (k) {
+      return k !== "project" && !Object.prototype.hasOwnProperty.call(W, k);
+    });
+    var MIN_OTHER = 80;
+    var othersTotal = 0;
+    if (others.length) {
+      othersTotal = Math.max(Math.floor(avail * 0.05), others.length * MIN_OTHER);   /* ③ 每列 ≥80px */
+      if (othersTotal > avail * 0.55) { othersTotal = avail * 0.55; }               /* 六列保底 45% */
+      othersTotal = Math.floor(othersTotal / others.length) * others.length;        /* 取整到 n 的倍数, 防溢出 */
+    }
+    var sixTotal = avail - othersTotal;
+    Object.keys(W).forEach(function (k) {
+      var t = thead.querySelectorAll('th[data-col="' + k + '"]');
+      var w = Math.floor(sixTotal * W[k] / sumSix);
+      for (var j = 0; j < t.length; j++) {
+        t[j].style.width = isVisible(k) ? w + "px" : "0px";
+      }
+    });
+    if (others.length) {
+      var each = Math.floor(othersTotal / others.length);
+      others.forEach(function (k) {
+        var t = thead.querySelectorAll('th[data-col="' + k + '"]');
+        for (var m = 0; m < t.length; m++) { t[m].style.width = each + "px"; }
+      });
+    }
+    /* ④ 容器宽变化也重算（window.resize 在容器级变化/部分宿主不触发）——幂等挂载 */
+    if (box && !box.__colWidthRO && window.ResizeObserver) {
+      var lastW = total;
+      var ro = new ResizeObserver(function () {
+        var w = box.clientWidth;
+        if (Math.abs(w - lastW) <= 1) { return; }
+        lastW = w;
+        window.requestAnimationFrame(function () { applyColWidths(); });
+      });
+      ro.observe(box);
+      box.__colWidthRO = ro;
+    }
+    /* ⑤ 兜底: 某些宿主（无头浏览器/嵌入 webview）不派发 resize 也不触发 RO —— 半秒探一次视口宽 */
+    if (!window.__colWidthTick) {
+      window.__colWidthTick = window.setInterval(function () {
+        var b = document.getElementById("main-table");
+        b = b && b.parentElement;
+        if (!b) { return; }
+        var w = window.innerWidth + ":" + b.clientWidth;
+        if (w !== window.__colWidthTickKey) {
+          window.__colWidthTickKey = w;
+          applyColWidths();
+        }
+      }, 500);
+    }
+  }
+
   function applyLayout() {
     var main = mainEl();
     var btn = document.getElementById("ratioBtn");
@@ -711,10 +780,11 @@
       main.style.gridTemplateColumns = "";   /* 单栏 / 收起 / 窄屏 ⇒ 回 CSS 口径 */
     }
     main.classList.toggle("ratio-55", splitMode && ratio === "5:5");
+    applyColWidths();   /* CL271: 六列 px 口径（切换列/缩放/分栏均重算） */
     if (btn) {
       btn.setAttribute("data-ratio", ratio);
       btn.title = "分栏比例: " + ratio +
-        "（点击循环 7:3 → 5:5 → 收起详情" +
+        "（点击循环 15:85 → 7:3 → 5:5 → 收起详情" +
         (RATIOS.indexOf(ratio) < 0 ? "; 自定义比例" : "") + "; 拖拽分隔条微调）";
     }
   }
@@ -727,6 +797,8 @@
   function cycleRatio() {
     if (ratio === "off") { setRatio(dragRatio); return; }        /* 收起 ⇒ 恢复上次自定义比例（可逆） */
     var i = RATIOS.indexOf(ratio);
+    // CL270: 默认档 15:85 已进 RATIOS ⇒ 四档自默认值出发恒可达;
+    //         自定义（拖拽所得, 不在预置内）仍一键收起, 再点一次恢复该自定义比例
     setRatio(i >= 0 && i < RATIOS.length - 1 ? RATIOS[i + 1] : "off");
   }
   function bindRatio() {
@@ -898,6 +970,7 @@
     bindRatio();
     bindSplitDrag();        /* C4d: 分隔条拖拽（N8/M3） */
     window.addEventListener("resize", applyLayout);   /* 窄屏/回宽 ⇒ 列宽口径重算 */
+
     bindColToggle();
     document.getElementById("detail-close").addEventListener("click", closeSplit);
     applyCols();

@@ -91,7 +91,6 @@
             <thead id="th-split" style="display:none">
               <tr>
                 <th class="col-number">编号</th>
-                <th class="col-progress">进度</th>
               </tr>
             </thead>
             <tbody id="board-body"></tbody>
@@ -114,7 +113,84 @@
   </div>
   </div><!-- /view-run -->
 
-  <div class="wc-footer" style="padding:14px;color:#6b7280;font-size:0.72rem;text-align:center;border-top:1px solid #2a2a3e;"><div id="wc-meta-bar" style="padding:6px 16px;color:#6b7280;font-size:0.72rem;border-bottom:1px solid #1f1f2e;"><span title="壳文件仅模板变更时更新（CL039 壳/数据分离）">静态壳</span><span id="meta-generated" title="数据生成时间（data/live.js 的 WEB_DATA_META）; 超 30 小时未刷新标 ⚠️">生成 –</span><span id="meta-count">共 0 条</span></div><div class="wc-footer-version">hermes-manager · 1.11(20261015)</div><div class="wc-footer-brand">跨项目任务板 · Task · 公开镜像 · 自动同步 · 已脱敏过滤</div></div>
+  <div class="wc-footer" style="padding:14px;color:#6b7280;font-size:0.72rem;text-align:center;border-top:1px solid #2a2a3e;"><div id="wc-meta-bar" style="padding:6px 16px;color:#6b7280;font-size:0.72rem;border-bottom:1px solid #1f1f2e;"><span title="壳文件仅模板变更时更新（CL039 壳/数据分离）">静态壳</span><span id="meta-generated" title="数据生成时间（data/live.js 的 WEB_DATA_META）; 超 30 小时未刷新标 ⚠️">生成 –</span><span id="meta-count">共 0 条</span></div><button type="button" class="wc-footer-version docs-entry" data-docs-toggle aria-controls="docs-panel" aria-expanded="false" title="查看本文档（履历 / 版本索引）">hermes-manager · 1.11(20261015)</button><div class="wc-footer-brand">跨项目任务板 · Task · 公开镜像 · 自动同步 · 已脱敏过滤</div></div>
+  <div class="docs-overlay" data-docs-close hidden></div><aside id="docs-panel" class="docs-panel" data-docs-panel style="overflow:hidden" role="dialog" aria-modal="true" aria-labelledby="docs-title" hidden><header class="docs-head"><span class="docs-title" id="docs-title">Task 板 · 文档</span><span class="docs-sub" id="docs-sub"></span><button type="button" class="docs-close" id="docs-close" data-docs-close aria-label="关闭文档面板">✕</button></header><nav class="docs-tabs" role="tablist"><button type="button" class="docs-tab active" role="tab" aria-selected="true" data-docs-tab="history">履历</button><button type="button" class="docs-tab" role="tab" aria-selected="false" data-docs-tab="index">版本索引</button></nav><div class="docs-body" id="docs-body" style="overflow:auto"></div></aside>
+<script id="BOARD_DOCS" type="application/json">{"page":{"version":"1.3","date":"2026-11-07","file":"web/1acl/index.html"},"note":"服务端/管理器版本由页脚版本行提供（CL039 壳零版本戳原则）；本块只放页面文档与履历，不含运行时数据","sections":{"history":[{"version":"1.3","date":"2026-11-07","items":["六列固定占比 15/15/30/10/10/15（编号/进度/描述/耗时/Tokens/更新时间），项目列固定 96px；状态列并入默认隐藏（CL262）","分栏表头与行只保留编号列，默认比例 15:85，左栏最小宽三处同源 320→140（CL262）","页面文档三件套落地：版本行入口 + 同页抽屉 + 内联 BOARD_DOCS（CL263）"]},{"version":"1.2","date":"2026-11-06","items":["壳/渲染外置：index.html + assets/shell-render.js 拆分，数据面独立（CL230）","异常计数条与异常优先级排序（CL233）；Task 页 15 列 + 7 隐列口径"]},{"version":"1.1","date":"2026-10-31","items":["分栏拖拽分隔条与比例持久化（CL088 C4d）；列设置（⚙）与 URL 覆盖（N3/M12）"]},{"version":"1.0","date":"2026-09-23","items":["单表口径：运行态 + 历史态按编号合并（CL039 / CL088 C4b）"]}],"index":[{"version":"1.3","date":"2026-11-07","note":"当前 · 六列固定占比 + 编号单列分栏 + 页面文档三件套"},{"version":"1.2","date":"2026-11-06","note":"壳/渲染外置 + 异常视图"},{"version":"1.1","date":"2026-10-31","note":"分栏拖拽 + 列设置"},{"version":"1.0","date":"2026-09-23","note":"单表基础版"}]}}</script>
+<script>
+(function () {
+  var blob = document.getElementById("BOARD_DOCS");
+  if (!blob) { return; }
+  var data;
+  try { data = JSON.parse(blob.textContent); } catch (e) { data = null; }
+  var panel = document.getElementById("docs-panel");
+  var overlay = document.querySelector(".docs-overlay");
+  var body = document.getElementById("docs-body");
+  var sub = document.getElementById("docs-sub");
+  var toggles = document.querySelectorAll("[data-docs-toggle]");
+  var tabs = document.querySelectorAll("[data-docs-tab]");
+  var current = "history";
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) { e.className = cls; }
+    if (text !== undefined && text !== null) {
+      e.appendChild(document.createTextNode(String(text)));
+    }
+    return e;
+  }
+  function render() {
+    if (!body) { return; }
+    body.textContent = "";
+    if (!data || !data.sections || !data.sections[current]) {
+      body.appendChild(el("p", "docs-empty", "暂无文档数据（数据块缺失或解析失败）"));
+      return;
+    }
+    if (sub) {
+      sub.textContent = "页面 " + ((data.page && data.page.version) || "-")
+        + (data.page && data.page.date ? " · " + data.page.date : "");
+    }
+    data.sections[current].forEach(function (entry) {
+      var sec = el("section", "docs-entry-item");
+      sec.appendChild(el("h3", "docs-entry-head",
+        (entry.version || "") + (entry.date ? "（" + entry.date + "）" : "")));
+      (entry.items || [entry.note || ""]).forEach(function (line) {
+        if (line) { sec.appendChild(el("p", "docs-entry-line", line)); }
+      });
+      body.appendChild(sec);
+    });
+  }
+  function setOpen(open) {
+    if (!panel) { return; }
+    panel.hidden = !open;
+    if (overlay) { overlay.hidden = !open; }
+    document.body.style.overflow = open ? "hidden" : "";
+    Array.prototype.forEach.call(toggles, function (t) {
+      t.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    if (open) { body.scrollTop = 0; }
+  }
+  Array.prototype.forEach.call(toggles, function (t) {
+    t.addEventListener("click", function () { render(); setOpen(panel.hidden); });
+  });
+  Array.prototype.forEach.call(tabs, function (t) {
+    t.addEventListener("click", function () {
+      current = t.getAttribute("data-docs-tab");
+      Array.prototype.forEach.call(tabs, function (o) {
+        var on = o === t;
+        o.classList.toggle("active", on);
+        o.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      render();
+      if (body) { body.scrollTop = 0; }
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-docs-close]"),
+    function (b) { b.addEventListener("click", function () { setOpen(false); }); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && panel && !panel.hidden) { setOpen(false); }
+  });
+})();
+</script>
 </div>
 
 <script>
