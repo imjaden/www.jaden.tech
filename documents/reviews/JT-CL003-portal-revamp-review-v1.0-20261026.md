@@ -464,18 +464,36 @@ L1 opacity 序列: [(0,0),(120,0.712),(240,0.921),(300,0.961),(400,0.992),(600,1
 
 ```
 $ git push origin HEAD:main          # ff-only
+To github.com:imjaden/www.jaden.tech.git
+   a4bea07..07e67c6  HEAD -> main
+PUSH_RC=0
+
 $ git rev-parse HEAD
-<待填：评审笔 sha>
+07e67c62f649599bf1f146ee8760ad22806d0063
 $ git ls-remote origin refs/heads/main
-<待填：远端 tip>
+07e67c62f649599bf1f146ee8760ad22806d0063	refs/heads/main
+
 $ git log --oneline origin/main..HEAD
-（空）
+（空，行数=0）
 $ git status --porcelain
-（空）
+（空，行数=0）
 ```
 
-> 三验结果在推送后由同一会话写入本节（见下方「三验回填」）。
+**三验结论（在评审笔 `07e67c6` 上执行，原样输出如上）**：
 
-### 三验回填
+| # | 判据 | 实测 | 结论 |
+|---|------|------|------|
+| ① | `rev-parse HEAD` == `ls-remote origin refs/heads/main` | 两侧同为 `07e67c62f649599bf1f146ee8760ad22806d0063` | ✅ |
+| ② | `origin/main..HEAD` 为空 | 行数 = 0 | ✅ |
+| ③ | `git status --porcelain` 为空 | 行数 = 0 | ✅ |
 
-（推送后回填：① `rev-parse HEAD` == `ls-remote origin refs/heads/main`；② `origin/main..HEAD` 空；③ `git status --porcelain` 空。）
+推送前 ff 预检：`git merge-base --is-ancestor a4bea07 HEAD` ⇒ 远端 tip 是 HEAD 祖先，**ff-only 成立**
+（`a4bea07..07e67c6` 快进，未 force、未改历史）。本次推送载荷 = 1 笔评审笔（本文件 + `review-log.md` + `.review-level.yaml`）
++ 本地 4 笔 `data@update` 镜像笔（`795bacf` / `229b4d8` / `6f60320` / `39177e7`）。
+
+### 三验回填说明
+
+上表三验在**评审笔** `07e67c6` 上执行并留痕。其后本会话另有一笔 **post-push 回填笔**（把本节实测值写回评审件 +
+在 `review-log.md` 追加「推送与三验」小节），该笔推送后以同一三命令复验，结论同样为「HEAD == 远端 tip / 区间为空 / 工作树干净」，
+最终 tip 见 `review-log.md` 同条目末节的记录与 `git log -1`。
+

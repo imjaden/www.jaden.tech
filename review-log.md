@@ -1035,6 +1035,13 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 计分：100 − 5（1× 🟡 Y1）= **95 / 100 → A → PASS**；🟢 9 条仅记录（沿用本项目口径，不计入 `findings_total`）。PASS ⇒ `git add` 评审件 + `review-log.md` + `.review-level.yaml` 三路径 → `audit@review:` 笔 → `git push origin HEAD:main`（ff-only，连带本地 4 笔 `data@update` 镜像笔）。
 
+### 推送与三验
+
+- **评审笔**: `07e67c6`（`audit@review: JT-CL003 portal revamp PASS 95 …`），3 文件 +535 行；推送前 `git merge-base --is-ancestor a4bea07 HEAD` ⇒ ff 成立。
+- **推送**: `git push origin HEAD:main` ⇒ `a4bea07..07e67c6  HEAD -> main`（rc=0，无 force / 无 `--all` / 无 `--tags`）。
+- **三验（在 `07e67c6` 上）**: ① `git rev-parse HEAD` = `07e67c62f649599bf1f146ee8760ad22806d0063` **==** `git ls-remote origin refs/heads/main` 同值；② `git log --oneline origin/main..HEAD` 行数 **0**；③ `git status --porcelain` 行数 **0**。三项全绿。
+- **回填笔**: 本节与评审件 §8 的实测回填为后续一笔 `audit@review:`，推送后以同一三命令复验（HEAD == 远端 tip / 区间空 / 工作树干净），最终 tip 以 `git log -1 --format=%H` 与 `git ls-remote` 对照为准。
+
 ---
 
 ## 条目格式说明
