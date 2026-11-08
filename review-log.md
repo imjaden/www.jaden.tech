@@ -1044,6 +1044,53 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-10-26 — JT-CL003「Y1 关账轮」（单条 🟡 关闭复核：L1 载体 `a#logo-link` → `img#logo`）
+
+- **review者**: Security Reviewer（review profile，用户 2026-10-26 全采推荐、串行单条关账）
+- **范围**: `d69d7b9`（`fix@site: JT-CL003 Y1 - move intro-1 …`）**2 文件 +10/−8** —— `index.html` (+9/−7) / `wechat.html` (+1/−1，仅 favicon 换戳 `1794110961 → 1794111578`)。`git diff --stat origin/main..HEAD` 同两文件（唯一本地领先笔，`origin/main = 8f37e8c`）；`git ls-files cache/` = **0**（门禁脚本未跟踪）；`git status --porcelain` 空。`a` 标签本体（`href="javascript:void(0);"` / `id`）一字未动。
+- **Tracking**: **Y1 ✅ CLOSED（`d69d7b9`）** —— 实测三行：① **t≈0**（可见页 + `getAnimations()` 钉 `currentTime=0`）`#logo` `transform = matrix(1, 0, 0, 1, 0, 10)`、`rect.top = 60` = 静止 `50` **+10.00**，`opacity 0`，`playState=running/dur 500/delay 0/fill backwards`；② **t≥1.5s**（定格 `ct=1500` 与 `finished` 双点 + 自然播放 3245ms）`transform = none`、`rect.top = 50`、`opacity = 1`、`getAnimations() = []`；③ **无 CLS**：`PerformanceObserver(layout-shift, buffered)` 于 1280×800（65 样本）与 345×667（108 样本）均 **0 条 entry / CLS = 0**，`top` 扫程恰 10px（50↔60、16↔26），`transform` 不入布局。**`a#logo-link` 全程 `transform: none`、`rect.top` 恒 166（`h=17` inline 行盒）、动画数 0** ⇒ "`a` 保持 inline 不动、零布局影响"成立。**反证（判别力）**：基线 `8f37e8c` 同探针 `a` 的 `getComputedStyle().transform` **算出** `matrix(1,0,0,1,0,10)` 但 `a`/`img` 的 `rect.top` 全程恒 166/50 ⇒ 声明被计算却不参与渲染（Y1 根因复现），HEAD 打出真实 10px 位移 ⇒ 改前改后单变量对照，非"读计算值"的假绿。**零回归**：1280×800 / 345×667 / 812×375 两卡同行 Δtop **0**、padding `12px 22px` / `7px 12px`、gap `10px` / `8px`、radius `999px`、`scrollW/H == innerW/H`（1280/800、345/667、812/375），三档数值与 `8f37e8c` **逐值相同**；`#main .container` inline `scale` 在标准三档均为 `(none)`（双侧一致），另压 `1280×220` **真实触发**分支 ⇒ `scale(0.88)`（复算 `(220−44−40)/154 = 0.8831 → 0.88`）双侧同值、`nAnim = 0`、动画期间 `ctrInlineDuring` 仍 `scale(0.88)`、`ctrBottom 135.85 < 220` 无裁切（缩放档 10px 渲染为 8.8px 属祖先坐标合成）；`logo → QR` 点击回归：单击只切一次（`event.target !== logo` 去重仍成立）、二次回退、**动画进行中 ct=350 点击仍命中 `img`**。**文案面**：`What I'm Tracking` 1 / `我在追踪的事项` 1 / `BMI/BWH` 2 / `TOKENS` 2（按行计 4、按次计 6 ≥ 4），旧名 6 组（`What I'm Doing Now` / `我正在做的事项` / `BMI-Tracker` / `Tokens-Tracker` / `DailyTracker` / `daily-tracker.html`）**全 0**。**门禁**：`check.py --mode post` **15/15** + `--selftest` **17/17** RC=0，`S15 layers=6`（class 从 `a` 迁 `img` 后层总数不变）/ `container_ok=True` / `card_no_tf=True`，S10/S16 判别力自证仍在跑且仍能打红。**戳**：`timestamp-manager.py check` RC=0，两文件同值 **1794111578** 且 **≠ 上一轮 1794110961**（S5 打印的 `old=1788947889` 为脚本内置更早基线常量，不能替代该判据）。（以下为 🟢，仅记录：**G1** 改动面/禁改面/工作树；**G2** Y1 双法 + 反证；**G3** 三档几何 + scale 分档 + CLS；**G4** 文案面；**G5** 门禁；**G6** 戳；**G7** 安全面。）
+- **状态**: ✅ PASS（100 / 100，Rating A；🔴 0 / 🟡 0 / 🟢 7；`findings_open = 0`）
+- **报告**: `documents/reviews/JT-CL003-portal-revamp-rereview-v1.0-20261026.md`
+- **实现 prompt**: ⬜ 无需生成（实现/审计类复审；本批 JT-CL003 全部关闭，R1/R2/R3 达标 + 唯一 🟡 已闭，无待修动作）
+
+### 发现摘要
+
+**改动面**：`index.html +9/−7`（6 处 `?t=` 换戳 + `intro intro-1` 从 `a#logo-link` 迁到 `img#logo` + 2 行原因注释）、`wechat.html +1/−1`（仅 favicon 戳）；`git diff d69d7b9~1 d69d7b9 -- wechat.html` 单行、单数字变化；禁改面（`static/**`、`bmi-tracker.html`、`tokens-tracker/**`、`documents/**`）零命中。
+
+**Y1 关闭方式裁定**：上一轮建议 `#logo-link{display:inline-block}`，作者改走"把 class 迁到 replaced 元素 `img`"。审后判为**等价且更优**：`a` 的 `display` 不变 ⇒ 无 inline→inline-block 的行盒/基线/`margin:auto` 行为漂移（实测 `a` `rect.top` 恒 166、`h=17`），且六层载体原则①（.intro 不碰 inline `scale`）继续成立（`1280×220` 缩放档 `ctrAnim=0`、`ctrInlineDuring=scale(0.88)` 保持）。
+
+**动效实测双法**：① 自然播放（先 `Emulation.setFocusEmulationEnabled(true)` + `Page.bringToFront` 把 `visibilityState` 拉回 `visible`、每样本自带 `vis` 字段）——`currentTime` 真实推进 0→266.7，`playState=running`，`img.rect.top` 在 60↔50 连续扫过；② 定格法——`pause` + 显式 `currentTime` 钉 0/250/500/1500/finished 五点，t=0 精确 `matrix(1,0,0,1,0,10)`，t≥500 `none`。两法互证，位移量 **10.00px**。
+
+**几何与回归**：`.now-card` 全页 3 张（Now 2 + 诗词 1），指标限定前两卡；HEAD 与 `8f37e8c` 基线副本（`git archive | tar -x`，不写 `.git/worktrees`）三档逐值相同，唯一差异是 `layers[0]` 由 `A#logo-link` 变为 `IMG#logo`。
+
+**门禁与戳**：15/15 + 17/17 RC=0；`layers=6` 证明"迁载体未减层"；两文件同戳 1794111578 且 ≠ 1794110961，单文件内 `?t=` 唯一值（无半换戳）。
+
+**安全面**：新增 10 行凭证/PII/本地绝对路径**三扫 0 命中**；无新增 `<script>` / 内联事件 / `eval` / `innerHTML` / 外链（`target="_blank"` 新增 0）；`javascript:void(0);` 为改动前既有 inert 锚点，非本笔引入；注释文本不含主机名/内网 IP/凭据语义。绝对路径 0 命中 ⇒ 按 JT-SEC-020 记 🟢（长期项状态不变）。
+
+**方法论观察（不计发现）**：① `visibilityState=hidden` 会让 CSS 动画停在 0%（本轮首测即命中，已用 focus emulation + bringToFront 修正）；② `Page.addScriptToEvaluateOnNewDocument` 注册的探针**跨文档持久生效**，其中一份会 `pause`+`finish()` 目标动画，导致后续导航出现"动画被提前结束"的假阴性（本轮实际发生，已弃用该批中间样本并在全新 browser session 重跑）；③ 缩放档 `10px` 渲染为 `10 × scale`（8.8px）属祖先坐标合成，当前无绝对位移要求，仅记录。
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | 改动面 2 文件 +10/−8 逐值一致；`wechat.html` 仅换戳；禁改面零命中；`cache/` 未跟踪；工作树干净 | PASS |
+| — | 🟢 | **Y1 关闭**：t≈0 `matrix(…,10)` / top 60 = 静止 50 **+10**；t≥1.5s `none` / top 50 / opacity 1；`a` 全程 `none` 且 top 恒 166 | **CLOSED** |
+| — | 🟢 | 反证：基线 `8f37e8c` 计算值 `matrix(…,10)` 但 `rect.top` 恒 166/50（声明→不渲染）⇒ HEAD 的 10px 非假绿 | PASS |
+| — | 🟢 | 零回归几何三档逐值同基线；`1280×220` 真实触发 `scale(0.88)` 且动画不夺权 | PASS |
+| — | 🟢 | 无 CLS（0 entry / CLS 0，两档）；`logo → QR` 点击含动画中点击均正常 | PASS |
+| — | 🟢 | 文案面 4 组命中（1/1/2/2）、旧名 6 组全 0 | PASS |
+| — | 🟢 | 门禁 15/15 + 17/17 RC=0；`layers=6` / `container_ok=True` / `card_no_tf=True`；S10/S16 仍能打红 | PASS |
+| — | 🟢 | 戳 1794111578 ×2 且 ≠ 1794110961，单文件唯一值；安全面 10 行三扫 0 命中 | PASS |
+| ~~1~~ | ~~🟡 LOW~~ | ~~**Y1** …~~ ⇒ **Y1 ✅ CLOSED (d69d7b9)**，🟡 归零 | **CLOSED** |
+
+计分：100 − 0（🔴 0、🟡 0）= **100 / 100 → A → PASS**；🟢 7 条仅记录，不计入 `findings_total`。Y1 关闭后 `findings_open = 0`；结转 🟢（`BWH 数据面待补` + JT-SEC-019/020/021/022/023）不因本笔解冻。
+
+### 推送与三验
+
+- **评审笔**: 见复审件 §8.2（由 `audit@review:` 回填笔写入真实 sha 与命令输出）。
+- **推送**: 仅 `git push origin HEAD:main`（ff-only），无 force / 无 `--all` / 无 `--tags`。
+- **三验**: ① `git rev-parse HEAD` == `git ls-remote origin refs/heads/main`；② `git log --oneline origin/main..HEAD` 行数 0；③ `git status --porcelain` 行数 0。实测值见复审件 §8.2。
+
+---
+
 ## 条目格式说明
 
 ```
