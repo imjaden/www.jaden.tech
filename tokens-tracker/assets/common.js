@@ -558,6 +558,42 @@
       history.replaceState(null, "", u.toString());
     } catch (e) {}
   }
+  /* ═══ D9: 状态筛选（单选）+ 异常正交开关 ═══
+     口径: status ∈ {"" | pending | active | done}; 异常独立布尔（可与任一状态叠加）。
+     URL 优先（?status= / ?anomaly=1），其次 localStorage; 空串 = 不过滤。 */
+  /* CL284: 键名口径集中一处（此前散落在两个函数里, 文档无记载 ⇒ 改名时漏改） */
+  var LS_PREFIX = "1acl-board";
+  function statusFilterKey(page) { return LS_PREFIX + ":" + page + ":status"; }
+  function anomalyFilterKey(page) { return LS_PREFIX + ":" + page + ":anomaly"; }
+  function filterKeys(page) {
+    return { status: statusFilterKey(page), anomaly: anomalyFilterKey(page), prefix: LS_PREFIX };
+  }
+  function loadStatusFilter(page) {
+    var v = "";
+    try { v = urlParams().get("status") || localStorage.getItem(statusFilterKey(page)) || ""; }
+    catch (e) { v = ""; }
+    v = String(v || "").toLowerCase();
+    return (v === "pending" || v === "active" || v === "done") ? v : "";
+  }
+  function saveStatusFilter(page, val) {
+    try {
+      if (val) { localStorage.setItem(statusFilterKey(page), val); }
+      else { localStorage.removeItem(statusFilterKey(page)); }
+    } catch (e) {}
+  }
+  function loadAnomalyOnly(page) {
+    try {
+      var q = urlParams().get("anomaly");
+      if (q !== null) { return q === "1"; }
+      return localStorage.getItem(anomalyFilterKey(page)) === "1";
+    } catch (e) { return false; }
+  }
+  function saveAnomalyOnly(page, on) {
+    try {
+      if (on) { localStorage.setItem(anomalyFilterKey(page), "1"); }
+      else { localStorage.removeItem(anomalyFilterKey(page)); }
+    } catch (e) {}
+  }
   function projectValues(rows, key) {
     /* 观测值去重（"-" 恒末尾）; rows 元素取 rows[i][key] */
     var seen = {}, out = [];
@@ -572,22 +608,6 @@
     });
     return out;
   }
-  function projectTabs(host, values, current, onPick) {
-    if (!host) { return; }
-    host.textContent = "";
-    [""].concat(values || []).forEach(function (v) {
-      var a = el("a", "tab-link" + ((current || "") === v ? " active" : ""), v || "全部");
-      a.href = "#";
-      a.setAttribute("data-project", v);
-      a.title = v ? ("只看项目 " + v + "（再点 = 清除筛选）") : "显示全部项目";
-      a.addEventListener("click", function (ev) {
-        if (ev && ev.preventDefault) { ev.preventDefault(); }
-        onPick(v);
-      });
-      host.appendChild(a);
-    });
-  }
-
   window.HB = {
     el: el, copyText: copyText, copyBtn: copyBtn,
     fmtDur: fmtDur, fmtNum: fmtNum, fmtCompact: fmtCompact,
@@ -607,6 +627,8 @@
     loadRetro: loadRetro, retroVar: retroVar, filesCell: filesCell,
     openPanel: openPanel, closePanel: closePanel, fillPanelHead: fillPanelHead,
     loadProjectFilter: loadProjectFilter, saveProjectFilter: saveProjectFilter,
-    projectValues: projectValues, projectTabs: projectTabs
+    loadStatusFilter: loadStatusFilter, saveStatusFilter: saveStatusFilter,
+    loadAnomalyOnly: loadAnomalyOnly, saveAnomalyOnly: saveAnomalyOnly,
+    projectValues: projectValues, filterKeys: filterKeys
   };
 })();

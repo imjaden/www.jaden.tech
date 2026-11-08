@@ -42,7 +42,7 @@
     ["desc", "描述", false],
     ["created_at", "创建时间", true],
     ["updated_at", "更新时间", false],
-    ["tokens", "Tokens(in+out+reasoning)", false],
+    ["tokens", "Tokens", false],
     ["cache_read", "Cache Read", true],
     ["cost", "Cost($)", true],
     ["duration", "耗时", false],
@@ -61,6 +61,17 @@
   var sortState = { key: "updated_at", dir: -1 };
   /* M16: 旧深链 ?pfilter= ↔ 项目标签筛选（新状态机单值态） */
   var projectFilter = HB.loadProjectFilter(PAGE);
+  /* D9: 状态筛选（单选） + 异常正交开关；URL ?status= / ?anomaly=1 优先于 localStorage */
+  var statusFilter = HB.loadStatusFilter(PAGE);      /* "" | pending | active | done */
+  var anomalyOnly = HB.loadAnomalyOnly(PAGE);
+  var STATUS_CHIPS = [
+    ["", "全部"],
+    ["pending", "待执行"],
+    ["active", "进行中"],
+    ["done", "已完成"]
+  ];
+  var STATUS_LABEL = { pending: "待执行", active: "进行中", done: "已完成" };
+  var STATUS_KEYS = ["pending", "active", "done", "anomaly"];   // SEC-600-8 深链白名单   // 空态文案用中文, 不直出内部键
   /* CL088 C4a N8/M3 + C4d: ⇔ 分栏比例
      态值 = 三档预置 "7:3" | "5:5" | "off"（收起详情）+ 拖拽自定义 "a:b"; URL ?ratio= 优先（N3/M12）。
      收起可逆: `off` 的记忆源 = **上次拖拽自定义比例**（预置不入记忆 ⇒ 三档预置恒可达, 不成死循环）。 */
@@ -197,9 +208,27 @@
     return out;
   }
 
-  function filtered() {
+  /* 状态归一: 历史态用 finished（老口径）与 done 同义 ⇒ 统一进「已完成」桶，避免 chip 漏计 */
+  function statusOf(r) {
+    var s = String(r.status || "").toLowerCase();
+    if (s === "finished" || s === "completed" || s === "closed") { return "done"; }
+    return s;
+  }
+  function isAnomaly(r) { return !!r.anomaly_level && r.anomaly_level !== "ok"; }
+  /* 项目维度先行（chip 计数 = 项目范围内计数，避免「切项目后数字不变」的错觉） */
+  function baseRows() {
     if (!projectFilter) { return rows; }
     return rows.filter(function (r) { return projectOf(r) === projectFilter; });
+  }
+  function filtered() {
+    var out = baseRows();
+    if (statusFilter) {
+      out = out.filter(function (r) { return statusOf(r) === statusFilter; });
+    }
+    if (anomalyOnly) {
+      out = out.filter(isAnomaly);
+    }
+    return out;
   }
 
   /* ── 排序（N4）────────────────────────────────────────────── */
@@ -308,7 +337,21 @@
       "异常 " + sum + " / 台账 " + total));
   }
 
-  /* ── 筛选状态机（第 9 条 / M2: 单值态, 后动覆盖, 再点当前项 = 清除）── */
+  /* ── 筛选状态机（M2: 单值态, 后动覆盖, 再点当前项 = 清除）──
+     两维: 状态（单选 chip）× 项目（行内标签 / 当前项目 chip），交集生效；
+     异常为**正交开关**（可与任一状态叠加: 异常 + 进行中 = 卡住中的任务）。 */
+  function syncUrl() {
+    try {
+      var u = new URLSearchParams(location.search);
+      if (statusFilter) { u.set("status", statusFilter); } else { u.delete("status"); }
+      if (anomalyOnly) { u.set("anomaly", "1"); } else { u.delete("anomaly"); }
+      if (projectFilter) { u.set("project", projectFilter); } else { u.delete("project"); }
+      u.delete("pfilter");
+      var qs = u.toString();
+      history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + location.hash);
+    } catch (e) { /* file:// 或受限环境: URL 同步失败不影响筛选 */ }
+  }
+
   function pickProject(p) {
     var v = String(p == null ? "" : p);
     projectFilter = (v && projectFilter === v) ? "" : v;
@@ -316,15 +359,104 @@
     pageNo = 1;
     renderTabs();
     render();
+    syncUrl();
   }
 
-  /* 项目标签（页内 Tab; 项 = 观测值「全部」+ 各项目） */
+  function pickStatus(v) {
+    var val = String(v || "");
+    statusFilter = (val && statusFilter === val) ? "" : val;
+    HB.saveStatusFilter(PAGE, statusFilter);
+    pageNo = 1;
+    renderTabs();
+    render();
+    syncUrl();
+  }
+
+  function toggleAnomaly() {
+    anomalyOnly = !anomalyOnly;
+    HB.saveAnomalyOnly(PAGE, anomalyOnly);
+    pageNo = 1;
+    renderTabs();
+    render();
+    syncUrl();
+  }
+
+  function clearFilters() {
+    statusFilter = "";
+    anomalyOnly = false;
+    projectFilter = "";
+    HB.saveStatusFilter(PAGE, "");
+    HB.saveAnomalyOnly(PAGE, false);
+    HB.saveProjectFilter(PAGE, "");
+    pageNo = 1;
+    renderTabs();
+    render();
+    syncUrl();
+  }
+
+  /* 顶部标签组 = 状态五档（计数 = 项目范围内现算; 异常档取 Python 台账值对账） */
   function renderTabs() {
-    var host = document.getElementById("project-tabs");
-    if (!host) { return; }
-    HB.projectTabs(host, HB.projectValues(rows, "project"), projectFilter, function (v) {
-      pickProject(v);
-    });
+    var host = document.getElementById("status-chips");
+    var slot = document.getElementById("project-chip");
+    if (host) {
+      host.textContent = "";
+      var base = baseRows();
+      var counts = { "": base.length, pending: 0, active: 0, done: 0 };
+      var anomScoped = 0;
+      base.forEach(function (r) {
+        var s = statusOf(r);
+        if (counts[s] !== undefined) { counts[s] += 1; }
+        if (isAnomaly(r)) { anomScoped += 1; }
+      });
+      var pyTotal = Number((window.LIVE_ANOMALY || {}).anomaly_total || 0);
+      // CL276 评审 🟠3: chip 数须等于「点开后实际行数」⇒ 一律用行级 anomScoped;
+      // 台账 anomaly_total 与行级不等时只在 title 里对账（否则点开是 0 条却标 2 条）。
+      var anomCount = anomScoped;
+      var anomLedgerNote = (!projectFilter && pyTotal && pyTotal !== anomScoped)
+        ? ("；台账 anomaly_total=" + pyTotal + "，行级判定=" + anomScoped + "（以行级为准）")
+        : "";
+      var defs = STATUS_CHIPS.map(function (c) { return [c[0], c[1], counts[c[0]]]; });
+      defs.push(["anomaly", "异常", anomCount]);
+      defs.forEach(function (d) {
+        var key = d[0];
+        var isAnom = key === "anomaly";
+        var on = isAnom ? anomalyOnly : (statusFilter === key);
+        var b = HB.el("button", "chip chip-" + (key || "all") + (on ? " on" : ""),
+                      d[1] + " " + d[2]);
+        b.type = "button";
+        b.setAttribute("data-status", key);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+        b.title = isAnom
+          ? ("异常 " + anomCount + " 条（行级判定: critical/doc_missing/timeout/idle/skipped）"
+             + anomLedgerNote + "；可与任一状态叠加")
+          : ("只看「" + d[1] + "」" + d[2] + " 条；再点回到全部");
+        b.addEventListener("click", function () {
+          if (isAnom) { toggleAnomaly(); } else { pickStatus(key); }
+        });
+        host.appendChild(b);
+      });
+      /* 规格 §5.4: ≤960px 首屏只留 全部/进行中/异常, 待执行/已完成 收进「更多」 */
+      var more = HB.el("button", "chip chip-more", "更多 ▾");
+      more.type = "button";
+      more.title = "展开其余状态筛选（窄屏）";
+      more.setAttribute("aria-expanded", host.classList.contains("chips-open") ? "true" : "false");
+      more.addEventListener("click", function () {
+        var open = host.classList.toggle("chips-open");
+        more.setAttribute("aria-expanded", open ? "true" : "false");
+        more.textContent = open ? "收起 ▴" : "更多 ▾";
+      });
+      host.appendChild(more);
+    }
+    if (slot) {
+      slot.textContent = "";
+      if (projectFilter) {
+        var tag = HB.el("button", "chip chip-project on", "项目：" + projectFilter + " ✕");
+        tag.type = "button";
+        tag.title = "清除项目筛选（状态筛选保留）";
+        tag.addEventListener("click", function () { pickProject(projectFilter); });
+        slot.appendChild(tag);
+      }
+    }
   }
 
   /* ── 列设置（⚙; N3）──────────────────────────────────────── */
@@ -612,14 +744,34 @@
     });
     if (!list.length) {
       var e = HB.el("tr");
-      e.appendChild(HB.el("td", "empty-row", projectFilter
-        ? "（项目 " + projectFilter + " 下无任务; 再点当前标签清除筛选）"
-        : "（无队列/历史任务数据）"));
+      var c = HB.el("td", "empty-row",
+        (statusFilter || projectFilter || anomalyOnly)
+          ? "（该筛选下无任务："
+            + (statusFilter ? "状态=" + (STATUS_LABEL[statusFilter] || statusFilter) + " " : "")
+            + (projectFilter ? "项目=" + projectFilter + " " : "")
+            + (anomalyOnly ? "仅异常" : "")
+            + "）"
+          : "（无队列/历史任务数据）");
+      if (statusFilter || projectFilter || anomalyOnly) {
+        var clear = HB.el("button", "chip chip-clear", "清除筛选");
+        clear.type = "button";
+        clear.addEventListener("click", function () { clearFilters(); });
+        c.appendChild(document.createTextNode(" "));
+        c.appendChild(clear);
+      }
+      e.appendChild(c);
       body.appendChild(e);
     }
+    var filterBits = [];
+    if (statusFilter) {
+      var lbl = { pending: "待执行", active: "进行中", done: "已完成" }[statusFilter] || statusFilter;
+      filterBits.push("状态 " + lbl);
+    }
+    if (projectFilter) { filterBits.push("项目 " + projectFilter); }
+    if (anomalyOnly) { filterBits.push("仅异常"); }
     document.getElementById("meta-count").textContent = "共 " + list.length + " 条"
       + "（运行态 " + items.length + " + 历史态 " + tasks.length + " 合并 · 行键=编号）"
-      + (projectFilter ? " · 筛选 " + projectFilter : "");
+      + (filterBits.length ? " · 筛选：" + filterBits.join(" · ") : "");
     renderPager(list.length);
     if (splitMode) { showDetail(findRow(split.number)); }
     else { HB.closePanel(); }
@@ -693,7 +845,7 @@
   /* CL271 / SEC-597-1: 六列固定占比的**真实**落地。
      Chromium 在 `table-layout: fixed` 下丢弃「百分比 − 像素」混合单位 calc（列宽回落 auto ⇒ 六等分），
      故改为按 table.clientWidth 计算 px 后写 th.style.width（fixed 布局只认首行/表头宽度, td 自动跟随）。
-     口径: 项目列 96px; 六列权重 15/15/30/15/10/10（sum=0.95）; 若还有其它可见列, 六列按原权重占 95%,
+     口径: 项目列 96px; 六列权重 15/15/30/10/10/15（sum=0.95；按表头序 编号/进度/描述/耗时/Tokens/更新时间）; 若还有其它可见列, 六列按原权重占 95%,
      其余 5% 均分给它们（默认无其它可见列 ⇒ 六列按 /0.95 归一占满）。 */
   /* CL272 / SEC-598-1..3: 列宽 px 落盘（CL271 引入）必须**先清内联再测**，
      否则 fixed 布局下 table.clientWidth 已被上一次写入的 px 撑大 ⇒ 列宽棘轮（缩窗不回收、右侧列被裁）。
@@ -927,13 +1079,29 @@
       projectFilter = String(proj);
       HB.saveProjectFilter(PAGE, projectFilter);
     }
+    /* CL282 深链优先（评审尾项 A）: URL 参数**覆盖** localStorage —— 原实现把本地值又写回一遍,
+       ?status= 与 ?anomaly= 实际不生效（冷载仍按上次点选）。优先级: URL > localStorage > 默认 ""。
+       同时给出 ?status 与 ?anomaly: 两者正交（状态单选 + 异常开关），可同时生效。 */
+    var qStatus = qs.get("status");
+    if (qStatus !== null && qStatus !== "") {
+      /* SEC-600-8: 白名单比对（数组 indexOf）, 防 ?status=constructor / __proto__ 原型键穿透 */
+      statusFilter = STATUS_KEYS.indexOf(qStatus) !== -1 ? qStatus : "";
+      HB.saveStatusFilter(PAGE, statusFilter);
+    }
+    var qAnom = qs.get("anomaly");
+    if (qAnom !== null && qAnom !== "") {
+      anomalyOnly = !(qAnom === "0" || qAnom === "false");
+      HB.saveAnomalyOnly(PAGE, anomalyOnly);
+    }
   }
 
   /* CL039 数据失败占位（J1: 壳保留, 区域显示暂不可用） */
   function dataPlaceholder() {
     items = []; tasks = []; rows = []; expanded = {};
-    var tabs = document.getElementById("project-tabs");
+    var tabs = document.getElementById("status-chips");
     if (tabs) { tabs.textContent = ""; }
+    var pchip = document.getElementById("project-chip");
+    if (pchip) { pchip.textContent = ""; }
     var notice = document.getElementById("stats-notice");
     if (notice) {
       notice.textContent = "数据暂不可用（data/live.js 加载失败）; 30 分钟后自动重试";

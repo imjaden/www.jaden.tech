@@ -82,6 +82,21 @@ tr.anom-warn > td { background: rgba(245, 158, 11, .045); }
 }
 .tab-link:hover { color: var(--text); border-color: var(--cobalt-500); text-decoration: none; }
 .tab-link.active { background: var(--cobalt-600); color: #fff; border-color: var(--cobalt-600); }
+/* D9: 顶部状态 chip 组（全部/待执行/进行中/已完成/异常），带计数；窄屏横向滚动 */
+.status-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  background: var(--surface-900); color: var(--text-dim); border: 1px solid var(--line);
+  padding: 4px 12px; border-radius: var(--radius-md); font-size: 0.78rem;
+  font-family: inherit; cursor: pointer;
+}
+.chip:hover { color: var(--text); border-color: var(--cobalt-500); }
+.chip.on { color: #fff; border-color: var(--cobalt-600); background: var(--cobalt-600); }
+.chip-anomaly { border-color: rgba(248,113,113,0.45); color: #f87171; }
+.chip-anomaly.on { background: #b91c1c; border-color: #b91c1c; color: #fff; }
+.chip-project { border-color: rgba(79,70,229,0.5); color: #c7d2fe; }
+.chip-clear { margin-left: 6px; border-color: rgba(248,113,113,0.4); }
+.chip-slot:empty { display: none; }
 .meta-side { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--text-dim); font-size: 0.75rem; white-space: nowrap; }
 .switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; color: var(--text-dim); font-size: 0.72rem; }
 .switch input { accent-color: var(--cobalt-500); }
@@ -148,7 +163,14 @@ table.data-table { width: 100%; border-collapse: collapse; }
 .data-table th.sortable::after { content: " \25b4\25be"; font-size: 10px; color: #555; }
 .data-table th.sort-asc::after { content: " \25b4"; color: var(--cobalt-400); }
 .data-table th.sort-desc::after { content: " \25be"; color: var(--cobalt-400); }
-.data-table td { padding: 7px 10px; border-bottom: 1px solid var(--line-dim); font-size: 0.8rem; vertical-align: middle; white-space: nowrap; }
+/* SEC-599-1: 表头已裁切（CL272），表体同样必须裁切 —— 否则长文本压到相邻列。
+   td 直接持文本节点（desc 由 JS 截断到 DESC_MAX），故裁切声明落在 td 上；
+   单元格内层元素（badge/proj-tag）由下面第二条规则再兜一层。 */
+.data-table td { padding: 7px 10px; border-bottom: 1px solid var(--line-dim); font-size: 0.8rem; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.data-table td > span, .data-table td > div, .data-table td > a {
+  display: inline-block; max-width: 100%; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom;
+}
 .data-table td.col-desc { white-space: normal; min-width: 220px; }
 .data-table td.col-time { color: var(--text-dim); font-size: 0.74rem; }
 .data-table tbody tr { transition: background 0.15s; }
@@ -263,7 +285,12 @@ table.data-table { table-layout: fixed; }
 .guide-table td.col-ex { font-size: 0.74rem; color: var(--text-dim); white-space: normal; }
 
 footer { margin-top: 12px; color: var(--text-dim); font-size: 0.7rem; }
+/* CL282 规格 §5.4: 窄屏「更多」—— 宽屏不显示该按钮；≤960 把 待执行/已完成 收起 */
+.chip.chip-more { display: none; }
 @media (max-width: 960px) {
+  .chip.chip-more { display: inline-flex; }
+  #status-chips:not(.chips-open) .chip[data-status="pending"],
+  #status-chips:not(.chips-open) .chip[data-status="done"] { display: none; }
   .board-main, .board-main.split-on { grid-template-columns: minmax(0, 1fr); }
   /* C4d: 窄屏回单栏 ⇒ 分隔条隐藏（页内 JS 同判据: 不写内联列宽, 防内联样式压过本 media） */
   .split-handle { display: none !important; }
@@ -327,4 +354,6 @@ footer { margin-top: 12px; color: var(--text-dim); font-size: 0.7rem; }
 .docs-entry-item { margin-bottom: 12px; }
 .docs-entry-head { font-size: 0.8rem; margin: 0 0 4px; color: #e5e7eb; }
 .docs-entry-line { margin: 0 0 3px; color: #9ca3af; font-size: 0.76rem; line-height: 1.5; }
+.docs-group-head { font-size: 0.78rem; margin: 14px 0 6px; padding-top: 10px;
+  border-top: 1px solid #2a2a3e; color: #9ca3af; letter-spacing: .02em; }
 .docs-empty { color: #6b7280; font-size: 0.78rem; }
