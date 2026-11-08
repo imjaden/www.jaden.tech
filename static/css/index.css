@@ -388,3 +388,29 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .now-name.is-loading { animation: none; }
 }
+
+/* ===== 首帧分层进场（WHAT I'M TRACKING 改版） =====
+   载体原则（两条都由既有实现逼出来，勿改）：
+   ① .intro 只挂在**不参与 adjustMainHeight 内联 scale** 的元素上（#main .container 本身不用），
+      否则动画 transform 会顶掉 scale → 矮窗口内容被裁（index.js:19-26）；
+   ② 用 animation-fill-mode: backwards（不是 both）：延迟期显示 from 态（不闪），
+      动画结束即回到基础样式（无 transform）⇒ .now-card:hover / :active 的位移不被填充态压死。 */
+@keyframes intro-rise {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.intro {
+    animation: intro-rise .5s cubic-bezier(.2, .7, .2, 1) backwards;
+}
+.intro-1 { animation-delay: 0ms; }    /* logo */
+.intro-2 { animation-delay: 120ms; }  /* 归档图标行 */
+.intro-3 { animation-delay: 240ms; }  /* 区块标题 What I'm Tracking */
+.intro-4 { animation-delay: 360ms; }  /* 追踪卡（BMI/BWH · TOKENS） */
+.intro-5 { animation-delay: 480ms; }  /* 诗词区 */
+.intro-6 { animation-delay: 600ms; }  /* 页脚（备案号） */
+/* 同会话只播一次：index.html 头部内联脚本命中 sessionStorage ⇒ <html class="intro-skip"> */
+html.intro-skip .intro { animation: none; }
+/* 减少动态偏好：瞬显（内容本来就靠默认可见性，这里只是关掉动画） */
+@media (prefers-reduced-motion: reduce) {
+    .intro { animation: none; }
+}

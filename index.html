@@ -14,7 +14,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<link rel="shortcut icon" href="static/img/favicon-64.png?t=1793791974">
+<link rel="shortcut icon" href="static/img/favicon-64.png?t=1794110961">
 <meta name="keywords" content="Jaden Li, 李俊杰, Solutions Architect, AIOps, Enterprise AI, Hermes Agent, Shanghai">
 <meta name="description" content="Jaden Li (李俊杰), Solutions Architect. 14yrs: 8 Dev + 6 Presales. Enterprise AIOps delivery for China Telecom, China Mobile, UnionPay.">
 <meta property="og:title" content="Jaden Li">
@@ -25,7 +25,9 @@
 <!-- 首屏主图预载：单档 1600w（竖屏手机经 cover 裁切后需要的宽度 ≈1600，给小档反而被放大 2 倍变糊） -->
 <link rel="preload" as="image" type="image/avif" fetchpriority="high"
       href="static/img/bear01-1600.avif">
-<link rel="stylesheet" href="static/css/index.css?t=1793791974"/>
+<link rel="stylesheet" href="static/css/index.css?t=1794110961"/>
+<!-- 首帧分层进场：同会话只播一次。必须在首绘前决定，否则会闪一次动画 -->
+<script>try{ if (sessionStorage.getItem('jt-intro-seen') === '1') document.documentElement.className += ' intro-skip'; }catch(e){}</script>
 <!-- 关键内联：样式表未到达时也先给出预设底色与 hero 几何，避免白屏与跳动 -->
 <style>
   body { background: #b0b2b8; }
@@ -48,40 +50,40 @@
   </a>
 <section id="main">
   <div class="container">
-    <a href="javascript:void(0);" id="logo-link">
-        <img id="logo" src="static/img/logo-260.webp?t=1793791974"
+    <a href="javascript:void(0);" id="logo-link" class="intro intro-1">
+        <img id="logo" src="static/img/logo-260.webp?t=1794110961"
              width="130" height="130" alt="Jaden Li" decoding="async"/>
     </a>
-    <!-- 归档站入口：上一版 48×48 方形图标行（品牌位） -->
-    <div class="icon-links">
+    <!-- 归档站入口：上一版 48×48 方形图标行（品牌位）；图标体积小（2.7K/4.1K），懒加载只作"首帧干净"的表态 -->
+    <div class="icon-links intro intro-2">
       <a href="https://intfocus.archived.jaden.tech/" target="_blank" rel="noopener" title="Intfocus 归档站 ｜ Intfocus archive site">
-        <img src="static/img/icons/intfocus.png?t=1793791974" width="48" height="48" alt="Intfocus" decoding="async"/>
+        <img src="static/img/icons/intfocus.png?t=1794110961" width="48" height="48" alt="Intfocus" loading="lazy" decoding="async"/>
       </a>
       <a href="https://cloudwise.archived.jaden.tech" target="_blank" rel="noopener" title="Cloudwise 归档站 ｜ Cloudwise archive site">
-        <img src="static/img/icons/cloudwise.png?t=1793791974" width="48" height="48" alt="Cloudwise" decoding="async"/>
+        <img src="static/img/icons/cloudwise.png?t=1794110961" width="48" height="48" alt="Cloudwise" loading="lazy" decoding="async"/>
       </a>
     </div>
   </div>
 </section>
 <!-- 追踪器与诗词：上一版底部药丸栈（区块标题 + 同名药丸卡） -->
 <div class="bottom-stack">
-<section class="now-section" aria-label="Currently working on">
-  <h2 class="now-title" id="nowTitle" data-zh="我正在做的事项" data-en="What I'm Doing Now">我正在做的事项</h2>
-  <div class="now-cards">
-    <!-- a11y: 可访问名 = 可见标题（BMI-Tracker / Tokens-Tracker），不随 i18n 切换，属已知限制（D08） -->
+<section class="now-section" aria-label="Currently tracking">
+  <h2 class="now-title intro intro-3" id="nowTitle" data-zh="我在追踪的事项" data-en="What I'm Tracking">我在追踪的事项</h2>
+  <div class="now-cards intro intro-4">
+    <!-- a11y: 可访问名 = 可见标题（BMI/BWH、TOKENS），不随 i18n 切换，属已知限制（D08）；解释性文案在 title 双语 -->
     <a class="now-card" href="./bmi-tracker.html" target="_blank" rel="noopener"
-       title="让 BMI 持续下降 · 每日记录体重与训练 ｜ Keep BMI trending down · daily weight &amp; workout log">
+       title="BMI 与围度档案 · 体重 / 围度持续追踪（围度筹备中） ｜ BMI &amp; body measurements · weight log (measurements coming soon)">
       <span class="now-emoji" aria-hidden="true">⚖️</span>
-      <span class="now-name">BMI-Tracker</span>
+      <span class="now-name">BMI/BWH</span>
     </a>
     <a class="now-card" href="./tokens-tracker/" target="_blank" rel="noopener"
-       title="实践 AI Agent · Tokens 消耗持续上升 ｜ Hands-on AI agents · token usage keeps climbing">
+       title="AI Agent Token 消耗看板 · 跨项目任务板镜像 ｜ AI agents in practice · token usage board">
       <span class="now-emoji" aria-hidden="true">🧩</span>
-      <span class="now-name">Tokens-Tracker</span>
+      <span class="now-name">TOKENS</span>
     </a>
   </div>
 </section>
-<section class="poetry-section" aria-label="Today's Poetry">
+<section class="poetry-section intro intro-5" aria-label="Today's Poetry">
   <h2 class="now-title" id="poetryTitle" data-zh="今日诗词鉴赏" data-en="Today's Poetry">今日诗词鉴赏</h2>
   <div class="now-cards">
     <!-- 诗词标题是数据：先骨架条，数据到达后水合，不阻塞首帧 -->
@@ -93,7 +95,7 @@
   </div>
 </section>
 </div>
-<div class="footer">
+<div class="footer intro intro-6">
   <div class="wrap">
     <div class="ft-copy">
         <p><a href="https://beian.miit.gov.cn">备案号：沪ICP备20021619号-1</a></p>
@@ -157,6 +159,6 @@
   });
 })();
 </script>
-<script type="text/javascript" src="static/js/index.js?t=1793791974"></script>
+<script type="text/javascript" src="static/js/index.js?t=1794110961"></script>
 </body>
 </html>

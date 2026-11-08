@@ -137,4 +137,16 @@
     }
 
     applyLanguage();
+
+    /**
+     * 首帧分层进场（.intro / .intro-1..6）：同会话只播一次
+     * 头部内联脚本已按 sessionStorage 预置 <html class="intro-skip">；这里只在首播结束后打标，
+     * 让站内跳回首页时不再重播（1200ms > 最后一层 600ms 延迟 + 500ms 时长）。
+     * 打标失败（隐私模式/禁用存储）只影响"每次都播"，不影响可见性。
+     */
+    if (document.documentElement.className.indexOf('intro-skip') === -1) {
+        setTimeout(function () {
+            try { sessionStorage.setItem('jt-intro-seen', '1'); } catch (e) {}
+        }, 1200);
+    }
 })();
