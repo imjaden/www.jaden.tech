@@ -1131,6 +1131,50 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-11-09 — 夜间 L2 复审（7 笔未推：JT-CL004 门户门禁入仓 `scripts/portal-check.py` + tokens-tracker 壳/渲染重写 + 2 份设计/评审文档；新增 1 🟡 门禁判据陈旧失效 → PASS 90）
+
+- **review者**: Security Reviewer（review profile，站点仓夜间 L2 cron）
+- **范围**: `origin/main = 52befa6` 之上 **7 笔未推**（ahead 7 / behind 0，`git status --porcelain` 空）：`2dfe85c`（`TODO-handoff.md` 机器段 +32/−20）、`35790a9`（design +396）、`cc55e03`（review +187）、`8c2e9cd`（**`scripts/portal-check.py` +345 首次入仓**）、`ef85154`（TODO-handoff +2/−2 + `documents/README.md` +1）、`bcfd66e`（design +25/−12）、`6787ae4`（tokens-tracker 5 文件 **+315/−232**：`common.js` +39/−17、`shell-render.js` +183/−15、`style.css` +30/−1、`live.js` +271/−174、`index.html` +29/−16）。聚合 `git diff --stat 34e8527..HEAD` ⇒ **10 文件 +1526/−243**；`git diff --name-status --diff-filter=DR` **空**（无改名、无删除）。
+- **Tracking**: **JT-SEC-024（🟡 MEDIUM，新 OPEN）** + 结转 **JT-SEC-021（🟡）/ JT-SEC-019 / JT-SEC-020 / JT-SEC-022 / JT-SEC-023（🟢）**
+- **状态**: ✅ PASS（**90 / 100**，Rating A；🔴 0 / 🟡 2 / 🟢 8）
+- **报告**: 无独立评审件 —— 夜间 L2 绿批复审按站点仓既有 2 文件口径（本条目 + `.review-level.yaml`），`AUDITLOG.md` 已于 `ff08fec` 移除、不再重建
+- **实现 prompt**: ⬜ 无需生成（安全复审，非设计评审；无 markers）
+
+### 发现摘要
+
+**凭证扫描 Pass 1-4 全绿**：Pass 1（`sk-`/`sk-ant-`/`ghp_`/`github_pat_`/`AKIA`/`AIza`/`xox[baprs]-`/`-----BEGIN *PRIVATE KEY-----`）对 **80 个 tracked 文件 `git grep` ⇒ 0 命中**；Pass 2（`api[_-]?key|apikey|secret|password|passwd|access_token|auth_token|bearer` 引号赋值式）**0 命中**；Pass 3（`/Users/|~/CodeSpace|.hermes|localhost|127.0.0.1|192.168|token|secret|key|credential|密码|密钥|凭证`）对本轮 **1526 行新增**：宽词命中 19 行，逐行核为 `cache_read_tokens`/`total_tokens` 用量计数、`data-col="tokens"` 表头、设计/评审件自述的扫描口径与 `SEC-571-16` 任务语义，**无凭证字面量**；绝对路径命中 9 行全在 `documents/**`（见 JT-SEC-020 扩面）；Pass 4（注释幽灵键）对 `34e8527..HEAD` 全量 `git log -p` 新增行复扫 **0 命中**。PII（邮箱 / `1[3-9]` 手机 / 身份证）**0 命中**。`git ls-files` 无 `.env*` / `.pem` / `.key` / 私钥入库；`cache/` 由 `.gitignore` 覆盖（`git status --ignored` ⇒ `!! cache/`）。
+
+**`scripts/portal-check.py` 代码面（345 行为新入仓的生产脚本）**：只读 —— 无 `open(...,"w")` / 无 `write_text` / 无仓内落盘；**无命令执行面** —— `shell=True` / `os.system` / `subprocess.call|run|Popen` **0 处**（第 23 行 `import subprocess` 为**死 import**，全文件无消费者，🟢 观察项）；`ROOT = Path(__file__).resolve().parents[1]` 相对定位正确（上轮设计件 Q7 指出的 `parents[3]` 陷阱未踩）；无 `eval`/`exec`/`__import__`；正则解析对象仅为仓内自有 HTML/CSS/JS，无外部输入。**实跑**：`--mode post` **15/15 rc=0**、`--selftest` **17/17 rc=0**（S10 注入 `.now-desc` 后 S1/S6 双红、S16 回退旧文案后 S14 红 ⇒ 判据非常量真）；`python3 -m py_compile` OK。
+
+**tokens-tracker 壳/渲染重写（本轮最大新代码面）注入面归零**：`innerHTML` / `outerHTML` / `insertAdjacentHTML` / `document.write` / `eval(` / `new Function` / `setTimeout("…")` 在 `index.html` + `common.js` + `shell-render.js` **合计 0 处**（`common.js:123` 唯一 `innerHTML` 命中在注释「**禁 innerHTML**」内）；渲染统一走 `el()`（`textContent`）+ `document.createTextNode`（`common.js` textContent 16 / createElement 16，`shell-render.js` textContent 37 / createElement 17）。md 轻量渲染器 `mdToFragment` 仅产出 `p/h/code/strong/em` 文本节点，`linkPlain()` 把 `[text](url)` **降级为纯文本 ⇒ 不生成 `<a href>`**，故不存在 `javascript:` 链接面；`6787ae4` 新增行 `innerHTML|insertAdjacentHTML|document.write|eval|new Function|.src =|location.href =|onclick=|javascript:` **0 命中**；`onclick=` 计数 HEAD **0** == `origin/main` **0**；`fetch(` / `XMLHttpRequest` / `sendBeacon` **0 处**（数据只经同源 `<script src="data/live.js?t=…">` 注入，与既有壳/数据分离口径一致）；动态 `setAttribute("href")` / `.target =` **0 处**。删除面核验：`projectTabs`（`a.href="#"`）、旧 `BOARD_DOCS` 内联渲染、`project-tabs` 导航块均被**等价替换**为行内项目标签 + 文本节点渲染，**未删除任何安全守卫**。
+
+**输入面（URL / localStorage）逐点校验**：`?ratio=` 先经 `HB.ratioToPct(v) !== null` 白名单式校验（非法值回落 `"15:85"`），自定义拖拽比例解析为数值后进 `style.width = w + "px"`，**无 CSS 注入面**；`?cols=` / `?status=` / `?pfilter=` / `?project=` 仅参与**等值比较**与列 key 匹配（未知 key 不产生元素）；`?number=` 走 `findRow()` 在已渲染行集合内匹配，未命中即不动作；`ratio` / `cols` 回写 URL 走 `URL.searchParams.set` + `history.replaceState`；30 分钟刷新 `location.replace(location.pathname + search + …)` **只拼同源 pathname**（无 protocol/host 变量）⇒ 无开放重定向面。
+
+**安全控制集无回归**：`<meta name="referrer" content="strict-origin-when-cross-origin">` **8/8 HTML 全在**（含 `tokens-tracker/index.html:6`）；`target="_blank"` ↔ `rel="noopener"` 计数 `index.html` **6/6**、`tokens-tracker/index.html` **1/1**、`daily-poetry.html` 1/1、`bmi-tracker.html` 1/1、`daily-tracker-archive-*.html` 1/1（`wechat.html` 1/0 为**同源**内链，历轮既有零风险观察项）；SRI **2/2** —— `chart.js@4.4.7` 两处 `integrity="sha384-vsrfe…"` + `crossorigin="anonymous"` + `defer` 与 `origin/main` **逐字节相同**；外链域集合不变（`cdn.jsdelivr.net` ×2 脚本、`www.jaden.tech` 图标、`github.com` 角标、两个 `*.archived.jaden.tech`）；`tokens-tracker` 无新增外链；`?t=` 全仓唯一值 **1794111578**（`timestamp-manager.py check` RC=0，`index.html` 6 处 + `wechat.html` 1 处同值，18h42m 龄属正常）。
+
+**生成物（`6787ae4` 数据笔）零指纹**：`live.js` 头注释仅「公开镜像 · 自动同步 · 已脱敏过滤」一行；`<script|javascript:|onerror=|onload=|innerHTML|document.cookie` **0 命中**；顶层 `window.*` 键集不变（`WEB_DATA_META`/`LIVE_ITEMS`/`BOARD_STATS`/`HIST_*` 共 8 个，LIVE_ITEMS 条目数增长），`generated_at 2026-11-08T22:09:38+08:00`（距评审 ~9h，未破 30h 阈）；`BOARD_DOCS` 内联 `application/json` 块正文**不含 `</script`**（注释符内嵌检查 `grep -c` = 1，即其自身闭合标签）⇒ 无 JSON-in-script 逃逸面；`OUT` 键渲染全走 `JSON.parse(…textContent)` + `el()` 文本节点。
+
+**JT-SEC-024（🟡 MEDIUM，新 OPEN）—— AGENTS.md 钉的首屏回归判据在 HEAD 实测为红，且已红 14 天**：`python3 scripts/perf-check.py` ⇒ **rc=1，3 条断言失败**：①`layout: icon-links row + bottom pill stack present`、②`layout: exactly 5 entries`（`pills=3 + icon-links=0`）、③`layout: 2 section titles`（`found 1`）。**归因（逐 commit 实测，非推测）**：`adb887d` 引入该布局契约时 `class="icon-links"` = 1、`now-title` = 2 ⇒ 绿；`5e98bad`（JT-CL003 首页 portal 改版，2026-10-26）把图标带改为 `class="icon-links intro intro-2"`（六层进场载体）并把 `now-title` 2→1 ⇒ **自该笔起恒红**，`4ffda68` / HEAD 逐值继承。判定：**页面布局本身是刻意改版（非回归）**，失效的是**判据面** —— `perf-check.py:96` 用 `'class="icon-links"' in index` 精确串、`:100` 用 `<div class="icon-links">` 精确正则、`:104` 写死 `n_titles == 2`，均未随 CL003 同步；`grep -in "perf.check|perf_check|perfcheck" review-log.md .review-level.yaml` ⇒ **0 命中**，说明该钉子从未进入历轮评审回路（历轮均以 `cache/scratch/JT-CL001/check.py --mode post` 为门禁，`portal-check.py` 入仓后亦未纳入 perf 面）。风险 = AGENTS.md 声明的「rc=0 才算绿」首屏守卫**实质失效**，未来 `?t=` 漂移 / 请求集膨胀 / 体积超预算不会被拦（当前其体积预算与 `?t=` 一致面子项自身为 PASS，故**无现存安全暴露**，仅判据失效）。**改法**：`perf-check.py:96` 改 `re.search(r'class="[^"]*\bicon-links\b', index)`、`:100` 同宽化并对当前布局定 `pills=3 + icon-links=2`（合 5 入口，与 `index.html` 实测 3 `now-card` + 2 图标 `a` 一致）、`:104` 改 `n_titles >= 1` 或按新口径重述契约；并在 TODO-handoff / AGENTS 的 harness 行同时登记 `perf-check.py` 与 `portal-check.py` 双钉，避免再次漏跑。
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| 1 | 🟡 MEDIUM | **JT-SEC-024** `scripts/perf-check.py` 在 HEAD rc=1（3 断言失败），判据面自 `5e98bad`（2026-10-26）未随改版同步；`review-log` 从未记录该钉子 ⇒ 首屏守卫实质失效 | **OPEN（本轮新增，P2 建议本轮内修判据：3 行正则宽化）** |
+| 2 | 🟡 MEDIUM | **JT-SEC-021** `javascript:` FAQ 死链生成器侧根因未修（结转） | OPEN 无变化（tracked HTML 仅 `index.html:53` 的 `javascript:void(0)` 刻意 inert 锚点，FAQ 死链本轮 0 再生，无 REGRESSION） |
+| 3 | 🟢 LOW | **JT-SEC-019** `tokens-tracker/index.html:116` footer 版本披露 `hermes-manager · 1.11(20261015)` | OPEN 无变化（该页本轮被重写，披露行保留） |
+| 4 | 🟢 LOW | **JT-SEC-020** `documents/**` 本地绝对路径披露 —— 本轮**扩面**：`documents/design/JT-CL004-…-20261108.md` 3 处、`documents/reviews/JT-CL004-…-review-…md` 3 处（另 `~/CodeSpace`、`~/.hermes/profiles/ops|review/cache/scratch`），全仓 10 文件命中 | OPEN（扩 2 文件 6 处，无凭证无 PII） |
+| 5 | 🟢 LOW | **JT-SEC-022** `TODO-handoff.md:14` 公开 `~/CodeSpace/www.jaden.tech` 与 branch | OPEN 无变化 |
+| 6 | 🟢 LOW | **JT-SEC-023** `tokens-tracker/data/live.js` desc「**SEC-571-16：深探 key 轮换**」披露内部凭据轮换任务语义 | OPEN（较上轮已去掉 provider 名，语义仍在；建议 `1acl-board-gen` 对 desc 加凭据生命周期词遮罩或整条置空） |
+| — | 🟢 | 凭证 Pass 1-4、PII、私钥入库、`--diff-filter=DR`、工作树干净（7 笔全部为本地未推、无夹带其他前缀） | PASS |
+| — | 🟢 | `portal-check.py` 只读无命令执行，`--mode post` 15/15 + `--selftest` 17/17 RC=0，`py_compile`/`node --check` OK | PASS |
+| — | 🟢 | 重写面注入归零（innerHTML 0 / md 渲染全 textContent / `[t](url)` 文本化 / 无 fetch-eval-动态 href / 删除面无守卫丢失） | PASS |
+| — | 🟢 | 输入面校验：`?ratio=` 白名单+数值化、`?cols/?status/?number` 等值比较、刷新仅拼同源 pathname | PASS |
+| — | 🟢 | 控制集无回归：referrer 8/8、noopener 6/6+1/1、SRI 2/2、戳 1794111578 全仓同值、外链域不变 | PASS |
+| — | 🟢 | 生成物零指纹：`live.js` 危险串 0、键集不变、`BOARD_DOCS` 无 `</script` 逃逸、desc 走 textContent | PASS |
+| — | 🟢 | `portal-check.py:23 import subprocess` 为死 import；`loadRetro(slug)` 动态 script src 路径休眠（`live.js` 0 个 `retro_slug`、`data/` 仅 `live.js`）——启用前须加 `[a-z0-9_-]` 白名单 | 观察项（不计发现） |
+
+计分：100 − 5（JT-SEC-021 结转 🟡）− 5（JT-SEC-024 新增 🟡）= **90 / 100 → A → PASS**。🟢 8 条仅记录/观察项（死 import、`loadRetro` 休眠路径、`wechat.html` 同源 `_blank` 无 noopener 既有债），不计入 `findings_total`。PASS ⇒ 审计笔 path-scoped commit（本文件 + `.review-level.yaml`）并**连带推送全部 7 笔本地待推 commit**（`git push origin main`，ff-only）。
+
+---
 ## 条目格式说明
 
 ```
