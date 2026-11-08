@@ -338,9 +338,36 @@ PII 类（邮箱 / 手机号 / 身份证 / IPv4）
 - `review-log.md`：新增 `## 2026-10-26 — JT-CL003「Y1 关账轮」` 条目（`Y1 ✅ CLOSED (d69d7b9)` + 实测三行）
 - `.review-level.yaml`：`review_history` 追加一条（`verdict: PASS` / `score: 100` / `findings_total: 0` / `findings_open: 0`），追加后 `yaml.safe_load` 复验
 
-### 8.2 推送与三验
+### 8.2 推送与三验（实测，非预测）
 
-（本节结果由后续 `audit@review:` 回填笔写入，内容为真实命令输出，不使用预测值。）
+- **评审笔**: `f668bdf9c6303285ab491eba6ad3b9bb2f8a786d`（`audit@review: JT-CL003 Y1 closed (logo intro carrier) + push`），**3 文件 +412 行** —— 本评审件 `+357` / `review-log.md +47` / `.review-level.yaml +8`；提交面**不含** `index.html` / `wechat.html` / `static/**` 任何改动（`git diff --cached --name-only` 逐条核对）。
+- **推送前 ff 校验**: `git merge-base --is-ancestor origin/main HEAD` ⇒ `ff-ok (origin/main is ancestor of HEAD)`（`origin/main = 8f37e8c`）。
+- **推送**: `git push origin HEAD:main` ⇒
+
+```
+To github.com:imjaden/www.jaden.tech.git
+   8f37e8c..f668bdf  HEAD -> main
+push rc=0
+```
+
+  仅此一条命令；无 `--force` / 无 `--all` / 无 `--tags` / 未改写历史。
+
+- **三验（在 `f668bdf` 上执行）**:
+
+```
+① local  : f668bdf9c6303285ab491eba6ad3b9bb2f8a786d
+   remote : f668bdf9c6303285ab491eba6ad3b9bb2f8a786d
+   ⇒ MATCH
+
+② git log --oneline origin/main..HEAD | wc -l
+   0
+
+③ git status --porcelain | wc -l
+   0
+   （git status -sb ⇒ ## main...origin/main，无 ahead/behind 标记）
+```
+
+- **回填笔**: 本节实测值为后续一笔 `audit@review:` 回填；回填笔推送后以**同一三命令**复跑（HEAD == 远端 tip / `origin/main..HEAD` 为空 / 工作树干净），最终 tip 以 `git rev-parse HEAD` 与 `git ls-remote origin refs/heads/main` 对照为准。
 
 ## 9. 方法论观察（不计发现）
 

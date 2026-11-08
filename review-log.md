@@ -1085,9 +1085,10 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ### 推送与三验
 
-- **评审笔**: 见复审件 §8.2（由 `audit@review:` 回填笔写入真实 sha 与命令输出）。
-- **推送**: 仅 `git push origin HEAD:main`（ff-only），无 force / 无 `--all` / 无 `--tags`。
-- **三验**: ① `git rev-parse HEAD` == `git ls-remote origin refs/heads/main`；② `git log --oneline origin/main..HEAD` 行数 0；③ `git status --porcelain` 行数 0。实测值见复审件 §8.2。
+- **评审笔**: `f668bdf9c6303285ab491eba6ad3b9bb2f8a786d`（`audit@review: JT-CL003 Y1 closed (logo intro carrier) + push`），3 文件 **+412** 行（复审件 +357 / 本文件 +47 / `.review-level.yaml` +8），不含 `index.html` / `wechat.html` / `static/**` 改动；推送前 `git merge-base --is-ancestor origin/main HEAD` ⇒ rc=0（ff 成立，`origin/main = 8f37e8c`）。
+- **推送**: `git push origin HEAD:main` ⇒ `8f37e8c..f668bdf  HEAD -> main`，rc=0；无 force / 无 `--all` / 无 `--tags`。
+- **三验（在 `f668bdf` 上）**: ① `git rev-parse HEAD` = `f668bdf9c6303285ab491eba6ad3b9bb2f8a786d` **==** `git ls-remote origin refs/heads/main` 同值；② `git log --oneline origin/main..HEAD | wc -l` = **0**；③ `git status --porcelain | wc -l` = **0**（`git status -sb` ⇒ `## main...origin/main`）。三项全绿，实测输出见复审件 §8.2。
+- **回填笔**: 上述实测值为后续一笔 `audit@review:` 回填；回填笔推送后以同一三命令复跑，最终 tip 以 `git rev-parse HEAD` 与 `git ls-remote` 对照为准。
 
 ---
 
