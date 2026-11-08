@@ -991,6 +991,52 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-10-26 — JT-CL003 首页 portal 改版评审（What I'm Tracking + BMI/BWH / TOKENS + 六层首帧阶梯进场）
+
+- **review者**: Security Reviewer（review profile，本批串行最后一步）
+- **范围**: `5e98bad`（`feat@site: portal revamp`）**4 文件 +60/−20** —— `index.html` (+22/−18) / `static/css/index.css` (+26/−0) / `static/js/index.js` (+12/−0) / `wechat.html` (+1/−1，仅换戳)。`git diff --stat HEAD~1` 与任务书表格**逐值一致**；`wechat.html` diff 仅 `?t=1793791974 → 1794110961`；`git show --name-only | grep -E "bmi-tracker|tokens-tracker|documents/"` ⇒ `NO FORBIDDEN PATHS`；开工 `git status --porcelain` 空。
+- **Tracking**: **R1 文案面**（`index.html:71` `data-zh="我在追踪的事项"` / `data-en="What I'm Tracking"` + `:77 BMI/BWH` / `:82 TOKENS` + `:70 aria-label="Currently tracking"` + `:75/:80` 双语 tooltip 含全角「｜」；旧文案 `grep -c` = **0**）✅；**R2 首帧分层进场**（`index.css:392-415` keyframes + 6 档 delay 0/.12/.24/.36/.48/.6s + `fill=backwards` + `intro-skip` + `prefers-reduced-motion`；head 内联防闪；`index.js:147` 1200ms 打标）✅（1 处 🟡 见 Y1）；**R3 资源与戳**（图标 lazy / 背景+logo eager / QR 不进 HTML / 双文件同戳 `1794110961` 复算成立）✅。**反转自证（本轮独立做，未引作者结论）**：基线 `S14=True S15=True` → 反转①卡名回退 `BMI-Tracker` ⇒ `S14=False`；反转②`.intro` 挪至 `#main .container` ⇒ `S15=False (container_ok=False)`；追加单变量 `rev2b`（仅挪载体、层数仍 6）⇒ `container_ok=False` 独打红 / `rev2c`（`.now-card` 基础块加 `transform`）⇒ `card_no_tf=False` 独打红。**Y1**（🟡 LOW）`#logo-link` 为 `display:inline`，CSS Transforms 规范下不接受 `transform` ⇒ 六层中首层**只有淡入无位移**（实测 L1 `rectTop` 恒 166.000 vs ty 10→0.19，opacity 0→0.712→0.961→1）；修法 `#logo-link{display:inline-block}`，须回归三档 `rectTop−final==ty` 与 `.icon-links` top。**G1** 门禁复跑 `--mode post` **15/15** + `--selftest` **17/17** RC=0；**G2** 判别力三支单变量（上）；**G3** 几何三档（`.now-section` 作用域，全页 3 张 `.now-card` 已排除诗词卡）：top 差 **0**、padding `12px 22px`/`7px 12px`、gap `10`/`8`、radius `999px`、`cursor:pointer`、`scrollW/H == innerW/H` 全绿；**G4** 净空自量 1280→**929.46**、345→行内 **70.28**（视口 102.28；卡 119.95+114.77+gap8=242.72，行宽 313）、812→**533.28**，与作者 `120+114.8/242.8` 在 ±0.08px 内一致但净空分母须用行宽 313；**G5** 阶梯定格 350ms opacity `0.98/0.91/0.68/0/0/0`、1100ms 全 1，rAF 真实帧 t=323.7ms `0.952/0.820/0.312/0/0/0` 互相印证；**G6** 无 CLS：L2–L6 `rectTop(t)−rectTop(final)` 恰等于 `translateY(t)`，`offsetTop`/`offsetHeight`/`scrollHeight`/`.now-cards` 高全程恒定；**G7** 兜底四式：`CSS.forcePseudoState(hover)` 本机生效 ⇒ `matrix(1,0,0,1,0,-1)` + border/bg 变色、二访 `htmlClass=' intro-skip'` + 六层 `animation:none` opacity 1、reduced-motion 六层 `none`/`1`、停用脚本后六层仍 opacity 1 且中文标题可读；**G8** 戳与资源：`timestamp-manager.py check` RC=0 双文件同值 1794110961、图标 2× lazy、`#background` `fetchpriority=high` 无 lazy、`#logo` 无 lazy、QR `grep -c`=0、0 console error / 0 HTTP≥400 / 0 loadingFailed；**G9** 安全面：本笔 60 新增行 + 连带镜像笔 548 行，凭证/PII/本地绝对路径三扫 **0 命中**，唯一内联脚本为 `sessionStorage` 读且 try/catch 包裹、只存 `'1'`。**语义裁定（任务书 §2.8）🟢 可接受不回退**：`bmi-tracker.html` `grep -ic "BWH|三围|waist"` = **0**（仅 21× `weight`），但 tooltip 明写「围度筹备中 / measurements coming soon」构成诚实披露、链接目标未变、无空表误导 ⇒ 记 **BWH 数据面待补** 待办（🟢 不阻断），落数据后须同步呈现三围字段否则收敛或回退命名。观察项（不计发现）：`className += ' intro-skip'` 在空 className 下产出前导空格（选择器不受影响）；push 连带 4 笔 `data@update` 镜像笔（`795bacf`/`229b4d8`/`6f60320`/`39177e7`，548 行，含 `shell-render.js +169`/`style.css +78`/`index.html +84`）仅做凭证扫描、**未做功能审计**，若上游未另行评审建议补镜像专项。
+- **状态**: ✅ PASS（95 / 100，Rating A；🔴 0 / 🟡 1 / 🟢 9）
+- **报告**: `documents/reviews/JT-CL003-portal-revamp-review-v1.0-20261026.md`
+- **实现 prompt**: ⬜ 无需生成（实现/审计类评审；唯一动作面为 Y1 一行 `#logo-link{display:inline-block}` + BWH 数据面待补）
+
+### 发现摘要
+
+**改动面与禁改面**：4 文件 +60/−20 与任务书逐值一致；`wechat.html` 仅 favicon `?t=` 数字变化（`1793791974 → 1794110961`），无其它行；`bmi-tracker.html` / `tokens-tracker/**` / `documents/**` 零命中；`git status --porcelain` 空（`cache/` 由 `.gitignore` 覆盖，`git status --ignored` ⇒ `!! cache/`）。
+
+**文案面**：`grep -n "What I'm Tracking\|我在追踪的事项\|BMI/BWH\|TOKENS\|Currently tracking" index.html` 命中 `:70/:71/:73/:77/:82` 五行；旧文案（`What I'm Doing Now` / `我正在做的事项` / `BMI-Tracker` / `Tokens-Tracker`）`grep -c` = **0**；两卡 `title` 各 1 份、均双语、均含全角「｜」，`&` 已转义为 `&amp;`（门禁 `bare_amp=0` / `card_aria=0`）。
+
+**门禁可靠性（本批核心）**：`check.py --mode post` **15/15**、`--selftest` **17/17**（S10 注入 `.now-desc` ⇒ S1+S6 转红；S16 回退旧文案 ⇒ S14 转红）。本轮另行以 `run(mode="post", html=<变异体>, css=<原样>)` 直调 harness 做**独立**反转：基线双绿 → ①卡名回退 `BMI-Tracker` ⇒ `S14=False`；②`.intro` 挪至 `.container` ⇒ `S15=False`。因②同时把 layers 变成 5（混入第二变量），追加 `rev2b`（仅把 `intro intro-1` 从 `#logo-link` 挪到 `.container`，层数保持 6）⇒ `container_ok=False` 且 `layers=6`；`rev2c`（CSS 给 `.now-card` 基础块加 `transform: none`）⇒ `card_no_tf=False` ⇒ **两条子判据各自具备独立判别力**，S15 非恒真。
+
+**真机几何（Chrome 156 headless + CDP，本地 `http.server` 只读）**：口径修正——`.now-card` 全页 3 张（Now 2 + 诗词 1），本报告全部指标限定 `.now-section` 作用域，否则「两卡同行」会被诗词卡误判为 false（首轮未限定即观测到 `sameRow=false` 的假阴性，已改正）。三档实测：**1280×800** 卡 156.23/150.31 top 573.23（差 0）、pad `12px 22px`、gap 10、radius 999、pointer、`scrollW/H=1280/800`；**345×667** 卡 119.95/114.77 top 505.02（差 0）、pad `7px 12px`（矮视口档生效）、gap 8、`scrollW/H=345/667`；**812×375** 卡 119.95/114.77 top 213.02（差 0）、pad `7px 12px`、gap 8、`scrollW/H=812/375`。三档 `centered=0`（卡组精确居中）。中文档（`navigator.language='zh-CN'`）⇒ 标题渲染「我在追踪的事项」、`bodyHasEnTitle=false`、卡名 `['BMI/BWH','TOKENS']` 不随语言变；英文档 ⇒ `WHAT I'M TRACKING`（`text-transform: uppercase`）。
+
+**动效**：①六层定格（文档启动即 `pause` 六个 `CSSAnimation` 再设 `currentTime`，避免读到已结束的空集——首轮直接读时 `animCount=0` 全部为 1，该假阴性已排除）：`delays=['0s','0.12s','0.24s','0.36s','0.48s','0.6s']`、`dur=0.5s`、`fill=backwards`；350ms opacity `0.98/0.91/0.68/0/0/0`、ty `0.19/0.88/3.23/10/10/10`；1100ms 全 1。②真实 rAF 轨迹（2.2s / 62 帧）在 323.7ms 取到 `0.952/0.820/0.312/0/0/0`，与定格法同形态。③CLS：`rectTop(t)−rectTop(final)` 对 L2–L6 **恰等于** `translateY(t)`（t=0/120/240/300/350/400/480/600/900/1100 十点全 OK），`offsetTop`/`offsetHeight`/`scrollHeight`/`.now-cards` 高全程恒定 ⇒ 布局不参与动画。④hover：`CSS.forcePseudoState(hover)` 本机**有效**，`transform=matrix(1, 0, 0, 1, 0, -1)` + `border rgba(255,255,255,0.5)` + `bg rgba(12,18,30,0.55)`；机制侧 `fill=backwards`（非 both）+ 基础块无 `transform`（`card_no_tf=True`）。⑤二访 `sessionStorage['jt-intro-seen']='1'` ⇒ `htmlClass=' intro-skip'`、六层 `animation-name:none`/opacity 1；首访 2.2s 后 `seen='1'` 正确写入。⑥reduced-motion ⇒ `matchMedia=true`、`intro anims=0`、六层 `none`/`1`。⑦`Emulation.setScriptExecutionDisabled(true)` 重载 ⇒ 六层仍 opacity 1、标题 `w=1248 h=20.4 vis=visible`、卡文 `‼ BMI/BWH`/`TOKENS` 可读。
+
+**Y1（🟡 LOW）六层中首层只淡入不位移**：`L1 a#logo-link.intro.intro-1 display=inline`（L2 flex / L3 block / L4 flex / L5 block / L6 block）。CSS Transforms Level 1 规定 `transform` 仅作用于 transformable element，非 replaced inline box 不在其列 ⇒ 定格实测 L1 `rectTop` 恒 `166.000` 而 ty 从 `10.00` 降到 `0.19`，opacity 仍正常阶梯 `0→0.712→0.921→0.961→0.992→1`。设计意图为六层同构上移（`index.css:392-401` 共享规则），故属实现偏差而非刻意；影响面纯视觉精细度（无 CLS、无 a11y 语义变更、不影响 hover 与三兜底）。修法：`#logo-link{display:inline-block;}`（本批 review 禁改 `static/**`，交 ops），落改后须回归三档 `rectTop−final==ty`、`#main` 居中、`.icon-links` top（`margin-top` 依赖前块级盒）、门禁 15/15。
+
+**语义接受度（任务书 §2.8）**：`grep -ic "BWH\|三围\|waist" bmi-tracker.html` = **0**，字段面仅 21× `weight`。裁定 **🟢 可接受、不回退命名**：tooltip「围度筹备中 / measurements coming soon」构成诚实披露（未声称现有数据）、`href="./bmi-tracker.html"` 目标未变（无空表导向）、`BMI-Tracker → BMI/BWH` 使 345px 档单行容纳（实测 119.95px）并为围度落地预留命名。记 **`BWH 数据面待补`** 为 🟢 待办：数据落地后须同步呈现三围字段，否则收敛「筹备中」表述或回退命名。
+
+**安全面**：本笔 `git show --unified=0` 新增 60 行 —— 凭证前缀（`sk-`/`ghp_`/`github_pat_`/`AKIA`/`BEGIN … PRIVATE KEY`/`api_key=|secret|password=|bearer`）**0 命中**；PII（邮箱/`1[3-9]` 手机/18 位身份证）**0 命中**；本地绝对路径（`/Users/`/`~`/`/home/`/`C:\`/`/private/`/`/var/`/`/tmp/`）**0 命中**。新增内联脚本仅 `sessionStorage.getItem` 一次读、`className +=` 一次写、整体 `try{}catch(e){}` 包裹（隐私模式不阻断解析），存储值为常量 `'1'` 无 PII、不随请求外发。无新增内联事件属性 / `innerHTML` / `eval` / `new Function` / 动态 `<script>`。push 载荷另含 548 行镜像笔新增，同跑三扫 **0 命中**。
+
+**观察项（不计发现）**：①`className += ' intro-skip'` 在空 className 下产出前导空格 `' intro-skip'`，`html.intro-skip` 选择器不受影响，无功能后果；②push 连带 4 笔 `data@update` 镜像笔（`795bacf` 11-05 / `229b4d8` 11-06 / `6f60320` daily-tracker 11-07 / `39177e7` tokens-tracker 11-07），含 `tokens-tracker/assets/shell-render.js +169`（新增 `anomalyRank`/`anomalyTitle`/`renderAnomBar`/`applyColWidths`）/ `style.css +78` / `index.html +84` —— 该 4 笔**不在本批被审对象内**，仅做凭证/PII/路径扫描，未做功能审计；若上游 1acl 板生成器侧未另行评审，建议补一笔镜像专项复核。
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | 改动面 4 文件 +60/−20 逐值一致；`wechat.html` 仅换戳；禁改面零命中；工作树干净 | PASS |
+| — | 🟢 | 文案面：新标题/卡名/tooltip/aria 全落位，旧文案 `grep -c`=0，`bare_amp=0` | PASS |
+| — | 🟢 | 门禁 `--mode post` 15/15 + `--selftest` 17/17 RC=0 | PASS |
+| — | 🟢 | 反转自证三支（S14 文案 / container_ok / card_no_tf 各自单变量打红）⇒ S14/S15 非恒真 | PASS |
+| — | 🟢 | 几何三档全绿；净空自量 929.46 / 70.28（视口 102.28）/ 533.28 | PASS |
+| — | 🟢 | 六层阶梯（定格+rAF 双法）；无 CLS；hover `matrix(1,0,0,1,0,-1)`；三兜底齐备 | PASS |
+| — | 🟢 | 戳 1794110961 复算成立；图标 lazy / 背景 logo eager / QR 按需；0 console error / 0 HTTP≥400 | PASS |
+| — | 🟢 | 安全面 60 行 + 连带 548 行 凭证/PII/路径 0 命中 | PASS |
+| — | 🟢 | 语义裁定：`BMI/BWH` 无 BWH 数据但 tooltip 诚实披露 ⇒ 可接受，记 `BWH 数据面待补` 待办 | PASS（待办） |
+| 1 | 🟡 LOW | **Y1** `#logo-link` `display:inline` ⇒ `translate3d` 不生效，六层中首层只淡入不位移；修法 `display:inline-block` | OPEN（一行可修） |
+
+计分：100 − 5（1× 🟡 Y1）= **95 / 100 → A → PASS**；🟢 9 条仅记录（沿用本项目口径，不计入 `findings_total`）。PASS ⇒ `git add` 评审件 + `review-log.md` + `.review-level.yaml` 三路径 → `audit@review:` 笔 → `git push origin HEAD:main`（ff-only，连带本地 4 笔 `data@update` 镜像笔）。
+
+---
+
 ## 条目格式说明
 
 ```
