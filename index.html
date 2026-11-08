@@ -14,7 +14,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<link rel="shortcut icon" href="static/img/favicon-64.png?t=1794110961">
+<link rel="shortcut icon" href="static/img/favicon-64.png?t=1794111578">
 <meta name="keywords" content="Jaden Li, 李俊杰, Solutions Architect, AIOps, Enterprise AI, Hermes Agent, Shanghai">
 <meta name="description" content="Jaden Li (李俊杰), Solutions Architect. 14yrs: 8 Dev + 6 Presales. Enterprise AIOps delivery for China Telecom, China Mobile, UnionPay.">
 <meta property="og:title" content="Jaden Li">
@@ -25,7 +25,7 @@
 <!-- 首屏主图预载：单档 1600w（竖屏手机经 cover 裁切后需要的宽度 ≈1600，给小档反而被放大 2 倍变糊） -->
 <link rel="preload" as="image" type="image/avif" fetchpriority="high"
       href="static/img/bear01-1600.avif">
-<link rel="stylesheet" href="static/css/index.css?t=1794110961"/>
+<link rel="stylesheet" href="static/css/index.css?t=1794111578"/>
 <!-- 首帧分层进场：同会话只播一次。必须在首绘前决定，否则会闪一次动画 -->
 <script>try{ if (sessionStorage.getItem('jt-intro-seen') === '1') document.documentElement.className += ' intro-skip'; }catch(e){}</script>
 <!-- 关键内联：样式表未到达时也先给出预设底色与 hero 几何，避免白屏与跳动 -->
@@ -50,17 +50,19 @@
   </a>
 <section id="main">
   <div class="container">
-    <a href="javascript:void(0);" id="logo-link" class="intro intro-1">
-        <img id="logo" src="static/img/logo-260.webp?t=1794110961"
+    <a href="javascript:void(0);" id="logo-link">
+        <!-- L1 载体挂在 img 上而不是 <a> 上：a#logo-link 是 display:inline，非 replaced inline box
+             不接受 transform（review Y1），挂 img（replaced）才会真的上移 -->
+        <img id="logo" class="intro intro-1" src="static/img/logo-260.webp?t=1794111578"
              width="130" height="130" alt="Jaden Li" decoding="async"/>
     </a>
     <!-- 归档站入口：上一版 48×48 方形图标行（品牌位）；图标体积小（2.7K/4.1K），懒加载只作"首帧干净"的表态 -->
     <div class="icon-links intro intro-2">
       <a href="https://intfocus.archived.jaden.tech/" target="_blank" rel="noopener" title="Intfocus 归档站 ｜ Intfocus archive site">
-        <img src="static/img/icons/intfocus.png?t=1794110961" width="48" height="48" alt="Intfocus" loading="lazy" decoding="async"/>
+        <img src="static/img/icons/intfocus.png?t=1794111578" width="48" height="48" alt="Intfocus" loading="lazy" decoding="async"/>
       </a>
       <a href="https://cloudwise.archived.jaden.tech" target="_blank" rel="noopener" title="Cloudwise 归档站 ｜ Cloudwise archive site">
-        <img src="static/img/icons/cloudwise.png?t=1794110961" width="48" height="48" alt="Cloudwise" loading="lazy" decoding="async"/>
+        <img src="static/img/icons/cloudwise.png?t=1794111578" width="48" height="48" alt="Cloudwise" loading="lazy" decoding="async"/>
       </a>
     </div>
   </div>
@@ -159,6 +161,6 @@
   });
 })();
 </script>
-<script type="text/javascript" src="static/js/index.js?t=1794110961"></script>
+<script type="text/javascript" src="static/js/index.js?t=1794111578"></script>
 </body>
 </html>
