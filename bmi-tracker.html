@@ -5,7 +5,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
-<title> BMI Tracker · 202607 ~ 202610</title>
+<title> BWH / BMI Tracker · 2026-07 ~ present</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous" defer></script>
 <style>
 
@@ -123,8 +123,95 @@ h2 .toggle:hover{background:#21262d;color:#e6edf3}
 .cta{display:inline-block;background:#238636;color:#fff;padding:6px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;margin-top:6px}
 .cta:hover{background:#2ea043}
 .footer{margin-top:30px;padding-top:10px;border-top:1px solid #21262d;font-size:11px;color:#484f58;text-align:center}
+/* ── CL063：阶段百叶窗 ── */
+.phase-panel{border:1px solid #30363d;border-radius:12px;margin:14px 0;background:#0f141b;overflow:hidden}
+.phase-panel>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 16px;font-size:15px;color:#f0f6fc;background:#161b22;border-bottom:1px solid transparent}
+.phase-panel>summary::-webkit-details-marker{display:none}
+.phase-panel>summary::before{content:"▶";font-size:10px;color:#8b949e;transition:transform .15s}
+.phase-panel[open]>summary::before{transform:rotate(90deg)}
+.phase-panel[open]>summary{border-bottom-color:#30363d}
+.pp-key{font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;
+  color:#7ee787;background:rgba(126,231,135,.12);border:1px solid rgba(126,231,135,.35);
+  padding:4px 7px;border-radius:6px}
+.pp-name{font-weight:600}
+.pp-range{margin-left:auto;font-size:11.5px;color:#8b949e}
+.pp-body{padding:14px 16px 6px}
+.goal-bar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.goal-chip{flex:1 1 180px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px 12px;
+  display:flex;flex-direction:column;gap:2px}
+.goal-chip .gk{font-size:11px;color:#8b949e}
+.goal-chip .gv{font-size:16px;font-weight:600;color:#e6edf3}
+.goal-chip .gn{font-size:11px;color:#7ee787}
+.bwh-bar{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;background:#161b22;border:1px dashed #30363d;
+  border-radius:10px;padding:9px 12px;margin:0 0 12px;font-size:12.5px}
+.bwh-bar .bwh-k{font:600 11px/1 ui-monospace,monospace;letter-spacing:.06em;color:#58a6ff}
+.bwh-bar .bwh-v{color:#e6edf3}
+.bwh-bar .bwh-t{margin-left:auto;color:#8b949e;font-size:11.5px}
+table.p1sum{width:100%;border-collapse:collapse;margin:0 0 8px;font-size:13px}
+table.p1sum td{padding:6px 8px;border-bottom:1px solid #21262d}
+table.p1sum td.k{color:#8b949e;width:88px}
+table.p1sum td.v{color:#e6edf3}
+@media print{
+  details.phase-panel>summary::before{content:""}
+  details.phase-panel>.pp-body,details.phase-panel>*:not(summary){display:block !important}
+  details.phase-panel{border-color:#999;break-inside:avoid}
+}
+/* ── end CL063 ── */
+/* ── CL068：密度收敛（全页有效字号 ≤14px）+ badge 去背景 + 百叶窗标题 ── */
+h1{font-size:14px;font-weight:700;letter-spacing:.2px}
+h2{font-size:14px}
+.card .value{font-size:14px}
+.pp-name{font-size:14px}
+.phase-panel>summary{font-size:14px}
+.goal-chip .gv{font-size:14px}
+.p1-bar .goal-chip{flex:1 1 150px}   /* 6 格一行放下；窄屏自动换行 */
+.badge-green{background:none;border:1px solid currentColor}
+.badge-blue{background:none;border:1px solid currentColor}
+.badge-yellow{background:none;border:1px solid currentColor}
+/* ── end CL068 ── */
 
 /* ── archive-extra: Archived tab 补充（portal style 之外）── */
+/* CL063：阶段百叶窗（站点/归档页共用） */
+.phase-panel{border:1px solid #30363d;border-radius:12px;margin:14px 0;background:#0f141b;overflow:hidden}
+.phase-panel>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 16px;font-size:15px;color:#f0f6fc;background:#161b22;border-bottom:1px solid transparent}
+.phase-panel>summary::-webkit-details-marker{display:none}
+.phase-panel>summary::before{content:"▶";font-size:10px;color:#8b949e;transition:transform .15s}
+.phase-panel[open]>summary::before{transform:rotate(90deg)}
+.phase-panel[open]>summary{border-bottom-color:#30363d}
+.pp-key{font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;color:#7ee787;
+  background:rgba(126,231,135,.12);border:1px solid rgba(126,231,135,.35);padding:4px 7px;border-radius:6px}
+.pp-name{font-weight:600}
+.pp-range{margin-left:auto;font-size:11.5px;color:#8b949e}
+.pp-body{padding:14px 16px 6px}
+.goal-bar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.goal-chip{flex:1 1 180px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.goal-chip .gk{font-size:11px;color:#8b949e}
+.goal-chip .gv{font-size:16px;font-weight:600;color:#e6edf3}
+.goal-chip .gn{font-size:11px;color:#7ee787}
+.bwh-bar{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;background:#161b22;border:1px dashed #30363d;
+  border-radius:10px;padding:9px 12px;margin:0 0 12px;font-size:12.5px}
+.bwh-bar .bwh-k{font:600 11px/1 ui-monospace,monospace;letter-spacing:.06em;color:#58a6ff}
+.bwh-bar .bwh-v{color:#e6edf3}
+.bwh-bar .bwh-t{margin-left:auto;color:#8b949e;font-size:11.5px}
+table.p1sum{width:100%;border-collapse:collapse;margin:0 0 8px;font-size:13px}
+table.p1sum td{padding:6px 8px;border-bottom:1px solid #21262d}
+table.p1sum td.k{color:#8b949e;width:88px}
+table.p1sum td.v{color:#e6edf3}
+/* CL068：站点同样收敛到 ≤14px + badge 去背景 */
+h1{font-size:14px;font-weight:700;letter-spacing:.2px}
+h2{font-size:14px}
+.card .value{font-size:14px}
+.pp-name{font-size:14px}
+.phase-panel>summary{font-size:14px}
+.goal-chip .gv{font-size:14px}
+.p1-bar .goal-chip{flex:1 1 150px}
+.badge-green{background:none;border:1px solid currentColor}
+.badge-blue{background:none;border:1px solid currentColor}
+.badge-yellow{background:none;border:1px solid currentColor}
+@media print{details.phase-panel>summary::before{content:""}
+  details.phase-panel>.pp-body{display:block !important}}
 .sub{margin-bottom:3px}
 /* CL033：portal style 提取失败时兜底（与 portal 同值，层叠无害） */
 .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem;margin:.75rem 0}
@@ -148,34 +235,66 @@ h2 .toggle:hover{background:#21262d;color:#e6edf3}
 
 <div class="tab-bar">
   <a class="tab-btn" href="./index.html">🏠 首页</a>
-  <button class="tab-btn active" onclick="switchTab('archived')">📊 Archived</button>
+  <button class="tab-btn active" onclick="switchTab('archived')">📊 BMI/BWH</button>
 <button class="tab-btn" onclick="switchTab('omad')">🍽 OMAD</button>
 </div>
 
 <!-- ═══════ ARCHIVED TAB ═══════ -->
 
 <div id="tab-archived" class="page active">
-<h1>📦 BMI Tracker · 202607 ~ 202610</h1>
-<!-- DT:goalLine:start --><p class="sub" id="goalLine">🎯 阶段二 减脂期 65→60 kg · 当前 63.0 kg（7 日均值 63.1 kg） · 已走 38% · 还差 3.1 kg · 阶段一 减重期 71.1→65 kg 已完成（2026-10-10 归档） · 达标计时 D+21/365 天</p><!-- DT:goalLine:end -->
+<h1>📦 BWH / BMI Tracker · 2026-07 ~ present</h1>
+<!-- DT:goalLine:start --><p class="sub" id="goalLine">🎯 阶段二 减脂期 65→60 kg · 当前 63.0 kg（7 日均值 63.1 kg） · 已走 38% · 还差 3.1 kg · 阶段一 减重期 71.8→65 kg 已完成（2026-10-10 归档） · 达标计时 D+21/365 天</p><!-- DT:goalLine:end -->
 <!-- DT:maintainCard:anchor -->
 <p class="sub">数据源 records.json · 生成时间 2026-10-31 · 全量记录 111 条</p>
 
-<h2>📅 Monthly Summary</h2>
-<div class="goal-grid">
+<details id="phase1Panel" class="phase-panel" open>
+  <summary>
+    <span class="pp-key">BMI</span>
+    <span class="pp-name">Phase 1 · Exercise-driven loss</span>
+    <span class="badge badge-green">✅ Achieved</span>
+    <span class="pp-range">2026-07-01 → 2026-10-10</span>
+  </summary>
+  <div class="pp-body">
+    <div class="goal-bar p1-bar"><div class="goal-chip"><span class="gk">Start</span><span class="gv">71.8 kg</span><span class="gn">2026-07-01</span></div><div class="goal-chip"><span class="gk">End</span><span class="gv">65.0 kg</span><span class="gn">7-day mean hit 2026-10-10</span></div><div class="goal-chip"><span class="gk">Span</span><span class="gv">101 days</span><span class="gn">14.4 weeks</span></div><div class="goal-chip"><span class="gk">Loss</span><span class="gv">−6.8 kg</span><span class="gn">0.47 kg/week</span></div><div class="goal-chip"><span class="gk">BMI</span><span class="gv">24.84 → 22.49</span><span class="gn">1.70 m</span></div><div class="goal-chip"><span class="gk">Lowest</span><span class="gv">64.56 kg</span><span class="gn">2026-10-09</span></div></div>
+    <h2>📅 Monthly Summary</h2>
+    <div class="goal-grid">
 <div class="card"><h3>📅 Jul</h3><div class="value green">22 <span class="unit">记录</span></div><div class="sub">范围 07-04 ~ 07-31 · 运动 21 天</div><div class="sub">起始 70.8 kg · 月末 71.3 kg</div><div class="sub">最低 68.5 kg · 最高 71.3 kg</div><div class="sub">跑量 114.1 km</div><div class="sub">净变化 +0.5 kg</div></div>
 <div class="card"><h3>📅 Aug</h3><div class="value green">29 <span class="unit">记录</span></div><div class="sub">范围 08-01 ~ 08-31 · 运动 27 天</div><div class="sub">起始 70.6 kg · 月末 67.7 kg</div><div class="sub">最低 67.7 kg · 最高 70.6 kg</div><div class="sub">跑量 142.6 km</div><div class="sub">净变化 -2.9 kg</div></div>
 <div class="card"><h3>📅 Sep</h3><div class="value green">29 <span class="unit">记录</span></div><div class="sub">范围 09-01 ~ 09-30 · 运动 27 天</div><div class="sub">起始 67.5 kg · 月末 65.81 kg</div><div class="sub">最低 65.42 kg · 最高 67.73 kg</div><div class="sub">跑量 152.1 km</div><div class="sub">净变化 -1.69 kg</div></div>
 <div class="card"><h3>📅 Oct</h3><div class="value green">31 <span class="unit">记录</span></div><div class="sub">范围 10-01 ~ 10-31 · 运动 25 天</div><div class="sub">起始 65.85 kg · 月末 63.0 kg</div><div class="sub">最低 62.9 kg · 最高 65.9 kg</div><div class="sub">跑量 188.6 km</div><div class="sub">净变化 -2.85 kg</div></div>
-</div>
+    </div>
 
-<h2>📉 Weight / Running Curve</h2>
-<div class="chart-wrap"><canvas id="wtChart"></canvas></div>
+    <h2>📉 Weight / Running Curve</h2>
+    <div class="chart-wrap"><canvas id="wtChart"></canvas></div>
 
-<h2>🎯 Progress</h2>
-<!-- DT:progressMeta:start --><div class="meta-grid" id="progressMeta"><div class="meta-item"><strong>Start</strong>71.1 kg</div><div class="meta-item"><strong>Current</strong><strong>63.0</strong> kg</div><div class="meta-item"><strong>Lost</strong>8.1 kg (73%)</div><div class="meta-item"><strong>Left</strong>3.0 kg</div><div class="meta-item"><strong>Duration</strong>22 days</div></div><!-- DT:progressMeta:end -->
-<!-- DT:progressFill:start --><div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:73%"></div></div><!-- DT:progressFill:end -->
+    <h2>🎯 Progress</h2>
+<!-- DT:progressMeta:start --><div class="meta-grid" id="progressMeta"><div class="meta-item"><strong>Start</strong>71.8 kg</div><div class="meta-item"><strong>Current</strong><strong>63.0</strong> kg</div><div class="meta-item"><strong>Lost</strong>8.8 kg (75%)</div><div class="meta-item"><strong>Left</strong>3.0 kg</div><div class="meta-item"><strong>Duration</strong>22 days</div></div><!-- DT:progressMeta:end -->
+<!-- DT:progressFill:start --><div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:75%"></div></div><!-- DT:progressFill:end -->
+  </div>
+</details>
 
-<h2>📋 All Records (111 rows · date desc)<span class="toggle" onclick="tbl=document.getElementById('archiveTbl');tbl.classList.toggle('collapse');this.textContent=tbl.classList.contains('collapse')?'▶ expand':'▼ collapse'">▶ expand</span></h2>
+<details id="phase2Panel" class="phase-panel">
+  <summary>
+    <span class="pp-key">BWH</span>
+    <span class="pp-name">Phase 2 · Fat loss &amp; measurements</span>
+    <span class="badge badge-blue">🔵 In progress</span>
+    <span class="pp-range">2026-10-10 → target 60.0 kg</span>
+  </summary>
+  <div class="pp-body">
+    <div class="goal-bar"><div class="goal-chip"><span class="gk">Weight ≤60.5</span><span class="gv">62.3 kg</span><span class="gn">1.8 kg to go</span></div><div class="goal-chip"><span class="gk">Waist ≤78</span><span class="gv">80.0 cm</span><span class="gn">2.0 cm to go</span></div><div class="goal-chip"><span class="gk">Arms/thighs held</span><span class="gv">arm 28.0 / thigh 50.0</span><span class="gn">baseline 28.0 / 50.0</span></div></div>
+    <div class="bwh-bar"><span class="bwh-k">BWH</span><span class="bwh-v">2026-11-08　waist 80.0 · hip 86.0 · chest 88.0 · arm-relaxed 28.0 · arm-flexed 29.0 · thigh 50.0 · calf 35.5</span><span class="bwh-t">next checkpoint 2026-11-15 (in 7 days)</span></div>
+    <p class="sub">Daily metrics live in the local DailyTracker panel; this page is the archive face and keeps only phase targets and the latest measurement.</p>
+  </div>
+</details>
+
+<details id="recordsPanel" class="phase-panel">
+  <summary>
+    <span class="pp-key">📋</span>
+    <span class="pp-name">All Records</span>
+    <span class="pp-range">111 rows · date desc</span>
+  </summary>
+  <div class="pp-body">
+<h2 style="display:none">📋 All Records (111 rows · date desc)<span class="toggle" onclick="tbl=document.getElementById('archiveTbl');tbl.classList.toggle('collapse');this.textContent=tbl.classList.contains('collapse')?'▶ expand':'▼ collapse'">▶ expand</span></h2>
 <table id="archiveTbl" class="collapse"><thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead><tbody>
 <tr><td>10-31</td><td class="num">63.0</td><td>running 6.10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
 <tr><td>10-30</td><td class="num">63.1</td><td>running 6.10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
@@ -289,6 +408,8 @@ h2 .toggle:hover{background:#21262d;color:#e6edf3}
 <tr><td>07-05</td><td class="num">70.4</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
 <tr><td>07-04</td><td class="num">70.8</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
 </tbody></table>
+  </div>
+</details>
 
 <div class="footer">DailyTracker Archive · Generated by Personal Assistant</div>
 </div>
@@ -372,39 +493,6 @@ h2 .toggle:hover{background:#21262d;color:#e6edf3}
 
 
 <script>
-// Tab switching — saves preference to localStorage (DT-SEC-038: today→archived)
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
-  document.querySelector('.tab-btn[onclick*="'+name+'"]').classList.add('active');
-  document.getElementById('tab-'+name).classList.add('active');
-  localStorage.setItem('dt_active_tab', name);
-  // Re-render chart if switching to archived tab
-  if(name==='archived' && document.getElementById('wtChart')) renderChart();
-}
-
-// Restore last tab on load — 守卫: 旧 4-tab 值(faq/refs/today) → archived
-(function(){
-  var saved = localStorage.getItem('dt_active_tab');
-  if(saved!=='archived' && saved!=='omad') saved='archived';
-  if(saved==='omad' && document.getElementById('tab-omad')) switchTab('omad');
-})();
-
-// OMAD tab auto-highlight (portal 原样)
-(function(){
-  var d=new Date();
-  var dow=d.getDay();
-  var dayNum={0:7,1:1,2:2,3:3,4:4,5:5,6:6}[dow];
-  var dayNames={1:'周一',2:'周二',3:'周三',4:'周四',5:'周五',6:'周六',7:'周日'};
-  var woLabel={1:'🏃 跑步日',2:'🏋️ 力量日',3:'🏃 跑步日',4:'🏋️ 力量日',5:'🏃 跑步日',6:'🧘 恢复日',7:'🏃 跑步日'};
-  var mealLabel={1:'🍽 方案 A（跑步日）',2:'🍽 方案 B（力量日）',3:'🍽 方案 A（跑步日）',4:'🍽 方案 B（力量日）',5:'🍽 方案 A（跑步日）',6:'🍽 方案 C 周六换口味',7:'🍽 方案 A（跑步日）'};
-  document.getElementById('omadTip').textContent='📌 今天 '+dayNames[dayNum]+' — '+woLabel[dayNum];
-  document.getElementById('omadMealTip').textContent='今天推荐 '+mealLabel[dayNum];
-  document.querySelectorAll('#tab-omad .card[data-days],#tab-omad .meal-card[data-days]').forEach(function(el){
-    var days=el.getAttribute('data-days').split(',');
-    if(days.indexOf(String(dayNum))!==-1) el.classList.add('highlight');
-  });
-})();
 
 // Archived chart (records.json 全量 · sections chart_js)
 function renderChart(){
