@@ -108,19 +108,21 @@ $ git check-ignore -v scripts/portal-check.py
 （无输出）                                              rc=1   ← 未被忽略
 ```
 
-⚠️ 口径坑：`git check-ignore` 对**不存在的路径**同样返回 1。所以 AC 里的「返回非零」必须在文件**落地并 add 之后**复跑，且须配一条正向证据（`git ls-files --error-unmatch`），否则是假绿。见 §3 AC-3/AC-4。
+⚠️ 口径坑：`git check-ignore` 对**不存在的路径**同样返回 1。所以 AC 里的「不被忽略」必须在文件**落地并 add 之后**复跑，且须配正向证据（`git ls-files --error-unmatch`），否则是假绿。三条已合并为 AC-3 的单行伴生判据，见 §3。
 
 ### 2.5 引用点
 
 ```
 $ grep -rn "scratch/JT-CL001\|check\.py" --include="*.md" . | grep -v node_modules
+# 原样输出 153 行（13 个跟踪文件命中）；下列 4 行为按类过滤后需关注的条目
+# 按类过滤后需改 2 处（:20 / :35）；其余为机器段 / 已新路径 / 历史冻结，处置见 §7.2
 ./TODO-handoff.md:8   | JT-CL004 | 门户门禁版本化 scripts/portal-check.py | READY | queued | normal | - |   ← 机器段，无旧路径
 ./TODO-handoff.md:20  ... harness: `python3 cache/scratch/JT-CL001/check.py --mode post` = 15/15 ...        ← 引用 1
 ./TODO-handoff.md:35  ... `python3 cache/scratch/JT-CL001/check.py --mode post` ⇒ 期望 15/15 rc=0 ...        ← 引用 2
 ./TODO-handoff.md:42  ... JT-CL004 ... 门禁版本化 → scripts/portal-check.py（345 行原样搬）+ ...             ← 无旧路径，不改
 ```
 
-受跟踪文件里**只有 `TODO-handoff.md` 两处**用旧路径。`documents/reports/JT-CL001-*`、`documents/reviews/*`、`review-log.md` 中的旧路径是一时点历史记录（含当时的计数口径 8/8、10/10、13/13），按「历史文档不回改」冻结，见 §7.2。
+受跟踪文件里**人工可执行命令引用仅 `TODO-handoff.md:20`/`:35` 两处**用旧路径（全量 `git grep` 命中 13 个跟踪文件、原样 153 行；其中 `.md` 之外唯一命中为 `.review-level.yaml:379` 的 `review_history` 历史字段）。`documents/reports/JT-CL001-*`、`documents/reviews/*`、`review-log.md` 中的旧路径是一时点历史记录（含当时的计数口径 8/8、10/10、13/13），按「历史文档不回改」冻结，见 §7.2。
 
 ### 2.6 `AGENTS.md` 上下文（55-63）
 
@@ -161,13 +163,15 @@ $ python3 -c "... Path('scripts/portal-check.py').resolve().parents[3]"
 |:--|:-----|:-----|:-----|:---------|
 | AC-1 | 修后档全绿 | `python3 scripts/portal-check.py --mode post` | 末行 `15/15 通过（mode=post）` 且 `rc=0` | 计数精确等值 + rc |
 | AC-2 | 判别力自证全绿 | `python3 scripts/portal-check.py --selftest` | 末行 `17/17 通过（mode=post, selftest）` 且 `rc=0` | 计数精确等值 + rc |
-| AC-3 | 新路径不被忽略 | `git check-ignore -q scripts/portal-check.py; echo $?` | **rc≠0**（实测 1） | rc 非零 |
+| AC-3 | 新路径落地、受追踪且不被忽略（防假绿伴生判据，整条 rc=0 才算过） | `test -f scripts/portal-check.py && git ls-files --error-unmatch scripts/portal-check.py >/dev/null && ! git check-ignore -q scripts/portal-check.py` | 整条 **rc=0** | 文件存在 + 正向追踪 + 反向不忽略，三段与 |
 | AC-3' | 反向对照（防假绿） | `git check-ignore -q cache/scratch/JT-CL001/check.py; echo $?` | **rc=0**（旧路径仍被忽略） | rc 等值 |
-| AC-4（建议附加） | 新脚本已入版本库 | `git ls-files --error-unmatch scripts/portal-check.py` | rc=0 且打印路径 | 正向追踪证据 |
-| AC-5（建议附加） | 无参可跑、零副作用 | `python3 scripts/portal-check.py; echo rc=$?; git status --short` | rc=0、`15/15`、`git status` 仅含预期改动（脚本自身 + 2 文档） | rc + 工作树 |
-| AC-6（建议附加） | 断言面未漂移 | `diff -u cache/scratch/JT-CL001/check.py scripts/portal-check.py` | 恰 **2 个 hunk**（§6.3 白名单），345 行不变 | 结构断言 |
+| AC-5 | 无参可跑、零副作用 | `python3 scripts/portal-check.py; echo rc=$?; git status --porcelain` | rc=0、`15/15`；条目集 ⊆ {`scripts/portal-check.py`, `TODO-handoff.md`, `AGENTS.md`, `documents/README.md`, 本方案文档}，且不含 `cache/**` / `index.html` / `static/**` / `wechat.html` | rc + 工作树 |
+| AC-6 | 断言面未漂移 | `diff -u cache/scratch/JT-CL001/check.py scripts/portal-check.py` | 恰 **2 个 hunk**（§6.3 白名单），345 行不变 | 结构断言 |
+| AC-7 | 文档侧旧路径零残留 / 新路径四处 | `git grep -c "cache/scratch/JT-CL001/check.py" -- TODO-handoff.md`；`git grep -c "scripts/portal-check.py" -- TODO-handoff.md` | 前者无输出（`rc=1`）；后者 = **4**（`:8`/`:20`/`:35`/`:42`） | 计数等值 |
+| AC-8 | `AGENTS.md` 最小改动面 | `git diff -U0 <impl>~1 <impl> -- AGENTS.md` | 恰 **+1 / -0**，且 `:61` 原文零改动；配套 `sha256sum AGENTS.md` 前后值留档（§8） | 结构断言 |
+| AC-9 | `documents/README.md` 索引不缺席 | `git grep -c "JT-CL004" -- documents/README.md` | **≥1**（D5-A 落地） | 计数 ≥1 |
 
-> AC-4/5/6 为**附加判据**，不替换用户登记的三条；理由是 AC-3 存在「路径不存在也返回 1」的假绿面（§2.4）。
+> AC-5/AC-6 为**附加判据**（对应用户三条的防假绿面）；AC-7/AC-8/AC-9 覆盖文档侧交付面（Y6）。AC-3 已内联原 AC-4 的 `ls-files` 正向证据，不再单列「建议附加」项。
 
 ## 4. S1–S16 迁移映射表
 
@@ -200,7 +204,7 @@ $ python3 -c "... Path('scripts/portal-check.py').resolve().parents[3]"
 | 模式 | 语义 | 判据集 | 期望 | 副作用 |
 |:--|:--|:--|:--|:--|
 | `--mode post`（**默认**） | 改后门禁：断言「已实施状态」成立 | 15 项 | 15/15 rc=0 | 无（只读 3 个源文件，见下） |
-| `--mode pre` | 改前自检：记录态，只有 S1/S2/S5 判值，S4/S6/S7 标「现状记录」恒绿 | 与 post 同编号但多处恒绿 | 用于改版前留基线，**不可当门禁** | 无 |
+| `--mode pre` | 改前自检：记录态，只有 S1/S2/S5 判值，S4/S6/S7 标「现状记录」恒绿 | **6 项**（S1/S2/S4/S5/S6/S7；其中 S4/S6/S7 为恒绿记录态）；当前页面已是后态 ⇒ **S1 恒红、整档 `5/6` rc=1**，仅用于改版前留基线，**不可当门禁** | 无 |
 | `--selftest` | 在 post 之上追加 2 项**判别力自证**：注入已知退化后对应断言必须转红 | 17 项 | 17/17 rc=0 | 无（`html_probe` 只在内存里 `re.sub`，不写盘） |
 
 **无参行为契约**（AC-5）：`python3 scripts/portal-check.py` == `--mode post`（`check.py:301` `default="post"`），不联网、不写任何仓内文件（`check.py:19` 已声明「只读脚本」，§4 表中全部读操作均为 `Path.read_text`），工作树 `git status` 在跑完后不得出现新条目。
@@ -253,6 +257,7 @@ Q7 伪码实测已跑出搬后全文 diff，**只有 2 个 hunk**：
 | 2 | 按 §6.3 patch 2 个 hunk（4 行替换） | `diff -u <旧> <新>` 恰 2 hunk |
 | 3 | 跑三档 | `--mode post` 15/15 rc=0；`--selftest` 17/17 rc=0；无参 15/15 rc=0 |
 | 4 | 入版本库 | `git add scripts/portal-check.py`；`git ls-files --error-unmatch scripts/portal-check.py` rc=0；`git check-ignore -q …` rc=1 |
+| 5 | 文档改动复验（Y6） | `git grep -c "cache/scratch/JT-CL001/check.py" -- TODO-handoff.md` 无输出（rc=1）；`git grep -c "scripts/portal-check.py" -- TODO-handoff.md` = 4；`git diff -U0 <impl>~1 <impl> -- AGENTS.md` 恰 +1/-0；`git grep -c "JT-CL004" -- documents/README.md` ≥1（AC-7/8/9） |
 
 ### 6.5 旧 scratch 副本处置
 
@@ -278,6 +283,7 @@ Q7 伪码实测已跑出搬后全文 diff，**只有 2 个 hunk**：
 | `TODO-handoff.md:8` | 机器段表格，标题即新路径，无旧路径 | 不改 | 由 `hm loop entry-page --write` 派生，手改会被覆盖 |
 | `TODO-handoff.md:42` | 「门禁版本化 → `scripts/portal-check.py`」 | 不改 | 已是新路径；实现完成后可在 [6/6] 移入「已闭合」节 |
 | `documents/reports/JT-CL001-*`（4 文件）、`documents/reviews/*`（8 文件）、`review-log.md` | 旧路径 + 当时口径 8/8、10/10、12/12、13/13、15/15 | **冻结不回改** | 一时点取证记录，回改等于篡改历史；新脚本 15/15 与最新记录一致，断链风险为零 |
+| `.review-level.yaml:379` | `review_history` 历史字段（记录当时命令串） | **不改** | 与 `documents/reports`/`documents/reviews` 同档的历史取证，是审计链而非活引用 |
 | `cache/review-prep/*.md`（5 文件） | 旧路径 | 不改 | gitignored、一次性 prompt |
 | `scripts/perf-check.py` | 无引用 | 不改 | 与本笔无耦合 |
 
@@ -298,7 +304,7 @@ Q7 伪码实测已跑出搬后全文 diff，**只有 2 个 hunk**：
 - No build tools, no package manager; 首屏回归钉子 = `python3 scripts/perf-check.py`（体积预算 + 请求集 + `?t=` 一致，rc=0 才算绿）
 
 新增（62 行位置，紧跟 61）:
-- 门户门禁（第二颗钉子）= `python3 scripts/portal-check.py`（`index.html` / `static/css/index.css` / `wechat.html` 的 S1–S16 静态断言；默认 `--mode post` 15 项，`--selftest` 17 项含 2 条判别力自证，rc=0 才算绿；改 Now 区 / 诗词区 / 首帧进场前必跑）
+- 门户门禁（第二颗钉子）= `python3 scripts/portal-check.py`（`index.html` / `static/css/index.css` / `wechat.html` 的 S1–S16 静态断言；默认 `--mode post` 15 项，`--selftest` 17 项含 2 条判别力自证，rc=0 才算绿；改 Now 区 / 诗词区 / 首帧进场前必跑；S5 后半句「≠旧值」已恒真，戳新鲜度仍属人工判据，见方案 OBS-1）
 ```
 
 - 为什么独立成行而非追写 61：61 行的主语是「首屏」（体积/请求集），追写会把两种判据塞进同一句，读者会误以为 `perf-check.py` 也管 DOM 断言；且受保护文件改动面越小越易审批（+1 行 vs 改 1 行长句）。
@@ -369,7 +375,7 @@ Q7 伪码实测已跑出搬后全文 diff，**只有 2 个 hunk**：
 |:--|:--|:--|:--|:--|
 | D1 | 旧 scratch 副本何时删 | A 本笔删；B 保留到 [6/6] 收尾删（推荐）；C 永久保留只读 | **B** | A 风险在 [4/6]/[5/6] 失去即时回退源；C 会让「双份真值」长期存在，正是本需求要消灭的；B 窗口最短且有 §11.2 判据 |
 | D2 | docstring 头部是否顺带修正 | A 只做 2 hunk（推荐）；B 顺带补全判据清单（现 docstring 只列 S1–S7/S14/S15，缺 S1b/S8/S9/S11/S12/S13 与 S10/S16 说明）；C 重写抬头为门户门禁通用描述 | **A** | B/C 都会让 diff 超出「原样搬」白名单，把「行为是否变化」的判断成本推给评审；文档缺口已在此登记（OBS-5），可另立小笔 |
-| D3 | S5 的 `OLD_TS = "1788947889"` 已成恒真子句 | A 本笔不动，另立 CL（推荐）；B 本笔顺带参数化（`--max-age` 或从 git 取上一轮戳）；C 删除该子句 | **A** | 属断言口径变更（非搬迁），混入会让本笔失去「等价性可证」；且 S5 的真实判据「≠ 上一轮」历史上一直是人工补核（`documents/reviews/JT-CL003-portal-revamp-rereview-v1.0-20261026.md:316`），值得独立设计 |
+| D3 | S5 的 `OLD_TS = "1788947889"` 已成恒真子句 | A 本笔不动，另立 CL（推荐；已登记为具名待开项 `PENDING-OBS-1`，见 §13）；B 本笔顺带参数化（`--max-age` 或从 git 取上一轮戳）；C 删除该子句 | **A** | 属断言口径变更（非搬迁），混入会让本笔失去「等价性可证」；且 S5 的真实判据「≠ 上一轮」历史上一直是人工补核（`documents/reviews/JT-CL003-portal-revamp-rereview-v1.0-20261026.md:316`），值得独立设计 |
 | D4 | `AGENTS.md` 落地形态 | A 新增独立一行（推荐，§8）；B 追写 61 行句尾 | **A** | 职责不混（首屏 vs 门户）、patch 面最小（+1 行）；B 句子过长易误读为同一颗钉子 |
 | D5 | `documents/README.md` 索引补 D1 的时机 | A [3/6] 与脚本同批（推荐）；B 留到 [6/6] 收尾统一补；C 不补 | **A** | README 索引表显式列了全部 `design/` 文档，缺项会被下一轮盘点当孤儿；同批成本 1 行 |
 
@@ -377,12 +383,19 @@ Q7 伪码实测已跑出搬后全文 diff，**只有 2 个 hunk**：
 
 | # | 观察 | 证据 | 建议 |
 |:--|:--|:--|:--|
-| OBS-1 | S5 后半句「`!= 旧值`」退化为恒真（`OLD_TS` 为早期常量，当前戳永远不等） | `check.py:31`、`:133-134`；`documents/reviews/JT-CL003-portal-revamp-rereview-v1.0-20261026.md:316` 已人工补核 | 另立 CL 参数化，与 D3 同批 |
+| OBS-1 | S5 后半句「`!= 旧值`」退化为恒真（`OLD_TS` 为早期常量，当前戳永远不等） | `check.py:31`、`:133-134`；`documents/reviews/JT-CL003-portal-revamp-rereview-v1.0-20261026.md:316` 已人工补核 | **具名待开项 `PENDING-OBS-1`**（与 D3 同批）：另立 CL 参数化 + 补戳新鲜度机检，见下方登记表 |
 | OBS-2 | S3 要求「卡上 aria-label = 0」，与无障碍改进方向相反；只因 Q5′ 曾删 aria-label 而设 | `check.py:102-110` | 若未来补 aria-label，需先改 S3 口径 |
 | OBS-3 | S13 用**字面 JS 表达式**匹配（`textContent = poetryLang() === 'en' ? enText : zh`），任何重构（改名/拆函数/换三元写法）即假红 | `check.py:237-238` | 改为「`poetryLang()` 存在 + 空态分支含三元」的结构判据 |
 | OBS-4 | `--mode pre --selftest` 语义混乱（selftest 内部固定 post） | `check.py:301-302`、`:314`、`:325` | 加互斥校验（`pre` 与 `selftest` 同时出现即报错） |
-| OBS-5 | docstring 判据清单不全（缺 S1b/S8/S9/S11/S12/S13/S10/S16） | `check.py:9-19` vs 实跑 15/17 项 | 与 D2-B 合并另立小笔 |
+| OBS-5 | docstring **三处失真**：① 用法路径仍是旧 scratch 位置（本笔已修）② 判据清单不全（缺 S1b/S8/S9/S11/S12/S13/S10/S16）③ 「`--mode pre` 修前自检：必须全绿」已失效（当前页面为后态 ⇒ pre 恒 `5/6` rc=1） | `check.py:4-19` vs 实跑 15/17 项、pre 5/6 | 与 D2-B 合并另立小笔（本笔按 D2-A 只修路径，不补清单/不改措辞） |
 | OBS-6 | `documents/README.md` 索引需补本设计稿 | §1.3 D5 | 随 D5-A 处理，或收尾补 |
+
+**具名待开项登记（Y5 落地）**
+
+| 待开编号 | 来源 | 内容 | 落点 |
+|:--|:--|:--|:--|
+| `PENDING-OBS-1`（编号占位；派发时由 1A 队列分配为实际 CL 序号） | OBS-1 / D3 | S5 后半句恒真：`OLD_TS` 参数化（`--max-age` 或从 git 取上一轮戳），并补「戳新鲜度」机检，消除「15/15 被当戳已换新」的误读 | `cache/draft/TODO-<派发日>.md` 待开行（由 ops 收口写入）；本步**不写** hermes-manager 仓 draft（跨仓） |
+| `PENDING-OBS-5`（编号占位，同上） | OBS-5 / D2-B | docstring 判据清单补全 + `pre` 措辞修正 | 同上 draft 待开行 |
 
 ## 14. 参考文档
 
