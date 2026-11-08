@@ -17,7 +17,7 @@
   - CL003 门户改版: `5e98bad`(feat) → `07e67c6`(PASS 95) → `8f37e8c`(三验) → `d69d7b9`(fix Y1) → `f668bdf`(PASS 100) → `52befa6`(三验)
   - CL063/CL068 站点同步: `d746508` / `fb7a66e` / `4ffda68`(业务) + `4509555`(PASS 95) → `34e8527`(三验)
 - 线上: https://www.jaden.tech `index.css?t=1794111578`；`bmi-tracker.html` sha256 `11f6b80f…`（52511 B，线上 == 本地）；Pages `{"branch":"main","status":"built"}`，部署 `2026-11-08 10:20:55 GMT`
-- harness: `python3 cache/scratch/JT-CL001/check.py --mode post` = **15/15** rc=0；`--selftest` = **17/17** rc=0；`scripts/timestamp-manager.py check` 同值 `1794111578`
+- harness: `python3 scripts/portal-check.py --mode post` = **15/15** rc=0；`--selftest` = **17/17** rc=0；`scripts/timestamp-manager.py check` 同值 `1794111578`
   - ⚠️ 旧口径作废: 本文件历史里写的 `13/13`（10-25）、`9/9`/`10/10`（更早）均为 S9/S10 修复前数字
 - 工作树: clean（`cache/**` gitignored；仅本文件收尾笔待提交）
 - 本会话按用户指示**不 push**（21:17「准备退出本会话 TUI」）；评审+push 延后明早
@@ -32,7 +32,7 @@
 
 - **今日业务笔全部已推**：`52befa6`（CL003 收口）→ `34e8527`（CL063/CL068 收口）⇒ 无未审计业务笔、无未推实现笔
 - 复核命令（明早直跑）：
-  - `python3 cache/scratch/JT-CL001/check.py --mode post` ⇒ 期望 **15/15** rc=0（`13/13` 为旧口径，已作废）
+  - `python3 scripts/portal-check.py --mode post` ⇒ 期望 **15/15** rc=0（`13/13` 为旧口径，已作废）
   - `git log --oneline origin/main..HEAD` ⇒ 恰 1 笔（本文件收尾笔）
   - `git show --stat HEAD` ⇒ 恰 1 文件（`TODO-handoff.md`）
 - 放行口径：review PASS 后 `git push origin HEAD:main`（ff-only，禁 force）；本会话不 push。次日若 review 忙，此笔可与其他本线笔一次收口。
