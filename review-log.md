@@ -1092,6 +1092,45 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-11-08 — daily-tracker CL063 两窗 + CL068 密度 + CL068c 头部口径（站点仓 3 笔同步评审 → PASS 95）
+
+- **review者**: Security Reviewer（review profile，站点仓代推笔）
+- **范围**: `origin/main = 52befa6` 之上 **3 笔未推**（ahead 3 / behind 0，`git status --porcelain` 空）：`4ffda68`（`index.html` +1/−1，入口卡 tooltip 换「阶段一已达成 / 阶段二进行中 · 围度每两周更新」）、`fb7a66e`（`bmi-tracker.html` +135/−47，CL068 密度 + 阶段一 chip + badge 去背景）、`d746508`（`bmi-tracker.html` +6/−4，CL068c 头部读「今日」）。`git diff --stat origin/main..HEAD` ⇒ 2 文件 **+140/−50**，与任务书逐笔行数（1/1、135/47、6/4）**逐值一致**；`--diff-filter=DR` 空；`tokens-tracker/**` / `daily-tracker-archive-*.html` / `AGENTS.md` / `documents/**` / `cache/**` / `static/**` / `wechat.html` **零命中**。
+- **Tracking**: **CL063 两窗**（Phase 1 · Exercise-driven loss / 6 格 goal-chip）、**CL068 密度**（全页 ≤14px、badge 1px 同色边框）、**CL068c 头部口径**（今日读值）三项 ✅；Y1（🟡 LOW）转交件「38 处引用未改」数字不可复算
+- **状态**: ✅ PASS（95 / 100，Rating A；🔴 0 / 🟡 1 / 🟢 7）
+- **报告**: `documents/reviews/bmi-archive-cl063-sync-review-v1.0-20261108.md`
+- **实现 prompt**: ⬜ 无需生成（实现 / 整合验证类审计，非设计评审；无 markers）
+
+### 发现摘要
+
+**四项线上判据（本地文件自证，逐条 `grep -c`）**：`📊 BMI/BWH` = **1**、`Exercise-driven loss` = **1**、`<strike>阶段一` = **1**、`switchTab('faq')` = **0**。FAQ 页签已整体移除（页签集 = `🏠 首页` / `📊 BMI/BWH` / `🍽 OMAD`），HTML 面 `class="faq-q"` = 0 ⇒ 无「按钮指向已删页签」的运行时断裂；7 条 `.faq-q` CSS 成为死样式（观察项，🟢 不计发现）。阶段一 chip 逐值抽取与转交件一致：`Start 71.8 kg` / `End 65.0 kg (7-day mean hit 2026-10-10)` / `Span 101 days (14.4 weeks)` / `Loss −6.8 kg (0.47 kg/week)` / `BMI 24.84 → 22.49` / `Lowest 64.56 kg (2026-10-09)`。
+
+**生成产物零占位 / 零手改指纹**：`git show fb7a66e -- bmi-tracker.html | grep -c '^+.*__[A-Z_]{2,}__'` = **0**；文件内 `__GEN__\|__GOAL_LINE__\|__PROGRESS__\|__MAINTAIN_CARD__` = **0**；`/Users/jadenli` = **0**；`DT:` 锚点 `goalLine` / `progressMeta` / `progressFill` **start/end 各 1:1 全配对**（`maintainCard:anchor` 单点锚在）⇒ 下轮重渲不会因锚错配污染。新增行无新 JS 消费面（`<script|innerHTML|eval(|fetch(|addEventListener|clipboard` 0 命中），`onclick=` HEAD **3** == `origin/main` **3**（净新增 0，两处 `+onclick` 是既有行位移，参数为字面量）。
+
+**文件名与引用（口径复算，Y1 来源）**：`bmi-tracker.html` 仍在（52,511 B）、`--diff-filter=DR` 空、`index.html` 的 `href="./bmi-tracker.html"` 未动。引用计数三口径实测 —— **站点仓 HTML 2 处**（`index.html` / `daily-tracker-archive-202607-202610.html` 各 1）/ **站点仓全仓 109 处 21 文件**（`review-log.md` 31、`documents/**` 63、`.review-level.yaml` 3、`README.md` 1、`AGENTS.md` 1、HTML 2）/ **上游 daily-tracker 仓 291 处 95 文件**；转交件称「38 处引用未改」**无一口径可复现** ⇒ **Y1（🟡 LOW）**：属转交件描述失准，代码实质断言（无 rename / 链接全解析）成立故不阻断；改法 = 转交方改为机判口径（HTML 2 处 + 全仓 109 处 + `--diff-filter=DR` 空），站点仓不动。
+
+**真机可用性（Chrome headless + CDP，本地 `http.server:8099` 只读，`Page.addScriptToEvaluateOnNewDocument` 前置监听后重载）**：`errs=[]` / `rej=[]` ⇒ **0 console error**；nav `200`、资源仅 `chart.js@4.4.7` `s=200` ⇒ **0 个 HTTP ≥400**；`#phase2Panel` 点击 summary：`open false→true→false`、高度 **55.6875 → 251.203125 → 55.6875**；页签 `["🏠 首页","📊 BMI/BWH","🍽 OMAD"]`、`Phase 1 · Exercise-driven loss` 1 处；可见字号分布 `{11:25, 11.5:4, 12:20, 12.5:1, 13:15, 13.6:11, 14:20}` ⇒ **max = 14px（>14 元素数 0）**，h1 14 / h2×10 全 14 / chip `.gv` 14 / summary 14；溢出：1280 档 `scrollWidth 1265 ≤ innerWidth 1280`、375 档 `375 ≤ 375`；badge `bg rgba(0,0,0,0)` + `border 1px` 同色（绿 `rgb(126,231,135)` / 蓝 `rgb(88,166,255)`）+ 11px；`#wtChart` canvas 996×280 且 `Chart` 实例存在。头部口径复现转交件：`生成时间 2026-11-08`、`当前 62.3 kg（7 日均值 62.77 kg）· 已达成 45% · 还差 2.77 kg`、Progress `Current 62.3 / Lost 9.5 kg (81%) / Left 2.3 kg / Duration 30 days`、Monthly Summary 四卡 `Jul/Aug/Sep/Oct`、All Records `111 rows`。
+
+**首页断言面未破**：`python3 cache/scratch/JT-CL001/check.py --mode post` ⇒ **15/15，RC=0**。S14 是本次改动直接钉子 —— `index.html` 仅换 tooltip，仍 `tool=True` / `old=[]`（无 `BMI-Tracker`/`Tokens-Tracker` 残留）/ `bare_amp=0`；S5 戳 `1794111578` 双文件同值（本批未触 `?t=`）。
+
+**CL068c 副作用裁定（🟢 记录，不阻断）**：头部改读「今日」⇒ 页面字节每天不同，23:00 班次每日在站点仓产生一笔 `data@archive`。页面内 **0 个 JS 时间源**（`new Date|toISOString|Date.now` = 0）⇒ 字节只在生成器重渲时变，不随访客刷新抖动，静态托管 + `?t=` 未动故无缓存问题。**推送节奏 = 每日一次收口**（与 23:30 夜间 L2 review 同批连带推送，避免一日多推）；后续夜间复审须把「仅日期/数值口径行变化」视为预期形态。回退点（若改主意）= 上游 `_render_site_archived_page` 四处上界 `min(iso_str, _ARCHIVE_END)`，本笔不动上游。
+
+**安全面**：三笔 **137 新增非空行**三扫 —— 凭证（`api_key|secret|password|token=|bearer|ghp_|sk-|AKIA|xox[bp]-|eyJ…|BEGIN *PRIVATE`）、PII（email 式）、本地绝对路径（`/Users/|/home/|C:\`）**全 0 命中**；新增外链 / `src="http"` / `fetch(` / `XMLHttpRequest` **0 命中**。供应链不变：`chart.js@4.4.7` `<script>` 行与 `origin/main` 逐字节相同，`integrity="sha384-vsrfe…"` + `crossorigin` + `defer` 保留（`integrity=` 计数 1），`name="referrer"` 1 处保留。注入面：新增节点全静态文本/数值，无 `innerHTML`/`eval`/`new Function`/`document.write`，`Chart` 数据取页面内联数组（同源）。数据披露：新增围度 `arm 28.0 / thigh 50.0` 属用户自有公开健康数据，与既有体重/BMI 披露面同档，非新增类别。
+
+| # | Level | Title | Status |
+|---|-------|-------|--------|
+| — | 🟢 | 改动面 2 文件逐笔行数一致、禁改面零命中、工作树干净、ahead 3 / behind 0 | PASS |
+| — | 🟢 | 四项判据自证 `1 / 1 / 1 / 0`；FAQ 页签整体移除且无悬挂 `switchTab('faq')` | PASS |
+| — | 🟢 | 生成产物零指纹：占位符 0 / 绝对路径 0 / `DT:` 锚点 3 对全配对 / 无新 JS 面 / `onclick` 净新增 0 | PASS |
+| — | 🟢 | 真机 0 console error、0 HTTP≥400、折叠 55.69↔251.20、max 字号 14px、双档无溢出、图表实例存在 | PASS |
+| — | 🟢 | 门禁 `--mode post` **15/15** RC=0 ⇒ 首页断言面未破（S14 tooltip 换文案仍绿） | PASS |
+| — | 🟢 | CL068c 日更副作用：无 JS 时间源、每日一次收口（与 23:30 夜间 review 同批） | 记录 |
+| 1 | 🟡 LOW | **Y1** 转交件「38 处引用未改」不可复算（2 / 109 / 291 三口径均非 38）；代码实质断言成立 | OPEN |
+
+计分：100 − 5（1× 🟡 LOW）= **95 / 100 → A → PASS**。🟢 7 条仅记录（含观察项：`.faq-q` 死 CSS、`summary .badge` 双块镜像为设计同构、`<title>`/`h1` 仍 BWH 先序**待确认**），不计入 `findings_total`。PASS ⇒ path-scoped commit（仅本文件 + 本件 + `.review-level.yaml`）+ `git push origin main`（ff-only）；三验与推送前/后 tip 见评审件 §10。
+
+---
+
 ## 条目格式说明
 
 ```
