@@ -281,17 +281,30 @@ $ … | grep -nE '^\+[^+].*(src="http|href="http|fetch\(|XMLHttpRequest)'
 
 ### 10.2 推送与三验（实测）
 
-- **推送前 tip**：`52befa6c97fc52c9f2d7d9532a70635fe4549ceb`（`origin/main`，behind 0 ⇒ ff 天然成立）
-- **评审笔**：本文件 + `review-log.md` + `.review-level.yaml` 三文件，path-scoped commit `audit@review: bmi archive CL063/CL068 sync 评审 PASS …`；不含 `bmi-tracker.html` / `index.html` / `static/**` / `documents/reports/**` / `AGENTS.md` 任何改动
-- **推送**：`git push origin main`（ff-only；无 `--force` / `--all` / `--tags`；分支为 `main`，非停更的 `master`）
-- **三验**（推送后在评审笔 tip 上执行，原样值见 §10.3 回填）：
-  1. `git rev-parse HEAD` **==** `git ls-remote origin refs/heads/main | awk '{print $1}'`
-  2. `git log --oneline origin/main..HEAD` ⇒ **空**
-  3. `git status --porcelain` ⇒ **空**
+- **推送前 tip**：`52befa6c97fc52c9f2d7d9532a70635fe4549ceb`（`origin/main`，behind 0 ⇒ ff 天然成立；推送前 `git ls-remote` 复读同为 `52befa6`，无他线并发落仓）
+- **评审笔**：`4509555cfbb9b04ac49a516bc4e7a1871a6eaf19`（`audit@review: bmi archive CL063/CL068 sync 评审 PASS 95 (四项判据 1/1/1/0)`），恰 3 文件 **+347/−0**（评审件 +300 / `review-log.md` +39 / `.review-level.yaml` +8），`git diff --cached --stat` 无删除行 ⇒ 不含 `bmi-tracker.html` / `index.html` / `static/**` / `documents/reports/**` / `AGENTS.md` 任何改动
+- **ff 前置**：`git merge-base --is-ancestor origin/main HEAD` ⇒ **rc=0**
+- **推送**：`git push origin main` ⇒ `52befa6..4509555  main -> main`，**rc=0**（无 `--force` / `--all` / `--tags`；分支 `main`，非停更 `master`；未改写历史）
+- **推送后 tip**：`4509555cfbb9b04ac49a516bc4e7a1871a6eaf19`
 
-### 10.3 三验回填
+### 10.3 三验（在评审笔 `4509555` 上，原样输出）
 
-（由紧随其后的 `audit@review:` 回填笔写入 `git push` 原始输出、评审笔 sha、推送后 tip 与三验原样输出；最终 tip 以 `git rev-parse HEAD` 与 `git ls-remote` 对照为准。）
+```
+$ git rev-parse HEAD
+4509555cfbb9b04ac49a516bc4e7a1871a6eaf19
+$ git ls-remote origin refs/heads/main | awk '{print $1}'
+4509555cfbb9b04ac49a516bc4e7a1871a6eaf19      ⇒ ① 同值 ✅
+
+$ git log --oneline origin/main..HEAD | wc -l
+0                                              ⇒ ② 空 ✅
+
+$ git status --porcelain | wc -l
+0
+$ git status -sb | head -1
+## main...origin/main                          ⇒ ③ 空 ✅
+```
+
+本回填笔（`audit@review: backfill CL063/CL068 三验`）推送后以同一三命令复跑，最终 tip 以 `git rev-parse HEAD` 与 `git ls-remote` 对照为准。
 
 ## 11. 停止判据与后续
 
