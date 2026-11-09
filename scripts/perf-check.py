@@ -92,15 +92,18 @@ def main():
           "hero <img> carries intrinsic width/height", "avoids CLS")
     check("<picture>" in index, "hero served through <picture>", "avif → webp → jpg")
 
-    # 3b. layout contract (上一版布局：48px 归档图标行 + 底部药丸栈；5 个入口 / 2 个区块标题)
-    check('class="icon-links"' in index and 'class="bottom-stack"' in index,
+    # 3b. layout contract (48px 归档图标行 + 底部药丸栈；5 个入口 / 2 个区块标题)
+    # 匹配按 class token 而非精确串：CL003 起进场动画把类写成 `icon-links intro intro-2` /
+    # `now-title intro intro-3`，精确串会静默恒红（JT-SEC-024）。
+    check(re.search(r'class="[^"]*\bicon-links\b', index) is not None
+          and 'class="bottom-stack"' in index,
           "layout: icon-links row + bottom pill stack present")
     check('class="app-band"' not in index, "layout: no app-band drift")
     n_band = index.count('<a class="now-card"')
-    m_icons = re.search(r'<div class="icon-links">(.*?)</div>', index, re.S)
+    m_icons = re.search(r'<div class="icon-links[^"]*">(.*?)</div>', index, re.S)
     n_icon = m_icons.group(1).count("<a ") if m_icons else 0
     check(n_band + n_icon == 5, "layout: exactly 5 entries", f"pills={n_band} + icon-links={n_icon}")
-    n_titles = index.count('class="now-title"')
+    n_titles = len(re.findall(r'class="[^"]*\bnow-title\b', index))
     check(n_titles == 2, "layout: 2 section titles", f"found {n_titles}")
 
     # 4. ?t= parity
