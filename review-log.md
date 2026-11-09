@@ -1214,7 +1214,38 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 推送：`f8c6c53..0e083d1 HEAD -> main`（评审笔 `0e083d1`，3 文件 +271/−0，rc=0）+ 本回填笔；三验在评审笔上 `rev-parse HEAD == ls-remote`（`0e083d1…`）、`origin/main..HEAD` 空、`status --porcelain` 空，逐条原样输出见评审件 §10.3。
 
+## 2026-11-09 — JT-CL004 [6/6] 收尾复盘件审计 + JT-SEC-025 关闭复核（单笔 `d82b5d7`：retro 件 + 基线刷新 → PASS 90）
+
+- **review者**: Security Reviewer（review profile，用户 2026-11-09「1 现在执行」触发单笔收尾审计）
+- **范围**: `origin/main = 756932f` 之上 **1 笔未推**（ahead 1 / behind 0，`git status --porcelain` 空）：`d82b5d7` `docs@handoff: JT-CL004 [6/6] retro + baseline refresh (closes JT-SEC-025)` —— `documents/reports/JT-CL004-retro-v1.0-20261109.md` **+61/−0**（新）+ `TODO-handoff.md` **+14/−15**（机器段 `hm loop entry-page --write` 派生 2→1 条 + 基线刷新）＝ **+75/−15**。名称面不含 `scripts/`、`index.html`、`static/`、`AGENTS.md`、`tokens-tracker/`；无 `--diff-filter=DR`；无他流水线夹带。
+- **Tracking**: **JT-SEC-025（🟡 → ✅ CLOSED，`d82b5d7`）** + **JT-SEC-026（🟡 LOW，新）** + 结转 JT-SEC-021（🟡）/ 019 / 020 / 022 / 023（🟢）
+- **状态**: ✅ PASS（**90 / 100**，Rating A；🔴 0 / 🟡 1 新增 / 🟢 10）
+- **报告**: `documents/reviews/JT-CL004-retro-audit-v1.0-20261109.md`
+- **实现 prompt**: ⬜ 无需生成（收尾文档审计，非设计评审；无 markers）
+
+### 发现摘要
+
+**复盘件事实对齐（逐条实测，全部成立，两处数字例外见 JT-SEC-026）** —— ① **六步轨迹 8 个 commit 逐个 `git log -1 --format=%s` 实测存在且语义相符**（`35790a9` 方案 / `cc55e03` 设计评审 `PASS with notes 6` `score 80` / `8c2e9cd` 脚本入仓 + `ef85154` 引用同步 + `bcfd66e` 方案回填 / `27d63d9` AGENTS 指针+双钉子 / `0e083d1` `[5/6]` PASS 90 / `d82b5d7` 本笔），时间列与 `hm loop status` 逐格一致（含 1042m 隔夜等待）。② **数字对齐**：复盘件「PASS 90（🔴0 / 🟡1→关闭 / 🟢8）」与实现审计 frontmatter `score: 90 / findings_red: 0 / findings_yellow: 1 / findings_green: 8` 四值一致。③ **三钉子现跑复验**：`--mode post` **15/15 rc=0**、`--selftest` **17/17 rc=0**、`perf-check.py` **28 项全 PASS rc=0**；旧对照件 `cache/scratch/JT-CL001/check.py` 仍 **15/15**。④ **等价性「diff 8 行」成立**：`diff … | grep -c "^[<>]"` = **8**，内容 4 处（docstring 3 条 Usage 路径 + `ROOT parents[3]→parents[1]`），**断言体零改动**，`grep -oE 'check\("S[0-9]+'` = 22 次调用（S1×3，S4/S5/S6/S7×2，余各 1）⇒ S1–S16 全在、self-test 分支（S10/S16）保留；`grep -c /Users/jadenli scripts/portal-check.py` = **0**（文中自证命令成立）。⑤ **机器段未被手改**：生成标记闭合、`sha256:8384a60a`、派生 **1 条** = 实表 1 行，`hm check handoff .` ⇒ **✅ errors=0 warns=0 · 机器段 1 行 · 差异知会 0**。⑥ **`JT-SEC-025` ✅ CLOSED**：基线 `HEAD 756932f` / `origin/main 756932f`（`ls-remote` 实测同值）/ `ahead 0`（落笔时点，本笔后 =1）三数一致，待审计表仅列本笔、无 `27d63d9`/`6e66f04` 残留，推送链 9 个 sha 逐个 `git log -1` 均存在。⑦ **无回归**：`timestamp-manager check` 双文件同值 **1794111578** rc=0；`hm loop status JT-CL004` ⇒ `[1/6]`–`[6/6]` 全 ✅（整体 1078m）；`hm check quality .` ⇒ Complete 24 / Issues 0（复盘件 frontmatter 六字段齐备）。⑧ **安全面**：新增 75 行凭证/PII 扫描 **0 命中**；`/Users/jadenli` 复盘件 1 / `TODO-handoff.md` 0，唯一 1 处为 `:43` 自证命令字面量（「脚本内无家目录硬编码」的证明），非路径披露 ⇒ 按 JT-SEC-020 记 🟢；本笔零代码行，无新增执行/外链面。
+
+**`JT-SEC-026`（🟡 LOW，新 OPEN，非阻断，`documents/reports/**` 归 ops fix-forward）** —— 复盘件两处数字口径失准：(a) **用量行是 `[5/6]` 快照冒充 `[6/6]` 累计** —— 文中 `api 249 / in 777,619 / out 198,554 / $0.3532` 逐值等于 `cache/closed-loop/20261108-jaden-tech-ops-JT-CL004-impl-audit.json`（15:24），而该行标签写「含本轮 `[4/6]`–`[6/6]`」；步骤记录 `…-retro.json`（15:25:04 落盘，与 `d82b5d7` 15:25:01 同批）为 **258 / 787,295 / 205,185 / $0.3627** ⇒ 低估 9 次 api / 9,676 in / 6,631 out / $0.0095。(b) **「恒红 14 天」量级错 12 倍** —— 实测窗 `5e98bad 2026-11-08 12:10:32 → 6e66f04 2026-11-09 15:19:34` = **27h09m（21 笔）**；即便按契约引入笔 `adb887d`（11-04 19:35）起算亦仅 4.8 天；该句是「判据必须入版本库」论点的关键量级证据，故记 🟡 而非 🟢。改法：改用量为 258/787,295/205,185/$0.3627、改「恒红 27 小时（跨 21 笔）」或改述为「自 `adb887d` 引入契约后 4.8 天即失配、5 天内零评审命中」、第 32 行「≈17.5h」→「≈17h58m」（1078m），落 `docs@retro: JT-SEC-026 numeric correction`；**禁 amend**（该笔已推，改写历史越界），走 fix-forward。附 🟢 精度项：同族「≈17.5h ↔ 1078m」四舍五入误差，单列不计发现。
+
+| # | Level | ID | 标题 | 状态 |
+|:-:|:--|:--|:--|:--|
+| 1 | 🟡 LOW | **JT-SEC-026** | 复盘件数字口径失准（用量行 = `[5/6]` 快照；「恒红 14 天」↔ 实测 27h09m） | NEW OPEN（non-blocking，ops fix-forward） |
+| 2 | 🟡 MEDIUM | **JT-SEC-021** | `javascript:` FAQ 死链生成器侧根因未修（结转，0 再生） | OPEN 无变化（not in scope） |
+| 3 | 🟢 LOW | **JT-SEC-019** | `tokens-tracker/index.html` footer 版本披露 | OPEN 无变化 |
+| 4 | 🟢 LOW | **JT-SEC-020** | `documents/**` / `~/CodeSpace` 路径披露（本笔 +1 处自证命令字面量） | OPEN（扩 1 处，🟢） |
+| 5 | 🟢 LOW | **JT-SEC-022** | `TODO-handoff.md` 公开仓路径与 branch | OPEN 无变化 |
+| 6 | 🟢 LOW | **JT-SEC-023** | `live.js` desc 含凭据轮换任务语义 | OPEN 无变化 |
+| — | 🟡 | **JT-SEC-025** | `TODO-handoff.md` 基线节时点滞后 | **✅ CLOSED（`d82b5d7`）** |
+| — | 🟡 | **JT-SEC-024** | `perf-check.py` 判据自 `5e98bad` 恒红 | **✅ CLOSED（`6e66f04`，上轮）** |
+
+计分：`100 − 5（JT-SEC-021 结转 🟡）− 5（JT-SEC-026 新增 🟡）= **90 / 100 → A → PASS**`；**JT-SEC-025 / 024 关闭不扣分**（上轮 −5 回冲）。PASS ⇒ path-scoped commit（本文件 + 评审件 + `.review-level.yaml`）+ **ff-only 推 1 笔被审笔 + 评审笔**（`git push origin HEAD:main`，无 force/all/tags）+ 三验回填笔。
+
+推送：`756932f..<评审笔> HEAD -> main`（评审笔 3 文件新增，rc=0）+ 回填笔；三验在最终 tip 上 `rev-parse HEAD == ls-remote`、`origin/main..HEAD` 空、`status --porcelain` 空，原样输出见评审件 §8。
+
 ---
+
 ## 条目格式说明
 
 ```
