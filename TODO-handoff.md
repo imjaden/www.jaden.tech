@@ -1,4 +1,4 @@
-<!-- generated: 2026-11-08 · source: cache/draft/TODO-20261108.md · sha256:77cd1266 -->
+<!-- generated: 2026-11-08 · source: cache/draft/TODO-20261108.md · sha256:6a99097b -->
 > 派生: 待执行 **2** 条 · 最近闭环 **CL4** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261108.md）
@@ -12,15 +12,15 @@
 ## 二、基线（人工维护）
 
 - 仓: `~/CodeSpace/www.jaden.tech` · branch `main`
-- 本地 HEAD: `34e8527`（= `origin/main`，ahead/behind `0 0`）· 收尾笔 = 本文件所在 commit（**未推**，待明早评审）
-- 今日推送链（均由 review 执行，本会话未 push）: `52befa6` → `34e8527`
-  - CL003 门户改版: `5e98bad`(feat) → `07e67c6`(PASS 95) → `8f37e8c`(三验) → `d69d7b9`(fix Y1) → `f668bdf`(PASS 100) → `52befa6`(三验)
-  - CL063/CL068 站点同步: `d746508` / `fb7a66e` / `4ffda68`(业务) + `4509555`(PASS 95) → `34e8527`(三验)
-- 线上: https://www.jaden.tech `index.css?t=1794111578`；`bmi-tracker.html` sha256 `11f6b80f…`（52511 B，线上 == 本地）；Pages `{"branch":"main","status":"built"}`，部署 `2026-11-08 10:20:55 GMT`
-- harness: `python3 scripts/portal-check.py --mode post` = **15/15** rc=0；`--selftest` = **17/17** rc=0；`scripts/timestamp-manager.py check` 同值 `1794111578`
-  - ⚠️ 旧口径作废: 本文件历史里写的 `13/13`（10-25）、`9/9`/`10/10`（更早）均为 S9/S10 修复前数字
-- 工作树: clean（`cache/**` gitignored；仅本文件收尾笔待提交）
-- 本会话按用户指示**不 push**（21:17「准备退出本会话 TUI」）；评审+push 延后明早
+- 本地 HEAD: `27d63d9` · `origin/main` = `f8c6c53`（夜间 L2 PASS 90，7 笔）· ahead = 1（`27d63d9` docs@agents）+ 本文件收尾笔
+- 2026-11-09 本会话: `27d63d9 docs@agents: point to shared feedback spec + name both regression nails`（AGENTS.md +4/−1：回话规范指针 + 双钉子）
+- 推送链（2026-11-08，均由 review 执行）: `52befa6`（CL003 收口）→ `34e8527`（CL063/CL068 收口）→ `2dfe85c`（收尾 docs）→ 夜间 L2 `f8c6c53`
+  - 夜间 1A 侧同时推进 JT-CL004: `35790a9`(方案) → `cc55e03`([2/6] 设计评审 PASS 80) → `8c2e9cd`(portal-check.py 入仓) → `ef85154`(TODO-handoff 引用同步) → `bcfd66e`(方案回填 Y1–Y6)
+- 线上: https://www.jaden.tech `index.css?t=1794111578`；`bmi-tracker.html` sha256 `11f6b80f…`（52511 B，线上 == 本地）；Pages `{"branch":"main","status":"built"}`
+- harness（现为两颗钉子，均已入仓）: `python3 scripts/perf-check.py`（体积/请求集/`?t=`）+ `python3 scripts/portal-check.py`（S1–S16）= **15/15** rc=0、`--selftest` = **17/17** rc=0；旧 `cache/scratch/JT-CL001/check.py` 仍可跑（15/15，与新钉子差 8 行 docstring），作为对照保留
+  - ⚠️ 旧口径作废: 历史里写的 `13/13`（10-25）、`9/9`/`10/10` 均为 S9/S10 修复前数字
+- 工作树: 本文件（机器段同步）为唯一改动，随本笔提交；`cache/**` gitignored
+- 本会话**不 push**（用户当日口径），评审+push 由 review 角色执行
 
 ## 三、待执行（人工维护）
 
@@ -28,18 +28,20 @@
 
 | 待审计笔 | 内容 | 复审面 | 前置 / 连带 |
 |:--|:--|:--|:--|
-| 本文件收尾笔 `chore@docs: nightly close-out — refresh baseline + machine section` | TODO-handoff.md 机器段（`hm loop entry-page --write`，派生 2 条）+「基线」刷新 | `TODO-handoff.md`（1 文件） | 无前置；与 JT-CL004 无连带 |
+| `27d63d9` | `docs@agents`: 回话规范指针（`message-feedback-spec.md` 优先于本文件）+ 钉子扩为两颗（`perf-check.py` + `portal-check.py`） | `AGENTS.md`（+4/−1，3136B） | 受保护文件，用户 2026-11-09「采用推荐」已批 |
+| 本文件收尾笔 `docs@handoff: sync machine section + baseline (2026-11-09)` | 机器段（派生 2 条）＋基线刷新 | `TODO-handoff.md` | 无前置 |
 
-- **今日业务笔全部已推**：`52befa6`（CL003 收口）→ `34e8527`（CL063/CL068 收口）⇒ 无未审计业务笔、无未推实现笔
-- 复核命令（明早直跑）：
-  - `python3 scripts/portal-check.py --mode post` ⇒ 期望 **15/15** rc=0（`13/13` 为旧口径，已作废）
-  - `git log --oneline origin/main..HEAD` ⇒ 恰 1 笔（本文件收尾笔）
-  - `git show --stat HEAD` ⇒ 恰 1 文件（`TODO-handoff.md`）
-- 放行口径：review PASS 后 `git push origin HEAD:main`（ff-only，禁 force）；本会话不 push。次日若 review 忙，此笔可与其他本线笔一次收口。
+- **昨晚至今日业务笔全部已推**：`52befa6` → `34e8527` → `2dfe85c` → 夜间 L2 `f8c6c53` ⇒ 无未审计业务笔
+- 复核命令（明早/下次收口直跑）：
+  - `python3 scripts/portal-check.py --mode post` ⇒ **15/15** rc=0；`--selftest` ⇒ **17/17** rc=0
+  - `python3 scripts/perf-check.py` ⇒ rc=0
+  - `git log --oneline origin/main..HEAD` ⇒ 2 笔（`27d63d9` + 本文件收尾笔）
+- 放行口径：review PASS 后 `git push origin HEAD:main`（ff-only，禁 force）；本会话不 push
 
 ### 其他
 
-- **JT-CL004**（机器段已登记）：门禁版本化 → `scripts/portal-check.py`（345 行原样搬）+ `TODO-handoff.md` 两处引用改新路径 + `AGENTS.md:61` 扩句（受保护文件，小步 patch 逐审批）。**建议明早第一件**：现在唯一自动化判据还在 gitignored 的 `cache/scratch/`，S9/S10 两次静默退化就发生在这块。
+- **JT-CL004**（机器段已登记，进行中）：门禁版本化 → `scripts/portal-check.py` 已入仓（`8c2e9cd`，19906B）+ `TODO-handoff.md` 引用同步（`ef85154`）+ **`AGENTS.md` 钉子扩为两颗（`27d63d9`，本次）**。进度：`[1/6]`–`[4/6]` ✅（[4/6] ops 核查 2026-11-09 15:00:41，commit `27d63d9`）；剩 **`[5/6]` 实现审计（派 review）→ `[6/6]` 收尾复盘**。
+- **JT-SEC-024 🟡**（夜间 L2 新开）：`perf-check.py` stale contract —— perf-check 的断言口径与现行资源集/预算可能已脱钩，需复核后收紧或改判据。建议与 `[5/6]` 一并交 review。
 - **待开（lqip）**（机器段已登记）：首屏背景内联 LQIP，低优先，随下次改首屏一并做。
 - 已闭合、无需再动：
   - CL003 门户改版（PASS 100，含 🟡 Y1 修：`intro-1` 从 inline `a#logo-link` 移到 replaced `img#logo`）
