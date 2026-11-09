@@ -1242,7 +1242,7 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 计分：`100 − 5（JT-SEC-021 结转 🟡）− 5（JT-SEC-026 新增 🟡）= **90 / 100 → A → PASS**`；**JT-SEC-025 / 024 关闭不扣分**（上轮 −5 回冲）。PASS ⇒ path-scoped commit（本文件 + 评审件 + `.review-level.yaml`）+ **ff-only 推 1 笔被审笔 + 评审笔**（`git push origin HEAD:main`，无 force/all/tags）+ 三验回填笔。
 
-推送：`756932f..<评审笔> HEAD -> main`（评审笔 3 文件新增，rc=0）+ 回填笔；三验在最终 tip 上 `rev-parse HEAD == ls-remote`、`origin/main..HEAD` 空、`status --porcelain` 空，原样输出见评审件 §8。
+推送：`756932f..dde4429 HEAD -> main`（ff-only 快进 2 笔 = 被审笔 `d82b5d7` + 评审笔 `dde4429`，`dde4429` 3 文件 +338/−0，push_rc=0）+ 回填笔；三验在 `dde4429` 上 `rev-parse HEAD == ls-remote`（`dde442900236…`）、`origin/main..HEAD` 空、`status --porcelain` 空，原样输出见评审件 §8.1。
 
 ---
 

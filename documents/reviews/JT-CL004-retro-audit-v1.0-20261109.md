@@ -290,10 +290,35 @@ PASS ⇒ path-scoped commit（本评审件 + `review-log.md` + `.review-level.ya
 ## 8. 推送与三验
 
 - **推送前 tip**：`HEAD = d82b5d7`（被审笔，ahead 1）· `origin/main = 756932f`
-- **推送**：`git push origin HEAD:main`（ff-only）
+- **评审笔**：`dde4429 audit@review: JT-CL004 [6/6] retro PASS + push`（3 文件 +338/−0：本评审件 + `review-log.md` +31 + `.review-level.yaml` +8）
+- **推送**：
 
-（本笔推送与三验的实测输出由紧邻的回填笔写入下方，`git log` 可查。）
+```
+$ git push origin HEAD:main
+To github.com:imjaden/www.jaden.tech.git
+   756932f..dde4429  HEAD -> main
+push_rc=0
+```
 
-### 8.1 三验（在最终 tip 上）
+- **推送后 tip**：`origin/main = dde4429`（本笔推送含被审笔 `d82b5d7` + 评审笔 `dde4429`，ff-only 快进 2 笔）
 
-见回填笔 §8.2：① `git rev-parse HEAD` == `git ls-remote origin refs/heads/main | awk '{print $1}'`；② `git log --oneline origin/main..HEAD` 空；③ `git status --porcelain` 空。
+### 8.1 三验（在评审笔 tip `dde4429` 上）
+
+```
+1) $ git rev-parse HEAD
+dde442900236982c1a100148f35f6f6a40316f8f
+   $ git ls-remote origin refs/heads/main | awk '{print $1}'
+dde442900236982c1a100148f35f6f6a40316f8f          # ① 相等
+
+2) $ git log --oneline origin/main..HEAD
+（无输出）                                          # ② 空
+
+3) $ git status --porcelain
+（无输出）                                          # ③ 空
+```
+
+三验在**推送后即时**执行，`HEAD == ls-remote`、未推区间为空、工作树干净 ⇒ 被审笔与评审笔均已落到 `main`，无残留本地笔。
+
+### 8.2 回填说明
+
+本节由紧随的 `audit@review: backfill JT-CL004 [6/6] three-check results (tip dde4429)` 笔写入（该笔只改本评审件 §8 与 `review-log.md` 推送行，不含任何代码/受保护文件）；回填笔自身推送后三验重跑结果见评审对话回执，`git log --oneline origin/main..HEAD` 收尾为空。
