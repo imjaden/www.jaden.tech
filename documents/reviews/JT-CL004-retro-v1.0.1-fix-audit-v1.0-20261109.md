@@ -165,10 +165,23 @@ $ hm check quality .                            ⇒ Complete 25 / Issues 0
 
 ## 9. 推送与三验
 
-- **推送前 tip**：`c128c9a40cf61dc5b2b766335efb04650cf4baa7`（`origin/main`，`ls-remote` 实测）。
-- **推送动作**：`git push origin HEAD:main`（ff-only，无 `--force` / `--all` / `--tags`），连带被审笔 `28a0816` 与本评审笔。
-- **推送后 tip**：见 §9.1。
+- **推送前 tip**：`c128c9a40cf61dc5b2b766335efb04650cf4baa7`（`origin/main`，`ls-remote` 实测），`ahead 1`。
+- **推送动作**：`git push origin HEAD:main`（ff-only 快进 2 笔 = 被审笔 `28a0816` + 评审笔 `a628d7a`；无 `--force` / `--all` / `--tags`，未改写历史）。
+- **推送结果**：`c128c9a..a628d7a  HEAD -> main`，`push_rc=0`；评审笔 `a628d7a` 3 文件 +205/−0（本件 174 行 + `review-log.md` 23 行 + `.review-level.yaml` 8 行）。
 
-### 9.1 三验（推送后即时）
+### 9.1 三验（在评审笔 tip `a628d7a` 上，推送后即时）
 
-（推送后回填）
+```
+1) $ git rev-parse HEAD
+   a628d7a91acea87cb60f70a203b7cf68caa89927
+   $ git ls-remote origin refs/heads/main | awk '{print $1}'
+   a628d7a91acea87cb60f70a203b7cf68caa89927        ⇒ ✅ 同值
+2) $ git log --oneline origin/main..HEAD
+   （无输出）                                      ⇒ ✅ 未推区间为空
+3) $ git status --porcelain
+   （无输出）                                      ⇒ ✅ 工作树干净
+   $ git rev-list --left-right --count origin/main...HEAD
+   0	0                                          ⇒ ✅ ahead 0 / behind 0
+```
+
+判定：被审笔与评审笔均已落到 `origin/main`，本地零残留笔。本件回填走**追加一笔**（`git push origin HEAD:main` 再推，ff-only，仅 `documents/reviews/` + `review-log.md` 两个已授权路径），不改写已推笔。

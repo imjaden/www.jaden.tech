@@ -1265,7 +1265,7 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 计分：`100 − 5（JT-SEC-021 结转 🟡）= **95 / 100 → A → PASS**`；`JT-SEC-026` 关闭不扣分（上轮 −5 回冲）。PASS ⇒ path-scoped commit（本文件 + 评审件 + `.review-level.yaml`）+ ff-only 推被审笔 + 评审笔 + 三验回填笔。
 
-推送：（推送后回填）
+推送：`c128c9a..a628d7a HEAD -> main`（ff-only 快进 2 笔 = 被审笔 `28a0816` + 评审笔 `a628d7a`，评审笔 3 文件 +205/−0，push_rc=0）+ 本回填笔（ff-only，仅 `documents/reviews/` + `review-log.md`）；三验在 `a628d7a` 上 `rev-parse HEAD == ls-remote`（`a628d7a91ace…`）、`origin/main..HEAD` 空、`status --porcelain` 空、`ahead/behind = 0/0`，原样输出见评审件 §9.1。
 
 ---
 
