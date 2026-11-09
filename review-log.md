@@ -1269,6 +1269,33 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-11-09 — 夜间 L2 全项目审查（2 笔未推：tokens-tracker 镜像数据笔 + 收口 docs 笔）+ 🔴 `JT-SEC-027` 公开仓历史残留简历 PDF 发现 → CONDITIONAL PASS 80
+
+- **review者**: Security Reviewer（review profile，cron `daily-tracker-review` 21:50 班次；无用户在场，按 prompt 自主执行）
+- **范围**: `origin/main = 823cd42` 之上 **2 笔未推**（ahead 2 / behind 0，`git status --porcelain -uall` 空）：`bc5ff63` `data@update: tokens-tracker - auto sync`（`assets/shell-render.js` +13/−3 / `assets/style.css` +2 / `data/live.js` +87/−294 = 3 文件 +98/−296）→ `82d9a9a` `docs@handoff: nightly close-out - 2026-11-09 baseline + queue [JT-CL004]`（`TODO-handoff.md` +26/−29）。聚合 **4 文件 +124/−325**；`--diff-filter=DR` 空；无 `index.html` / `static/` / `scripts/` / `AGENTS.md` / `documents/`；`tokens-tracker/index.html` 壳未动（壳/数据分离成立）。
+- **Tracking**: **JT-SEC-027（🔴 HIGH / P0，NEW OPEN）** + 结转 JT-SEC-021（🟡）/ 019 / 020 / 022 / 023（🟢）；JT-SEC-024/025/026 复核**仍 CLOSED**
+- **状态**: ⚠️ CONDITIONAL PASS（**80 / 100**，Rating B；🔴 1 / 🟡 0 新增 / 🟢 5 结转）
+- **报告**: `documents/reviews/JT-sec-027-history-pii-review-v1.0-20261109.md`
+- **实现 prompt**: ⬜ 无需生成（非 PASS；且本笔为历史数据面处置，非设计评审）
+
+### 发现摘要
+
+**`JT-SEC-027`（🔴 HIGH / P0）公开仓历史残留 `resume-landscape.pdf`，含未声明的住址/生日/婚育/政治面貌** —— 该件已于 `69d7d72`（2023-06-06 19:15:52）从工作树删除、HEAD 树内 0 命中，但 blob `3b0931c1050f2189fff4123591751a1a5d18160b`（**218,580 B / 1 页**，`CreationDate 2022-11-29`）仍挂在 `main` 历史：`git rev-list origin/main --objects | grep -i resume` 列出该 blob；**外网实测 `raw.githubusercontent.com/imjaden/www.jaden.tech/35a3d86/resume-landscape.pdf` 与 `7c69b03` 均 HTTP 200**；`api.github.com/repos/imjaden/www.jaden.tech` 返回 `private: false` / `visibility: public` ⇒ 删除只给了「已下线」的错觉。PyMuPDF 解出正文 **908 字**：姓名 + 手机（11 位，本件脱敏） + 邮箱 `jaden.li@jaden.tech`（此三项在 `.review-level.yaml` `data_types` 内，且 `wechat.html:531` 现有 `tel:` 同号属既有公开联系面，按 anti-pattern 不计），**另有未声明字段：住址（小区名 + 门牌号 + 室号 3 段，本件脱敏）、出生年月（YYYY-MM）、籍贯（省+市）、婚姻/婚育状况、政治面貌** —— 门牌号 + 生日 + 婚育 + 政治面貌是可用于社工/开户的敏感组合，非站点功能所需，且用户 2023 年主动删除已表明撤回意愿，历史残留使撤回失效。全历史文档型对象（pdf/docx/xls/ppt/zip/rar/7z/p12/pem/key）**仅此 1 个**；`review-log.md` 与 `.review-level.yaml` 对该件 `grep -cin` **= 0** ⇒ 24 轮评审从未覆盖，属首轮发现。**取证弯路（须记入方法论）**：首轮 ASCII 硬扫只捞到一个 163 邮箱别名（本件脱敏），因 PDF 内嵌子集字体 CID 编码未解码，一度按「仅邮箱」低风险推进；换 conda `py3.12` + PyMuPDF 才拿到真实文本 ⇒ **禁止以硬扫 0 命中代替文本层解码**。处置方案：**A（建议）历史重写**（`git filter-repo --path resume-landscape.pdf --invert-paths` + `reflog expire --expire=now --all` + `gc --prune=now` + `git push origin +main:main`；破坏性：全 sha 变更致 `review-log.md` 旧 sha 引用失效、现存 clone/PR 失效、GitHub 孤儿对象需另开工单）/ B 仓转 private / C 接受并把 `address/birth/marital/political` 补进 `data_types` / D 仅开 support 工单清缓存。**本轮不改历史**（需用户裁定）。
+
+**被审 2 笔本体干净（0 发现）** —— `shell-render.js` 3 处改动均为**窄化/加固**：`SEC-600-13` 把 `anomaly` 移出 `STATUS_KEYS` 白名单（`anomaly` 非状态值、走正交开关 `?anomaly=1`，留在白名单会造「过滤到 0 行」死链）、`SEC-600-9` 仅追加 `is-current` class 拼接、`SEC-600-10` 改 `?project=` 覆盖 localStorage；消费点实测为 `projectOf(r) === projectFilter` 等值比较 + `HB.el(..., "项目：" + projectFilter)` + `u.set("project", …)`，`HB.el` 实现是 `n.textContent = String(text)`（`common.js:10-15`）⇒ 无 innerHTML / 无选择器拼接 / 无跳转，不构成注入面。`style.css` +2 行新规则特异性（`100+10+10+10`）与既有隐藏规则同级且位置在后 ⇒ 覆盖成立，无 `url()`/`expression()`/外部 `@import`。`data/live.js` **8 个 `window.*` 键集不变**，`filtered` 24→19（draft 23→18 / empty 1→0 / kept 62→49）；`LIVE_ITEMS` 39→16（`done` 25→4、`pending` 14→12，`daily-checker` 29→4）属 done 条目滚出 live 窗口的**数据流**而非生成器改口径（键集/字段集/转义不变，**观察项不计发现**）；`"session_id"` 40 处 **前后同数** ⇒ 非本笔新增披露；`</script` **0**、`innerHTML`/`eval(`/`new Function`/`document.write`/`<script` **0**、`javascript:` **0**。
+
+**收口 docs 笔** —— 机器段派生口径齐备（`generated: 2026-11-09 · sha256:381041ec`、派生 2 条、`generated end` 闭合，人工段未复述派生数字）；待审计表**两笔齐全** ⇒ `JT-SEC-025` 的失效模式（清单缺笔致照文漏审）**未复发**；`JT-SEC-020` 面**缩减 1 处**（删掉一条 `~/CodeSpace/hermes-manager/...` 指针）。**观察项（不计发现）**：基线行「本地 HEAD `bc5ff63` · ahead = 1」是落笔前时点（提交后实为 `82d9a9a` / ahead 2），且上版「本件提交后 ahead = N」括注本版被删；因两笔均已入表，不构成漏审风险，故不升发现 —— 建议 ops 侧恢复括注口径（待确认 2）。
+
+**安全面 / 无回归** —— Pass1 全仓凭证 **0** 命中、无 `.env`/`.pem`/`.key`/`credentials` 入库；Pass2 宽词 `token` 命中均为 `cache_read_tokens` / `total_tokens` / `tokens-tracker` 字样；Pass3 **124 条新增行**凭证 / PII / `/Users/jadenli` **0 命中**；Pass4 `git log -p` 近 200 笔 PEM / AWS / GitHub / OpenAI 型密钥 **0**；新增行 `innerHTML|outerHTML|insertAdjacentHTML|document.write|eval(|new Function|动态 .src|location.*|fetch(|onclick=|onerror=` **0**（唯一 `javascript:` 命中是 `TODO-handoff.md` 中描述 `JT-SEC-021` 的散文）。控制集无回归：`tokens-tracker/index.html` 未动 ⇒ `referrer` meta 1 处、`rel="noopener"` 1 处在；全仓 CDN 仍仅 `chart.js@4.4.7` 两文件带 `integrity="sha384-…"`；本批 0 新增依赖。输入面：`?project=` 仍无白名单（仅 `?status=` 有，收窄后只收三态），但仅做等值比较 + `textContent` + URL 回写，无 sink（观察项：`HB.saveProjectFilter` 可被恶意深链写入长串挤占 localStorage 配额，影响仅筛选记忆丢失）。
+
+**门禁与运行面（实跑）** —— `python3 scripts/perf-check.py` ⇒ **28 项全 PASS rc=0**（含 `exactly 5 entries — pills=3 + icon-links=2`、`2 section titles`、`?t= parity 1794111578`）；`portal-check.py --mode post` ⇒ **15/15**；`--selftest` ⇒ **17/17**；`timestamp-manager.py check` ⇒ 全同值 `1794111578`；`node --check`（shell-render / common / live）三方 OK；`py_compile` OK。真机：`http://127.0.0.1:8099/tokens-tracker/` ⇒ **HTTP 200**，Chrome headless `--dump-dom` DOM **46,004 B** 含 `共 16 条` + `LLM-RADAR-CL010` + `待开（SEC-571-16）` + `web-data-ready` ⇒ `live.js` → `shell-render.js` 渲染链无 JS 中断，条数与数据面 16 项一致。
+
+计分：`100 − 15（JT-SEC-027 🔴）− 5（JT-SEC-021 结转 🟡）= **80 / 100 → B → CONDITIONAL PASS**`；024/025/026 复核闭合不扣分。
+
+**推送：本轮不 push**（CONDITIONAL PASS 口径）—— 仅 path-scoped commit 审计 3 文件（本文件 + 评审件 + `.review-level.yaml`）。本地待推 `bc5ff63`（镜像数据）/ `82d9a9a`（收口 docs）/ 本审计笔，三者安全面均无阻断项，`JT-SEC-027` 属历史遗留、与待推笔无因果；用户裁定方案后 `git push origin HEAD:main`（ff-only，禁 force）一条命令放行。**待确认**：① `JT-SEC-027` 采 A/B/C/D 哪一方案（建议 A）；② `TODO-handoff.md` 基线节是否恢复「本笔提交后 ahead = N+1」括注（建议恢复，ops 侧落笔）。
+
+---
+
 ## 条目格式说明
 
 ```
