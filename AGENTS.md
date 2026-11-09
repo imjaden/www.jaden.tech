@@ -58,6 +58,9 @@ python3 -m http.server 8099   # 8080 长期被 http-server.cli 占用，浏览�
 
 ## Notes
 
-- No build tools, no package manager; 首屏回归钉子 = `python3 scripts/perf-check.py`（体积预算 + 请求集 + `?t=` 一致，rc=0 才算绿）
+- No build tools, no package manager; 回归钉子 = 两颗，rc=0 才算绿：
+  `python3 scripts/perf-check.py`（体积预算 + 首次请求集 + `?t=` 一致）
+  `python3 scripts/portal-check.py`（S1–S16：页面结构 / 文案面 / 首帧进场机制；`--mode post` 必须 **15/15**、`--selftest` 必须 **17/17**）
 - Static assets in `static/css/`, `static/js/`, `static/img/`
 - Python scripts are standalone dev tools (not deployed); `scripts/poetry-titles-gen.py` 从月包派生标题索引，新月包落地后须重跑（`--check` 可判同步）
+- 回话规范：`~/CodeSpace/hermes-manager/skills-governance/message-feedback-spec.md`（**优先于本文件**；本文件只补仓的事实与纪律，不改回话形状）
