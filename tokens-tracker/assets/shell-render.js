@@ -71,7 +71,9 @@
     ["done", "已完成"]
   ];
   var STATUS_LABEL = { pending: "待执行", active: "进行中", done: "已完成" };
-  var STATUS_KEYS = ["pending", "active", "done", "anomaly"];   // SEC-600-8 深链白名单   // 空态文案用中文, 不直出内部键
+  /* SEC-600-8 深链白名单；SEC-600-13: 只收 statusOf() 会返回的三态 ——
+     `anomaly` 不是状态值（走正交开关 ?anomaly=1），收进来会造出「过滤到 0 行」的死链 */
+  var STATUS_KEYS = ["pending", "active", "done"];   // 空态文案用中文, 不直出内部键
   /* CL088 C4a N8/M3 + C4d: ⇔ 分栏比例
      态值 = 三档预置 "7:3" | "5:5" | "off"（收起详情）+ 拖拽自定义 "a:b"; URL ?ratio= 优先（N3/M12）。
      收起可逆: `off` 的记忆源 = **上次拖拽自定义比例**（预置不入记忆 ⇒ 三档预置恒可达, 不成死循环）。 */
@@ -421,7 +423,11 @@
         var key = d[0];
         var isAnom = key === "anomaly";
         var on = isAnom ? anomalyOnly : (statusFilter === key);
-        var b = HB.el("button", "chip chip-" + (key || "all") + (on ? " on" : ""),
+        /* SEC-600-9: ≤960 会把 待执行/已完成 收进「更多」; 若其中一个正是当前生效筛选,
+           则打 is-current（CSS 不折叠它）—— 否则用户看不到「当前生效」是哪一档 */
+        var collapsible = (key === "pending" || key === "done");
+        var b = HB.el("button",
+                      "chip chip-" + (key || "all") + (on ? " on" : "") + (on && collapsible ? " is-current" : ""),
                       d[1] + " " + d[2]);
         b.type = "button";
         b.setAttribute("data-status", key);
@@ -1074,8 +1080,9 @@
       }
     }
     /* ?project= 只用于分栏定位（与 ?number= 同时给出）; 单独给出时按筛选处理（M16 映射） */
+    /* SEC-600-10: 与 status/anomaly 同一条优先级 —— URL 覆盖 localStorage（原实现只在本地为空时生效） */
     var proj = qs.get("project");
-    if (proj && !number && !projectFilter) {
+    if (proj && !number) {
       projectFilter = String(proj);
       HB.saveProjectFilter(PAGE, projectFilter);
     }

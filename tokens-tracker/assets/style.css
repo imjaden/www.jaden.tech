@@ -291,6 +291,8 @@ footer { margin-top: 12px; color: var(--text-dim); font-size: 0.7rem; }
   .chip.chip-more { display: inline-flex; }
   #status-chips:not(.chips-open) .chip[data-status="pending"],
   #status-chips:not(.chips-open) .chip[data-status="done"] { display: none; }
+  /* SEC-600-9: 当前生效的折叠 chip 不隐藏（否则窄屏看不出筛选档） */
+  #status-chips:not(.chips-open) .chip.is-current { display: inline-flex; }
   .board-main, .board-main.split-on { grid-template-columns: minmax(0, 1fr); }
   /* C4d: 窄屏回单栏 ⇒ 分隔条隐藏（页内 JS 同判据: 不写内联列宽, 防内联样式压过本 media） */
   .split-handle { display: none !important; }
