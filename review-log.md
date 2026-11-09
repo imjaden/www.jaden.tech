@@ -1212,6 +1212,8 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 计分：`100 − 5（JT-SEC-021 结转 🟡）− 5（JT-SEC-025 新增 🟡）= **90 / 100 → A → PASS**`；**JT-SEC-024 关闭不扣分**（上轮 −5 回冲）。PASS ⇒ path-scoped commit（本文件 + 评审件 + `.review-level.yaml`）+ **连带推送 3 笔未审计笔**（`git push origin HEAD:main`，ff-only，无 force/all/tags）+ 三验回填笔。
 
+推送：`f8c6c53..0e083d1 HEAD -> main`（评审笔 `0e083d1`，3 文件 +271/−0，rc=0）+ 本回填笔；三验在评审笔上 `rev-parse HEAD == ls-remote`（`0e083d1…`）、`origin/main..HEAD` 空、`status --porcelain` 空，逐条原样输出见评审件 §10.3。
+
 ---
 ## 条目格式说明
 

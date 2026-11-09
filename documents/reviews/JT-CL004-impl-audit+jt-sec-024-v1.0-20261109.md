@@ -213,10 +213,27 @@ $ grep -n "~/CodeSpace" AGENTS.md  ⇒ 39:(既有证书路径，非本笔)  66:(
 ### 10.2 推送前 tip 与评审笔
 
 - **推送前 tip**：`6e66f045b3f85b9e86109668a4597224e035dd6f`（= `origin/main` + 3 笔待审）
-- **评审笔**：`TBD-A`（`audit@review: JT-CL004 [5/6] PASS + JT-SEC-024 closed (perf-check token match)`），恰 3 文件：本评审件 / `review-log.md` / `.review-level.yaml`，**不含**任何产品代码、`AGENTS.md`、`TODO-handoff.md`
-- **推送链**：`f8c6c53` → `27d63d9` → `d33fa31` → `6e66f04` → `TBD-A` → `TBD-B`（三验回填笔）
+- **评审笔 A**：`0e083d1eb969053380d9519e078207bf3afd7986`（`audit@review: JT-CL004 [5/6] PASS + JT-SEC-024 closed (perf-check token match)`），恰 3 文件 **+271/−0**（评审件 +225 / `review-log.md` +38 / `.review-level.yaml` +8），`git diff --cached --stat` 无删除行 ⇒ **不含**任何产品代码、`AGENTS.md`、`TODO-handoff.md`
+- **推送命令**：`git push origin HEAD:main` ⇒ `f8c6c53..0e083d1  HEAD -> main`，**rc=0**（无 `--force` / `--all` / `--tags`；分支 `main`；未改写历史）
+- **推送链**：`f8c6c53` → `27d63d9` → `d33fa31` → `6e66f04` → `0e083d1`（评审笔）→ 三验回填笔 B
 
-### 10.3 三验（回填区，见文末追加）
+### 10.3 三验（实测，评审笔 `0e083d1` 上原样输出）
+
+```
+$ git rev-parse HEAD
+0e083d1eb969053380d9519e078207bf3afd7986
+$ git ls-remote origin refs/heads/main | awk '{print $1}'
+0e083d1eb969053380d9519e078207bf3afd7986      ⇒ ① 同值 ✅
+
+$ git log --oneline origin/main..HEAD | wc -l
+0                                              ⇒ ② 空 ✅
+
+$ git status --porcelain | wc -l
+0                                              ⇒ ③ 空 ✅
+```
+
+- ff 前置：`git merge-base --is-ancestor origin/main HEAD` ⇒ rc=0；推送前 `git ls-remote` 复读仍为 `f8c6c53`（无他线并发落仓）。
+- 回填笔 B（本文件 §10 追加）推送后以同三条命令复跑，最终 tip 以 `git rev-parse HEAD` 与 `git ls-remote origin refs/heads/main` 对照为准。
 
 ## 11. 停止判据与后续
 
