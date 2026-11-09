@@ -1175,6 +1175,44 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 计分：100 − 5（JT-SEC-021 结转 🟡）− 5（JT-SEC-024 新增 🟡）= **90 / 100 → A → PASS**。🟢 8 条仅记录/观察项（死 import、`loadRetro` 休眠路径、`wechat.html` 同源 `_blank` 无 noopener 既有债），不计入 `findings_total`。PASS ⇒ 审计笔 path-scoped commit（本文件 + `.review-level.yaml`）并**连带推送全部 7 笔本地待推 commit**（`git push origin main`，ff-only）。
 
 ---
+
+## 2026-11-09 — JT-CL004 [5/6] 实现审计 + JT-SEC-024 闭合（3 笔待推：AGENTS.md 回话规范指针 + TODO-handoff 同步 + perf-check 判据 token 化 → PASS 90）
+
+- **review者**: Security Reviewer（review profile，用户 2026-11-09「采用推荐」触发 L2）
+- **范围**: `origin/main = f8c6c53` 之上 **3 笔未推**（ahead 3 / behind 0，`git status --porcelain` 空）：`27d63d9`（`AGENTS.md` **+4/−1**：回话规范指针 + 双钉子口径）、`d33fa31`（`TODO-handoff.md` **+20/−18**：机器段 `hm loop entry-page --write` 派生 2 条 + 基线刷新）、`6e66f04`（`scripts/perf-check.py` **+7/−4**：3 处判据精确串 → class token）。`git diff --name-status --diff-filter=DR` 空；hermes-manager 跨仓 `status --porcelain` 空。
+- **Tracking**: **JT-SEC-024（🟡 → ✅ CLOSED，`6e66f04`）** + **JT-SEC-025（🟡 LOW，新）** + 结转 JT-SEC-021（🟡）/ 019 / 020 / 022 / 023（🟢）
+- **状态**: ✅ PASS（**90 / 100**，Rating A；🔴 0 / 🟡 1 新增 / 🟢 8）
+- **报告**: `documents/reviews/JT-CL004-impl-audit+jt-sec-024-v1.0-20261109.md`
+- **实现 prompt**: ⬜ 无需生成（实现审计，非设计评审；无 markers）
+
+### 发现摘要
+
+**`JT-SEC-024` ✅ CLOSED（closed by `6e66f04`）** —— ① 正向 `python3 scripts/perf-check.py` ⇒ **rc=0，28 项全 PASS（0 FAIL）**，其中 `layout: icon-links row + bottom pill stack present` / `exactly 5 entries — pills=3 + icon-links=2` / `2 section titles — found 2` 三条原恒红断言转绿。② **反向判别力自测（本轮自造，`index.html` 读内存单点变异，不落盘）**：谓词字面量先自 `perf-check.py` 抽取并断言存在（`ICON/ENTRY/WRAP` 均 `verbatim-in-source: True`）——**变异①** 1 个 `<a class="now-card"` → `<a class="now-zzz"` ⇒ `entries == 5` **False**（`n_band=2 + n_icon=2 = 4`）；**变异②** `class="now-title intro intro-3"` → `class="zzz"` ⇒ `titles == 2` **False**（`n_titles=1`）；**变异③** `class="icon-links intro intro-2"` → `class="icon-links"`（仅去动画类）⇒ 图标行断言仍 **True**、`entries` 仍 True。基线 `(True, True, True)`，`n_band=3 / n_icon=2 / n_titles=2`。③ **宽化未过度**：`grep -c` `icon-links` = **1**（`index.html:60` 真实 `<div class="icon-links intro intro-2">`）、`now-title` = **2**（`:73` / `:89` 两处真实 `<h2>`）、`<a class="now-card"` = **3**；`class="[^"]*\bX\b` 不跨引号、`\b` 挡 `icon-linksx`；即便 token 出现在注释，`exactly 5 entries` 仍锚定真实 `<div class="icon-links…">` 包裹内 `<a ` 计数 ⇒ 双层兜底，非「放宽到恒真」。观察项：`n_band` 仍精确串（失败方向朝红，保守；未来给单卡加动画类须同步宽化）。
+
+**`JT-CL004 [5/6]` 实现审计** —— `--mode post` **15/15 rc=0**、`--selftest` **17/17 rc=0**（`grep -c '^✅'` = 15 / 17 与汇总行一致）。**等价性**：`diff cache/scratch/JT-CL001/check.py scripts/portal-check.py` = **12 行 diff 输出 / 内容 4 处 8 行**（docstring 3 条 Usage 路径 + `ROOT parents[3] → parents[1]`），S1–S16 断言逻辑零改动（`grep -oE 'check\("S[0-9]+"'` ⇒ S1…S16 全在，22 次调用 = 16 基础 + 6 复检/自证），无删减、无精确集合改 `>=`（现存 `>=2` / `>=1` 两处在对照件同样存在，非本笔引入）。**无副作用**：`open(...,'w')|shutil|os.(remove|unlink|system)|subprocess.(run|call|Popen)` **0 命中**（rc=1）；`:23 import subprocess` 仍为死 import（🟢 观察项）。**判别力（自跑 + 读实现）**：`:311` 以 `re.sub` 对真实 `<span class="now-name">` 结构注入 `.now-desc` 后重算 ⇒ S1_ok=False、S6_ok=False；`:319-327` 回退三处旧文案后 S14_ok=False；均为真造数据 + 重算断言，非 `assert True`；自证档「红」单列为预期证据、不计失败。
+
+**`AGENTS.md` 转交件判据 6/6** —— `grep -c message-feedback-spec` = **1**、`wc -c` = **3136 B**（≤4000）、正文零复制 `grep -c "首行时间锚\|停下提问的门槛\|降噪与转交"` = **0**、指针含「优先于本文件」且位 `AGENTS.md:66`、`git diff --name-only` 无 `skills*`、跨仓零改；真值件 `message-feedback-spec.md` 4350 B `topic: message-feedback-spec` 在。钉子口径行 `AGENTS.md:61-63`（rc=0 才算绿；post 15/15、selftest 17/17）与实跑**逐字一致**。
+
+**`TODO-handoff.md` 机器段未被手改** —— `<!-- generated: 2026-11-08 · source: cache/draft/TODO-20261108.md · sha256:6a99097b -->` ↔ `<!-- generated end -->` 闭合齐备、派生 2 条；`hm check handoff .` ⇒ **✅ errors=0 warns=0 · 机器段 2 行 · 差异知会 0**。
+
+**JT-SEC-025（🟡 LOW，新 OPEN，非阻断）** —— `TODO-handoff.md` 基线节时点滞后：文书 `本地 HEAD 27d63d9 · origin/main f8c6c53 · ahead 1（+ 本文件收尾笔）`，实测 `HEAD 6e66f04 / ahead 3`；「待审计 commit 清单」仅 2 行、缺 `6e66f04`（正是闭合 JT-SEC-024 的笔）⇒ 照文执行者会漏审该笔。根因 = d33fa31 落笔时数字自洽，`6e66f04` 之后产生、未回写。**改法**：ops 侧 `[6/6]` 收尾刷新基线节（HEAD=评审笔 / ahead=0）并把 `6e66f04` 补入待审计表；本评审禁改该文件故不代改。
+
+**无回归 / 安全面** —— `timestamp-manager.py check` ⇒ 双文件同值 **1794111578** rc=0；`node --check static/js/index.js` + `py_compile scripts/portal-check.py scripts/perf-check.py` OK。3 笔新增 31 行凭证/PII 扫描 0 命中（唯一宽词命中为 `perf-check.py:96` 注释里的英文单词 `token`，逐行核实为误报）；`/Users/jadenli` **0/0/0**；`AGENTS.md:66` 新增 `~/CodeSpace/hermes-manager/skills-governance/message-feedback-spec.md` 为规范真值位置 ⇒ 按 JT-SEC-020 口径记 🟢（同族已披露 10 文件）。
+
+| # | Level | ID | 标题 | 状态 |
+|:-:|:--|:--|:--|:--|
+| 1 | 🟡 LOW | **JT-SEC-025** | `TODO-handoff.md` 基线节时点滞后（HEAD/ahead 与待审计表缺 `6e66f04`） | NEW OPEN（非阻断，ops [6/6] 关闭） |
+| 2 | 🟡 MEDIUM | **JT-SEC-024** | `perf-check.py` 判据自 `5e98bad` 未随 CL003 同步，3 条 layout 断言恒红 | **✅ CLOSED（`6e66f04`）** |
+| 3 | 🟡 MEDIUM | **JT-SEC-021** | `javascript:` FAQ 死链生成器侧根因未修（结转，0 再生） | OPEN 无变化（not in scope） |
+| 4 | 🟢 LOW | **JT-SEC-019** | `tokens-tracker/index.html` footer 版本披露 | OPEN 无变化 |
+| 5 | 🟢 LOW | **JT-SEC-020** | `documents/**` / `~/CodeSpace` 路径披露（本笔 +1 真值位置） | OPEN（扩 1 处，🟢） |
+| 6 | 🟢 LOW | **JT-SEC-022** | `TODO-handoff.md` 公开仓路径与 branch | OPEN 无变化 |
+| 7 | 🟢 LOW | **JT-SEC-023** | `live.js` desc 含凭据轮换任务语义 | OPEN 无变化 |
+| — | 🟢 | 转交件 6/6、`portal-check` 与 CL001 对照件等价、双档 15/15+17/17、无副作用面、无回归、机器段 0/0 | PASS |
+
+计分：`100 − 5（JT-SEC-021 结转 🟡）− 5（JT-SEC-025 新增 🟡）= **90 / 100 → A → PASS**`；**JT-SEC-024 关闭不扣分**（上轮 −5 回冲）。PASS ⇒ path-scoped commit（本文件 + 评审件 + `.review-level.yaml`）+ **连带推送 3 笔未审计笔**（`git push origin HEAD:main`，ff-only，无 force/all/tags）+ 三验回填笔。
+
+---
 ## 条目格式说明
 
 ```
