@@ -1244,6 +1244,29 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 推送：`756932f..dde4429 HEAD -> main`（ff-only 快进 2 笔 = 被审笔 `d82b5d7` + 评审笔 `dde4429`，`dde4429` 3 文件 +338/−0，push_rc=0）+ 回填笔；三验在 `dde4429` 上 `rev-parse HEAD == ls-remote`（`dde442900236…`）、`origin/main..HEAD` 空、`status --porcelain` 空，原样输出见评审件 §8.1。
 
+## 2026-11-09 — JT-CL004 复盘件 v1.0.1 数字修正审计 + JT-SEC-026 关闭（单笔 `28a0816`：用量快照纠正 + 恒红时长实测 → PASS 95）
+
+- **review者**: Security Reviewer（review profile，用户 2026-11-09「2 现在推」触发的单笔 fix-forward 审计）
+- **范围**: `origin/main = c128c9a` 之上 **1 笔未推**（ahead 1 / behind 0，`git status --porcelain` 空）：`28a0816` `docs@report: JT-CL004 retro v1.0.1 - correct usage snapshot and red-window duration (JT-SEC-026)` —— `documents/reports/JT-CL004-retro-v1.0-20261109.md` **+10/−3**（frontmatter `version: 1.0`→`1.0.1`；结论行恒红时长；用量行 + 新增 §七 变更记录）。`--name-only` 仅此 1 文件；无 `scripts/` `index.html` `static/` `AGENTS.md` `TODO-handoff.md`；无 `--diff-filter=DR`；无他流水线夹带。
+- **Tracking**: **JT-SEC-026（🟡 → ✅ CLOSED，`28a0816`）** + 结转 JT-SEC-021（🟡）/ 019 / 020 / 022 / 023（🟢）
+- **状态**: ✅ PASS（**95 / 100**，Rating A；🔴 0 / 🟡 0 / 🟢 9）
+- **报告**: `documents/reviews/JT-CL004-retro-v1.0.1-fix-audit-v1.0-20261109.md`
+- **实现 prompt**: ⬜ 无需生成（文档数字修正审计，非设计评审；无 markers）
+
+### 发现摘要
+
+**`JT-SEC-026` ① 用量口径 ✅ CLOSED** —— 文中 `:61` 改为「本会话累计快照（`[6/6]` 落笔时，`…-retro.json`）：api **258** / in **787,295** / out **205,185** / **$0.3627**」，四值逐值等于 `cache/closed-loop/20261108-jaden-tech-ops-JT-CL004-retro.json` `usage`（`api_call_count 258` / `input_tokens 787295` / `output_tokens 205185` / `estimated_cost_usd 0.362702082`→`0.3627`），标签「`[6/6]` 落笔时」与 `step: retro` / `updated_at 2026-11-09T15:25:04` / `usage_caliber: session_cumulative` 口径自洽（上轮错配根因消除）；`[5/6]` 对照值 **249 / 777,619 / 198,554 / $0.3532** 四值逐值等于 `…-impl-audit.json` `usage`（`0.353208978`→`0.3532`，`updated_at 15:24:14` 与步骤表 `[5/6] 11-09 15:24` 同点）；两档差值 9 api / 9,676 in / 6,631 out / $0.0095 与上轮记载的低估量逐值一致 ⇒ 修正幅度正确。**② 恒红时长 ✅ CLOSED** —— `git log -1 --format=%ct` 实测 `5e98bad ct=1794111032`（2026-11-08 12:10:32）→ `6e66f04 ct=1794208774`（2026-11-09 15:19:34），`Δ = 97,742 s = 27h09m02s` ↔ 文中 **27h09m**（截秒）；`git rev-list --count 5e98bad..6e66f04` = **21** ↔ 文中 **21 笔**；文中括注的两端时间戳与 `%ci` 逐字相同 ⇒ 指标自带可复算锚点。
+
+**变更记录节与越界排查** —— 新增 §七 两条（`1.0 首版` / `1.0.1` 列两项修正）与实际 diff 两处**一一对应、不多不少**，frontmatter `version: 1.0.1` 与末行版本号一致；diff 仅 3 个 hunk（`@@ -2,7 +2,7 @@` 版本 / `@@ -16,7 +16,7 @@` 结论行 / `@@ -58,4 +58,11 @@` 用量行 + §七），删除行恰 3 条且逐条为被修正旧值；`+/-` 行匹配「六步轨迹 / 验收证据 / 教训 / 遗留」= **0**（唯一命中是 hunk 边界上下文行 `## 二、六步轨迹`），§二–§五 正文零改动；全文 `grep -c '14 天'` = **1** 且位于 §七（描述旧值），无残留错误断言。
+
+**安全面 / 无回归** —— 10 新增行凭证 / PII / 本地绝对路径三扫 **0 命中**（`scan_rc=1`），新增行仅含版本号、汇总数字、commit sha、`cache/closed-loop/` 相对路径、Markdown 表格，零外链零脚本，未扩大披露面（`JT-SEC-020` 无新增）；`python3 scripts/portal-check.py --mode post` ⇒ **15/15 rc=0**；`python3 scripts/perf-check.py` ⇒ **OK all perf assertions passed rc=0**；`hm loop status JT-CL004` ⇒ `[1/6]`–`[6/6]` 全 ✅（整体 1078m，只读）；`hm check handoff .` ⇒ **errors=0 warns=0 · 机器段 1 行 · 差异知会 0**；`hm check quality .` ⇒ Complete 25 / Issues 0。
+
+**观察项（不计发现）** —— O1 `:32` 「≈17.5h」vs `1078m = 17h58m` 四舍五入误差（上轮 🟢 精度项，本笔 scope 未含）；O2 `:30` `[6/6]` 时间列 `15:2x` 占位，台账实为 `15:25`（`v1.0` 既有）。
+
+计分：`100 − 5（JT-SEC-021 结转 🟡）= **95 / 100 → A → PASS**`；`JT-SEC-026` 关闭不扣分（上轮 −5 回冲）。PASS ⇒ path-scoped commit（本文件 + 评审件 + `.review-level.yaml`）+ ff-only 推被审笔 + 评审笔 + 三验回填笔。
+
+推送：（推送后回填）
+
 ---
 
 ## 条目格式说明
