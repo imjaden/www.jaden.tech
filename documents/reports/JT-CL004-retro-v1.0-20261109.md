@@ -2,7 +2,7 @@
 title: JT-CL004 收尾复盘 · 门户门禁版本化（scripts/portal-check.py）
 topic: jt-cl004-retro
 type: report
-version: 1.0
+version: 1.0.1
 date: 2026-11-09
 author: jaden-tech-ops
 closure: JT-CL004
@@ -16,7 +16,7 @@ review_report: documents/reviews/JT-CL004-impl-audit+jt-sec-024-v1.0-20261109.md
 ## 一、结论
 
 门户门禁已从 gitignored 的 `cache/scratch/JT-CL001/check.py` 迁成仓内 `scripts/portal-check.py`，与 `scripts/perf-check.py` 并列为 `AGENTS.md` 明示的两颗回归钉子；`[6/6]` 收尾时刷新入口页基线并关闭本轮唯一新增 🟡 `JT-SEC-025`。
-实现审计 **PASS 90**（🔴0 / 🟡1→关闭 / 🟢8），🟡 `JT-SEC-024`（`perf-check.py` 判据自 `5e98bad` 起恒红 14 天）已由 `6e66f04` 关闭。
+实现审计 **PASS 90**（🔴0 / 🟡1→关闭 / 🟢8），🟡 `JT-SEC-024`（`perf-check.py` 判据自 `5e98bad`（2026-11-08 12:10:32）起恒红至 `6e66f04`（2026-11-09 15:19:34），实测 **27h09m** / 21 笔）已由 `6e66f04` 关闭。
 
 ## 二、六步轨迹
 
@@ -58,4 +58,11 @@ $ hm check handoff .                              # 0 err 0 warn
 
 ## 六、用量
 
-本会话累计（含 CL003 收尾、CL063/CL068 站点同步、本轮 [4/6]–[6/6]）：api 249 / in 777,619 / out 198,554 / $0.3532。
+本会话累计快照（`[6/6]` 落笔时，`cache/closed-loop/20261108-jaden-tech-ops-JT-CL004-retro.json`）：api **258** / in **787,295** / out **205,185** / **$0.3627**（含 CL003 收尾、CL063/CL068 站点同步、本轮 `[4/6]`–`[6/6]`；`[5/6]` 时点快照为 249 / 777,619 / 198,554 / $0.3532）。
+
+## 七、变更记录
+
+| 版本 | 日期 | 变更 |
+|:--|:--|:--|
+| 1.0 | 2026-11-09 | 首版 |
+| 1.0.1 | 2026-11-09 | 按 `JT-SEC-026`（🟡 文档数字口径）修正两处：用量行改用 `[6/6]` 快照并标注 `[5/6]` 对照值；「恒红 14 天」改为实测 **27h09m**（`5e98bad` 11-08 12:10:32 → `6e66f04` 11-09 15:19:34，21 笔） |
