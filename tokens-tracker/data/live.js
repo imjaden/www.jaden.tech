@@ -1,15 +1,15 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 19,
+  "filtered": 18,
   "filtered_breakdown": {
-    "draft": 18,
-    "empty": 0,
-    "kept": 49,
+    "draft": 17,
+    "empty": 7,
+    "kept": 29,
     "window": 1
   },
-  "generated_at": "2026-11-09T20:39:46+08:00",
+  "generated_at": "2026-11-10T20:39:39+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "6a2e8b2d",
+  "generator_version": "bcb6633f",
   "pages": [
     "index"
   ]
@@ -17,12 +17,30 @@ window.WEB_DATA_META = {
 window.LIVE_ITEMS = [
   {
     "project": "llm-radar",
-    "number": "LLM-RADAR-CL010",
+    "number": "LLM-RADAR-CL016",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09 18:46",
-    "desc": "documents/README.md 索引漂移（hm check readme…"
+    "updated_at": "2026-11-10 19:10",
+    "desc": "`--json` 模式下 chromedriver 告警污染 stdout（26…"
+  },
+  {
+    "project": "llm-radar",
+    "number": "LLM-RADAR-CL015",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-10 19:10",
+    "desc": "X 采集 attach 失败时自愈补页"
+  },
+  {
+    "project": "llm-radar",
+    "number": "LLM-RADAR-CL014",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-10 19:10",
+    "desc": "`lr chrome` 幂等就绪 + page target 兜底"
   },
   {
     "project": "hermes-manager",
@@ -30,7 +48,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "2026-11-05",
-    "updated_at": "2026-11-09 18:44",
+    "updated_at": "2026-11-10 15:04",
     "desc": "**评审 r1 的非阻断项（接受延后，登记备查）**"
   },
   {
@@ -39,7 +57,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09 18:44",
+    "updated_at": "2026-11-10 15:04",
     "desc": "**SEC-571-16：深探 key 轮换**"
   },
   {
@@ -48,8 +66,17 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09 18:44",
+    "updated_at": "2026-11-10 15:04",
     "desc": "**AC-4：镜像守卫跨仓执行**"
+  },
+  {
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL327",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-10 15:04",
+    "desc": "**SEC-CL321-2 待办（用户 22"
   },
   {
     "project": "hermes-manager",
@@ -57,7 +84,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "2026-11-04",
-    "updated_at": "2026-11-09 18:44",
+    "updated_at": "2026-11-10 15:04",
     "desc": "**`hm sessions sweep` 人读模式丢弃失败原因（\"see 上方…"
   },
   {
@@ -66,7 +93,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09 18:44",
+    "updated_at": "2026-11-10 15:04",
     "desc": "**观察项：`hm loop report` 的 `loop_id`⇒stric…"
   },
   {
@@ -75,7 +102,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09 18:44",
+    "updated_at": "2026-11-10 15:04",
     "desc": "**C3 首次真实触发核验（观察项，不立项）**"
   },
   {
@@ -84,35 +111,8 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09 18:44",
+    "updated_at": "2026-11-10 15:04",
     "desc": "**§C3 实证段补「正例样本」+ §C2 一句口径**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL249",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-09 18:44",
-    "desc": "**DAILY-CHECKER-CL249 收 r3 的两条文档补充（R3-3 …"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL229",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-09 18:44",
-    "desc": "**DAILY-CHECKER-CL229 CL228 评审残余 3🟢 登记**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL205",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-09 18:44",
-    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
   },
   {
     "project": "daily-checker",
@@ -120,57 +120,40 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09 18:44",
+    "updated_at": "-",
     "desc": "**DAILY-CHECKER-CL189 跨仓 daily-tracker `…"
   },
   {
-    "project": "llm-radar",
-    "number": "LLM-RADAR-CL012",
-    "status": "done",
-    "progress": "[6/6]",
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL205",
+    "status": "pending",
+    "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09",
-    "desc": "twitter.json 部分成功写盘合并（防数据腰斩）"
+    "updated_at": "-",
+    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
   },
   {
-    "project": "llm-radar",
-    "number": "LLM-RADAR-CL011",
-    "status": "done",
-    "progress": "[6/6]",
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL229",
+    "status": "pending",
+    "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09",
-    "desc": "AGENTS.md 增加回话规范指针（跨 profile 真值）"
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL229 CL228 评审残余 3🟢 登记**"
   },
   {
-    "project": "llm-radar",
-    "number": "LLM-RADAR-CL008",
-    "status": "done",
-    "progress": "[6/6]",
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL249",
+    "status": "pending",
+    "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-09",
-    "desc": "X 登录巡检落 cron（llm-radar-twitter-login-loc…"
-  },
-  {
-    "project": "llm-radar",
-    "number": "LLM-RADAR-CL007",
-    "status": "done",
-    "progress": "[6/6]",
-    "created_at": "-",
-    "updated_at": "2026-11-09",
-    "desc": "CLI 中断收敛（KeyboardInterrupt 守卫）"
+    "updated_at": "-",
+    "desc": "**DAILY-CHECKER-CL249 收 r3 的两条文档补充（R3-3 …"
   }
 ];
 window.BOARD_STATS = {
   "running": 0,
   "series": [
-    {
-      "api_calls": 0,
-      "cache_read_tokens": 0,
-      "date": "20261103",
-      "estimated_cost_usd": 0.0,
-      "files": 0,
-      "total_tokens": 0
-    },
     {
       "api_calls": 0,
       "cache_read_tokens": 0,
@@ -218,17 +201,25 @@ window.BOARD_STATS = {
       "estimated_cost_usd": 0.0156,
       "files": 5,
       "total_tokens": 60304
+    },
+    {
+      "api_calls": 0,
+      "cache_read_tokens": 0,
+      "date": "20261110",
+      "estimated_cost_usd": 0.0,
+      "files": 0,
+      "total_tokens": 0
     }
   ]
 };
 window.LIVE_ANOMALY = {
-  "anomaly_total": 21,
-  "doc_missing": 21,
+  "anomaly_total": 4,
+  "doc_missing": 4,
   "idle": 0,
-  "ledger_total": 49,
+  "ledger_total": 36,
   "skipped": 6,
   "timeout": 0,
-  "total": 43,
+  "total": 30,
   "unknown": 0
 };
 window.HIST_TASKS = [];
@@ -445,22 +436,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20261011"
+    "start": "20261012"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 2665.195956123048,
-      "first_pass_rate": 0.2971014492753623,
-      "n": 138,
-      "round_mean": 2.6594202898550723
+      "duration_mean": 3108.5718720285154,
+      "first_pass_rate": 0.302158273381295,
+      "n": 139,
+      "round_mean": 2.661870503597122
     },
     "recent": {
-      "duration_mean": 16397.59507215023,
-      "first_pass_rate": 0.25,
-      "n": 4,
-      "round_mean": 1.75
+      "duration_mean": 431.97734053929645,
+      "first_pass_rate": 0.0,
+      "n": 3,
+      "round_mean": 1.3333333333333333
     }
   },
   "verdict": "部分改善（部分指标反向）"
