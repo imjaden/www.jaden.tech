@@ -1296,6 +1296,47 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-11-10 — 夜间 L2 全项目审查（2 笔未推数据笔：tokens-tracker 镜像 + daily-tracker 同步）+ 🔴 `JT-SEC-027` 复验仍 OPEN（公开面今日实测 200）→ CONDITIONAL PASS 80
+
+- **review者**: Security Reviewer（review profile，cron `daily-tracker-review` 21:50 班次；无用户在场，按 prompt 自主执行）
+- **范围**: `origin/main = 823cd42` 之上 **5 笔未推**（ahead 5 / behind 0，`git status --porcelain -uall` 空）；本轮相对上轮审计笔 `04adc7a` 新增 **2 笔**：`3253f92` `data@update: tokens-tracker - auto sync`（`tokens-tracker/data/live.js` +76/−85）→ `bbbd189` `data@update: daily-tracker 11-10 - auto sync`（`bmi-tracker.html` +39/−18 / `daily-tracker-archive-202607-202610.html` +15/−3 = 2 文件 +54/−21）。聚合 **3 文件 +130/−106**；`--diff-filter=DR` 空；无 `index.html` / `static/` / `scripts/` / `AGENTS.md` / `documents/`；`tokens-tracker/index.html` 壳未动（壳/数据分离成立）。
+- **Tracking**: **JT-SEC-027（🔴 HIGH / P0，仍 OPEN 无变化）** + 结转 JT-SEC-021（🟡）/ 019 / 020 / 022 / 023（🟢）；JT-SEC-024 / 025 / 026 复核**仍 CLOSED**
+- **状态**: ⏳ CONDITIONAL PASS（**80 / 100**，Rating B；🔴 1 / 🟡 1 / 🟢 4）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告；P0 明细件沿用 `documents/reviews/JT-sec-027-history-pii-review-v1.0-20261109.md`
+- **实现 prompt**: ⬜ 无需生成（夜间复审计，非设计评审）
+
+### 发现摘要
+
+**`JT-SEC-027`（🔴 HIGH / P0）复验仍 OPEN —— 今日外网实测仍可下载，且暴露面收窄至恰好 1 个 blob** —— ① `curl raw.githubusercontent.com/imjaden/www.jaden.tech/35a3d86/resume-landscape.pdf` ⇒ **HTTP 200**（今日复测，非引用昨日结论）；② `api.github.com/repos/imjaden/www.jaden.tech` ⇒ `private: false` / `visibility: public`；③ 按 **ref 逐条枚举**（比昨日仅查 `origin/main` 更严）：`refs/remotes/origin/main` 文档型对象 **1 个**（`3b0931c…`），`refs/remotes/origin/gh-pages` **0**、`refs/remotes/origin/master` **0** ⇒ 公开暴露面**恰为 main 历史 1 个 blob**，无第二公开分支扩大面。**本轮新增证据（对方案 A 有直接影响）**：本地存在**第二个** PII blob `ec5c5089410b86510744d1e08212b5282f13e353 resume.pdf`（**219,004 B**，`%PDF-1.7`），但其可达 ref 仅 `refs/original/refs/heads/main`、`refs/original/refs/remotes/origin/main`、`refs/original/refs/stash`；`refs/heads/main` / `origin/main` / `origin/gh-pages` / `origin/master` 各 **0 命中** ⇒ **未公开**（昨日「全历史文档型对象仅 1 个」是 `origin/main` 口径，本轮 `--all` 口径实为 2 个）。⇒ 若采方案 A，`gc --prune=now` 前**必须先删除 `refs/original/*` 备份 ref 并 `stash drop`**（该 ref 族由早年 filter-branch 产生），否则对象在本地仓库存活、`gc` 不可回收；公开面不受影响，但本地副本仍含未声明 PII。处置仍待用户裁定 A/B/C/D（**建议 A**）。
+
+**被审 2 笔本体干净（0 新发现）** —— `data/live.js`：`window.*` **键集 8 个前后完全一致**（`WEB_DATA_META` / `LIVE_ITEMS` / `WEB_DATA_READY` / `BOARD_STATS` / `HIST_EXTRA` / `HIST_SESSION_CAP` / `HIST_TASKS` / `LIVE_ANOMALY`，`HIST_EXTRA` 为既有非新增），`filtered` 19→18（`draft` 18→17 / `empty` 0→7 / `kept` 49→29）、`LIVE_ITEMS` 16→**15** 属 done 条目滚出 live 窗口的**数据流**，非生成器改口径；`</script` **0**、`innerHTML`/`eval(`/`new Function`/`document.write` **0**；敏感词扫描唯一命中 `:61` `SEC-571-16：深探 key 轮换` 为既存 `JT-SEC-023` 面（🟢 仍 OPEN 无变化）；`HIST_EXTRA` 为聚合统计（`n=139/3`、`first_pass_rate`、`round_mean`），无 PII 无项目名。`daily-tracker-archive-*.html`：仅数值口径行（Oct 运动 25→29 天 / 跑量 188.6→214.5 km、`Start` 71.1→71.8、`Lost` 73%→75%），`71.8 − 63.0 = 8.8` 自洽，无脚本面变化。
+
+**⚠️ 口径提示：`data@update` 笔**不等于**纯数据笔** —— `bbbd189` 在 `bmi-tracker.html` 内夹带 **+39 行新增可执行代码**（`switchTab()` 页签切换 + 启动期 localStorage 恢复 IIFE + OMAD 当日高亮 IIFE，注释自述 `DT-SEC-038: today→archived`）。本轮已按代码审计：`switchTab(name)` 有 2 个 sink（`querySelector('.tab-btn[onclick*="'+name+'"]')` 选择器拼接、`getElementById('tab-'+name)`），但**全部 3 处调用点均为字面量**（`archived` ×1 / `omad` ×2），且 localStorage 读回值先经 `saved!=='archived' && saved!=='omad'` 白名单归一后才可能进入调用 ⇒ **当前无可达 taint**，判 🟢 观察项（纯客户端；选择器注入最坏为 class 误加或选择器语法异常抛错，无脚本执行、无外发）；`omadTip` / `omadMealTip` 走 `textContent`，写入 `dt_active_tab` 仅偏好字符串。**结论：不构成发现**，但「数据笔夹带新 JS」这一事实须记入后续复审计口径 —— 仅凭 commit 前缀 `data@update` 判 SKIP 会漏审新增执行面。
+
+**观察项（不计发现）** —— O1 `bmi-tracker.html` 阶段二计时 `D+31` 与 archive 页 `Duration 22 days` / `D+21` 口径不同源（前者自阶段二起点、后者沿用首版锚点），数据面口径待统一，非安全问题；O2 `JT-SEC-020` 面本轮**无新增**（2 笔新增行 `/Users/jadenli` 0 命中）。
+
+**安全面 / 无回归** —— Pass1 全仓凭证 0 命中、无 `.env`/`.pem`/`.key`/`credentials` 入库；Pass2 宽词（`sk-` / `ghp_` / `AKIA` / `xox*` / PEM）0 命中；Pass3 **130 条新增行**凭证 / PII / 本地绝对路径 **0 命中**；Pass4 `git log -p` 近 60 笔 PEM / AWS / GitHub / OpenAI 型密钥 **0**；新增行 `innerHTML|outerHTML|insertAdjacentHTML|document.write|eval(|new Function|fetch(|XMLHttpRequest|location.(href|assign|replace)|onerror=|javascript:` **0**。控制集无回归：`bmi-tracker.html` 与 `daily-tracker-archive-*.html` 各 `referrer` meta **1** / `integrity` **1**（`sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC`）/ `crossorigin` **1** / `rel="noopener"` **1** 全在；`tokens-tracker/index.html` `referrer` 1 / `noopener` 1；`index.html` `noopener` 6 不变；全仓 CDN 仍仅 `chart.js@4.4.7` 两文件带 SRI，本批 **0 新增依赖**、0 新增外链域。
+
+**门禁（实跑）** —— `python3 scripts/perf-check.py` ⇒ **28 项全 PASS rc=0**（含 `exactly 5 entries — pills=3 + icon-links=2`、`2 section titles — found 2`、`?t= parity 1794111578`）；`python3 scripts/portal-check.py --mode post` ⇒ **15/15 rc=0**；`--selftest` ⇒ **17/17 rc=0**；`python3 scripts/timestamp-manager.py check` ⇒ 双文件同值 `1794111578` rc=0。
+
+### 发现表
+
+| # | Level | ID | 标题 | 状态 |
+|:-:|:--|:--|:--|:--|
+| 1 | 🔴 HIGH / P0 | **JT-SEC-027** | 公开仓 main 历史残留简历 PDF（住址/出生年月/婚育/政治面貌），外网 200 可下载 | **仍 OPEN 无变化**（今日复测 200；待用户裁定 A/B/C/D） |
+| 2 | 🟡 MEDIUM | **JT-SEC-021** | `javascript:` FAQ 死链生成器侧根因未修（结转，0 再生） | OPEN 无变化（not in scope） |
+| 3 | 🟢 LOW | **JT-SEC-019** | `tokens-tracker/index.html` footer 版本披露 | OPEN 无变化 |
+| 4 | 🟢 LOW | **JT-SEC-020** | `documents/**` / `~/CodeSpace` 路径披露 | OPEN 无变化（本轮 0 新增） |
+| 5 | 🟢 LOW | **JT-SEC-022** | `TODO-handoff.md` 公开仓路径与 branch | OPEN 无变化 |
+| 6 | 🟢 LOW | **JT-SEC-023** | `live.js` desc 含凭据轮换任务语义 | OPEN 无变化（`:61` 仍在） |
+| — | 🟡 | **JT-SEC-024/025/026** | 判据恒红 / 基线滞后 / 复盘件数字 | **✅ 仍 CLOSED**（复核无损） |
+
+计分：`100 − 15（JT-SEC-027 🔴）− 5（JT-SEC-021 结转 🟡）= **80 / 100 → B → CONDITIONAL PASS**`；024/025/026 已闭合不扣分，本轮 0 新发现不扣分。
+
+**推送：本轮不 push**（CONDITIONAL PASS 口径）—— 仅 path-scoped commit 审计 2 文件（本文件 + `.review-level.yaml`；单日志口径不新建 `documents/reviews/` 件）。本地待推累计 **5 笔业务/审计笔**（`bc5ff63` 镜像数据 / `82d9a9a` 收口 docs / `04adc7a` 上轮审计 / `3253f92` 镜像数据 / `bbbd189` 日更同步）+ 本审计笔；五笔安全面均无阻断项，与 `JT-SEC-027`（历史遗留）无因果。**待确认**：① `JT-SEC-027` 采 A/B/C/D 哪一方案（建议 A；落 A 前先 `git update-ref -d` 删 `refs/original/*` 并 `stash drop`，再 `gc --prune=now`）；② 是否放行 5 笔待推笔（安全面无阻断，`git push origin HEAD:main` ff-only 一条命令）。
+
+---
+
 ## 条目格式说明
 
 ```
