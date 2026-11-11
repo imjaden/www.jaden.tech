@@ -70,7 +70,8 @@
     ["active", "进行中"],
     ["done", "已完成"]
   ];
-  var STATUS_LABEL = { pending: "待执行", active: "进行中", done: "已完成" };
+  var STATUS_LABEL = { pending: "待执行", active: "进行中", done: "已完成",
+                       stale: "停滞", backlog: "待补件" };
   /* SEC-600-8 深链白名单；SEC-600-13: 只收 statusOf() 会返回的三态 ——
      `anomaly` 不是状态值（走正交开关 ?anomaly=1），收进来会造出「过滤到 0 行」的死链 */
   var STATUS_KEYS = ["pending", "active", "done"];   // 空态文案用中文, 不直出内部键
@@ -171,6 +172,12 @@
         anomaly_level: (l && l.anomaly_level) || null,
         anomaly_signals: (l && l.anomaly_signals) || [],
         anomaly_cmd: (l && l.anomaly_cmd) || "",
+        /* CL332: 可粘给 AI 的 Prompt（Python 侧组装, 含 任务/现状/异常/期望/验收/边界） */
+        anomaly_prompt: (l && l.anomaly_prompt) || "",
+        /* CL341: 停滞分层字段直通（历史态才有; 运行态行恒 null） */
+        stale_kind: (h && h.stale_kind) || null,
+        exempt: (h && h.exempt) || null,             /* CL342 */
+        missing_steps: (h && h.missing_steps) || [],
         tokens: h ? ((h.input_tokens || 0) + (h.output_tokens || 0) +
                      (h.reasoning_tokens || 0)) : null,
         cache_read: h ? (h.cache_read_tokens || 0) : null,
@@ -214,9 +221,20 @@
   function statusOf(r) {
     var s = String(r.status || "").toLowerCase();
     if (s === "finished" || s === "completed" || s === "closed") { return "done"; }
+    if (s === "done-exempt") { return "done"; }      /* CL342: 豁免进「已完成」桶, 徽标另行标注 */
     return s;
   }
-  function isAnomaly(r) { return !!r.anomaly_level && r.anomaly_level !== "ok"; }
+  /* CL340: 停滞回路（未验收且最后一步 > 7 天）也进「异常」口径,
+     否则旧回路会永远挂在「进行中」——数据面由 lib_loop._hist_status 单点判定。 */
+  /* CL341: 停滞分两层 —— 只有「该编号在本仓 git log 一笔都没有」才算异常（真烂尾）;
+     有提交但六件件不齐 = 缺记账, 进「待补件」档, 不再涂红。数据面由 lib_loop._stale_kind 单点判定。 */
+  function isAnomaly(r) {
+    if (statusOf(r) === "stale" && r.stale_kind === "no-commits") { return true; }
+    return !!r.anomaly_level && r.anomaly_level !== "ok";
+  }
+  function isBacklog(r) {
+    return statusOf(r) === "stale" && r.stale_kind === "missing-artifacts";
+  }
   /* 项目维度先行（chip 计数 = 项目范围内计数，避免「切项目后数字不变」的错觉） */
   function baseRows() {
     if (!projectFilter) { return rows; }
@@ -224,7 +242,9 @@
   }
   function filtered() {
     var out = baseRows();
-    if (statusFilter) {
+    if (statusFilter === "backlog") {
+      out = out.filter(isBacklog);
+    } else if (statusFilter) {
       out = out.filter(function (r) { return statusOf(r) === statusFilter; });
     }
     if (anomalyOnly) {
@@ -302,6 +322,7 @@
     if (lv === "critical") { return 0; }
     if (lv === "warn") { return 1; }
     if (lv === "unknown") { return 2; }
+    if (r && statusOf(r) === "stale" && r.stale_kind === "no-commits") { return 2; }   /* CL341 */
     return 3;
   }
 
@@ -337,6 +358,14 @@
     var sum = Number(c.anomaly_total || 0);
     host.appendChild(HB.el("span", "anom-chip lv-info",
       "异常 " + sum + " / 台账 " + total));
+    /* CL332: 批量把异常行整理成一段问题描述（Python 侧已拼好, 壳只复制） */
+    if (Number(c.prompt_count || 0) > 0 && c.prompt) {
+      var b = HB.el("button", "anom-copy", "⧉ 复制异常 Prompt（" + Number(c.prompt_count) + " 条）");
+      b.type = "button";
+      b.title = "把全部有异常信号的行（含不可判定）整理成一段「任务/现状/异常/期望/验收」问题描述，直接粘给 AI";
+      b.addEventListener("click", function () { HB.copyText(c.prompt); });
+      host.appendChild(b);
+    }
   }
 
   /* ── 筛选状态机（M2: 单值态, 后动覆盖, 再点当前项 = 清除）──
@@ -396,6 +425,48 @@
     syncUrl();
   }
 
+  /* ── CL344: 统计 Prompt（当前项目范围内的 异常/待补件/待执行/进行中）─────
+     0 值整行省略, 「已完成」永不出现（符合预期）; 不含任何写命令（沿用 CL332 边界）。 */
+  function statsCounts() {
+    var c = { anomaly: 0, backlog: 0, pending: 0, active: 0 };
+    baseRows().forEach(function (r) {
+      var s = statusOf(r);
+      if (isAnomaly(r)) { c.anomaly += 1; }
+      if (isBacklog(r)) { c.backlog += 1; }
+      if (s === "pending") { c.pending += 1; }
+      if (s === "active") { c.active += 1; }
+    });
+    return c;
+  }
+  function statsPrompt() {
+    var c = statsCounts();
+    var m = window.WEB_DATA_META || {};
+    var ts = String(m.generated_at || "").replace("T", " ").slice(0, 16);
+    var head = "【1ACL 看板统计】" + (projectFilter || "全部项目")
+             + (ts ? "（数据 " + ts + "）" : "");
+    var lines = [head];
+    [["异常", c.anomaly], ["待补件", c.backlog],
+     ["待执行", c.pending], ["进行中", c.active]].forEach(function (kv) {
+      if (kv[1] > 0) { lines.push("- " + kv[0] + " " + kv[1] + " 条"); }
+    });
+    if (lines.length === 1) {
+      lines.push("- 当前无待办、无异常");
+    } else {
+      lines.push("请按优先级给出处理建议，优先异常与待执行项。");
+    }
+    return lines.join("\n");
+  }
+  function renderStatsButton() {
+    var host = document.getElementById("stats-chip");
+    if (!host) { return; }
+    host.textContent = "";
+    var b = HB.el("button", "anom-copy stats-copy", "📊");
+    b.type = "button";
+    b.title = "复制统计 Prompt（" + (projectFilter || "全部项目") + "：异常/待补件/待执行/进行中，0 值省略）";
+    b.addEventListener("click", function () { HB.copyText(statsPrompt()); });
+    host.appendChild(b);
+  }
+
   /* 顶部标签组 = 状态五档（计数 = 项目范围内现算; 异常档取 Python 台账值对账） */
   function renderTabs() {
     var host = document.getElementById("status-chips");
@@ -404,11 +475,12 @@
       host.textContent = "";
       var base = baseRows();
       var counts = { "": base.length, pending: 0, active: 0, done: 0 };
-      var anomScoped = 0;
+      var anomScoped = 0, backlogCount = 0;
       base.forEach(function (r) {
         var s = statusOf(r);
         if (counts[s] !== undefined) { counts[s] += 1; }
         if (isAnomaly(r)) { anomScoped += 1; }
+        if (isBacklog(r)) { backlogCount += 1; }
       });
       var pyTotal = Number((window.LIVE_ANOMALY || {}).anomaly_total || 0);
       // CL276 评审 🟠3: chip 数须等于「点开后实际行数」⇒ 一律用行级 anomScoped;
@@ -419,6 +491,7 @@
         : "";
       var defs = STATUS_CHIPS.map(function (c) { return [c[0], c[1], counts[c[0]]]; });
       defs.push(["anomaly", "异常", anomCount]);
+      defs.push(["backlog", "待补件", backlogCount]);
       defs.forEach(function (d) {
         var key = d[0];
         var isAnom = key === "anomaly";
@@ -442,6 +515,7 @@
         host.appendChild(b);
       });
       /* 规格 §5.4: ≤960px 首屏只留 全部/进行中/异常, 待执行/已完成 收进「更多」 */
+      renderStatsButton();               /* CL344 */
       var more = HB.el("button", "chip chip-more", "更多 ▾");
       more.type = "button";
       more.title = "展开其余状态筛选（窄屏）";
@@ -530,7 +604,22 @@
 
   function statusCell(r) {
     var td = HB.el("td", colClass("status"));   /* CL271: 与表头同步 hidden, 防表头/表体错位 */
-    td.appendChild(HB.statusBadge(r.status));
+    var badge = HB.statusBadge(r.status);
+    if (statusOf(r) === "stale") {            /* CL340/CL341: 原值 stale 不面向人, 按分层换中文 */
+      var isBacklogRow = isBacklog(r);
+      badge.textContent = isBacklogRow ? STATUS_LABEL.backlog : STATUS_LABEL.stale;
+      badge.title = isBacklogRow
+        ? ("待补件：有提交记录但六件件不齐（缺 " + ((r.missing_steps || []).join("/") || "-")
+           + "）；可用 hm loop exempt 显式收口")
+        : "停滞：未验收、最后一步件超过 7 天且本仓 git log 无该编号提交（lib_loop._stale_kind）";
+    }
+    if (r.exempt || (r.hist && r.hist.status === "done-exempt")) {   /* CL342 */
+      var ex = r.exempt || {};
+      badge.textContent = "已豁免";
+      badge.title = "已豁免（≠ 六件齐备）：" + (ex.reason || "-")
+        + "；证据 " + (ex.evidence || "-") + "；" + (ex.at || "-") + " by " + (ex.who || "-");
+    }
+    td.appendChild(badge);
     /* OBS-1 ③（CL088 C4c 补批）: 同编号双态 ⇒ 状态列**显式标注来源**（不静默丢一侧;
        完整依据（两侧原值 + 时间戳 + 规则）= title, 分栏详情另给一节）。 */
     if (r.status_conflict) {
@@ -622,6 +711,17 @@
     d.appendChild(HB.el("span", "sd-label", "描述"));
     d.appendChild(document.createTextNode(HB.plainText(r.desc) || "-"));
     wrap.appendChild(d);
+    /* CL332: 单行 Prompt —— 待执行/进行中/异常行都能一键整理成一段话 */
+    if (r.anomaly_prompt) {
+      var pbtn = HB.el("button", "prompt-copy", "⧉ 复制本条 Prompt");
+      pbtn.type = "button";
+      pbtn.title = "把这条的现状 / 异常 / 期望 / 验收整理成一段 Prompt，粘到该项目的会话里";
+      pbtn.addEventListener("click", function (e) {
+        if (e && e.stopPropagation) { e.stopPropagation(); }
+        HB.copyText(r.anomaly_prompt);
+      });
+      wrap.appendChild(pbtn);
+    }
     stepRows(r).forEach(function (s) {
       var item = HB.el("div", "stage-item");
       item.appendChild(HB.el("span", "step-idx", "[" + s.idx + "/6]"));
@@ -654,6 +754,7 @@
 
   function rowTr(r, splitMode) {
     var tr = HB.el("tr");
+    tr.setAttribute("data-number", r.number);   /* CL333: ⌘F 搜索按编号定位行 */
     if (r.anomaly_level === "critical") { tr.className = "anom-critical"; }
     else if (r.anomaly_level === "warn") { tr.className = "anom-warn"; }
     if (splitMode && split && split.number === r.number) { tr.className = "selected"; }
@@ -692,6 +793,119 @@
       tr.appendChild(metricCell(k, r));
     });
     return tr;
+  }
+
+  /* ── CL333: ⌘F / Ctrl+F 快捷搜索（编号优先, 跨页跳转; 不过滤行）─────
+     与 html-gen table 的 qsOverlay 同形态: 覆盖层 + 输入框 + 命中计数,
+     Enter 下一个 / Shift+Enter 上一个 / Esc 关闭。刻意**不做过滤** ——
+     跳转保留上下文, 过滤会让「这条在列表里的位置」消失。 */
+  var QS = { el: null, input: null, cnt: null, hits: [], idx: -1 };
+
+  function qsMatches(q) {
+    var needle = String(q || "").trim().toLowerCase();
+    if (!needle) { return []; }
+    return orderedRows(filtered()).filter(function (r) {
+      var hay = [r.number, projectOf(r), HB.plainText(r.desc)].join(" ").toLowerCase();
+      return hay.indexOf(needle) !== -1;
+    }).map(function (r) { return r.number; });
+  }
+
+  function qsRenderCount() {
+    if (!QS.cnt) { return; }
+    if (!QS.hits.length) { QS.cnt.textContent = QS.input.value ? "0 / 0" : ""; return; }
+    QS.cnt.textContent = (QS.idx + 1) + " / " + QS.hits.length;
+  }
+
+  function qsPaint() {
+    var trs = document.querySelectorAll("#board-body tr[data-number]");
+    Array.prototype.forEach.call(trs, function (tr) {
+      tr.classList.remove("qs-hit", "qs-cur");
+      var num = tr.getAttribute("data-number");
+      if (QS.hits.indexOf(num) === -1) { return; }
+      tr.classList.add("qs-hit");
+      if (QS.idx >= 0 && QS.hits[QS.idx] === num) { tr.classList.add("qs-cur"); }
+    });
+  }
+
+  function qsJump(dir) {
+    if (!QS.hits.length) { return; }
+    var n = QS.hits.length;
+    QS.idx = QS.idx < 0 ? (dir > 0 ? 0 : n - 1) : ((QS.idx + dir) % n + n) % n;
+    var num = QS.hits[QS.idx];
+    /* 命中行可能在别的页 ⇒ 先切页再画 */
+    var list = orderedRows(filtered());
+    var pos = -1;
+    for (var i = 0; i < list.length; i += 1) { if (list[i].number === num) { pos = i; break; } }
+    var want = pos < 0 ? pageNo : Math.floor(pos / PAGE_SIZE) + 1;
+    if (want !== pageNo) { pageNo = want; render(); }
+    qsPaint();
+    var tr = document.querySelector('#board-body tr[data-number="' + String(num).replace(/"/g, '\\"') + '"]');
+    if (tr && tr.scrollIntoView) { tr.scrollIntoView({ block: "center" }); }
+    qsRenderCount();
+  }
+
+  function qsSearch() {
+    QS.hits = qsMatches(QS.input.value);
+    QS.idx = -1;
+    qsPaint();
+    qsRenderCount();
+  }
+
+  function qsClose() {
+    if (!QS.el) { return; }
+    QS.el.classList.remove("on");
+    QS.hits = []; QS.idx = -1;
+    var trs = document.querySelectorAll("#board-body tr[data-number]");
+    Array.prototype.forEach.call(trs, function (tr) { tr.classList.remove("qs-hit", "qs-cur"); });
+    qsRenderCount();
+  }
+
+  function qsOpen() {
+    if (!QS.el) { return; }
+    QS.el.classList.add("on");
+    QS.input.focus();
+    QS.input.select();
+    qsSearch();
+  }
+
+  function qsBuild() {
+    var wrap = HB.el("div", "qs-overlay");
+    wrap.id = "qs-overlay";
+    var box = HB.el("div", "qs-box");
+    var input = HB.el("input", "qs-input");
+    input.type = "search";
+    input.id = "qs-input";
+    input.placeholder = "任务编号 / 项目 / 描述关键字";
+    input.setAttribute("aria-label", "搜索任务（Enter 下一个，Esc 关闭）");
+    var cnt = HB.el("span", "qs-count", "");
+    cnt.id = "qs-count";
+    box.appendChild(input);
+    box.appendChild(cnt);
+    box.appendChild(HB.el("span", "qs-hint", "⌘F · Enter 下一个 · Esc 关闭"));
+    wrap.appendChild(box);
+    wrap.addEventListener("click", function (e) { if (e.target === wrap) { qsClose(); } });
+    input.addEventListener("input", qsSearch);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); qsJump(e.shiftKey ? -1 : 1); }
+      else if (e.key === "Escape") { e.preventDefault(); qsClose(); }
+    });
+    document.body.appendChild(wrap);
+    QS.el = wrap; QS.input = input; QS.cnt = cnt;
+  }
+
+  function qsBindKeys() {
+    qsBuild();
+    document.addEventListener("keydown", function (e) {
+      var key = String(e.key || "").toLowerCase();
+      if ((e.metaKey || e.ctrlKey) && key === "f") {
+        e.preventDefault();                 /* 接管浏览器查找 */
+        qsOpen();
+        return;
+      }
+      if (key === "escape" && QS.el && QS.el.classList.contains("on")) {
+        e.preventDefault(); qsClose();
+      }
+    });
   }
 
   /* ── 分页（N4: 每页 50 + 页码）──────────────────────────────── */
@@ -770,7 +984,7 @@
     }
     var filterBits = [];
     if (statusFilter) {
-      var lbl = { pending: "待执行", active: "进行中", done: "已完成" }[statusFilter] || statusFilter;
+      var lbl = STATUS_LABEL[statusFilter] || statusFilter;
       filterBits.push("状态 " + lbl);
     }
     if (projectFilter) { filterBits.push("项目 " + projectFilter); }
@@ -810,6 +1024,23 @@
     if (r.live) { HB.renderLiveDetail(root, r.live); }
     else { HB.renderHistDetail(root, r.hist); }
     if (r.status_conflict) { statusConflictSection(root, r); }   /* OBS-1 ③: 不静默丢一侧 */
+    if (r.exempt) { exemptSection(root, r.exempt); }             /* CL347: 豁免依据 */
+  }
+
+  /* CL347: 豁免依据（来件 §3-2）—— 光写「已豁免」看不出这豁免站不站得住:
+     几笔提交、哪个 sha、谁批的、什么理由, 四件一起给。 */
+  function exemptSection(root, ex) {
+    var box = HB.el("div", "detail-section exempt-box");
+    box.appendChild(HB.el("div", "detail-section-title", "豁免依据（≠ 六件齐备）"));
+    var ul = document.createElement("ul");
+    [["提交笔数", (ex.commits || 0) + " 笔"],
+     ["证据", ex.evidence || ex.merged_sha || "-"],
+     ["批准", (ex.who || "-") + " · " + (ex.at || "-")],
+     ["理由", ex.reason || "-"]].forEach(function (kv) {
+      ul.appendChild(HB.el("li", "", kv[0] + ": " + String(kv[1])));
+    });
+    box.appendChild(ul);
+    root.appendChild(box);
   }
 
   /* ── 排序绑定 ─────────────────────────────────────────────── */
@@ -1144,6 +1375,7 @@
     bindSort();
     bindRatio();
     bindSplitDrag();        /* C4d: 分隔条拖拽（N8/M3） */
+    qsBindKeys();           /* CL333: ⌘F/Ctrl+F 快捷搜索覆盖层 */
     window.addEventListener("resize", applyLayout);   /* 窄屏/回宽 ⇒ 列宽口径重算 */
 
     bindColToggle();

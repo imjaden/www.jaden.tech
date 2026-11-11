@@ -1,91 +1,37 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 18,
+  "filtered": 11,
   "filtered_breakdown": {
-    "draft": 17,
-    "empty": 7,
-    "kept": 29,
+    "draft": 10,
+    "empty": 4,
+    "kept": 27,
     "window": 1
   },
-  "generated_at": "2026-11-10T20:39:39+08:00",
+  "generated_at": "2026-11-11T20:44:21+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "bcb6633f",
+  "generator_version": "ef5d8ece",
   "pages": [
     "index"
   ]
 };
 window.LIVE_ITEMS = [
   {
-    "project": "llm-radar",
-    "number": "LLM-RADAR-CL016",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-10 19:10",
-    "desc": "`--json` 模式下 chromedriver 告警污染 stdout（26…"
-  },
-  {
-    "project": "llm-radar",
-    "number": "LLM-RADAR-CL015",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-10 19:10",
-    "desc": "X 采集 attach 失败时自愈补页"
-  },
-  {
-    "project": "llm-radar",
-    "number": "LLM-RADAR-CL014",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-10 19:10",
-    "desc": "`lr chrome` 幂等就绪 + page target 兜底"
-  },
-  {
     "project": "hermes-manager",
-    "number": "待开（r1 非阻断项）",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "2026-11-05",
-    "updated_at": "2026-11-10 15:04",
-    "desc": "**评审 r1 的非阻断项（接受延后，登记备查）**"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "待开（SEC-571-16）",
+    "number": "HERMES-MANAGER-CL337",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-10 15:04",
-    "desc": "**SEC-571-16：深探 key 轮换**"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "待开（AC-4）",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-10 15:04",
+    "updated_at": "2026-11-11 19:31",
     "desc": "**AC-4：镜像守卫跨仓执行**"
   },
   {
     "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL327",
+    "number": "HERMES-MANAGER-CL336",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-10 15:04",
-    "desc": "**SEC-CL321-2 待办（用户 22"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL209",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "2026-11-04",
-    "updated_at": "2026-11-10 15:04",
-    "desc": "**`hm sessions sweep` 人读模式丢弃失败原因（\"see 上方…"
+    "updated_at": "2026-11-11 19:31",
+    "desc": "**SEC-571-16：深探 key 轮换**"
   },
   {
     "project": "hermes-manager",
@@ -93,7 +39,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-10 15:04",
+    "updated_at": "2026-11-11 19:31",
     "desc": "**观察项：`hm loop report` 的 `loop_id`⇒stric…"
   },
   {
@@ -102,7 +48,7 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-10 15:04",
+    "updated_at": "2026-11-11 19:31",
     "desc": "**C3 首次真实触发核验（观察项，不立项）**"
   },
   {
@@ -111,35 +57,26 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "2026-11-10 15:04",
+    "updated_at": "2026-11-11 19:31",
     "desc": "**§C3 实证段补「正例样本」+ §C2 一句口径**"
   },
   {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL189",
+    "project": "hermes-manager",
+    "number": "HERMES-MANAGER-CL141",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "-",
-    "desc": "**DAILY-CHECKER-CL189 跨仓 daily-tracker `…"
+    "updated_at": "2026-11-11 19:31",
+    "desc": "**TC15 首屏工具表断言间歇性红（全量门禁不可信）**"
   },
   {
     "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL205",
+    "number": "DAILY-CHECKER-CL259",
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "-",
-    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
-  },
-  {
-    "project": "daily-checker",
-    "number": "DAILY-CHECKER-CL229",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "-",
-    "desc": "**DAILY-CHECKER-CL229 CL228 评审残余 3🟢 登记**"
+    "updated_at": "2026-11-11 18:31",
+    "desc": "**DAILY-CHECKER-CL259 向 html-gen 回灌 layo…"
   },
   {
     "project": "daily-checker",
@@ -147,21 +84,40 @@ window.LIVE_ITEMS = [
     "status": "pending",
     "progress": "-",
     "created_at": "-",
-    "updated_at": "-",
+    "updated_at": "2026-11-11 18:31",
     "desc": "**DAILY-CHECKER-CL249 收 r3 的两条文档补充（R3-3 …"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL229",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-11 18:31",
+    "desc": "**DAILY-CHECKER-CL229 CL228 评审残余 3🟢 登记**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL205",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-11 18:31",
+    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
+  },
+  {
+    "project": "daily-checker",
+    "number": "DAILY-CHECKER-CL189",
+    "status": "pending",
+    "progress": "-",
+    "created_at": "-",
+    "updated_at": "2026-11-11 18:31",
+    "desc": "**DAILY-CHECKER-CL189 跨仓 daily-tracker `…"
   }
 ];
 window.BOARD_STATS = {
   "running": 0,
   "series": [
-    {
-      "api_calls": 0,
-      "cache_read_tokens": 0,
-      "date": "20261104",
-      "estimated_cost_usd": 0.0,
-      "files": 0,
-      "total_tokens": 0
-    },
     {
       "api_calls": 0,
       "cache_read_tokens": 0,
@@ -209,17 +165,27 @@ window.BOARD_STATS = {
       "estimated_cost_usd": 0.0,
       "files": 0,
       "total_tokens": 0
+    },
+    {
+      "api_calls": 0,
+      "cache_read_tokens": 0,
+      "date": "20261111",
+      "estimated_cost_usd": 0.0,
+      "files": 0,
+      "total_tokens": 0
     }
   ]
 };
 window.LIVE_ANOMALY = {
-  "anomaly_total": 4,
-  "doc_missing": 4,
+  "anomaly_total": 0,
+  "doc_missing": 0,
   "idle": 0,
-  "ledger_total": 36,
-  "skipped": 6,
+  "ledger_total": 31,
+  "prompt": "",
+  "prompt_count": 0,
+  "skipped": 3,
   "timeout": 0,
-  "total": 30,
+  "total": 28,
   "unknown": 0
 };
 window.HIST_TASKS = [];
@@ -282,11 +248,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 8,
       "session_id": "20261015_221750_2f42ad",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20260930_175010_2a8ebc",
       "state": "over"
     },
     {
@@ -374,11 +335,6 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 7,
-      "session_id": "20260930_175010_2a8ebc",
-      "state": "over"
-    },
-    {
-      "refs": 7,
       "session_id": "20261014_131132_7196ef",
       "state": "over"
     },
@@ -436,25 +392,25 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20261012"
+    "start": "20261013"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 3108.5718720285154,
+      "duration_mean": 3056.409657351405,
       "first_pass_rate": 0.302158273381295,
       "n": 139,
-      "round_mean": 2.661870503597122
+      "round_mean": 2.5899280575539567
     },
     "recent": {
-      "duration_mean": 431.97734053929645,
-      "first_pass_rate": 0.0,
-      "n": 3,
-      "round_mean": 1.3333333333333333
+      "duration_mean": null,
+      "first_pass_rate": null,
+      "n": 0,
+      "round_mean": null
     }
   },
-  "verdict": "部分改善（部分指标反向）"
+  "verdict": "数据不足（近2天或基线窗口无已验收任务）"
 };
 window.WEB_DATA_READY = true;
 if (window.dispatchEvent) { window.dispatchEvent(new Event('web-data-ready')); }

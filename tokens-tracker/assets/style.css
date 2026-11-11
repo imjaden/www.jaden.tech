@@ -359,3 +359,33 @@ footer { margin-top: 12px; color: var(--text-dim); font-size: 0.7rem; }
 .docs-group-head { font-size: 0.78rem; margin: 14px 0 6px; padding-top: 10px;
   border-top: 1px solid #2a2a3e; color: #9ca3af; letter-spacing: .02em; }
 .docs-empty { color: #6b7280; font-size: 0.78rem; }
+
+/* CL332: 复制 Prompt —— 异常条批量 + 行级单条（沿用 anom-chip 的配色语言） */
+.anom-copy, .prompt-copy { font-size: 0.72rem; padding: 2px 9px; border-radius: 999px;
+  background: #1b1b2b; color: #a5b4fc; border: 1px solid #4f46e5; cursor: pointer; }
+.anom-copy:hover, .prompt-copy:hover { background: #26264a; color: #e0e7ff; }
+.prompt-copy { display: block; margin: 6px 0 2px; }
+.prompt-copy:active, .anom-copy:active { transform: scale(0.98); }
+
+/* CL333: ⌘F 快捷搜索覆盖层（不过滤, 只跳转高亮） */
+.qs-overlay { position: fixed; inset: 0; display: none; z-index: 90;
+  background: rgba(8, 8, 14, 0.55); }
+.qs-overlay.on { display: flex; align-items: flex-start; justify-content: center; }
+.qs-box { margin-top: 12vh; display: flex; align-items: center; gap: 10px;
+  background: #14141f; border: 1px solid #34344e; border-radius: 10px;
+  padding: 10px 14px; min-width: 420px; max-width: 70vw; box-shadow: 0 18px 50px rgba(0,0,0,.5); }
+.qs-input { flex: 1; background: #0e0e16; border: 1px solid #2a2a3e; border-radius: 6px;
+  color: #e5e7eb; font-size: 0.86rem; padding: 6px 10px; outline: none; }
+.qs-input:focus { border-color: #4f46e5; }
+.qs-count { color: #a5b4fc; font-size: 0.76rem; min-width: 3.4em; text-align: right; }
+.qs-hint { color: #6b7280; font-size: 0.7rem; white-space: nowrap; }
+#board-body tr.qs-hit { background: rgba(79, 70, 229, 0.12); }
+#board-body tr.qs-cur { outline: 1px solid #6366f1; outline-offset: -1px; }
+
+/* CL340: 停滞（未验收且最后一步 > 7 天）徽标 */
+.badge-stale { background: #3a2a12; color: #fbbf24; border: 1px solid #b45309; }
+
+/* CL347: 豁免依据块（与异常块同构, 但用中性色: 豁免不是异常） */
+.exempt-box { border-left: 3px solid #6b7280; padding-left: 8px; margin-top: 8px; }
+.exempt-box .detail-section-title { color: #9ca3af; font-weight: 600; }
+.exempt-box li { color: #d1d5db; font-size: 12px; line-height: 1.6; }
