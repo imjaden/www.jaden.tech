@@ -28,22 +28,20 @@
 
 ### 待审计 commit 清单
 
-| 待审计笔 | 内容 | 复审面 | 前置 / 连带 |
-|:--|:--|:--|:--|
-| `ef703df` `data@update: tokens-tracker - auto sync` | 20:45 cron 镜像产物 | `tokens-tracker/assets/*`、`data/live.js` | 他线产物，非本会话引入 |
-| 本笔 `docs@report: JT-SEC-027 plan D — repo recreated, orphan objects gone` | 报告 §七（删仓重建执行记录）+ 本文件基线刷新 | `documents/reports/JT-SEC-027-history-rewrite-20261111.md`、`TODO-handoff.md` | 重建后首笔；普通 ff 推送 |
+**无**（截至 `c7590d1` 全部已推，`ahead = 0`）。本会话上线笔（供复查定位）：`7ef4d93` LQIP → `05d55c7` handoff → `ef703df` tokens 镜像 → `76c8aae` 报告 §七 → `3dc43dd` review L2 → `c7590d1` gitee 对齐记账。
 
 - 明早串行序：只剩一条
-  ① `待开（sec-021）` — 实测站点产物 0 再生、生成器已剥离 FAQ 的 `javascript:` 链接，本仓仅剩 `index.html:54` logo `void(0)` 交互锚点 ⇒ 建议**接受并关号**，待 review 下轮确认
-- 明早首跑：`python3 scripts/portal-check.py --mode post`（15/15）+ `--selftest`（17/17）+ `python3 scripts/perf-check.py`（28 PASS / rc=0）+ `python3 cache/scratch/raw-pii-probe.py`（期望 `rc=0`，防回流）
+  ① `待开（sec-028）` — review 21:50 夜间轮新开的「本地 PII bundle」项**已滞后**：该 bundle 2026-11-11 21:00 已删，`~/CodeSpace/cache/rewrite-backup/` 现仅剩 post-rewrite（clone 验证 resume 对象 0）⇒ 只需 review 下轮核验后关号，**无需实施动作**
+- 明早首跑：`python3 scripts/portal-check.py --mode post`（15/15）+ `--selftest`（17/17）+ `python3 scripts/perf-check.py`（28 PASS / rc=0）+ `python3 cache/scratch/raw-pii-probe.py`（期望 `rc=0`，防回流；`rc=3` = 对照组不通，无结论不算通过）
 - 放行口径：review PASS 后 `git push origin HEAD:main`（**ff-only**；新库已就位，无需任何 force）
 
 ### 其他
 
-- **JT-SEC-027 方案 A ✅ 已执行**（2026-11-11）：`filter-repo` 清除 `resume-landscape.pdf` / `resume.pdf` / `resume.html`，删 `refs/original/*`（3 个）+ `gc --prune=now`，`--force-with-lease` 推送 `823cd42 → 99f95aa`；两枚 PII blob（`3b0931c…` / `ec5c508…`）本地已不可达；遗留 = GitHub 孤儿对象待验证（见 ①）
-- **JT-CL004 ✅ 完成**（`[1/6]`–`[6/6]` 全绿）+ `JT-SEC-024/025/026 ✅ CLOSED`
-- **结转**: `JT-SEC-021` 🟡；`JT-SEC-019/020/022/023` 🟢（披露同族，仅记录）
+- **JT-SEC-027 ✅ CLOSED**（review 21:50 L2 判）：A 历史重写（`823cd42 → 99f95aa`）+ D 删库重建（同名空库 → 373 commits → Pages `built` 20:55:59）双段落地，旧 sha 三类 PII 路径全 404、三个 PII blob 按 sha 取均 404；证书沿用未重签，空窗约 1 分钟。详见 `documents/reports/JT-SEC-027-history-rewrite-20261111.md` §七
+- **JT-SEC-021 ✅ CLOSED**（同日 L2）：站点产物 0 再生、FAQ 面已移除，本仓仅剩 `index.html:54` logo `void(0)` 交互锚点（非死链）
+- **JT-CL004 ✅ 完成**（`[1/6]`–`[6/6]` 全绿）+ `JT-SEC-024/025/026 ✅ CLOSED`；`JT-SEC-019/020/022/023` 🟢（披露同族，仅记录）
+- **gitee 镜像已对齐**（用户裁「走 A」）：`master` = `c7590d1` 与 GitHub 同号，旧对象 `gc` 后 resume 计数 0；gitee 侧 5 个 2022 年旧提交已弃（内容被现版覆盖）
 - 已闭合、无需再动：CL003 门户改版（PASS 100）/ CL063·CL068 站点同步（PASS 95）/ imjaden 转交件（`3f7e246`）/ BWH 数据面由上游闭合
 - 日更口径（2026-11-08 裁定）：`bmi-tracker.html` 头部读今日 ⇒ 每天一笔 `data@archive`；推送节奏 = **每日一次收口**（现与 21:50 L2 同批）
-- 备份：重写前全量 bundle `~/CodeSpace/cache/rewrite-backup/www-jaden-tech-pre-rewrite-20261111.bundle`（16M，**含 PII**，确认无需回滚后删除）
-- 快校验口径: `hm check readme .` 在本仓**不适用**（手写索引被判「多余索引」+ 一处归档断链），属既有漂移；本仓无 `tests/` ⇒ pytest 定向不适用
+- 备份现状：**仅存干净备份** `~/CodeSpace/cache/rewrite-backup/www-jaden-tech-post-rewrite-20261111.bundle`（16M，clone 验证 resume 对象 0）；含 PII 的 `pre-rewrite` bundle 已于 21:00 删除
+- 快校验口径: `hm check readme .` 在本仓**不适用**（手写索引被判「多余索引」+ 一处归档断链，10-25 存量），本轮复跑仍 `1/1 未通过`，属既有漂移；`hm check handoff .` 0 err 0 warn、`hm check draft .` 1 warn（JT-CL004 一闭环两条目，合法）；本仓无 `tests/` ⇒ pytest 定向不适用
