@@ -1,11 +1,10 @@
-<!-- generated: 2026-11-11 · source: cache/draft/TODO-20261111.md · sha256:8bc25421 -->
-> 派生: 待执行 **3** 条 · 最近闭环 **—** · 差异知会 无（未找到含「差异知会」的设计文档）
+<!-- generated: 2026-11-11 · source: cache/draft/TODO-20261111.md · sha256:a322066a -->
+> 派生: 待执行 **2** 条 · 最近闭环 **—** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261111.md）
 
 | 编号 | 标题 | 状态（派生摘要·全文见 draft） | kind | priority | 方案文档 |
 |:--|:--|:--|:--|:--|:--|
-| 待开（lqip） | 首屏背景 LQIP 第二阶段 | 待定 | queued | low | - |
 | 待开（sec-021） | JT-SEC-021 收口 | 待办 | decision | normal | - |
 | 待开（sec-027-gc） | JT-SEC-027 孤儿对象回收（方案 D） | 待办 | ops | normal | - |
 <!-- generated end -->
@@ -13,7 +12,8 @@
 ## 二、基线（人工维护）
 
 - 仓: `~/CodeSpace/www.jaden.tech` · branch `main`
-- 本地 HEAD: `99f95aa`（历史重写后）· `origin/main` = `99f95aa`（强推后一致）· ahead = 0（＋本笔报告/handoff 提交）
+- 本地 HEAD: `7ef4d93`（LQIP 笔）· `origin/main` = `50fd247` · ahead = **1**
+- 线上 LQIP：**未生效**（`7ef4d93` 未推）；当前线上仍是纯 `#b0b2b8` 底色
 - ⚠️ **2026-11-11 历史已重写（JT-SEC-027 方案 A）**：全仓 sha 变更（435 commits），`823cd42` 之前的历史号全部失效；6 笔积压已随强推上线（新号见 `documents/reports/JT-SEC-027-history-rewrite-20261111.md` §四映射表）。内容零变更（tree `7e5c1641`）
 - 2026-11-09 推送链（review 执行，均已在旧历史上线）: `27d63d9` → `d33fa31` → `6e66f04` → `0e083d1` → `756932f` → `d82b5d7` → `dde4429` → `c128c9a` → `28a0816` → `a628d7a` → `823cd42`（**该批 sha 现已不在远端历史上**）
 - 线上: https://www.jaden.tech 站点首页 200；Pages 在强推后进入 `building`（需等部署完成再抽检 `?t=` 与 `bmi-tracker.html` sha）
@@ -28,13 +28,13 @@
 
 | 待审计笔 | 内容 | 复审面 | 前置 / 连带 |
 |:--|:--|:--|:--|
-| 本笔 `docs@report: JT-SEC-027 方案 A 执行记录 + 基线刷新` | 新增执行记录 + 本文件基线/待执行刷新 | `documents/reports/JT-SEC-027-history-rewrite-20261111.md`、`TODO-handoff.md` | 无前置；重写后第一笔，推送为普通 ff |
+| `7ef4d93` `feat@site: LQIP first-paint placeholder` | `body` 底色加 16px/750B JPEG 内联 LQIP（无新增 DOM/filter）+ `?t=` 换戳 | `index.html`、`wechat.html`（+9/−8；index.html gzip 4290→5197，预算 8000） | 首帧视觉改动，用户 2026-11-11「全采推荐方案」已批；两档几何 A/B 一致、双钉子 15/15 + 28 PASS |
+| 本笔 `docs@handoff: sync queue after LQIP + probes` | 机器段（派生 2 条）＋ 基线/待执行刷新 | `TODO-handoff.md` | 无前置 |
 
 - 明早串行序（① 前置最硬）：
-  ① `待开（sec-027-gc）` — 复测旧 sha 是否仍可 raw 访问（需出网环境），决定是否开 GitHub support 工单清孤儿对象
-  ② `待开（sec-021）` — 决策：修 daily-tracker 生成器 `javascript:` FAQ 死链，或接受本仓 inert 锚点并关 🟡；**跨仓/需裁定**
-  ③ `待开（lqip）` — 首屏背景 LQIP，低优先
-- 明早首跑：`python3 scripts/portal-check.py --mode post`（15/15）+ `--selftest`（17/17）+ `python3 scripts/perf-check.py`（rc=0）
+  ① `待开（sec-027-gc）` — 探针已实测 **verdict=OK**（旧 sha 仍 200、新 ref 404）⇒ 只差 GitHub 工单 GC（草稿 `cache/review/JT-SEC-027-github-support-ticket.md`，需网页提交）
+  ② `待开（sec-021）` — 实测站点产物 0 再生、生成器已剥离 FAQ 的 `javascript:` 链接，本仓仅剩 `index.html:54` logo `void(0)` 交互锚点 ⇒ 建议**接受并关号**，待 review 下轮确认
+- 明早首跑：`python3 scripts/portal-check.py --mode post`（15/15）+ `--selftest`（17/17）+ `python3 scripts/perf-check.py`（28 PASS / rc=0）
 - 放行口径：review PASS 后 `git push origin HEAD:main`（**ff-only**；重写已完成，后续不需要 force）
 
 ### 其他
