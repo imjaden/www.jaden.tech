@@ -1,17 +1,19 @@
-<!-- generated: 2026-11-11 · source: cache/draft/TODO-20261111.md · sha256:8709f296 -->
+<!-- generated: 2026-11-11 · source: cache/draft/TODO-20261111.md · sha256:f865f337 -->
 > 派生: 待执行 **1** 条 · 最近闭环 **—** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261111.md）
 
 | 编号 | 标题 | 状态（派生摘要·全文见 draft） | kind | priority | 方案文档 |
 |:--|:--|:--|:--|:--|:--|
-| 待开（sec-021） | JT-SEC-021 收口 | 待办 | decision | normal | - |
+| 待开（sec-028） | JT-SEC-028 复核（review 夜间轮新开） | 待办 | verify | low | - |
 <!-- generated end -->
 
 ## 二、基线（人工维护）
 
 - 仓: `~/CodeSpace/www.jaden.tech` · branch `main`
-- 本地 HEAD: `ef703df`（tokens 镜像 20:45 cron）· `origin/main` = `ef703df` · ahead = 0
+- 本地 HEAD: `3dc43dd`（review 夜间轮 L2 PASS 95）· `origin/main` = `3dc43dd` · ahead = 0
+- **gitee 镜像已对齐**（2026-11-11 22:15，用户裁「走 A」）：`reset --hard` 到 GitHub 重写后历史 → 强推 `master` = `3dc43dd`；gitee 本地旧对象已 `gc --prune=now`（`resume.html` blob `b2ed476` 已清除，全对象 resume 计数 0）；弃掉 gitee 侧 5 个 2022 年旧提交（内容早已被现版覆盖）
+- 台账变动（review 21:50 L2，`3dc43dd`）：`JT-SEC-027` **CLOSED**（删库重建 + 旧 sha 404）、`JT-SEC-021` **CLOSED**（FAQ 面已移除）、新开 `JT-SEC-028`（本地 PII bundle）——该 bundle 已于 21:00 删除，待 review 下轮核验关号（见 draft `待开（sec-028）`）
 - 🆕 **2026-11-11 20:52 仓库已删库重建（JT-SEC-027 方案 D）**：旧库删除 → 同名空库重建 → 推送 373 commits → Pages `built` 20:55:59。**旧 sha 三类 PII 路径全 404**（探针 `cache/scratch/raw-pii-probe.py` `rc=0 verdict=GONE`）；证书**沿用**（`approved`，到期 2027-02-06，未重签）；`homepage`/主题/开关已还原；空窗约 1 分钟。详见 `documents/reports/JT-SEC-027-history-rewrite-20261111.md` §七
 - 线上 LQIP：**已生效**（`7ef4d93` 已随重建推送上线；线上 `index.html` sha256 == 本地 `8acecacbf248…`，`data:image/jpeg;base64` 命中 1）
 - ⚠️ **2026-11-11 历史已重写（JT-SEC-027 方案 A）**：全仓 sha 变更（373 commits），`823cd42` 之前的旧号全部失效；6 笔积压已随重写推送上线（新号见同报告 §四映射表）。内容零变更（tree `7e5c1641`）
