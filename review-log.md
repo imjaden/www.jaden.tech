@@ -1381,6 +1381,50 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 ---
 
+## 2026-11-12 — 夜间 L2 全项目安全审查（cron 21:50 班次）
+
+- **review者**: Security Reviewer（review profile，cron `daily-tracker-review` 21:50 班次；无用户在场，按 prompt 自主执行）
+- **范围**: `origin/main = 6e10557`（= 本地 HEAD），ahead 0 / behind 0，`git status --porcelain -uall` 空（**本轮无未推笔**）；相对上轮审计笔 `3dc43dd` 新增 **3 笔** = `c7590d1` docs@handoff（TODO-handoff.md +5/-3）→ `2a9a740` docs@handoff 夜间收口（TODO-handoff.md +9/-11）→ `6e10557` data@update daily-tracker 11-12（bmi-tracker.html +6/-6）；聚合 **2 文件 +20/-20**，`--diff-filter=DR` 空，`--diff-filter=A` 0 件（无新增文件），tracked 86 文件；单日志口径不新建 `documents/reviews/` 件。
+- **Tracking**: **JT-SEC-028（🟡 MEDIUM / P2）✅ CLOSED**（五路径实测）+ 复核 JT-SEC-021 / 027 仍 CLOSED + 结转 JT-SEC-019 / 020 / 022 / 023（🟢 LOW）
+- **状态**: ✅ PASS（**100 / 100**，Rating A；🔴 0 / 🟡 0 / 🟢 4 结转）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告
+- **实现 prompt**: ⬜ 无需生成（夜间复审计，非设计评审）
+
+### 发现摘要
+
+**`JT-SEC-028`（🟡 MEDIUM / P2）✅ CLOSED —— 四项判据均本轮独立实测，不引用 handoff 自述**：① **pre-rewrite bundle 已不存在**：`~/CodeSpace/cache/rewrite-backup/` 现存 **1 个文件** = `www-jaden-tech-post-rewrite-20261111.bundle` 16,767,686 B（目录 mtime 11-11 22:11），`test -e <pre-rewrite 绝对路径>` ⇒ **ABSENT**（上轮 17,188,271 B 的含 PII 件已删，与 handoff 记「21:00 删除」相符）；② **仅存的 post-rewrite bundle 独立复验为干净件**：bare clone 至 scratch 后 `rev-list --objects --all` = **1,764 对象**，`grep -icE resume` ⇒ **0**，文档型对象（pdf/docx/xlsx/pptx/zip/rar/7z/p12/pem/key）⇒ **0**（该 bundle 另含 `refs/heads/gh-pages` / `master` / `quarantine/20260906-tokens-mirror-leak` 四 ref）；③ **gitee 镜像归零**：镜像仓 `--all` resume 对象 **0**、`origin/master` resume 对象 **0**，`git ls-remote origin` ⇒ `master = 2a9a740`（与本地镜像 HEAD 同号），`gitee.com/imjaden/www.jaden.tech` 页面与 raw 均 **403**（非公开面，日后转公开前须按原口径摊平）；④ **披露面收口**：`TODO-handoff.md` 已删去 pre-rewrite 绝对路径与「含 PII」句，改为「仅存干净备份 post-rewrite（clone 验证 resume 对象 0）」——上轮判定的「指向本机敏感件的定向提示」消灭。残余两点**不新开号**：(a) `documents/reports/JT-SEC-027-history-rewrite-20261111.md:23/64/102` 仍写死 pre-rewrite 绝对路径并注「含 PII」，且 `:102` 仍留「待删」滞后措辞（文件其实已删）⇒ 归 **JT-SEC-020（🟢 披露同族）** + 文档时效观察项；(b) blob `3b0931c` 在本地 object DB 仍 `cat-file -e` PRESENT，但 `for-each-ref --contains` = **0**、`rev-list --objects --all` = **0**，仅 **reflog 可达**（`reflog_hits=2`）⇒ **非公开面**，物理解收需 `git reflog expire --expire=now --all && git gc --prune=now`（破坏性且不可逆，cron 不代跑，留用户裁定）。
+
+**`JT-SEC-027`（🔴 HIGH / P0）复核仍 CLOSED**：`raw.githubusercontent.com/imjaden/www.jaden.tech/35a3d86/resume-landscape.pdf` ⇒ **404**；按 blob sha 直取 `3b0931c…/resume-landscape.pdf` ⇒ **404**；`main/resume.html` ⇒ **404**；对照组 `main/index.html` ⇒ **200**（证网络通、非全站 404）；`api.github.com/repos/imjaden/www.jaden.tech` ⇒ `private=false` / `visibility=public` / `created_at=2026-11-11T12:52:31Z`（同名新库）；`git ls-remote origin` ⇒ 仅 `refs/heads/main`（`6e10557`）一个 ref，旧 gh-pages / master 未随重建推送。
+
+**`JT-SEC-021`（🟡 MEDIUM）复核仍 CLOSED**：`git grep 'javascript:'`（`*.html` `*.js`）全仓 **1 命中** = `index.html:54` logo 的 inert `void(0)` 锚点；`bmi-tracker.html` 内 `class="faq-q"` 元素 **0** 个；本轮被审 3 笔 HTML 侧 **0 行代码变更**（见下）⇒ 无再生路径。
+
+**被审 3 笔 0 新发现** —— `c7590d1` / `2a9a740` 两笔纯 docs（`TODO-handoff.md` 人工段：基线行刷新到 `3dc43dd`、gitee 对齐记账、028 滞后说明、台账 019/020/022/023 结转、`hm check readme` 不适用口径），无代码/无外链/无凭据；`hm check handoff .` 复跑 ⇒ **errors=0 warns=0**、`hm check draft .` ⇒ 1 warn（JT-CL004 一闭环两条目，合法）。`6e10557` `data@update` 笔经逐行核：`bmi-tracker.html` **6 行改动全部为数值/日期文本**，`grep -cE '<script|function|addEventListener|localStorage|querySelector|innerHTML'` 对 +/- 行 ⇒ **0**（非又来一轮「数据前缀夹带可执行代码」）；口径自洽实测：`71.8−62.5=9.3`（页面 Lost 9.3）、`9.3/(71.8−60.0)=78.8% → 页面 79%`、`Left 2.5`、`goal-chip 62.5−60.5=2.0 kg to go`、`D+33` 与 `Duration 34 days`（沿上轮 D+32/Duration 33 同口径进位）。
+
+**安全面 / 无回归** —— Pass1 tracked 全仓凭证 **0** 命中（`git ls-files | grep -icE '\.env|id_rsa|credentials|\.pem|\.key'` = 0）；Pass2 宽词（`sk-` / `ghp_` / `gho_` / `github_pat_` / `AKIA` / `xox*` / PEM）**8 文件命中全部为评审文档中描述扫描正则的散文**（`documents/reviews/*` 与 `review-log.md` 自述行），**0 个真实凭据**；Pass3 本轮 **22 条新增行**：密钥字面量 **0**、`/Users/` **0**、`jadenli` **0**、`~/CodeSpace` **2**（均在 docs，归 JT-SEC-020）、XSS sink **0**（`innerHTML|outerHTML|insertAdjacentHTML|document.write|eval(|new Function|location.(href|assign|replace)|<script` 全 0）；Pass4 `git log -p` 近 80 笔 PEM/AWS/GitHub/OpenAI 型密钥 **0**。控制集无回归：`referrer` meta **4/4**（index / wechat / bmi / tokens）、`bmi-tracker.html` `chart.js@4.4.7` + `integrity="sha384…"` **1** + `crossorigin` **1** + `noopener` **1** 全在、外链域集合不变（jsdelivr 仍 2 处 = chart.js 双文件；无新增依赖）；本地分支 `quarantine/20260906-tokens-mirror-leak` 凭证扫描 **0** 命中且远端仅 `refs/heads/main` ⇒ 未公开。
+
+**门禁（实跑）** —— `python3 scripts/perf-check.py` ⇒ **全 PASS rc=0**（含 exactly 5 entries pills=3+icon-links=2 / 2 section titles / `?t=` parity `1794394182` / 诗词标题索引与月包同步）；`python3 scripts/portal-check.py --mode post` ⇒ **15/15 rc=0**；`--selftest` ⇒ **17/17 rc=0**（含 S10/S16 判别力自证）；`python3 scripts/timestamp-manager.py check` ⇒ 全文件同值 `1794394182` rc=0；`node --check` 三文件（`common.js` / `shell-render.js` / `data/live.js`）rc=0；`py_compile` 三钉子脚本 rc=0。
+
+**线上面（实测）** —— `/`、`/index.html`、`/bmi-tracker.html`、`/wechat.html`、`/tokens-tracker/` 全部 **200**；线上 `/` 与本地 `index.html` **逐字节相同**（`diff` 0 行，sha256 `8acecacbf248…`，复测 `/index.html` 亦 identical）；线上 `bmi-tracker.html` sha256 `52d7f1f3…` 与本地相同，`goalLine` 实测 `当前 62.5 kg` ⇒ 本轮数据笔已上网。
+
+**观察项（不计发现）** —— O1 `documents/reports/JT-SEC-027-history-rewrite-20261111.md` 三处仍留 pre-rewrite 绝对路径 +「含 PII」+「待删」滞后措辞（文件已删），建议 fix-forward 泛化为 `<pre-rewrite>.bundle` 并改「已删除」；禁 amend。O2 `TODO-handoff.md` 基线行 `本地 HEAD: 3dc43dd` 属写时点口径（当前 `6e10557`），与本轮无关的常规滞后，非发现。O3 `daily-poetry.html` 仍有 9 处 `innerHTML` 注入点（本轮 range 未触及），但 `:484` `esc()` 覆盖全部插值位点（JT-SEC-016 口径不变），无新增 taint。O4 本轮首测 `https://www.jaden.tech/index.html` 返回 000（瞬时），复测 200 且逐字节相同 ⇒ 网络侧抖动，不构成站点缺陷。
+
+### 发现表
+
+| # | Level | ID | 标题 | 状态 |
+|:-:|:--|:--|:--|:--|
+| 1 | 🟡 MEDIUM / P2 | **JT-SEC-028** | 含 PII 的本机备份 + 其绝对路径被公开文档披露 | **✅ CLOSED**（bundle 已删 + post 件复验 0 文档对象 + gitee 镜像 0 + handoff 披露句收口） |
+| 2 | 🟢 LOW | **JT-SEC-019** | `tokens-tracker/index.html` footer 版本披露 | OPEN 无变化 |
+| 3 | 🟢 LOW | **JT-SEC-020** | `documents/**` / `~/CodeSpace` 路径披露 | OPEN（本轮 028 报告 3 处沿用同族口径，未扩新增面） |
+| 4 | 🟢 LOW | **JT-SEC-022** | `TODO-handoff.md` 公开仓路径与 branch | OPEN 无变化 |
+| 5 | 🟢 LOW | **JT-SEC-023** | `live.js` desc 含凭据轮换任务语义 | OPEN 无变化 |
+| — | 🟡/🔴 | **JT-SEC-021 / 027** | FAQ `javascript:` 死链 / 公开仓 PII 简历 PDF | **✅ 仍 CLOSED**（本轮独立复核） |
+
+计分：**100 − 0 = 100 / 100 → A → PASS**（028 关闭不扣分，上轮 −5 回冲；本轮被审 3 笔 0 新发现，🟢 4 项结转 0 扣分）。
+
+**推送：PASS ⇒ 本轮 push**。本轮起点 ahead=0，无他线待推笔；仅 path-scoped commit 审计 2 文件（本文件 + `.review-level.yaml`）后 ff-only 推送，三验（`rev-parse HEAD` == `origin/main`、`ls-remote` 同值、工作树干净）。**待确认 0 项**（028 的残余 (b) 物理解收为破坏性操作，已在观察项写明修法，留用户自行决定是否执行）。
+
+---
+
 ## 条目格式说明
 
 ```
