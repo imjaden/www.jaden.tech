@@ -456,6 +456,20 @@
     }
     return lines.join("\n");
   }
+  /* CL352: 看板窗 30 天 / 清扫窗 400 天 —— 把「窗外的停滞」显式写出来,
+     否则「异常归零」可能只是滑窗而非处置完成（daily-checker 回件 2026-11-12）。 */
+  function renderOffwindow() {
+    var desc = document.querySelector(".table-desc");
+    var o = (window.HIST_EXTRA || {}).offwindow;
+    if (!desc || !o || !o.count) { return; }
+    var names = Object.keys(o.by_project || {});
+    var s = HB.el("span", "offwin-note", "　· 窗口外停滞 " + o.count + " 条");
+    s.title = (o.board_days || 30) + " 天看板窗之外、" + (o.scan_days || 400) + " 天扫描窗之内的停滞回路"
+      + (names.length ? "（" + names.map(function (k) { return k + " " + o.by_project[k]; }).join("、") + "）" : "")
+      + "；看板数字归零不等于处置完成。";
+    desc.appendChild(s);
+  }
+
   function renderStatsButton() {
     var host = document.getElementById("stats-chip");
     if (!host) { return; }
@@ -516,6 +530,7 @@
       });
       /* 规格 §5.4: ≤960px 首屏只留 全部/进行中/异常, 待执行/已完成 收进「更多」 */
       renderStatsButton();               /* CL344 */
+      renderOffwindow();                 /* CL352 */
       var more = HB.el("button", "chip chip-more", "更多 ▾");
       more.type = "button";
       more.title = "展开其余状态筛选（窄屏）";
