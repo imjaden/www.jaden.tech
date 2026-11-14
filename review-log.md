@@ -1468,6 +1468,50 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 
 **推送：PASS ⇒ 本轮 push**。起点 ahead=2（`8e66110` + `2fbd919` 两笔数据笔，安全面无阻断），按 prompt「推送所有本地待推送 commit」要求一并推送：先 path-scoped commit 审计 2 文件（本文件 + `.review-level.yaml`），再 ff-only `git push`，三验（`rev-parse HEAD` == `origin/main`、`ls-remote origin main` 同值、工作树干净）。**待确认 0 项。**
 
+## 2026-11-14 — 夜间 L2 全项目安全审查（cron 21:50 班次）
+
+- **review者**: Security Reviewer（review profile，cron 夜间班次；无用户在场，按 prompt 自主执行）
+- **范围**: `origin/main = 1fee314`（`git ls-remote` 实测），本地 HEAD = `0be6323`，**ahead 2 / behind 0**，`git status --short` 空；相对上轮审计笔 `1fee314` 新增 **2 笔** = `e6d0106` data@update tokens-tracker（`tokens-tracker/data/live.js` +36/-150）→ `0be6323` data@update daily-tracker 11-14（`bmi-tracker.html` +6/-6）；聚合 **2 文件 +42/-156**，`--diff-filter=ADR` 空（无新增/删除/改名），tracked 86 文件；单日志口径不新建 `documents/reviews/` 件。
+- **Tracking**: 本轮 **0 新发现**；JT-SEC-019 / 020 / 022 / 023（🟢 LOW）结转 OPEN（023 面扩 1 处）；JT-SEC-021 / 024 / 025 / 026 / 027 / 028 复核仍 CLOSED
+- **状态**: ✅ PASS（**100 / 100**，Rating A；🔴 0 / 🟡 0 / 🟢 4 结转）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告
+- **实现 prompt**: ⬜ 无需生成（夜间复审计，非设计评审）
+
+### 发现摘要
+
+**被审 2 笔 0 新发现** —— 两笔均 `data@update:` 前缀，按既有纪律不以前缀判 SKIP，逐行核：
+
+**① `0be6323` bmi-tracker.html 纯数值笔** —— 6 行改动全在 `DT:goalLine` / `DT:progressMeta` / `DT:progressFill` / goal-bar / bwh-bar 的数值与生成日期文本内，按代码关键词（script 标签 / function / addEventListener / localStorage / querySelector / innerHTML）对 +/- 行取数 ⇒ **0**，非「数据前缀夹带可执行代码」。口径自洽实测：`71.8−61.76=10.04`（页面 Lost 10.04）✓；`10.04/(71.8−60.0)=85.08%→85%`（页面 85%）✓；`Left 61.76−60.0=1.76` ✓；goal-chip `61.76−60.5=1.26 kg to go` ✓；`已达成 53%` 与 7 日均值 62.35 同口径（`(65−62.35)/5=53%`，继承上轮 62.46→51% 的算法）✓；`还差 2.35` = 7 日均 −60.0 ✓；`D+34→D+35` 与 `Duration 35→36 days` 同步进位 ✓；`next checkpoint (in 2→1 days)` 与今日 11-14 相符 ✓；`生成时间 2026-11-14` / `全量记录 111 条`（未变）。唯一瑕疵属文案面：`(in 1 days)` 单复数，非安全面。
+
+**② `e6d0106` tokens-tracker 镜像数据笔（-150 行收缩）** —— `LIVE_ITEMS` 6 条全 `pending`、单项目 daily-checker（hermes-manager 系 done 条目滚出 live 窗口，非改口径），条目字段集 7 键不变；`window.*` 键集 **8 个不变**（WEB_DATA_META / LIVE_ITEMS / BOARD_STATS / LIVE_ANOMALY / HIST_TASKS / HIST_SESSION_CAP / HIST_EXTRA / WEB_DATA_READY）；`filtered 10→19`（draft 9 / empty 10 / window 10 / kept 13）、`generated_at 2026-11-14T20:39:43+08:00`、`generator_version e5d045fd→5208cf63`。全文件 `</script` **0**、`innerHTML` / `document.write` / `eval(` / `new Function` **0** ⇒ 数据面无可执行注入面；`json.loads` 解析 LIVE_ITEMS 通过。
+
+**③ `LIVE_ANOMALY.prompt` 任务书 1→2 条（按 JT-SEC-023 口径复核 ⇒ 🟢 面扩不开新号）** —— 659 字符 / `prompt_count=2`，实体为 HERMES-MANAGER-CL353 与 HTML-GEN-CL040 两段六段式任务书（任务/现状/异常/期望/验收/边界）。逐项扫：**0 凭据**（密钥前缀与 key/token/password 类关键词全 0）、**0 PII**（邮箱/手机号 0）、**0 外链/IP**、**0 内网主机名**；唯一本机面 = 两条验收行各 1 处家目录前缀路径 + 内部 CLI 名（`hm loop list --done` / `hm loop status`），与 JT-SEC-022 / JT-SEC-020 同族 ⇒ 记 🟢 观察（不计扣分），建议跨仓 `1acl-board-gen` 对验收行做 `<repo>` 泛化。desc 面本轮新增两条 DAILY-CHECKER 任务语义，同属 023 既有口径。
+
+**凭证扫描 Pass 1-4** —— Pass1 tracked 凭证类文件（env / 私钥 / 证书 / keystore）**0 件**；Pass2 宽词（凭据关键词）在非文档面 **0 文件命中**；Pass3 本轮新增行：密钥前缀 **0** / 家目录前缀 **0** / 用户名 **0** / XSS sink **0**；Pass4 历史文档型对象 **0**、全 ref resume 足迹 **0**。
+
+**Git 历史** —— `git rev-list origin/main --objects` 文档型对象（pdf/docx/xlsx/pptx/zip/rar/7z/p12/pem/key）**0 个**；`--all` 口径 resume 足迹 **0**；`git ls-remote origin` 仅 `refs/heads/main = 1fee314` 单 ref（本地 gh-pages / master / quarantine 三分支未随重建上传 ⇒ 非公开面）。
+
+**控制集无回归** —— `referrer` meta **5/5**（index / wechat / bmi / tokens / daily-poetry）；`bmi-tracker.html` 的 chart.js@4.4.7 `integrity="sha384-vsrfe…"` **1** + `crossorigin` **1** 仍在；`noopener` index 6 / bmi 1 / tokens 1；`tokens-tracker/index.html` 外链脚本 0（全本地 assets，本身无需 SRI）；`?t=` 全仓 7 处同值 `1794394182`；外链域与依赖集不变（无新增 CDN、无新增外链域）。
+
+**门禁（实跑）** —— `python3 scripts/perf-check.py` ⇒ **28 项全 PASS rc=0**（含 exactly 5 entries pills=3+icon-links=2 / 2 section titles / `?t=` parity / 诗词标题索引与月包同步）；`python3 scripts/portal-check.py --mode post` ⇒ **15/15 rc=0**；`--selftest` ⇒ **17/17 rc=0**（S10/S16 判别力自证）；`python3 scripts/timestamp-manager.py check` ⇒ 同值 `1794394182` rc=0；`node --check` 四文件（index.js / common.js / shell-render.js / data/live.js）rc=0；`py_compile` 四脚本 rc=0。
+
+**线上面（实测）** —— `https://www.jaden.tech/` / `/bmi-tracker.html` / `/tokens-tracker/` / `/tokens-tracker/data/live.js` 全 **200**（本轮待推 2 笔数据笔尚未上网，属预期）。
+
+**观察项（不计发现）** —— O1 `(in 1 days)` 单复数文案（生成器侧，非安全）。O2 `TODO-handoff.md:14` 基线行仍写 `本地 HEAD: 3dc43dd` / ahead 0（实际 `0be6323` / 2），属 ops 侧写时点滞后，沿用既有口径非发现。O3 `daily-poetry.html` 9 处 `innerHTML` 但 `esc()` 全覆盖全部插值位点（JT-SEC-016 口径不变，本轮 range 未触及）。O4 `LIVE_ANOMALY.prompt` 连续两轮启用且条数增长 ⇒ 若日后接入更多仓的任务书，家目录路径与内部 CLI 面会同步扩大，建议生成器侧一次性做路径泛化（与 JT-SEC-023 同一处修）。
+
+### 发现表
+
+| # | Level | ID | 标题 | 状态 |
+|:-:|:--|:--|:--|:--|
+| 1 | 🟢 LOW | **JT-SEC-019** | `tokens-tracker/index.html` footer 版本披露 1.11(20261015) | OPEN 无变化 |
+| 2 | 🟢 LOW | **JT-SEC-020** | `documents/**` / 家目录前缀路径披露 | OPEN 无变化 |
+| 3 | 🟢 LOW | **JT-SEC-022** | `TODO-handoff.md` 公开仓路径与 branch | OPEN 无变化 |
+| 4 | 🟢 LOW | **JT-SEC-023** | `live.js` 数据面内部语义披露（desc 任务语义 + prompt 验收行路径/内部 CLI） | OPEN（面扩 1 处，同族口径） |
+| — | 🟡/🔴 | **JT-SEC-021 / 027 / 028** | FAQ `javascript:` 死链 / 公开仓 PII 简历 / 含 PII 备份路径 | **✅ 仍 CLOSED**（本轮独立复核：`javascript:` 仅 1 命中 = index.html:54 inert void(0)；rewrite-backup 目录仅存 post-rewrite 干净件；文档型对象 0） |
+
+计分：**100 − 0 = 100 / 100 → A → PASS**（被审 2 笔 0 新发现，🟢 4 项结转不计扣分）。
+
+**推送：PASS ⇒ 本轮 push**。起点 ahead=2（`e6d0106` + `0be6323` 两笔数据笔，安全面无阻断），按 prompt「推送所有本地待推送 commit」要求一并推送：先 path-scoped commit 审计 2 文件（本文件 + `.review-level.yaml`），再 ff-only `git push`，三验（`rev-parse HEAD` == `origin/main`、`ls-remote origin main` 同值、工作树干净）。**待确认 0 项。**
 ---
 
 ---
