@@ -1,74 +1,20 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 10,
+  "filtered": 19,
   "filtered_breakdown": {
     "draft": 9,
-    "empty": 11,
-    "kept": 21,
-    "window": 1
+    "empty": 10,
+    "kept": 13,
+    "window": 10
   },
-  "generated_at": "2026-11-13T20:37:39+08:00",
+  "generated_at": "2026-11-14T20:39:43+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "e5d045fd",
+  "generator_version": "5208cf63",
   "pages": [
     "index"
   ]
 };
 window.LIVE_ITEMS = [
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL337",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-13 16:54",
-    "desc": "**AC-4：镜像守卫跨仓执行**"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL336",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-13 16:54",
-    "desc": "**SEC-571-16：深探 key 轮换**"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL161",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-13 16:54",
-    "desc": "**观察项：`hm loop report` 的 `loop_id`⇒stric…"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL150",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-13 16:54",
-    "desc": "**C3 首次真实触发核验（观察项，不立项）**"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL149",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-13 16:54",
-    "desc": "**§C3 实证段补「正例样本」+ §C2 一句口径**"
-  },
-  {
-    "project": "hermes-manager",
-    "number": "HERMES-MANAGER-CL141",
-    "status": "pending",
-    "progress": "-",
-    "created_at": "-",
-    "updated_at": "2026-11-13 16:54",
-    "desc": "**TC15 首屏工具表断言间歇性红（全量门禁不可信）**"
-  },
   {
     "project": "daily-checker",
     "number": "DAILY-CHECKER-CL189",
@@ -85,7 +31,7 @@ window.LIVE_ITEMS = [
     "progress": "-",
     "created_at": "-",
     "updated_at": "-",
-    "desc": "**gold DNS hang 根因未消除（观测项，未开工）**"
+    "desc": "**DAILY-CHECKER-CL205 DNS hang 三日复查（承 11…"
   },
   {
     "project": "daily-checker",
@@ -121,20 +67,12 @@ window.LIVE_ITEMS = [
     "progress": "-",
     "created_at": "-",
     "updated_at": "-",
-    "desc": "**DAILY-CHECKER-CL264 15 号并入台账口径两类判据（缺复盘…"
+    "desc": "**DAILY-CHECKER-CL264 15 号并入台账两类判据（承 11-…"
   }
 ];
 window.BOARD_STATS = {
-  "running": 1,
+  "running": 2,
   "series": [
-    {
-      "api_calls": 0,
-      "cache_read_tokens": 0,
-      "date": "20261107",
-      "estimated_cost_usd": 0.0,
-      "files": 6,
-      "total_tokens": 0
-    },
     {
       "api_calls": 764,
       "cache_read_tokens": 118087808,
@@ -168,7 +106,7 @@ window.BOARD_STATS = {
       "total_tokens": 0
     },
     {
-      "api_calls": 452,
+      "api_calls": 434,
       "cache_read_tokens": 30405120,
       "date": "20261112",
       "estimated_cost_usd": 1.8628,
@@ -180,21 +118,29 @@ window.BOARD_STATS = {
       "cache_read_tokens": 0,
       "date": "20261113",
       "estimated_cost_usd": 0.0,
-      "files": 0,
+      "files": 1,
       "total_tokens": 0
+    },
+    {
+      "api_calls": 10,
+      "cache_read_tokens": 163840,
+      "date": "20261114",
+      "estimated_cost_usd": 0.0049,
+      "files": 1,
+      "total_tokens": 184416
     }
   ]
 };
 window.LIVE_ANOMALY = {
-  "anomaly_total": 2,
+  "anomaly_total": 3,
   "doc_missing": 1,
   "idle": 0,
-  "ledger_total": 32,
-  "prompt": "【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-12（距今 1.27 天）\n【异常】实施停滞超阈值；复盘文档缺失 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值；台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/hermes-manager && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
-  "prompt_count": 1,
+  "ledger_total": 23,
+  "prompt": "【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-14（距今 2.27 天）\n【异常】实施停滞超阈值；复盘文档缺失 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值；台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/hermes-manager && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】html-gen · HTML-GEN-CL040\n【现状】台账状态=active；进度=[2/6] 设计评审；最近更新=2026-11-13（距今 0.96 天）\n【异常】实施停滞超阈值 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值\n【期望】回到该项目继续推进，并落一次步骤（step JSON），让「最近推进」刷新\n【验收】`cd ~/CodeSpace/html-gen.cli && hm loop status HTML-GEN-CL040` 的最近步骤时间已刷新，异常圆点消失\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
+  "prompt_count": 2,
   "skipped": 1,
-  "timeout": 1,
-  "total": 31,
+  "timeout": 2,
+  "total": 22,
   "unknown": 0
 };
 window.HIST_TASKS = [];
@@ -203,11 +149,6 @@ window.HIST_SESSION_CAP = {
     {
       "refs": 5,
       "session_id": "20261014_112906_913ac4",
-      "state": "at_cap"
-    },
-    {
-      "refs": 5,
-      "session_id": "20261014_114505_fc2dbe",
       "state": "at_cap"
     },
     {
@@ -245,38 +186,13 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 8,
+      "refs": 7,
       "session_id": "20261015_221750_2f42ad",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20261014_112946_f0330d",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20261014_131132_7196ef",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20261015_182157_f3cd84",
       "state": "over"
     },
     {
       "refs": 6,
       "session_id": "20261014_111910_ac695b",
-      "state": "over"
-    },
-    {
-      "refs": 6,
-      "session_id": "20261015_204022_7cfad0",
-      "state": "over"
-    },
-    {
-      "refs": 6,
-      "session_id": "20261016_202615_aad5bd",
       "state": "over"
     },
     {
@@ -323,38 +239,13 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 8,
+      "refs": 7,
       "session_id": "20261015_221750_2f42ad",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20261014_112946_f0330d",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20261014_131132_7196ef",
-      "state": "over"
-    },
-    {
-      "refs": 7,
-      "session_id": "20261015_182157_f3cd84",
       "state": "over"
     },
     {
       "refs": 6,
       "session_id": "20261014_111910_ac695b",
-      "state": "over"
-    },
-    {
-      "refs": 6,
-      "session_id": "20261015_204022_7cfad0",
-      "state": "over"
-    },
-    {
-      "refs": 6,
-      "session_id": "20261016_202615_aad5bd",
       "state": "over"
     },
     {
@@ -379,11 +270,6 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 5,
-      "session_id": "20261014_114505_fc2dbe",
-      "state": "at_cap"
-    },
-    {
-      "refs": 5,
       "session_id": "local-50c1d9716d466d99ecc767e092a1dbc195c449055efb3791be9d5b2c5787e9c2",
       "state": "at_cap"
     }
@@ -391,22 +277,22 @@ window.HIST_SESSION_CAP = {
   "window": {
     "days": 30,
     "kind": "filename_date",
-    "start": "20261015"
+    "start": "20261016"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 2999.959537106933,
-      "first_pass_rate": 0.29545454545454547,
-      "n": 132,
-      "round_mean": 2.5454545454545454
+      "duration_mean": 4540.052034729618,
+      "first_pass_rate": 0.3474576271186441,
+      "n": 118,
+      "round_mean": 2.635593220338983
     },
     "recent": {
-      "duration_mean": 1820.4635322374456,
-      "first_pass_rate": 0.17647058823529413,
-      "n": 17,
-      "round_mean": 1.1176470588235294
+      "duration_mean": 0.0,
+      "first_pass_rate": 0.0,
+      "n": 1,
+      "round_mean": 0.0
     }
   },
   "offwindow": {
