@@ -1514,6 +1514,71 @@ XSS：三笔代码笔的变更面 `innerHTML|outerHTML|insertAdjacentHTML|docume
 **推送：PASS ⇒ 本轮 push**。起点 ahead=2（`e6d0106` + `0be6323` 两笔数据笔，安全面无阻断），按 prompt「推送所有本地待推送 commit」要求一并推送：先 path-scoped commit 审计 2 文件（本文件 + `.review-level.yaml`），再 ff-only `git push`，三验（`rev-parse HEAD` == `origin/main`、`ls-remote origin main` 同值、工作树干净）。**待确认 0 项。**
 ---
 
+## 2026-11-15 — 夜间 L2 全项目安全审查（cron 21:50 班次）｜`data@update` 笔夹带 bmi-tracker.html 整篇结构重写 → 新增 `JT-SEC-029`（localStorage 守卫移除 ⇒ 返回访客整页空白，线上已生效）→ PASS 95
+
+- **review者**: Security Reviewer（review profile，cron 夜间班次；无用户在场，按 prompt 自主执行）
+- **范围**: `origin/main = 3d6217b`（`git ls-remote` 实测），本地 HEAD = `3d6217b`，**ahead 0 / behind 0**，`git status --short` 空；相对上轮审计笔 `e79e00e` 新增 **2 笔** = `3255953` + `3d6217b`（均 `data@update: daily-tracker 11-15`）；聚合 **2 文件 +315/−265**（`bmi-tracker.html` +314/−264 为主体，`daily-tracker-archive-202607-202610.html` +1/−1 纯文案），`--diff-filter=ADR` 空，tracked 86 文件；单日志口径不新建 `documents/reviews/` 件。
+- **Tracking**: 新增 **JT-SEC-029**（🟡 MEDIUM P1）；JT-SEC-019 / 020 / 022 / 023（🟢 LOW）结转 OPEN（019 / 020 本轮各面扩 1 处）；JT-SEC-021 / 024 / 025 / 026 / 027 / 028 复核仍 CLOSED
+- **状态**: ✅ PASS（**95 / 100**，Rating A；🔴 0 / 🟡 1 / 🟢 4 结转）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告
+- **实现 prompt**: ⬜ 无需生成（夜间复审计，非设计评审）
+
+### 发现摘要
+
+**口径纠正（本轮最重要的一条）**：`data@update:` 前缀**不再等于纯数据笔**。被审 2 笔中 `3d6217b` 把 `bmi-tracker.html` 由「归档单页」整篇替换为「四页签门户页」（today / omad / faq / refs），+314/−264、新增 6 处函数与 2 套 Chart.js 渲染逻辑。按既有纪律逐行审计，**不以前缀判 SKIP**。
+
+**① JT-SEC-029 🟡 MEDIUM P1 —— localStorage 白名单守卫被移除（`DT-SEC-038` 同类回归）**
+
+- **现状**（`bmi-tracker.html:558-559`）：`var saved = localStorage.getItem('dt_active_tab'); if(saved && saved !== 'today') switchTab(saved);` —— 旧版此处为 `saved!=='archived' && saved!=='omad'` 白名单归一（旧文件注释自述 `DT-SEC-038`），**新版本把守卫整条删掉**，只剩一条等值判断。
+- **汇点**（`:511-514`）：`querySelector('.tab-btn[onclick*="'+name+'"]').classList.add('active')` 与 `getElementById('tab-'+name).classList.add(...)` —— `name` 未经校验直拼 CSS 选择器，`.classList` 无空值防护。
+- **可达性（真实浏览器实测，非静态推断）**：上一版页面自身写入的 `dt_active_tab` 值就是 `archived`。置该值后加载本地 8099 副本 ⇒ `switchTab('archived')` 抛 `TypeError: Cannot read properties of null (reading 'classList')`；因 `:511-512` 在抛错**之前**已执行，四块 `.page` 的 `active` 全被摘掉，而 `.page{display:none}` ⇒ **`tab-today` / `tab-omad` / `tab-faq` / `tab-refs` 全部 `display:none` 且 `offsetHeight=0`**；`document.body.innerText` 仅剩 **38 字符**（四个页签标签），体重图 `window._wtChart === undefined`（`:614` 的 `DOMContentLoaded` 注册排在抛错之后，永不执行）。**即返回访客整页空白**；点任一页签可自愈（实测点击后 `tab-today` 显形、chart 归位、`localStorage` 归一为 `today`）。
+- **已在生产生效**：线上 `/bmi-tracker.html` 与本地**逐字节相同**（46916 B，`diff` 空），`:558-559` 同形 ⇒ 不是潜在缺陷，是当前线上缺陷。
+- **安全定级理由**：选择器注入无法执行脚本，`getElementById` 路径亦无原型链污染 ⇒ **无脚本执行、无外发、无凭据面**，不构成 🔴；但「公开页 + 确定性可用性中断 + 显式守卫回归」⇒ 🟡，优先级按 **P1**（建议 24h 内修）。
+- **修法（上游生成器一处）**：`var saved=localStorage.getItem('dt_active_tab'); if(['today','omad','faq','refs'].indexOf(saved)===-1) saved='today';` 并整体 `try{}catch(e){}` 包裹。根因在跨仓 `daily-tracker` 生成器模板；本仓 `bmi-tracker.html` 按 AGENTS.md 属生成物**禁手改** ⇒ 建议以跨仓修法落地，本仓侧仅复审计。
+
+**② 注入面复扫：本轮无新面** —— 315 新增行 `onerror=` / `onload=` / `fetch(` / `XMLHttpRequest` / `eval(` / `new Function` / `document.write` / `innerHTML` / `srcdoc` / `postMessage` **全 0**；`src=` 仅 1 处 = chart.js CDN（SRI 保留）。9 处 `onclick=` 全部字面量（4× `switchTab('<tab>')` + 5× `toggleFaq(this)`），无拼接。新增外链域仅 `cdn.jsdelivr.net` / `github.com` / `www.jaden.tech` / `youtu.be`（占位）⇒ 依赖集无新增 CDN。新增代码输出走 `textContent`（`chev`、`omadTip`、`omadMealTip`）与 Chart.js API，无 HTML 拼装。
+
+**③ 数据面自洽（4 组序列 + 5 项算术全对）** —— 阶段一 `p1lbs/p1wd/p1run/p1pr` 各 **90** 项且 `p1target = Array(90)`；今日 `lbs/wd/run/pr` 各 **37** 项且 `chartTarget = Array(37)`，长度全配对。`71.8−62.35=9.45`（页面 Lost 9.45）✓；`9.45/11.8=80.08%→80%`（页面 80%）✓；`62.35−60.5=1.85`（页面 差 1.85）✓；`62.35−60=2.35`（页面 Need 2.35）✓；`(65−62.36)/5=52.8%→53%`（页面 已达成 53%）✓；`D+36` 与 `Duration 37 days` 满足 `Duration=D++1` ✓；`下个节点 2026-11-15（还 0 天）` 与今日相符 ✓。
+
+**④ 归档页** —— `daily-tracker-archive-202607-202610.html` 唯一改动为 `DT:goalLine` 文案加「（7 日均）」三字，数值口径（63.0 / 63.1 / 38% / 3.1 kg / D+21）全未变，无脚本面变化 ✓。
+
+**凭证扫描 Pass 1-4** —— Pass1 tracked 凭证类文件（env / 私钥 / 证书 / keystore）**0 件**；Pass2 宽词在非文档面仅命中 `TOKENS` 卡片名与 index.html 注释散文（逐行核实为误报）；Pass3 本轮 315 新增行：密钥前缀 **0** / 家目录前缀 **0** / 用户名 **0** / 内网目录名 **0** / 邮箱 **0** / 手机号 **0** / XSS sink **0**；Pass4 `git log -p e79e00e..HEAD` 密钥模式 **0**。
+
+**Git 历史** —— `git rev-list origin/main --objects` 文档型对象（pdf/docx/xlsx/pptx/zip/rar/7z/p12/pem/key）**0 个**；`--all` 口径简历足迹 **0**；`ls-remote origin` 仅 `refs/heads/main = 3d6217b` 单 ref（本地 gh-pages / master / quarantine 未上传 ⇒ 非公开面）。
+
+**控制集无回归** —— `referrer` meta **6/6**（index / wechat / bmi / archive / daily-poetry / tokens）；chart.js@4.4.7 SRI `integrity="sha384-vsrfe…"` + `crossorigin` 在 bmi 与 archive 各 1 套仍在；`noopener` 配对：bmi `target="_blank"` 4 与 `noopener` 4 **1:1 全覆盖**，index 6 / poetry 1 / tokens 1 / archive 1；`bmi-tracker.html` `innerHTML` **0**；`?t=` 全仓 7 处同值 `1794394182`。
+
+**门禁（实跑）** —— `python3 scripts/perf-check.py` ⇒ **28 项全 PASS rc=0**；`python3 scripts/portal-check.py --mode post` ⇒ **15/15 rc=0**；`--selftest` ⇒ **17/17 rc=0**；`python3 scripts/timestamp-manager.py check` ⇒ 同值 `1794394182` rc=0。
+
+**门禁盲区（记录，非新发现）** —— 两颗钉子只校验 `index.html` / `wechat.html`，**对 `bmi-tracker.html` 零断言** ⇒ 本轮那处整页空白能一路绿灯上线，属门禁口径缺口；建议后续补一条最小冒烟（陈旧 `dt_active_tab` 下首屏可见面板数 ≥ 1）。
+
+**线上面（实测）** —— `/` **200**、`/bmi-tracker.html` **200**（46916 B，与本地 `diff` 空）；`/daily-tracker.html` ⇒ **503**（2026-09-06 已改名，见观察项 O4）。
+
+**观察项（不计发现）** ——
+O1 `javascript:` URL 回归 4 处（`:234` / `:310` / `:472` / `:496`，均为 `switchTab(...)` **活链**、无污点源）⇒ 属 JT-SEC-021 同族反模式（CSP 不友好、中键失效），非死链故不重开 021，记 🟢 面向观察。
+O2 版本号披露面扩大：`<title>Daily Tracker · 2.11(20261020)</title>`（原 tokens 页 footer 1.11 为 JT-SEC-019 同族）⇒ 归 019 🟢 面扩，不新开号。
+O3 公开页出现内部仓路径 `documents/references/faq-comprehensive-v2.1-20261025.md`（`:468`；该文件在仓内**不存在**，`documents/references/` 为空）⇒ 归 JT-SEC-020 🟢 面扩 + 悬空引用。
+O4 死链 5 处：`https://www.jaden.tech/daily-tracker.html` × 1（实测 503）+ `https://youtu.be/example` × 4（占位域名，`curl` 000）⇒ 🟢 文案面。
+O5 `AGENTS.md:9` 仍称 `bmi-tracker.html` 为「DailyTracker archive page」，且未列 `daily-tracker-archive-202607-202610.html` ⇒ 与今日实际结构相反（现为四页签门户页）⇒ 🟢 文档漂移，建议下一笔 docs 修正并把归档页补进 Pages 列表。
+O6 chart.js 的 `defer` 属性被移除（`:9`）⇒ 头部阻塞外部脚本，性能面非安全面。
+O7 `DT:goalLine` 在 bmi 页改名为 `DT:todaySub`（归档页仍保留 `DT:goalLine`）⇒ 若上游生成器仍按旧锚点回填会 miss，属工程契约面，建议跨仓确认。
+O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与上轮同（无回归）。
+
+### 发现表
+
+| # | Level | ID | 标题 | 状态 |
+|:-:|:--|:--|:--|:--|
+| 1 | 🟡 MEDIUM | **JT-SEC-029** | `bmi-tracker.html:558` localStorage 白名单守卫移除 ⇒ 陈旧值 `archived` 致四页签全 `display:none`、整页空白（线上已生效） | **OPEN（新，P1）** |
+| 2 | 🟢 LOW | **JT-SEC-019** | 版本号披露（tokens footer 1.11 + 本轮新增 bmi `<title>` 2.11） | OPEN（面扩 1 处） |
+| 3 | 🟢 LOW | **JT-SEC-020** | 公开页内部路径披露（本轮新增 `documents/references/**` 悬空引用） | OPEN（面扩 1 处） |
+| 4 | 🟢 LOW | **JT-SEC-022** | `TODO-handoff.md` 公开仓路径与 branch | OPEN 无变化 |
+| 5 | 🟢 LOW | **JT-SEC-023** | `live.js` 数据面内部语义披露 | OPEN 无变化 |
+| — | 🟡/🔴 | **JT-SEC-021 / 024 / 025 / 026 / 027 / 028** | FAQ `javascript:` 死链 / 各类已修项 | **✅ 仍 CLOSED**（本轮独立复核：`javascript:` 死链 0 —— 4 处为活链；公开仓简历 PDF 与 blob 全 404；rewrite-backup 仅存 post-rewrite 干净件；文档型对象 0） |
+
+计分：**100 − 5（JT-SEC-029 🟡）= 95 / 100 → A → PASS**（🟢 4 项结转不计扣分）。
+
+**推送：PASS ⇒ 本轮 push**。起点 ahead=0（无他线待推笔），path-scoped commit 审计 2 文件（本文件 + `.review-level.yaml`）后 ff-only 推送，三验（`rev-parse HEAD` == `origin/main`、`ls-remote origin main` 同值、工作树干净）。**待确认 1 项：JT-SEC-029 修法落点 —— 建议走跨仓 `daily-tracker` 生成器模板（本仓为生成物禁手改），是否照此执行。**
+
 ---
 
 ## 条目格式说明
