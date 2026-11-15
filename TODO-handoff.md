@@ -12,7 +12,7 @@
 ## 二、基线（人工维护）
 
 - 仓: `~/CodeSpace/www.jaden.tech` · branch `main`
-- 本地 HEAD: `c87a4bb`+amend（JT-CL005 设计件）· `origin/main` = `69ebf7d` · ahead = 1
+- 本地 HEAD: `1a89fdc`（029 复验取证）· `origin/main` = `69ebf7d` · ahead = **2**（`77ee77d` 设计件 + `1a89fdc` 复验取证，均未推）
 - 🆕 **2026-11-15 23:15 落地 JT-CL005 设计件**：`documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md`（门户同步面契约化：`config/sync-manifest.json` 单文件 + 产物内注释戳 + `sync-check.py` + `sync-status.html` + push→pull 模型）。三仓只读核对结论：daily-tracker **无 CLI**（monolithic，直写本仓 + 内部 commit + `_SITE_NIGHT_SLOT=(21,45)`）、script-miner **已有** `daily-poetry.py deploy --target`、hermes-manager 为壳/数据分离契约（CL039/CL058，双哨兵）
 - ✅ **`JT-SEC-029` 已由上游修复并上线**（2026-11-15 22:54/22:56 两次重渲，`b35ff95`/`69ebf7d`）：daily-tracker 源码 3146–3160 行 `_MIRROR_RESTORE_TAB_JS` 只恢复本页确实存在的 tab（含 `getElementById` 检查 + `removeItem`）；真机对照实测 —— `archived` 陈旧值下 **修复前**：四页签全 `display:none`、`bodyText` 38 字符、`_wtChart` undefined（=review 报的空白）；**修复后**：`localStorage` 归一 `null`、`tab-today` 可见、1005 字符、chart `object`；`omad`/`faq`/`junk-tab` 三档均安全。线上与本地 sha256 一致 `82c6488e…`（47283 B）⇒ 线上缺陷已消除，**待 review 下轮 L2 复核关号**（本会话不自行关号）
 - 同轮复核：`JT-SEC-028` ✅ CLOSED（bundle 已删）；`JT-SEC-019/020/022/023` 🟢 结转
@@ -32,12 +32,16 @@
 
 ### 待审计 commit 清单
 
-**无**（截至 `c7590d1` 全部已推，`ahead = 0`）。本会话上线笔（供复查定位）：`7ef4d93` LQIP → `05d55c7` handoff → `ef703df` tokens 镜像 → `76c8aae` 报告 §七 → `3dc43dd` review L2 → `c7590d1` gitee 对齐记账。
+| 待审计笔 | 内容 | 复审面 | 前置 / 连带 |
+|:--|:--|:--|:--|
+| `77ee77d` `docs@design: JT-CL005 sync-manifest contract v1.0` | 新增同步面契约设计件（§一实测测绘 + §三架构 + §六判据 + §八 pull 迁移 + §九 D1–D9 决策 + §十验收） | `documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md`（157 行）+ `TODO-handoff.md` | 无实现面；纯设计件，无运行时风险 |
+| `1a89fdc` `docs@handoff: JT-SEC-029 verified fixed upstream (live sha match) + design case note` | 029 复验取证（真机对照：修复前 38 字符/chart undefined → 修复后 1005 字符/chart object）+ 设计件补实证案由 | `TODO-handoff.md`、设计件 §一；**证据源** `cache/scratch/sec029/bmi-old.html`（gitignored） | 建议 review 同轮复核并把 `JT-SEC-029` 关号（线上 sha `82c6488e…` = 本地） |
 
-- 明早串行序：只剩一条
-  ① `待开（sec-028）` — review 21:50 夜间轮新开的「本地 PII bundle」项**已滞后**：该 bundle 2026-11-11 21:00 已删，`~/CodeSpace/cache/rewrite-backup/` 现仅剩 post-rewrite（clone 验证 resume 对象 0）⇒ 只需 review 下轮核验后关号，**无需实施动作**
-- 明早首跑：`python3 scripts/portal-check.py --mode post`（15/15）+ `--selftest`（17/17）+ `python3 scripts/perf-check.py`（28 PASS / rc=0）+ `python3 cache/scratch/raw-pii-probe.py`（期望 `rc=0`，防回流；`rc=3` = 对照组不通，无结论不算通过）
-- 放行口径：review PASS 后 `git push origin HEAD:main`（**ff-only**；新库已就位，无需任何 force）
+- 明早串行序（两条，顺序有依赖）
+  ① **派 review 评审 + push 这 2 笔**（顺带复核 `JT-SEC-029` 关号：线上/本地 sha256 一致、四档陈旧值真机实测均无空白）
+  ② `待开（sync-manifest）` — JT-CL005 P2 实施：`config/sync-manifest.json`（5 条）+ `scripts/sync-check.py`（rc 0/1/2/3）+ `scripts/sync-run.py` + 给 tokens-tracker / poetry-titles 补 SYNC 戳；判据见设计件 §十
+- 明早首跑：`python3 scripts/portal-check.py --mode post`（15/15）+ `--selftest`（17/17）+ `python3 scripts/perf-check.py`（28 PASS / rc=0）+ `python3 cache/scratch/raw-pii-probe.py`（期望 `rc=0`）
+- 放行口径：review PASS 后 `git push origin HEAD:main`（**ff-only**）；`JT-SEC-029` 由 review 关号，本会话不自行关
 
 ### 其他
 
