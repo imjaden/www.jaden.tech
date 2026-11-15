@@ -5,10 +5,9 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
-<title> BWH / BMI Tracker · 2026-07 ~ present</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous" defer></script>
+<title>Daily Tracker · 2.11(20261020)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous"></script>
 <style>
-
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d1117;color:#e6edf3;line-height:1.7}
 .tab-bar{background:#161b22;border-bottom:1px solid #30363d;max-width:1060px;margin:0 auto;display:flex;gap:0;position:sticky;top:0;z-index:100}
@@ -171,250 +170,71 @@ h2{font-size:14px}
 .badge-yellow{background:none;border:1px solid currentColor}
 summary .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px}
 /* ── end CL068 ── */
-
-/* ── archive-extra: Archived tab 补充（portal style 之外）── */
-/* CL063：阶段百叶窗（站点/归档页共用） */
-.phase-panel{border:1px solid #30363d;border-radius:12px;margin:14px 0;background:#0f141b;overflow:hidden}
-.phase-panel>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  padding:14px 16px;font-size:15px;color:#f0f6fc;background:#161b22;border-bottom:1px solid transparent}
-.phase-panel>summary::-webkit-details-marker{display:none}
-.phase-panel>summary::before{content:"▶";font-size:10px;color:#8b949e;transition:transform .15s}
-.phase-panel[open]>summary::before{transform:rotate(90deg)}
-.phase-panel[open]>summary{border-bottom-color:#30363d}
-.pp-key{font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;color:#7ee787;
-  background:rgba(126,231,135,.12);border:1px solid rgba(126,231,135,.35);padding:4px 7px;border-radius:6px}
-.pp-name{font-weight:600}
-.pp-range{margin-left:auto;font-size:11.5px;color:#8b949e}
-.pp-body{padding:14px 16px 6px}
-.goal-bar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px}
-.goal-chip{flex:1 1 180px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
-.goal-chip .gk{font-size:11px;color:#8b949e}
-.goal-chip .gv{font-size:16px;font-weight:600;color:#e6edf3}
-.goal-chip .gn{font-size:11px;color:#7ee787}
-.bwh-bar{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;background:#161b22;border:1px dashed #30363d;
-  border-radius:10px;padding:9px 12px;margin:0 0 12px;font-size:12.5px}
-.bwh-bar .bwh-k{font:600 11px/1 ui-monospace,monospace;letter-spacing:.06em;color:#58a6ff}
-.bwh-bar .bwh-v{color:#e6edf3}
-.bwh-bar .bwh-t{margin-left:auto;color:#8b949e;font-size:11.5px}
-table.p1sum{width:100%;border-collapse:collapse;margin:0 0 8px;font-size:13px}
-table.p1sum td{padding:6px 8px;border-bottom:1px solid #21262d}
-table.p1sum td.k{color:#8b949e;width:88px}
-table.p1sum td.v{color:#e6edf3}
-/* CL068：站点同样收敛到 ≤14px + badge 去背景 */
-h1{font-size:14px;font-weight:700;letter-spacing:.2px}
-h2{font-size:14px}
-.card .value{font-size:14px}
-.pp-name{font-size:14px}
-.phase-panel>summary{font-size:14px}
-.goal-chip .gv{font-size:14px}
-.p1-bar .goal-chip{flex:1 1 150px}
-.badge-green{background:none;border:1px solid currentColor}
-.badge-blue{background:none;border:1px solid currentColor}
-.badge-yellow{background:none;border:1px solid currentColor}
-summary .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px}
-@media print{details.phase-panel>summary::before{content:""}
-  details.phase-panel>.pp-body{display:block !important}}
-.sub{margin-bottom:3px}
-/* CL033：portal style 提取失败时兜底（与 portal 同值，层叠无害） */
-.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem;margin:.75rem 0}
-.meta-item{padding:.5rem .75rem;background:#222326;border-radius:6px;font-size:.85rem}
-.meta-item strong{color:#888;margin-right:.5rem}
-.progress-bar{height:6px;background:#21262d;border-radius:4px;margin:.5rem 0;overflow:hidden}
-.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#7ee787,#58a6ff);transition:width .5s}
-
-.github-corner{position:fixed;top:0;right:0;z-index:999;width:72px;height:72px}
-.github-corner svg{fill:#fff;color:#151b23;position:absolute;top:0;border:0;right:0}
-.github-corner:hover svg{filter:drop-shadow(0 0 8px rgba(96,165,250,.5))}
-.github-corner .octo-arm{transform-origin:130px 106px}
-.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}
-@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}
-@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}}
-.tab-bar a.tab-btn{text-decoration:none}
 </style>
 </head>
 <body>
-<a href="https://github.com/imjaden" class="github-corner" target="_blank" rel="noopener" aria-label="View source on Github"><svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" fill="#ffffff"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
 
 <div class="tab-bar">
-  <a class="tab-btn" href="./index.html">🏠 首页</a>
-  <button class="tab-btn active" onclick="switchTab('archived')">📊 BMI/BWH</button>
-<button class="tab-btn" onclick="switchTab('omad')">🍽 OMAD</button>
+  <button class="tab-btn active" onclick="switchTab('today')">📊 BMI/BWH</button>
+  <button class="tab-btn" onclick="switchTab('omad')">🍽 OMAD</button>
+  <button class="tab-btn" onclick="switchTab('faq')">❓ FAQ</button>
+  <button class="tab-btn" onclick="switchTab('refs')">🔗 References</button>
 </div>
 
-<!-- ═══════ ARCHIVED TAB ═══════ -->
+<!-- ═══════ TODAY TAB ═══════ -->
 
-<div id="tab-archived" class="page active">
-<h1>📦 BWH / BMI Tracker · 2026-07 ~ present</h1>
-<!-- DT:goalLine:start --><p class="sub" id="goalLine">🎯 阶段二 减脂期 65→60 kg · 当前 62.35 kg（7 日均值 62.36 kg） · 已达成 53% · 还差 2.36 kg（7 日均） · <strike>阶段一 减重期 71.8→65 kg 已完成（2026-10-10 归档） · 计时 D+36/365 天</strike></p><!-- DT:goalLine:end -->
-<!-- DT:maintainCard:anchor -->
-<p class="sub">数据源 records.json · 生成时间 2026-11-15 · 全量记录 111 条</p>
+<div id="tab-today" class="page active">
+<!-- DT:todaySub:start --><p class="sub" id="todaySub">🎯 阶段二 减脂期 65→60 kg · 当前 62.35 kg（7 日均值 62.36 kg） · 已达成 53% · 还差 2.36 kg（7 日均） · <strike>阶段一 减重期 71.8→65 kg 已完成（2026-10-10 归档） · 计时 D+36/365 天</strike></p><!-- DT:todaySub:end -->
 
-<details id="phase1Panel" class="phase-panel" open>
+<div class="goal-grid">
+  <!-- DT:wtCard:start --><div class="card" id="wtCard"><h3>⚖️ Weight</h3><div class="value green">62.35 <span class="unit">kg</span></div><div class="sub">Target: 60 · Lost: 9.45 kg (80%)</div><div class="bar-wrap"><div class="bar-fill" style="width:80%"></div></div><div class="sub">↓ Need 2.35 kg</div></div><!-- DT:wtCard:end -->
+  <!-- DT:exCard:start --><div class="card" id="exCard"><h3>🏃 Exercise</h3><div class="value blue">Indoor sports</div><div class="sub">跑1休1</div></div><!-- DT:exCard:end -->
+  <!-- DT:habitsCard:start --><div class="card" id="habitsCard"><h3>🔥 Habits</h3><div class="value green">24/30 <span class="unit">days</span></div><div class="sub">🌳✓ 📖✓ 🎓✓ (to 11-15)</div></div><!-- DT:habitsCard:end -->
+  
+</div>
+
+<details id="phase2Panel" class="phase-panel" open>
+  <summary>
+    <span class="pp-key">BWH</span>
+    <span class="pp-name">阶段二 · 减脂增围</span>
+    <span class="badge badge-blue">🔵 进行中</span>
+    <span class="pp-range">2026-10-10 → 目标 60.0 kg</span>
+  </summary>
+  <div class="pp-body">
+    <!-- DT:phase2Goals:start --><div class="goal-bar"><div class="goal-chip"><span class="gk">体重 ≤60.5</span><span class="gv">62.35 kg</span><span class="gn">差 1.85 kg</span></div><div class="goal-chip"><span class="gk">腰围 ≤78</span><span class="gv">80.0 cm</span><span class="gn">差 2.0 cm</span></div><div class="goal-chip"><span class="gk">臂/腿不降</span><span class="gv">臂 26.0 / 腿 50.0</span><span class="gn">28.0 / 50.0 为基准</span></div></div><!-- DT:phase2Goals:end -->
+    <!-- DT:phase2Bwh:start --><div class="bwh-bar"><span class="bwh-k">BWH</span><span class="bwh-v">2026-11-11　腰 80.0 · 臀 84.0 · 胸 89.0 · 臂松 26.0 · 臂紧 27.5 · 腿 50.0 · 小腿 34.5</span><span class="bwh-t">下个节点 2026-11-15（还 0 天）</span></div><!-- DT:phase2Bwh:end -->
+
+<h2>📉 Weight Chart <!-- DT:wtBadge:start --><span class="badge badge-green" id="wtBadge">📈 Trend: -0.07 kg/day</span><!-- DT:wtBadge:end --></h2>
+<div class="chart-wrap"><canvas id="wtChart"></canvas></div>
+
+<h2>🎯 Progress</h2>
+<!-- DT:progressMeta:start --><div class="meta-grid" id="progressMeta"><div class="meta-item"><strong>Start</strong>71.8 kg</div><div class="meta-item"><strong>Current</strong><strong>62.35</strong> kg</div><div class="meta-item"><strong>Lost</strong>9.45 kg (80%)</div><div class="meta-item"><strong>Left</strong>2.35 kg</div><div class="meta-item"><strong>Duration</strong>37 days</div></div><!-- DT:progressMeta:end -->
+<!-- DT:progressFill:start --><div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:80%"></div></div><!-- DT:progressFill:end -->
+<!-- DT:adaptCard:start --><div class="card" id="adaptCard"><h3>🧠 Weight Adaptation <span class="badge badge-blue">🔵 减脂进行中</span></h3><div class="value">D+36 <span class="unit">/ 365 天</span></div><div class="sub">适应期 1/2 · 约 6 个月（180 天）· 还需 329 天 · 适应期 1 完成 2027-04-08</div><div class="bar-wrap"><div class="bar-fill" style="width:9.9%"></div></div><div class="sub">达标后均值 63.3 kg · 波动 ±0.8 · 目标区间 60–66 内 37/37 天 (100%)</div><div class="sub">🔵 阶段二进行中 62.35 kg · 目标 60 kg · 还差 2.35 kg（高于目标区间不算回弹）</div></div><!-- DT:adaptCard:end -->
+
+  </div>
+</details>
+
+<details id="phase1Panel" class="phase-panel">
   <summary>
     <span class="pp-key">BMI</span>
-    <span class="pp-name">Phase 1 · Exercise-driven loss</span>
-    <span class="badge badge-green">✅ Achieved</span>
+    <span class="pp-name">阶段一 · 运动减重</span>
+    <span class="badge badge-green">✅ 已达成（归档）</span>
     <span class="pp-range">2026-07-01 → 2026-10-10</span>
   </summary>
   <div class="pp-body">
-    <div class="goal-bar p1-bar"><div class="goal-chip"><span class="gk">Start</span><span class="gv">71.8 kg</span><span class="gn">2026-07-01</span></div><div class="goal-chip"><span class="gk">End</span><span class="gv">65.0 kg</span><span class="gn">7-day mean hit 2026-10-10</span></div><div class="goal-chip"><span class="gk">Span</span><span class="gv">101 days</span><span class="gn">14.4 weeks</span></div><div class="goal-chip"><span class="gk">Loss</span><span class="gv">−6.8 kg</span><span class="gn">0.47 kg/week</span></div><div class="goal-chip"><span class="gk">BMI</span><span class="gv">24.84 → 22.49</span><span class="gn">1.70 m</span></div><div class="goal-chip"><span class="gk">Lowest</span><span class="gv">64.56 kg</span><span class="gn">2026-10-09</span></div></div>
-    <h2>📅 Monthly Summary</h2>
-    <div class="goal-grid">
-<div class="card"><h3>📅 Jul</h3><div class="value green">22 <span class="unit">记录</span></div><div class="sub">范围 07-04 ~ 07-31 · 运动 21 天</div><div class="sub">起始 70.8 kg · 月末 71.3 kg</div><div class="sub">最低 68.5 kg · 最高 71.3 kg</div><div class="sub">跑量 114.1 km</div><div class="sub">净变化 +0.5 kg</div></div>
-<div class="card"><h3>📅 Aug</h3><div class="value green">29 <span class="unit">记录</span></div><div class="sub">范围 08-01 ~ 08-31 · 运动 27 天</div><div class="sub">起始 70.6 kg · 月末 67.7 kg</div><div class="sub">最低 67.7 kg · 最高 70.6 kg</div><div class="sub">跑量 142.6 km</div><div class="sub">净变化 -2.9 kg</div></div>
-<div class="card"><h3>📅 Sep</h3><div class="value green">29 <span class="unit">记录</span></div><div class="sub">范围 09-01 ~ 09-30 · 运动 27 天</div><div class="sub">起始 67.5 kg · 月末 65.81 kg</div><div class="sub">最低 65.42 kg · 最高 67.73 kg</div><div class="sub">跑量 152.1 km</div><div class="sub">净变化 -1.69 kg</div></div>
-<div class="card"><h3>📅 Oct</h3><div class="value green">31 <span class="unit">记录</span></div><div class="sub">范围 10-01 ~ 10-31 · 运动 29 天</div><div class="sub">起始 65.85 kg · 月末 63.0 kg</div><div class="sub">最低 62.9 kg · 最高 65.9 kg</div><div class="sub">跑量 214.5 km</div><div class="sub">净变化 -2.85 kg</div></div>
-    </div>
-
-    <h2>📉 Weight / Running Curve</h2>
-    <div class="chart-wrap"><canvas id="wtChart"></canvas></div>
-
-    <h2>🎯 Progress</h2>
-<!-- DT:progressMeta:start --><div class="meta-grid" id="progressMeta"><div class="meta-item"><strong>Start</strong>71.8 kg</div><div class="meta-item"><strong>Current</strong><strong>62.35</strong> kg</div><div class="meta-item"><strong>Lost</strong>9.45 kg (80%)</div><div class="meta-item"><strong>Left</strong>2.35 kg</div><div class="meta-item"><strong>Duration</strong>37 days</div></div><!-- DT:progressMeta:end -->
-<!-- DT:progressFill:start --><div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:80%"></div></div><!-- DT:progressFill:end -->
+    <!-- DT:phase1Summary:start --><div class="goal-bar p1-bar"><div class="goal-chip"><span class="gk">起点</span><span class="gv">71.8 kg</span><span class="gn">2026-07-01</span></div><div class="goal-chip"><span class="gk">终点</span><span class="gv">65.0 kg</span><span class="gn">7 日均值达标 2026-10-10</span></div><div class="goal-chip"><span class="gk">历时</span><span class="gv">101 天</span><span class="gn">14.4 周</span></div><div class="goal-chip"><span class="gk">减重</span><span class="gv">−6.8 kg</span><span class="gn">0.47 kg/周</span></div><div class="goal-chip"><span class="gk">BMI</span><span class="gv">24.84 → 22.49</span><span class="gn">身高 1.70 m</span></div><div class="goal-chip"><span class="gk">最低</span><span class="gv">64.56 kg</span><span class="gn">2026-10-09</span></div></div><!-- DT:phase1Summary:end -->
+    <h2>📉 Weight Chart <span class="badge badge-green">阶段一全程</span></h2>
+    <div class="chart-wrap"><canvas id="wtChart1"></canvas></div>
   </div>
 </details>
 
-<details id="phase2Panel" class="phase-panel">
-  <summary>
-    <span class="pp-key">BWH</span>
-    <span class="pp-name">Phase 2 · Fat loss &amp; measurements</span>
-    <span class="badge badge-blue">🔵 In progress</span>
-    <span class="pp-range">2026-10-10 → target 60.0 kg</span>
-  </summary>
-  <div class="pp-body">
-    <div class="goal-bar"><div class="goal-chip"><span class="gk">Weight ≤60.5</span><span class="gv">62.35 kg</span><span class="gn">1.85 kg to go</span></div><div class="goal-chip"><span class="gk">Waist ≤78</span><span class="gv">80.0 cm</span><span class="gn">2.0 cm to go</span></div><div class="goal-chip"><span class="gk">Arms/thighs held</span><span class="gv">arm 26.0 / thigh 50.0</span><span class="gn">baseline 28.0 / 50.0</span></div></div>
-    <div class="bwh-bar"><span class="bwh-k">BWH</span><span class="bwh-v">2026-11-11　waist 80.0 · hip 84.0 · chest 89.0 · arm-relaxed 26.0 · arm-flexed 27.5 · thigh 50.0 · calf 34.5</span><span class="bwh-t">next checkpoint 2026-11-15 (in 0 days)</span></div>
-    <p class="sub">Daily metrics live in the local DailyTracker panel; this page is the archive face and keeps only phase targets and the latest measurement.</p>
-  </div>
-</details>
 
-<details id="recordsPanel" class="phase-panel">
-  <summary>
-    <span class="pp-key">📋</span>
-    <span class="pp-name">All Records</span>
-    <span class="pp-range">111 rows · date desc</span>
-  </summary>
-  <div class="pp-body">
-<h2 style="display:none">📋 All Records (111 rows · date desc)<span class="toggle" onclick="tbl=document.getElementById('archiveTbl');tbl.classList.toggle('collapse');this.textContent=tbl.classList.contains('collapse')?'▶ expand':'▼ collapse'">▶ expand</span></h2>
-<table id="archiveTbl" class="collapse"><thead><tr><th>Date</th><th>Weight</th><th>Exercise</th><th class="center">🌳</th><th class="center">📖</th><th class="center">🎓</th></tr></thead><tbody>
-<tr><td>10-31</td><td class="num">63.0</td><td>running 6.10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-30</td><td class="num">63.1</td><td>running 6.10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-29</td><td class="num">63.3</td><td>running 5.60km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-28</td><td class="num">62.9</td><td>running 5.15km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-27</td><td class="num">63.0</td><td>running 10.71km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-26</td><td class="num">63.4</td><td>running 5.37km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-25</td><td class="num">63.0</td><td>running 11.22km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-24</td><td class="num">63.3</td><td>running 6.10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-23</td><td class="num">63.8</td><td>-</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-<tr><td>10-22</td><td class="num">63.2</td><td>running 6.09km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-21</td><td class="num">63.4</td><td>running 6.10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-20</td><td class="num">63.9</td><td>running 6.09km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-19</td><td class="num">63.6</td><td>running 6.10km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-18</td><td class="num">63.8</td><td>running 12.22km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-17</td><td class="num">64.0</td><td>running 6.09km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-16</td><td class="num">63.8</td><td>running 10.02km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-15</td><td class="num">63.8</td><td>running 6.192km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-14</td><td class="num">64.3</td><td>running 6.09km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-13</td><td class="num">65.2</td><td>running 5.55km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-12</td><td class="num">65.02</td><td>-</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-<tr><td>10-11</td><td class="num">65.21</td><td>running 6.9km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-10</td><td class="num">64.89</td><td>running 5.6km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-09</td><td class="num">64.56</td><td>running 10.39km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-08</td><td class="num">64.9</td><td>running 5.65km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-07</td><td class="num">65.1</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-06</td><td class="num">65.25</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-05</td><td class="num">64.9</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-04</td><td class="num">65.3</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-03</td><td class="num">65.25</td><td>running 13km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>10-02</td><td class="num">65.9</td><td>running 10.4km</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-<tr><td>10-01</td><td class="num">65.85</td><td>running 15.3km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-30</td><td class="num">65.81</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-29</td><td class="num">65.42</td><td>running 5.23km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-28</td><td class="num">65.72</td><td>running 5.55km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-27</td><td class="num">66.46</td><td>running 5.4km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-26</td><td class="num">66.62</td><td>running 8.08km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-25</td><td class="num">66.62</td><td>running 7.05km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-24</td><td class="num">66.95</td><td>running 5.26km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-23</td><td class="num">67.15</td><td>running 5.56km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-22</td><td class="num">66.95</td><td>running 5.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-21</td><td class="num">66.95</td><td>running 6.09km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-20</td><td class="num">67.73</td><td>running 6.36km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-18</td><td class="num">66.69</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-17</td><td class="num">66.69</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-16</td><td class="num">66.93</td><td>-</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-<tr><td>09-15</td><td class="num">67.1</td><td>-</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-<tr><td>09-14</td><td class="num">67.3</td><td>running 5.61km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-13</td><td class="num">67.6</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-12</td><td class="num">67.6</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-11</td><td class="num">67.6</td><td>running 6.67km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-10</td><td class="num">67.2</td><td>running 5.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-09</td><td class="num">66.9</td><td>running 6.1km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-08</td><td class="num">67.1</td><td>running 7km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-07</td><td class="num">66.6</td><td>running 5.25km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-06</td><td class="num">66.8</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-05</td><td class="num">66.9</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-04</td><td class="num">66.7</td><td>running 5.25km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-03</td><td class="num">66.8</td><td>running 6.19km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-02</td><td class="num">67.0</td><td>running 3.82km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>09-01</td><td class="num">67.5</td><td>running 5.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-31</td><td class="num">67.7</td><td>running 5.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-30</td><td class="num">68.2</td><td>running 5.25km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-29</td><td class="num">68.4</td><td>running 5.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-28</td><td class="num">68.4</td><td>-</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-<tr><td>08-27</td><td class="num">68.1</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-26</td><td class="num">68.0</td><td>running 5.12km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-25</td><td class="num">69.0</td><td>running 10.16km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-24</td><td class="num">69.2</td><td>running 5.25km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-23</td><td class="num">68.8</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-22</td><td class="num">68.9</td><td>running 3.16km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-21</td><td class="num">69.0</td><td>running 5.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-20</td><td class="num">69.3</td><td>running 2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-19</td><td class="num">69.6</td><td>running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-18</td><td class="num">70.3</td><td>running 7.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-17</td><td class="num">-</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-14</td><td class="num">68.8</td><td>-</td><td class="center check">✅</td><td class="center check">✅</td><td class="center empty">-</td></tr>
-<tr><td>08-13</td><td class="num">68.4</td><td>running 5.20km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-12</td><td class="num">68.9</td><td>running 5.20km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-11</td><td class="num">69.6</td><td>running 5.20km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-10</td><td class="num">70.3</td><td>running 5.25km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-09</td><td class="num">69.3</td><td>running 5.2km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-08</td><td class="num">69.6</td><td>running 5.05km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-07</td><td class="num">69.6</td><td>running 6.96km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-06</td><td class="num">70.0</td><td>running 5.3km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-05</td><td class="num">69.7</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-04</td><td class="num">69.7</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-03</td><td class="num">70.1</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-02</td><td class="num">70.2</td><td>running 5.1km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>08-01</td><td class="num">70.6</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-31</td><td class="num">71.3</td><td>running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-30</td><td class="num">-</td><td>running 5km</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-<tr><td>07-23</td><td class="num">69.0</td><td>-</td><td class="center empty">-</td><td class="center empty">-</td><td class="center empty">-</td></tr>
-<tr><td>07-22</td><td class="num">68.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-21</td><td class="num">68.5</td><td>Running 7.21km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-20</td><td class="num">68.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-19</td><td class="num">69.1</td><td>Running 6km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-18</td><td class="num">69.1</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-17</td><td class="num">69.2</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-16</td><td class="num">69.4</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-15</td><td class="num">69.5</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-14</td><td class="num">69.6</td><td>Indoor sports</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-13</td><td class="num">70.2</td><td>Running 5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-12</td><td class="num">69.7</td><td>Indoor sports</td><td class="center check">✅</td><td class="center empty">-</td><td class="center check">✅</td></tr>
-<tr><td>07-11</td><td class="num">69.9</td><td>跑步10KM</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-10</td><td class="num">70.0</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-09</td><td class="num">70.3</td><td>跑步7.41km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-08</td><td class="num">69.7</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-07</td><td class="num">70.0</td><td>跑步3.5km</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-06</td><td class="num">70.3</td><td>下肢锻炼</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-05</td><td class="num">70.4</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-<tr><td>07-04</td><td class="num">70.8</td><td>跑步5k</td><td class="center check">✅</td><td class="center check">✅</td><td class="center check">✅</td></tr>
-</tbody></table>
-  </div>
-</details>
 
-<div class="footer">DailyTracker Archive · Generated by Personal Assistant</div>
+<!-- DT:dtFooter:start --><div class="footer" id="dtFooter">DailyTracker · 2026-11-15 · <a href="javascript:switchTab('omad')">🍽 OMAD 计划</a> · <a href="javascript:switchTab('faq')">❓ FAQ</a> · 逐日明细见站点 BWH/BMI 页</div><!-- DT:dtFooter:end -->
 </div>
+
+<!-- ═══════ OMAD TAB ═══════ -->
 
 <div id="tab-omad" class="page">
 <h1>🍽 OMAD + Home Workout Plan</h1>
@@ -487,33 +307,295 @@ summary .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px
 <li><strong>黑咖啡可空腹喝</strong>：提升运动表现 + 抑制食欲</li>
 <li><strong>青汁粉</strong>：饥饿感时冲 1 杯，填充胃部</li>
 </ul></div>
-<div class="footer">OMAD Plan v1.0 · </div>
+<div class="footer">OMAD Plan v1.0 · <a href="javascript:switchTab('faq')">❓ FAQ</a></div>
 </div>
 
 <!-- ═══════ FAQ TAB ═══════ -->
 
+<div id="tab-faq" class="page"><!-- CL041：FAQ 为 portal-only 发布面；站点页 bmi-tracker.html 不含 FAQ（有意为之，勿当同步遗漏） -->
+<h1>❓ FAQ — Weight Loss & Diet</h1>
+<p class="sub">持续更新 · 每个问题有编号 · v2.1（2026-10-25） · 点击问题可折叠／展开</p>
 
+<div class="faq-q">
+  <div class="q" style="cursor:pointer" onclick="toggleFaq(this)"><span class="chev" style="float:right;color:#8b949e;font-size:11px">▶</span><span class="num">#001</span> 饥饿感时推荐吃的顺序是什么？</div>
+  <div class="a collapse">
+    <p>原则：热量密度从低到高，蛋白收尾。</p>
+    <table style="font-size:12px;margin:8px 0"><thead><tr><th>顺序</th><th>食物</th><th>理由</th></tr></thead><tbody>
+    <tr><td>①</td><td>黄瓜 🥒</td><td>几乎 0 热量，水分填胃</td></tr>
+    <tr><td>②</td><td>西红柿 🍅</td><td>低热量 + 纤维，酸甜解馋</td></tr>
+    <tr><td>③</td><td>彩椒（红/黄）🫑</td><td>约 26 kcal/100g，脆甜口感 + 维 C 高（约 128mg/100g）</td></tr>
+    <tr><td>④</td><td>煮胡萝卜 🥕</td><td>纤维 + 微甜，比生吃更饱</td></tr>
+    <tr><td>⑤</td><td>煮鸡蛋蛋白 🥚</td><td>约 10g 蛋白，开始给饱腹信号</td></tr>
+    <tr><td>⑥</td><td>酱牛肉／卤鸡腿 🥩</td><td>高蛋白，最高饱腹感</td></tr>
+    <tr><td>⑦</td><td>香蕉 🍌</td><td>约 90 kcal／根，快碳 + 钾，够顶饿</td></tr>
+    <tr><td>⑧</td><td>煮红薯 🍠</td><td>慢碳，只有真的还饿才吃</td></tr>
+    </tbody></table>
+    <ul>
+      <li><strong>彩椒为什么排在西红柿之后</strong>：约 26 kcal/100g，比熟胡萝卜（约 41 kcal/100g）更低；脆甜口感用来替代「想嚼点东西」，维 C 高。</li>
+      <li><strong>彩椒怎么吃</strong>：洗净切条<b>生吃</b>；炒制会因用油多 90 kcal/10g，不在这个顺序里。</li>
+      <li><strong>彩椒在禁食窗口</strong>：与黄瓜同级，允许 ≤100g 生吃；严格派只喝水也行。</li>
+      <li><strong>香蕉为什么排在红薯前</strong>：一根约 90 kcal，比一个红薯小，还能补钾。真饿到需要碳水时，先吃香蕉。</li>
+      <li><strong>香蕉只在进食窗口吃</strong>：禁食窗口吃香蕉等于破断食。</li>
+      <li><strong>跑步日</strong>：跑前 3 小时吃半根到一根，不要空腹跑前 1 小时吃。</li>
+      <li><strong>禁食窗口饿</strong>：先喝水／黑咖啡／青汁粉，等 10 分钟。</li>
+      <li><strong>仍饿</strong>：吃黄瓜，或喝一杯青汁粉。离窗口不足 1 小时，吃半个蛋白。</li>
+    </ul>
+  </div>
+</div>
+
+<div class="faq-q">
+  <div class="q" style="cursor:pointer" onclick="toggleFaq(this)"><span class="chev" style="float:right;color:#8b949e;font-size:11px">▶</span><span class="num">#002</span> 脂肪、碳水、纤维在排便方面各起什么作用？</div>
+  <div class="a collapse">
+    <p>三者分工不同。OMAD 把食物压到一餐，更要配平。</p>
+    <ul>
+      <li><strong>纤维是主力</strong>：可溶纤维吸水软化粪便。不溶纤维增加体积、促蠕动。</li>
+      <li><strong>来源</strong>：黄瓜、生菜、胡萝卜、红薯（带皮更好）、火龙果、青汁粉。</li>
+      <li><strong>碳水决定含水量</strong>：红薯、果蔬含水高。壮馍、米线、干脆面纤维少，吃多易干硬。</li>
+      <li><strong>减碳要补纤维</strong>：碳水大减时纤维跟着掉，排便次数会变少。</li>
+      <li><strong>脂肪负责润滑</strong>：适量脂肪刺激胆囊收缩与结肠蠕动。长期极低脂反而易便秘。</li>
+      <li><strong>脂肪要小份</strong>：芝麻酱、花生米是脂肪炸弹。靠大量油通便会直接毁掉热量赤字。</li>
+    </ul>
+    <p><strong>本方案实操</strong>：每天喝水 ≥2L，跑后补 500ml。正餐固定 1 根黄瓜 + 生菜不限 + 红薯或火龙果。晨起温水 + 腹部按摩后再如厕。</p>
+    <p><strong>就医线</strong>：持续便秘、腹痛或便血，建议咨询医生。</p>
+  </div>
+</div>
+
+<div class="faq-q">
+  <div class="q" style="cursor:pointer" onclick="toggleFaq(this)"><span class="chev" style="float:right;color:#8b949e;font-size:11px">▶</span><span class="num">#003</span> 减重时如何提升力量？</div>
+  <div class="a collapse">
+    <p>赤字下练力量，目标是把肌肉留住。四条主线：</p>
+    <ul>
+      <li><strong>蛋白打底</strong>：正餐 50g+ 蛋白（牛肉 + 鸡腿 + 鸡蛋）。</li>
+      <li><strong>复合动作为主</strong>：壶铃摇摆（髋铰链）、俯卧撑（推）、单臂划船（拉）、农夫行走（负重走）。</li>
+      <li><strong>渐进超负荷</strong>：每周加 1 组、加 2 次或加一点重量。不要长期停在 4×15。</li>
+      <li><strong>恢复优先</strong>：力量日别空腹，正餐后 2 小时练。总睡眠 7h+。</li>
+    </ul>
+    <p>16 字总结：<strong>蛋白打底、复合为主、渐进加压、睡好恢复</strong>。</p>
+  </div>
+</div>
+
+<div class="faq-q">
+  <div class="q" style="cursor:pointer" onclick="toggleFaq(this)"><span class="chev" style="float:right;color:#8b949e;font-size:11px">▼</span><span class="num">#004</span> 减重达到目标后需要维持多久？（含页面倒计时口径）</div>
+  <div class="a">
+    <p><strong>结论：阶段 1 约 6 个月（180 天）。达标后顺延至累计 12 个月（365 天）。</strong></p>
+    <ul>
+      <li><strong>起算日</strong>：7 日均值首次 ≤65，即 2026-10-10（64.99）。</li>
+      <li><strong>节点</strong>：阶段 1 完成 2027-04-08。总期完成 2027-10-10。</li>
+      <li><strong>快照说明</strong>：以上为 2026-10-20 快照值。起算日若因补录变化，以页面卡片为准。</li>
+      <li><strong>为什么 6→12</strong>：0–3 个月主要是水分与糖原。3–6 个月食欲与代谢重校准。6–12 个月是维持研究里的门槛。</li>
+      <li><strong>页面口径</strong>：D = 渲染日 − 起算日，总期 365 天。回弹只告警，计时不停不重置。目标区间 60–66 kg。</li>
+      <li><strong>两个数字互为校验</strong>：Duration = 达标持续天数。D+ = 已过天数。Duration = D+ + 1。</li>
+      <li><strong>这 12 个月真正起作用</strong>：区间内停留占比、力量每周 2 次、蛋白 1.6 g/kg（约 102 g/日）。</li>
+      <li><strong>热量怎么回调</strong>：每周 +100–150 kcal，直到体重稳定 2–3 周。不要一次加回减脂前的量。</li>
+      <li><strong>监测</strong>：每周固定晨起（排便后）称重。连续 2 周偏离区间，回赤字 2–3 周再回维持。</li>
+      <li><strong>OMAD 怎么留</strong>：可继续 16:8，但窗口内要吃到维持热量。跑后加餐保留。</li>
+    </ul>
+    <p><strong>就医线</strong>：需要药物、极低热量或长期平台方案，建议咨询医生或注册营养师。</p>
+  </div>
+</div>
+
+<div class="faq-q">
+  <div class="q" style="cursor:pointer" onclick="toggleFaq(this)"><span class="chev" style="float:right;color:#8b949e;font-size:11px">▼</span><span class="num">#005</span> 减重达标后，要提前建立哪些意识／行为才能长期守住？</div>
+  <div class="a">
+    <p>63.0 kg（10-25）已在目标线。下面 7 组 17 条，前两组是打底原则。</p>
+    <p><strong>维持带 63.0–66.0 kg</strong>，与 🧠 体重适应期卡片的「健康带 63–66」一致。理想落点 63.5–65.0。低于 63 提示肌肉流失风险，高于 66 提示回弹。</p>
+
+    <p><strong>① 抗炎饮食 + 抗炎生活</strong></p>
+    <ul>
+      <li>目标是慢性低度炎症：毛囊炎、湿疹瘙痒、皮肤出油、易疲劳、脱发被放大。</li>
+      <li>急性发作（红肿化脓）按医嘱用药，不靠饮食自救。</li>
+      <li>多吃：深海鱼、莓果、绿茶、彩色蔬菜、蛋与瘦肉、橄榄油、燕麦。</li>
+      <li>少吃：奶茶甜点、深炸与反式脂肪、加工肉、酒精。</li>
+      <li>生活四大推手：睡眠不足、压力、久坐、节律紊乱。</li>
+      <li>23 点前睡，7 小时左右。跑后及时清洁肩背。</li>
+      <li>见效 4–8 周。看每月爆发次数，不看每天痒感。</li>
+    </ul>
+
+    <p><strong>② 薄肌理论</strong></p>
+    <ul>
+      <li>不追健美大块。要低体脂 + 有线条。</li>
+      <li>先有肌，再谈线条。缺口太大先掉的是肌肉。</li>
+    </ul>
+
+    <p><strong>③ 目标与指标</strong></p>
+    <ul>
+      <li>体重只看 7 日均值，不看单日。</li>
+      <li>成功 = 体重带 + 腰围 + 表现（配速、力量）。</li>
+      <li>先行预警：腰围、裤腰松紧、静息心率、睡眠、饥饿感。</li>
+      <li>规则写死：7 日均值 &gt;65.5 连续 5 天 → 记录饮食 1 周。</li>
+      <li>响应是回基线，不是再减一轮。</li>
+    </ul>
+
+    <p><strong>④ 生理层风险</strong></p>
+    <ul>
+      <li>达标后 6–12 个月是复胖高风险窗。</li>
+      <li>对策是「加」：蛋白、纤维、步数、力量。</li>
+      <li>RED-S：OMAD + 周跑 30–50km + 深睡 0.6h，会拖低睾酮与骨密度。</li>
+      <li>蛋白 1.6–2.0 g/kg，约 100–125 g/日。</li>
+      <li>OMAD 单餐吃不够，跑后加餐把蛋白配足。</li>
+      <li>睡眠是一等指标：固定入睡时点 + 每周深睡中位数。</li>
+      <li>复查一次：血脂、血糖、尿酸、肝酶、睾酮、维 D、甲功。</li>
+      <li>用药与补剂按医嘱复评，建议咨询医生。</li>
+    </ul>
+
+    <p><strong>⑤ 训练结构</strong></p>
+    <ul>
+      <li>力量 2–3 次/周：下肢 + 推拉 + 核心。</li>
+      <li>跑量周增幅 ≤10%，留跑休日。</li>
+      <li>提踵 : 抬前掌 ≈ 3:2。</li>
+      <li>只练提踵会前后失衡，易胫骨痛、崴脚。</li>
+      <li>抬前掌：脚跟贴地，扶墙慢抬，顶峰停 1s 慢放。</li>
+    </ul>
+
+    <p><strong>⑥ 行为与环境</strong></p>
+    <ul>
+      <li>80/20：每周留 1 次社交餐。</li>
+      <li>从「我在减重」换成「我平时就这么吃」。</li>
+      <li>家中不囤触发食物。</li>
+      <li>聚餐先蛋白 + 蔬菜，不喝含糖，酒精算促炎。</li>
+      <li>奖励换成连续跑步周数、力量 PR、睡眠达标天数。</li>
+    </ul>
+
+    <p><strong>⑦ 记录与复盘</strong></p>
+    <ul>
+      <li>称重每天做，只读 7 日均值。</li>
+      <li>围度 + 照片每月一次。</li>
+      <li>每季度看：体重带、腰围、力量、睡眠、皮肤。</li>
+      <li>每年一次大复盘，决定是否调带。</li>
+    </ul>
+
+    <p><strong>一句话</strong>：达标不是完成，是换成<strong>维持带 + 早期预警 + 力量／睡眠／蛋白三个杠杆</strong>。</p>
+    <p style="font-size:12px;color:#8b949e">完整版：documents/references/faq-comprehensive-v2.1-20261025.md §八 #017</p>
+  </div>
+</div>
+
+<div class="footer">FAQ v2.1 · 2026-10-25 更新 · 点击问题可折叠／展开 · <a href="javascript:switchTab('refs')">🔗 References</a></div>
+</div>
+
+<!-- ═══════ REFERENCES TAB ═══════ -->
+
+<div id="tab-refs" class="page">
+<h1>🔗 References</h1>
+<p class="sub">本项目资源 + 推荐阅读 / 观看</p>
+
+<h2>📂 Project Files</h2>
+<div class="ref-grid">
+  <div class="ref-card"><h4>📈 站点主页</h4><a href="https://www.jaden.tech/daily-tracker.html">www.jaden.tech/daily-tracker.html</a><div class="desc">线上部署版（需 review push）</div></div>
+  <div class="ref-card"><h4>🤖 GitHub</h4><a href="https://github.com/imjaden">github.com/imjaden</a><div class="desc">Jaden Li · 项目源码</div></div>
+  <div class="ref-card"><h4>📦 归档 2026-07~10</h4><a href="daily-tracker-archive-202607-202610.html">daily-tracker-archive-202607-202610.html</a><div class="desc">7-10 月全量记录 · 站点: www.jaden.tech/daily-tracker-archive-202607-202610.html</div></div>
+</div>
+
+<h2>📚 Further Reading</h2>
+<div class="ref-grid">
+  <div class="ref-card"><h4>📖 OMAD 入门</h4><a href="https://youtu.be/example" target="_blank" rel="noopener">Dr. Fung — 间歇性断食完全指南</a><div class="desc">Jason Fung 的断食理论基础，解释了为什么 OMAD 能有效减脂</div></div>
+  <div class="ref-card"><h4>📖 空腹运动</h4><a href="https://youtu.be/example" target="_blank" rel="noopener">空腹有氧 vs 力量训练时机</a><div class="desc">Jeff Nippard / Renaissance Periodization 关于空腹训练的科学研究</div></div>
+  <div class="ref-card"><h4>📖 居家力量</h4><a href="https://youtu.be/example" target="_blank" rel="noopener">哑铃/壶铃家庭训练计划</a><div class="desc">6kg 壶铃能做哪些有效动作；新手渐进方案</div></div>
+  <div class="ref-card"><h4>📖 OMAD 食谱</h4><a href="https://youtu.be/example" target="_blank" rel="noopener">OMAD 一天一餐吃什么</a><div class="desc">高蛋白低卡 OMAD 备餐思路，跟你的食材清单类似</div></div>
+</div>
+
+<div class="footer">References · 推荐链接待补充具体 URL · <a href="javascript:switchTab('faq')">❓ FAQ</a></div>
+</div>
 
 <script>
-// Tab switching — saves preference to localStorage (DT-SEC-038: today→archived)
+// FAQ accordion — 点击问题行折叠/展开（默认 #001–#003 折叠）
+function toggleFaq(qEl){
+  var a = qEl.parentElement.querySelector('.a');
+  if(!a) return;
+  a.classList.toggle('collapse');
+  var chev = qEl.querySelector('.chev');
+  if(chev) chev.textContent = a.classList.contains('collapse') ? '▶' : '▼';
+}
+
+// Tab switching — saves preference to localStorage
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
   document.querySelector('.tab-btn[onclick*="'+name+'"]').classList.add('active');
   document.getElementById('tab-'+name).classList.add('active');
   localStorage.setItem('dt_active_tab', name);
-  // Re-render chart if switching to archived tab
-  if(name==='archived' && document.getElementById('wtChart')) renderChart();
+  // Re-render chart if switching to today tab
+  if(name==='today' && document.getElementById('wtChart')) renderChart();
+  if(name==='today' && document.getElementById('wtChart1')) renderChart1();
 }
 
-// Restore last tab on load — 守卫: 旧 4-tab 值(faq/refs/today) → archived
+
+// CL063：阶段一全程图（独立 canvas + 独立 DT 锚点）
+function renderChart1(){
+  var c=document.getElementById('wtChart1');
+  if(!c) return;
+  if(window._wtChart1){window._wtChart1.destroy()}
+  var lbs=/* DT:p1lbs:start */["07-04", "07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05", "08-06", "08-07", "08-08", "08-09", "08-10", "08-11", "08-12", "08-13", "08-14", "08-17", "08-18", "08-19", "08-20", "08-21", "08-22", "08-23", "08-24", "08-25", "08-26", "08-27", "08-28", "08-29", "08-30", "08-31", "09-01", "09-02", "09-03", "09-04", "09-05", "09-06", "09-07", "09-08", "09-09", "09-10", "09-11", "09-12", "09-13", "09-14", "09-15", "09-16", "09-17", "09-18", "09-20", "09-21", "09-22", "09-23", "09-24", "09-25", "09-26", "09-27", "09-28", "09-29", "09-30", "10-01", "10-02", "10-03", "10-04", "10-05", "10-06", "10-07", "10-08", "10-09", "10-10"]/* DT:p1lbs:end */;
+  var wd=/* DT:p1wd:start */[70.8, 70.4, 70.3, 70.0, 69.7, 70.3, 70.0, 69.9, 69.7, 70.2, 69.6, 69.5, 69.4, 69.2, 69.1, 69.1, 68.6, 68.5, 68.6, 69.0, null, 71.3, 70.6, 70.2, 70.1, 69.7, 69.7, 70.0, 69.6, 69.6, 69.3, 70.3, 69.6, 68.9, 68.4, 68.8, null, 70.3, 69.6, 69.3, 69.0, 68.9, 68.8, 69.2, 69.0, 68.0, 68.1, 68.4, 68.4, 68.2, 67.7, 67.5, 67.0, 66.8, 66.7, 66.9, 66.8, 66.6, 67.1, 66.9, 67.2, 67.6, 67.6, 67.6, 67.3, 67.1, 66.93, 66.69, 66.69, 67.73, 66.95, 66.95, 67.15, 66.95, 66.62, 66.62, 66.46, 65.72, 65.42, 65.81, 65.85, 65.9, 65.25, 65.3, 64.9, 65.25, 65.1, 64.9, 64.56, 64.89]/* DT:p1wd:end */;
+  var run=/* DT:p1run:start */[5.0, 5.0, 5.0, 3.5, 5.0, 7.41, 5.0, 10.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 6.0, 5.0, 7.21, 5.0, 0.0, 5.0, 5.0, 5.0, 5.1, 5.0, 5.0, 5.0, 5.3, 6.96, 5.05, 5.2, 5.25, 5.2, 5.2, 5.2, 0.0, 5.0, 7.2, 5.0, 2.0, 5.21, 3.16, 5.21, 5.25, 10.16, 5.12, 5.21, 0.0, 5.2, 5.25, 5.2, 5.2, 3.82, 6.19, 5.25, 5.21, 5.21, 5.25, 7.0, 6.1, 5.2, 6.67, 5.21, 5.21, 5.61, 0.0, 0.0, 5.0, 5.0, 6.36, 6.09, 5.2, 5.56, 5.26, 7.05, 8.08, 5.4, 5.55, 5.23, 5.21, 15.0, 10.4, 13.0, 5.21, 5.21, 5.0, 5.21, 5.65, 10.39, 5.6]/* DT:p1run:end */;
+  var pr=/* DT:p1pr:start */[70.75, 70.7, 70.65, 70.6, 70.54, 70.49, 70.44, 70.39, 70.33, 70.28, 70.23, 70.18, 70.13, 70.07, 70.02, 69.97, 69.92, 69.86, 69.81, 69.76, null, 69.34, 69.29, 69.24, 69.19, 69.13, 69.08, 69.03, 68.98, 68.93, 68.87, 68.82, 68.77, 68.72, 68.66, 68.61, null, 68.4, 68.35, 68.3, 68.25, 68.2, 68.14, 68.09, 68.04, 67.99, 67.93, 67.88, 67.83, 67.78, 67.73, 67.67, 67.62, 67.57, 67.52, 67.46, 67.41, 67.36, 67.31, 67.26, 67.2, 67.15, 67.1, 67.05, 66.99, 66.94, 66.89, 66.84, 66.79, 66.68, 66.63, 66.58, 66.53, 66.47, 66.42, 66.37, 66.32, 66.26, 66.21, 66.16, 66.11, 66.06, 66.0, 65.95, 65.9, 65.85, 65.79, 65.74, 65.69, 65.64]/* DT:p1pr:end */;
+  window._wtChart1=new Chart(c,{
+    type:'line',
+    data:{labels:lbs,datasets:[
+      {label:'Actual',data:wd,borderColor:'#7ee787',backgroundColor:'rgba(126,231,135,0.08)',pointBackgroundColor:'#7ee787',pointBorderColor:'#0d1117',pointBorderWidth:2,pointRadius:2,borderWidth:2,tension:0,spanGaps:true},
+      {label:'🏃Running (km)',data:run,yAxisID:'y1',type:'bar',backgroundColor:'rgba(88,166,255,.35)',borderColor:'#58a6ff',borderWidth:1,borderRadius:2,barPercentage:0.7},
+      {label:'Trend',data:pr,borderColor:'#8b949e',borderDash:[6,3],pointRadius:0,borderWidth:2,tension:0},
+      {label:'Target 65kg',data:/* DT:p1target:start */Array(90).fill(65.0)/* DT:p1target:end */,borderColor:'#f85149',borderDash:[4,4],pointRadius:0,borderWidth:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8b949e',font:{size:11},boxWidth:12,padding:8},position:'bottom'},
+        tooltip:{backgroundColor:'#161b22',titleColor:'#e6edf3',bodyColor:'#8b949e',borderColor:'#30363d',borderWidth:1}},
+      scales:{y:{min:63,max:72,grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},stepSize:0.5}},
+              y1:/* DT:p1chartY1:start */{position:'right',min:0,max:16.0,grid:{drawOnChartArea:false},ticks:{color:'#58a6ff',font:{size:10},stepSize:5}}/* DT:p1chartY1:end */,
+              x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9},maxTicksLimit:14}}}}
+  });
+}
+
+// CL063：窗 2 图表在 details 展开后才 render（折叠时 canvas 尺寸为 0 ⇒ Chart.js 画不出来）
 (function(){
-  var saved = localStorage.getItem('dt_active_tab');
-  if(saved!=='archived' && saved!=='omad') saved='archived';
-  if(saved==='omad' && document.getElementById('tab-omad')) switchTab('omad');
+  var _p1=document.getElementById('phase1Panel');
+  if(!_p1) return;
+  if(_p1.open){ renderChart1(); }
+  else { _p1.addEventListener('toggle', function(){ if(_p1.open) renderChart1(); }); }
 })();
 
-// OMAD tab auto-highlight (portal 原样)
+// Restore last tab on load
+(function(){
+  var saved = localStorage.getItem('dt_active_tab');
+  if(saved && saved !== 'today') switchTab(saved);
+})();
+
+// Today's chart
+function renderChart(){
+  var c=document.getElementById('wtChart');
+  if(!c) return;
+  if(window._wtChart){window._wtChart.destroy()}
+  var lbs=/* DT:lbs:start */["10-10", "10-11", "10-12", "10-13", "10-14", "10-15", "10-16", "10-17", "10-18", "10-19", "10-20", "10-21", "10-22", "10-23", "10-24", "10-25", "10-26", "10-27", "10-28", "10-29", "10-30", "10-31", "11-01", "11-02", "11-03", "11-04", "11-05", "11-06", "11-07", "11-08", "11-09", "11-10", "11-11", "11-12", "11-13", "11-14", "11-15"]/* DT:lbs:end */;
+  var wd=/* DT:wd:start */[64.89, 65.21, 65.02, 65.2, 64.3, 63.8, 63.8, 64.0, 63.8, 63.6, 63.9, 63.4, 63.2, 63.8, 63.3, 63.0, 63.4, 63.0, 62.9, 63.3, 63.1, 63.0, 63.4, 63.9, 62.7, 62.9, 62.7, 62.4, 62.5, 62.3, 62.5, 62.5, 62.3, 62.5, 62.6, 61.76, 62.35]/* DT:wd:end */;
+  var ac=wd;
+  var run=/* DT:run:start */[5.6, 6.9, 0.0, 5.55, 6.09, 6.192, 10.02, 6.09, 12.22, 6.1, 6.09, 6.1, 6.09, 0.0, 6.1, 11.22, 5.37, 10.71, 5.15, 5.6, 6.1, 6.1, 0.0, 6.1, 5.0, 6.09, 6.2, 5.0, 6.1, 5.0, 0.0, 5.0, 0.0, 0.0, 0.0, 5.0, 5.0]/* DT:run:end */;
+  var pr=/* DT:pr:start */[64.59, 64.52, 64.45, 64.38, 64.31, 64.23, 64.16, 64.09, 64.02, 63.95, 63.88, 63.8, 63.73, 63.66, 63.59, 63.52, 63.45, 63.38, 63.3, 63.23, 63.16, 63.09, 63.02, 62.95, 62.87, 62.8, 62.73, 62.66, 62.59, 62.52, 62.44, 62.37, 62.3, 62.23, 62.16, 62.09, 62.01]/* DT:pr:end */;
+  window._wtChart=new Chart(c,{
+    type:'line',
+    data:{labels:lbs,datasets:[
+      {label:'🏃Running (km)',data:run,yAxisID:'y1',type:'bar',backgroundColor:'rgba(88,166,255,.35)',borderColor:'#58a6ff',borderWidth:1,borderRadius:2,barPercentage:0.7,categoryPercentage:0.9},
+      {label:'Actual',data:ac,borderColor:'#7ee787',backgroundColor:'rgba(126,231,135,0.1)',pointBackgroundColor:'#7ee787',pointBorderColor:'#0d1117',pointBorderWidth:2,pointRadius:ac.map(function(v){return v?4:0}),spanGaps:false,tension:.3,fill:true},
+      {label:'Trend',data:pr,borderColor:'#8b949e',borderDash:[6,3],pointRadius:0,borderWidth:2,tension:0},
+      {label:'Target 65kg',data:/* DT:chartTarget:start */Array(37).fill(60.0)/* DT:chartTarget:end */,borderColor:'#f85149',borderDash:[4,4],pointRadius:0,borderWidth:1.5}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8b949e',font:{size:11},boxWidth:12,padding:8},position:'bottom'},
+        tooltip:{backgroundColor:'#161b22',titleColor:'#e6edf3',bodyColor:'#8b949e',borderColor:'#30363d',borderWidth:1,
+          callbacks:{label:function(ctx){
+            if(ctx.dataset.yAxisID==='y1')return ctx.parsed.y+' km';
+            if(ctx.dataset.label==='Actual'&&ctx.parsed.y!==null)return ctx.parsed.y+' kg';
+            if(ctx.dataset.label==='Trend')return '~'+ctx.parsed.y.toFixed(1)+' kg (pred)';
+            return ctx.parsed.y+' kg '+ctx.dataset.label;
+          }}
+        }
+      },
+      scales:{x:{grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},maxTicksLimit:12}},
+        y:/* DT:chartY:start */{min:60,max:72,grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},stepSize:0.5}}/* DT:chartY:end */,
+        y1:/* DT:chartY1:start */{position:'right',min:0,max:15.0,grid:{drawOnChartArea:false},ticks:{color:'#58a6ff',font:{size:10},stepSize:5}}/* DT:chartY1:end */}
+    }
+  });
+}
+
+// OMAD tab auto-highlight
 (function(){
   var d=new Date();
   var dow=d.getDay();
@@ -529,40 +611,8 @@ function switchTab(name) {
   });
 })();
 
-// Archived chart (records.json 全量 · sections chart_js)
-function renderChart(){
-var lbs=["07-04", "07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05", "08-06", "08-07", "08-08", "08-09", "08-10", "08-11", "08-12", "08-13", "08-14", "08-17", "08-18", "08-19", "08-20", "08-21", "08-22", "08-23", "08-24", "08-25", "08-26", "08-27", "08-28", "08-29", "08-30", "08-31", "09-01", "09-02", "09-03", "09-04", "09-05", "09-06", "09-07", "09-08", "09-09", "09-10", "09-11", "09-12", "09-13", "09-14", "09-15", "09-16", "09-17", "09-18", "09-20", "09-21", "09-22", "09-23", "09-24", "09-25", "09-26", "09-27", "09-28", "09-29", "09-30", "10-01", "10-02", "10-03", "10-04", "10-05", "10-06", "10-07", "10-08", "10-09", "10-10", "10-11", "10-12", "10-13", "10-14", "10-15", "10-16", "10-17", "10-18", "10-19", "10-20", "10-21", "10-22", "10-23", "10-24", "10-25", "10-26", "10-27", "10-28", "10-29", "10-30", "10-31"];
-var wd=[70.8, 70.4, 70.3, 70.0, 69.7, 70.3, 70.0, 69.9, 69.7, 70.2, 69.6, 69.5, 69.4, 69.2, 69.1, 69.1, 68.6, 68.5, 68.6, 69.0, null, 71.3, 70.6, 70.2, 70.1, 69.7, 69.7, 70.0, 69.6, 69.6, 69.3, 70.3, 69.6, 68.9, 68.4, 68.8, null, 70.3, 69.6, 69.3, 69.0, 68.9, 68.8, 69.2, 69.0, 68.0, 68.1, 68.4, 68.4, 68.2, 67.7, 67.5, 67.0, 66.8, 66.7, 66.9, 66.8, 66.6, 67.1, 66.9, 67.2, 67.6, 67.6, 67.6, 67.3, 67.1, 66.93, 66.69, 66.69, 67.73, 66.95, 66.95, 67.15, 66.95, 66.62, 66.62, 66.46, 65.72, 65.42, 65.81, 65.85, 65.9, 65.25, 65.3, 64.9, 65.25, 65.1, 64.9, 64.56, 64.89, 65.21, 65.02, 65.2, 64.3, 63.8, 63.8, 64.0, 63.8, 63.6, 63.9, 63.4, 63.2, 63.8, 63.3, 63.0, 63.4, 63.0, 62.9, 63.3, 63.1, 63.0];
-var ac=wd;
-var pr=[71.13, 71.07, 71.01, 70.94, 70.88, 70.82, 70.76, 70.69, 70.63, 70.57, 70.51, 70.44, 70.38, 70.32, 70.26, 70.19, 70.13, 70.07, 70.01, 69.94, null, 69.44, 69.38, 69.32, 69.26, 69.19, 69.13, 69.07, 69.01, 68.94, 68.88, 68.82, 68.76, 68.69, 68.63, 68.57, null, 68.32, 68.26, 68.2, 68.13, 68.07, 68.01, 67.95, 67.88, 67.82, 67.76, 67.7, 67.63, 67.57, 67.51, 67.45, 67.38, 67.32, 67.26, 67.2, 67.13, 67.07, 67.01, 66.95, 66.88, 66.82, 66.76, 66.7, 66.63, 66.57, 66.51, 66.45, 66.38, 66.26, 66.2, 66.13, 66.07, 66.01, 65.95, 65.88, 65.82, 65.76, 65.7, 65.63, 65.57, 65.51, 65.45, 65.38, 65.32, 65.26, 65.2, 65.13, 65.07, 65.01, 64.95, 64.88, 64.82, 64.76, 64.7, 64.64, 64.57, 64.51, 64.45, 64.39, 64.32, 64.26, 64.2, 64.14, 64.07, 64.01, 63.95, 63.89, 63.82, 63.76, 63.7];
-var run=[5.0, 5.0, 5.0, 3.5, 5.0, 7.41, 5.0, 10.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 6.0, 5.0, 7.21, 5.0, 0.0, 5.0, 5.0, 5.0, 5.1, 5.0, 5.0, 5.0, 5.3, 6.96, 5.05, 5.2, 5.25, 5.2, 5.2, 5.2, 0.0, 5.0, 7.2, 5.0, 2.0, 5.21, 3.16, 5.21, 5.25, 10.16, 5.12, 5.21, 0.0, 5.2, 5.25, 5.2, 5.2, 3.82, 6.19, 5.25, 5.21, 5.21, 5.25, 7.0, 6.1, 5.2, 6.67, 5.21, 5.21, 5.61, 0.0, 0.0, 5.0, 5.0, 6.36, 6.09, 5.2, 5.56, 5.26, 7.05, 8.08, 5.4, 5.55, 5.23, 5.21, 15.0, 10.4, 13.0, 5.21, 5.21, 5.0, 5.21, 5.65, 10.39, 5.6, 6.9, 0.0, 5.55, 6.09, 6.192, 10.02, 6.09, 12.22, 6.1, 6.09, 6.1, 6.09, 0.0, 6.1, 11.22, 5.37, 10.71, 5.15, 5.6, 6.1, 6.1];
-var c=document.getElementById('wtChart');if(!c)return;if(window._wtChart){window._wtChart.destroy()}window._wtChart=new Chart(c,{
-  type:'line',
-  data:{labels:lbs,datasets:[
-    {label:'🏃 跑量 (km)',data:run,yAxisID:'y1',type:'bar',backgroundColor:'rgba(88,166,255,.35)',borderColor:'#58a6ff',borderWidth:1,borderRadius:2,barPercentage:0.7,categoryPercentage:0.9},
-    {label:'Actual',data:ac,borderColor:'#7ee787',backgroundColor:'rgba(126,231,135,0.1)',pointBackgroundColor:'#7ee787',pointBorderColor:'#0d1117',pointBorderWidth:2,pointRadius:ac.map(function(v){return v?4:0}),spanGaps:false,tension:.3,fill:true},
-    {label:'Trend',data:pr,borderColor:'#8b949e',borderDash:[6,3],pointRadius:0,borderWidth:2,tension:0},
-    {label:'Target 65',data:Array(111).fill(60.0),borderColor:'#f85149',borderDash:[4,4],pointRadius:0,borderWidth:1.5}
-  ]},
-  options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{labels:{color:'#8b949e',font:{size:11},boxWidth:12,padding:8},position:'bottom'},
-      tooltip:{backgroundColor:'#161b22',titleColor:'#e6edf3',bodyColor:'#8b949e',borderColor:'#30363d',borderWidth:1,
-        callbacks:{label:function(ctx){
-          if(ctx.dataset.yAxisID==='y1')return ctx.parsed.y+' km';
-          if(ctx.dataset.label==='Actual'&&ctx.parsed.y!==null)return ctx.parsed.y+' kg';
-          if(ctx.dataset.label==='Trend')return '~'+ctx.parsed.y.toFixed(1)+' kg (pred)';
-          return ctx.parsed.y+' kg '+ctx.dataset.label;
-        }}
-      }
-    },
-    scales:{x:{grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},maxTicksLimit:12}},
-      y:{min:61,max:72,grid:{color:'#21262d'},ticks:{color:'#8b949e',font:{size:10},stepSize:0.5}},
-      y1:{position:'right',min:0,max:15.0,grid:{drawOnChartArea:false},ticks:{color:'#58a6ff',font:{size:10},stepSize:5}}}
-  }
-});
-}
+// Render chart on page load
 document.addEventListener('DOMContentLoaded', renderChart);
-
 </script>
 </body>
 </html>
