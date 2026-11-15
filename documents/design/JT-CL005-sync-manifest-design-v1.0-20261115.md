@@ -22,6 +22,10 @@ status: READY
 | `daily-poetry.html` + `today-poetry-YYYYMM.js` | script-miner | `daily-poetry/daily-poetry.py deploy [--target]`（**已有幂等 CLI**，默认 `~/CodeSpace/www.jaden.tech`，见 397/504 行） | 手动 | 无 | 未纳入任何门禁 |
 | `static/js/poetry-titles-YYYYMM.js` | **本仓** | `scripts/poetry-titles-gen.py` | 新月包落地手动 | `--check` | 无时间戳/来源戳 |
 
+**实证案由（2026-11-15）**：`JT-SEC-029` —— 上游 daily-tracker 在 `data@update:` 前缀的一笔里把 `bmi-tracker.html` 整篇结构重写（+314/−264），
+删掉了 localStorage 白名单守卫，导致老访客整页空白**并已上线**；review 21:50 立单，上游 22:54 修复重渲。全过程本仓无任何结构变更告警 ——
+这正是本设计要补的「结构漂移」判据（§六）与 pull 模型（§八）的现实依据。
+
 三条硬事实：
 1. `index.html` 只有跳转链接（77/82 行），**门户没有任何「同步状态」视图**。
 2. `bmi-tracker.html` 走 **push 模型**（上游脚本直接写本仓并 commit），`AGENTS.md` 里「GENERATED … do NOT hand-edit」正是给 push 模型打的补丁。

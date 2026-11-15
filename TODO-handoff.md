@@ -1,4 +1,4 @@
-<!-- generated: 2026-11-11 · source: cache/draft/TODO-20261111.md · sha256:aebb1a8f -->
+<!-- generated: 2026-11-11 · source: cache/draft/TODO-20261111.md · sha256:ac2e156a -->
 > 派生: 待执行 **2** 条 · 最近闭环 **CL5** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261111.md）
@@ -6,7 +6,7 @@
 | 编号 | 标题 | 状态（派生摘要·全文见 draft） | kind | priority | 方案文档 |
 |:--|:--|:--|:--|:--|:--|
 | 待开（sync-manifest） | JT-CL005 P2 实施（manifest+check+run+戳） | 待办 | feature | normal | - |
-| 待开（sec-029） | JT-SEC-029 修复（bmi-tracker 返回访客空白） | 待办 | fix | high | - |
+| 待开（sec-029） | JT-SEC-029 复核（上游已修复并上线，等 review 关号） | 待核实 | verify | high | - |
 <!-- generated end -->
 
 ## 二、基线（人工维护）
@@ -14,7 +14,7 @@
 - 仓: `~/CodeSpace/www.jaden.tech` · branch `main`
 - 本地 HEAD: `c87a4bb`+amend（JT-CL005 设计件）· `origin/main` = `69ebf7d` · ahead = 1
 - 🆕 **2026-11-15 23:15 落地 JT-CL005 设计件**：`documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md`（门户同步面契约化：`config/sync-manifest.json` 单文件 + 产物内注释戳 + `sync-check.py` + `sync-status.html` + push→pull 模型）。三仓只读核对结论：daily-tracker **无 CLI**（monolithic，直写本仓 + 内部 commit + `_SITE_NIGHT_SLOT=(21,45)`）、script-miner **已有** `daily-poetry.py deploy --target`、hermes-manager 为壳/数据分离契约（CL039/CL058，双哨兵）
-- 🩺 **2026-11-15 21:50 L2 新开 `JT-SEC-029` 🟡 P1（线上已生效）**：`bmi-tracker.html:558` 的 localStorage 白名单守卫被上游生成器整条删除 ⇒ 旧访客 `dt_active_tab=archived` 触发 `switchTab` 抛 `TypeError`，四页签全 `display:none`（整页空白，点页签可自愈）；根因在跨仓 daily-tracker 模板，本仓该文件属生成物禁手改 ⇒ 修复须跨仓授权
+- ✅ **`JT-SEC-029` 已由上游修复并上线**（2026-11-15 22:54/22:56 两次重渲，`b35ff95`/`69ebf7d`）：daily-tracker 源码 3146–3160 行 `_MIRROR_RESTORE_TAB_JS` 只恢复本页确实存在的 tab（含 `getElementById` 检查 + `removeItem`）；真机对照实测 —— `archived` 陈旧值下 **修复前**：四页签全 `display:none`、`bodyText` 38 字符、`_wtChart` undefined（=review 报的空白）；**修复后**：`localStorage` 归一 `null`、`tab-today` 可见、1005 字符、chart `object`；`omad`/`faq`/`junk-tab` 三档均安全。线上与本地 sha256 一致 `82c6488e…`（47283 B）⇒ 线上缺陷已消除，**待 review 下轮 L2 复核关号**（本会话不自行关号）
 - 同轮复核：`JT-SEC-028` ✅ CLOSED（bundle 已删）；`JT-SEC-019/020/022/023` 🟢 结转
 - **gitee 镜像已对齐**（2026-11-11 22:15，用户裁「走 A」）：`reset --hard` 到 GitHub 重写后历史 → 强推 `master` = `3dc43dd`；gitee 本地旧对象已 `gc --prune=now`（`resume.html` blob `b2ed476` 已清除，全对象 resume 计数 0）；弃掉 gitee 侧 5 个 2022 年旧提交（内容早已被现版覆盖）
 - 台账变动（2026-11-11 L2 `3dc43dd` + 2026-11-15 L2）：`JT-SEC-027` ✅ CLOSED（删库重建 + 旧 sha 404）、`JT-SEC-021` ✅ CLOSED（FAQ 面已移除）、`JT-SEC-028` ✅ CLOSED（11-15 复核，bundle 已删）；`JT-SEC-029` 🟡 P1 新开
