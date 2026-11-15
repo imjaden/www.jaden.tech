@@ -1,12 +1,13 @@
-<!-- generated: 2026-11-11 · source: cache/draft/TODO-20261111.md · sha256:ac2e156a -->
-> 派生: 待执行 **2** 条 · 最近闭环 **CL5** · 差异知会 无（未找到含「差异知会」的设计文档）
+<!-- generated: 2026-11-15 · source: cache/draft/TODO-20261115.md · sha256:d93e01f5 -->
+> 派生: 待执行 **3** 条 · 最近闭环 **CL5** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
-## 一、已登记待执行（来源: live draft cache/draft/TODO-20261111.md）
+## 一、已登记待执行（来源: live draft cache/draft/TODO-20261115.md）
 
 | 编号 | 标题 | 状态（派生摘要·全文见 draft） | kind | priority | 方案文档 |
 |:--|:--|:--|:--|:--|:--|
 | 待开（sync-manifest） | JT-CL005 P2 实施（manifest+check+run+戳） | 待办 | feature | normal | - |
 | 待开（sec-029） | JT-SEC-029 复核（上游已修复并上线，等 review 关号） | 待核实 | verify | high | - |
+| 待开（hm-rotate-done） | hm draft 轮转丢完成节（工具缺陷） | 待办 | bug | normal | - |
 <!-- generated end -->
 
 ## 二、基线（人工维护）
@@ -34,13 +35,16 @@
 
 | 待审计笔 | 内容 | 复审面 | 前置 / 连带 |
 |:--|:--|:--|:--|
-| `77ee77d` `docs@design: JT-CL005 sync-manifest contract v1.0` | 新增同步面契约设计件（§一实测测绘 + §三架构 + §六判据 + §八 pull 迁移 + §九 D1–D9 决策 + §十验收） | `documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md`（157 行）+ `TODO-handoff.md` | 无实现面；纯设计件，无运行时风险 |
-| `1a89fdc` `docs@handoff: JT-SEC-029 verified fixed upstream (live sha match) + design case note` | 029 复验取证（真机对照：修复前 38 字符/chart undefined → 修复后 1005 字符/chart object）+ 设计件补实证案由 | `TODO-handoff.md`、设计件 §一；**证据源** `cache/scratch/sec029/bmi-old.html`（gitignored） | 建议 review 同轮复核并把 `JT-SEC-029` 关号（线上 sha `82c6488e…` = 本地） |
+| `77ee77d` `docs@design: JT-CL005 sync-manifest contract v1.0` | 新增同步面契约设计件（§一实测测绘 + §三架构 + §六判据 + §八 pull 迁移 + §九 D1–D9 + §十验收） | `documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md`（157 行） | 纯设计件，无运行时风险 |
+| `1a89fdc` `docs@handoff: JT-SEC-029 verified fixed upstream …` | 029 复验取证（真机对照 38→1005 字符 / chart undefined→object）+ 设计件补实证案由 | `TODO-handoff.md`、设计件 §一（证据源 `cache/scratch/sec029/bmi-old.html`，gitignored） | 建议 review 同轮复核并关 `JT-SEC-029`（线上 sha `82c6488e…` = 本地） |
+| `b8a72b5` `docs@handoff: nightly close-out 2026-11-15 - audit list=2 …` | 首次收口（清单 2 笔） | `TODO-handoff.md` | 其内容已被 `d44651b` 取代 |
+| `d44651b` `docs@handoff: close-out 2026-11-15 - restore completed section, audit list=3, register hm rotation bug` | 补回被 hm 轮转删除的完成节 5 条 + 登记 `hm` 轮转缺陷 + 清单校正 | `TODO-handoff.md` | 无 |
 
+- 本会话未推 4 笔（`git rev-list --count origin/main..HEAD` = 4），全部为文档/设计面，无源码或生成物改动
 - 明早串行序（两条，顺序有依赖）
-  ① **派 review 评审 + push 这 2 笔**（顺带复核 `JT-SEC-029` 关号：线上/本地 sha256 一致、四档陈旧值真机实测均无空白）
+  ① **派 review 评审 + push 这 4 笔**（顺带复核 `JT-SEC-029` 关号：线上/本地 sha256 一致、`archived`/`omad`/`faq`/`junk-tab` 四档陈旧值真机实测均无空白）
   ② `待开（sync-manifest）` — JT-CL005 P2 实施：`config/sync-manifest.json`（5 条）+ `scripts/sync-check.py`（rc 0/1/2/3）+ `scripts/sync-run.py` + 给 tokens-tracker / poetry-titles 补 SYNC 戳；判据见设计件 §十
-- 明早首跑：`python3 scripts/portal-check.py --mode post`（15/15）+ `--selftest`（17/17）+ `python3 scripts/perf-check.py`（28 PASS / rc=0）+ `python3 cache/scratch/raw-pii-probe.py`（期望 `rc=0`）
+- 明早首跑：`python3 scripts/portal-check.py --mode post`（15/15）+ `--selftest`（17/17）+ `python3 scripts/perf-check.py`（28 PASS）+ `python3 cache/scratch/raw-pii-probe.py`（期望 `rc=0`）
 - 放行口径：review PASS 后 `git push origin HEAD:main`（**ff-only**）；`JT-SEC-029` 由 review 关号，本会话不自行关
 
 ### 其他
