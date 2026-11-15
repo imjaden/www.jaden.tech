@@ -553,10 +553,12 @@ function renderChart1(){
   else { _p1.addEventListener('toggle', function(){ if(_p1.open) renderChart1(); }); }
 })();
 
-// Restore last tab on load
+// Restore last tab on load — 站点镜像守卫（JT-SEC-029）：只恢复本页确实存在的 tab
 (function(){
   var saved = localStorage.getItem('dt_active_tab');
-  if(saved && saved !== 'today') switchTab(saved);
+  if(!saved || saved === 'today') return;
+  if(!document.getElementById('tab-' + saved)){ localStorage.removeItem('dt_active_tab'); return; }
+  switchTab(saved);
 })();
 
 // Today's chart
