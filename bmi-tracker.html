@@ -575,7 +575,8 @@ function renderChart(){
       {label:'🏃Running (km)',data:run,yAxisID:'y1',type:'bar',backgroundColor:'rgba(88,166,255,.35)',borderColor:'#58a6ff',borderWidth:1,borderRadius:2,barPercentage:0.7,categoryPercentage:0.9},
       {label:'Actual',data:ac,borderColor:'#7ee787',backgroundColor:'rgba(126,231,135,0.1)',pointBackgroundColor:'#7ee787',pointBorderColor:'#0d1117',pointBorderWidth:2,pointRadius:ac.map(function(v){return v?4:0}),spanGaps:false,tension:.3,fill:true},
       {label:'Trend',data:pr,borderColor:'#8b949e',borderDash:[6,3],pointRadius:0,borderWidth:2,tension:0},
-      {label:'Target 65kg',data:/* DT:chartTarget:start */Array(37).fill(60.0)/* DT:chartTarget:end */,borderColor:'#f85149',borderDash:[4,4],pointRadius:0,borderWidth:1.5}
+      {label:'Target 60kg',data:/* DT:chartTarget:start */Array(37).fill(60.0)/* DT:chartTarget:end */,borderColor:'#f85149',borderDash:[4,4],pointRadius:0,borderWidth:1.5},
+      {label:'Phase1 end 65kg',data:/* DT:chartTarget65:start */Array(37).fill(65.0)/* DT:chartTarget65:end */,borderColor:'#f85149',borderDash:[2,3],pointRadius:0,borderWidth:1}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{labels:{color:'#8b949e',font:{size:11},boxWidth:12,padding:8},position:'bottom'},
