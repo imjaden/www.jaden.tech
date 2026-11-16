@@ -42,7 +42,8 @@
         "hash": "optional",
         "guard": "none"
       },
-      "_transition": "上游无 CLI、直写本仓（push 模型）；打戳待 P4 跨仓交接后启用"
+      "_transition": "上游无 CLI、直写本仓（push 模型）；打戳待 P4 跨仓交接后启用；打戳待 P4 跨仓交接；豁免期内 unstamped 不计 rc=1，到期自动转红",
+      "_transition_exempt_until": "2026-12-31"
     },
     {
       "id": "dt-archive",
@@ -76,7 +77,8 @@
         "hash": "optional",
         "guard": "none"
       },
-      "_transition": "与 bmi-tracker 同批产出；目录名随月份滚动，故用 glob"
+      "_transition": "与 bmi-tracker 同批产出；目录名随月份滚动，故用 glob；打戳待 P4 跨仓交接；豁免期内 unstamped 不计 rc=1，到期自动转红",
+      "_transition_exempt_until": "2026-12-31"
     },
     {
       "id": "tokens-board",
@@ -148,7 +150,8 @@
         "hash": "optional",
         "guard": "none"
       },
-      "_transition": "上游已有幂等 deploy CLI（--target）；打戳待 P4"
+      "_transition": "上游已有幂等 deploy CLI（--target）；打戳待 P4；打戳待 P4 跨仓交接；豁免期内 unstamped 不计 rc=1，到期自动转红",
+      "_transition_exempt_until": "2026-12-31"
     },
     {
       "id": "poetry-titles",

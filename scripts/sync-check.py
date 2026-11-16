@@ -88,6 +88,19 @@ def resolve(artifact):
     return [pattern] if (root / pattern).exists() else []
 
 
+def exempt_state(art, today_iso):
+    """过渡豁免档：返回 (status, detail) 或 None（无豁免登记）。
+
+    期内 ⇒ exempt（不计 rc=1）；到期 ⇒ unstamped（自动转黄）。
+    """
+    ex = str((art or {}).get("_transition_exempt_until") or "")
+    if not ex:
+        return None
+    if today_iso <= ex:
+        return ("exempt", f"过渡豁免（上游未打戳，豁免至 {ex}）")
+    return ("unstamped", f"过渡态（上游未打戳，豁免已于 {ex} 到期）")
+
+
 def check_artifact(art):
     """返回 (status, detail, record)。status ∈ ok/stale/unstamped/mismatch/missing/unknown"""
     files = resolve(art)
@@ -111,7 +124,7 @@ def check_artifact(art):
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as exc:
             # N-4：不覆盖更严重的既有判定（mismatch 不应被 unknown 降级）
-            if worst[0] in ("none", "ok", "unstamped", "stale"):
+            if worst[0] in ("none", "ok", "exempt", "unstamped", "stale"):
                 worst = ("unknown", f"{rel}: unreadable ({exc})")
             recs.append(base)
             continue
@@ -121,7 +134,13 @@ def check_artifact(art):
         if stamp is None:
             # Q-3：verify.hash 决定「无戳」的严重度 —— required ⇒ 结构违规；optional ⇒ 过渡态告警
             if contract.get("stamp") == "pending" and art.get("verify", {}).get("hash") != "required":
-                status, detail = "unstamped", f"{rel}: 过渡态（上游未打戳，hash=optional）"
+                # 过渡豁免到期机制（2026-11-16）：上游未打戳的产物可在清单里登记
+                # `_transition_exempt_until`；期内判 exempt（不计 rc=1），到期自动落回 unstamped。
+                _st = exempt_state(art, now_utc().date().isoformat())
+                if _st:
+                    status, detail = _st[0], f"{rel}: {_st[1]}"
+                else:
+                    status, detail = "unstamped", f"{rel}: 过渡态（上游未打戳，hash=optional）"
             else:
                 status, detail = "mismatch", f"{rel}: 契约要求打戳（hash=required）但缺失"
         else:
@@ -230,7 +249,7 @@ def print_human(payload):
         age = f"{row['age_h']}h" if row.get("age_h") is not None else "—"
         print(f"  {row.get('artifact', ''):<{width}}  {gen:<25}  {age:>7}  {row.get('producer', '—')}")
     for item in payload["details"]:
-        mark = {"ok": "✅", "stale": "⚠️", "unstamped": "⚠️",
+        mark = {"ok": "✅", "exempt": "🕓", "stale": "⚠️", "unstamped": "⚠️",
                 "mismatch": "❌", "missing": "❌", "unknown": "❓"}[item["status"]]
         print(f"  {mark} {item['detail']}")
     if payload["unregistered"]:
@@ -309,6 +328,13 @@ def selftest():
     _n = len(manifest.get("artifacts", []))
     ok("清单条目数 ≥ 5（当前 6：含 tokens-live）", _n >= 5, str(_n))
     ok("清单无绝对路径", "/Users/" not in json.dumps(manifest))
+
+    # 过渡豁免：期内不计 rc=1，到期自动落回 unstamped（2026-11-16 C 方案）
+    _in = exempt_state({"_transition_exempt_until": "2026-12-31"}, "2026-12-31")
+    ok("豁免：期内判 exempt", _in is not None and _in[0] == "exempt", str(_in))
+    _out = exempt_state({"_transition_exempt_until": "2026-12-31"}, "2027-01-01")
+    ok("豁免：到期判 unstamped", _out[0] == "unstamped" and "到期" in _out[1], str(_out))
+    ok("豁免：未登记者不受影响", exempt_state({}, "2026-12-31") is None)
 
     # emit_history 往返：同一 payload 连写两次，天数不增（同日幂等），且 rc/verdict 落盘
     _hp = ROOT / "cache" / "scratch" / "_history_probe.json"
