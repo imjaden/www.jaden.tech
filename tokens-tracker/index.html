@@ -1,17 +1,90 @@
 <!DOCTYPE html>
-<!-- SYNC id=tokens-board producer=hermes-manager/1acl-board-gen v=1 generated=2026-11-16T13:59:47+08:00 sha256=4a7610523f2947e3 -->
+<!-- SYNC id=tokens-board producer=hermes-manager/1acl-board-gen v=1 generated=2026-11-16T15:59:54 sha256=feb48256183d0be8 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<link rel="icon" href="../static/img/favicon.png" type="image/png"><!-- 板壳有 20KB 红线：只给本地 href，不带远端兜底脚本（见 lib_favicon） -->
-<title>跨项目任务板 · Task</title>
-<link rel="stylesheet" href="assets/style.css">
+<title>Dashboard · Hermes 控制台 · hermes-manager · 1.11(20261015)</title>
+<link rel="icon" href="../static/img/favicon.png" type="image/png">
+<script data-favicon-chain="1">(function(){var q=["/static/img/favicon.png", "https://www.jaden.tech/static/img/favicon.png", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAI0lEQVR42mPwd3v6nxLMMAwNIAToYwAu544kAwY2FkZgXgAA0G21l0mxILoAAAAASUVORK5CYII="],i=0,l=document.querySelector('link[rel="icon"]'),g=function(){if(i>=q.length)return;var p=new Image();p.onload=function(){l&&(l.href=q[i])};p.onerror=function(){i++;g()};p.src=q[i]};g()})();</script>
 <style>
-/* CL088 C4b: 单表（运行态 + 历史态合一）—— 行内明细/分页/空态 */
-.stage-row .stage-cell { padding: 4px 10px 8px; }
-.hist-load-note { color: #6b7280; font-size: 0.72rem; margin: 4px 0 0; }
+:root { --cobalt-600: #4f46e5; --surface-900: #15151f; }
+body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei",
+  sans-serif; background: #0e0e16; color: #e0e0e0; }
+.dash-wrap { max-width: 1400px; margin: 0 auto; padding: 16px var(--page-pad, 16px); box-sizing: border-box; }
+.dash-range { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 14px; }
+.dash-range .range-label { color: #6b7280; font-size: 0.75rem; }
+.range-btn { background: #16161f; color: #9ca3af; border: 1px solid #2a2a3e;
+  border-radius: 6px; padding: 3px 12px; font-size: 0.78rem; cursor: pointer;
+  font-family: inherit; }
+.range-btn:hover { color: #e0e0e0; border-color: var(--cobalt-600); }
+.range-btn.active { background: var(--cobalt-600); border-color: var(--cobalt-600);
+  color: #fff; }
+.dash-domain { background: #15151f; border: 1px solid #2a2a3e; border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 14px; }
+.dash-domain-head { margin: 0 0 10px; font-size: 1rem; }
+.dash-domain-head a { color: #e0e0e0; text-decoration: none; }
+.dash-domain-head a:hover { color: #a5b4fc; }
+.dash-window { margin-left: 8px; color: #6b7280; font-size: 0.72rem; font-weight: 400; }
+.dash-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px; }
+.dash-stat { background: #101019; border: 1px solid #23233a; border-radius: 8px;
+  padding: 8px 10px; }
+.dash-stat-label { display: block; color: #9ca3af; font-size: 0.72rem; }
+.dash-stat-value { display: block; font-size: 1.05rem; font-weight: 700;
+  margin: 2px 0; }
+.dash-stat-note { display: block; color: #6b7280; font-size: 0.68rem; }
+.dash-analysis { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px; margin-top: 12px; }
+.dash-anal { background: #101019; border: 1px solid #23233a; border-radius: 8px;
+  padding: 8px 10px; }
+.dash-anal-title { margin: 0 0 6px; font-size: 0.8rem; color: #e0e0e0; }
+.dash-anal-note, .dash-anal-empty { margin: 0 0 6px; color: #6b7280; font-size: 0.68rem; }
+.dash-anal-list { margin: 0; padding: 0; list-style: none; }
+.dash-anal-row { display: flex; justify-content: space-between; gap: 8px;
+  font-size: 0.74rem; padding: 2px 0; border-top: 1px solid #1c1c2c; }
+.dash-anal-label { color: #9ca3af; }
+.dash-anal-value { color: #e0e0e0; }
+.dash-unavailable { border: 1px solid #7f1d1d; background: #2a1015; color: #fca5a5;
+  border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; }
+.dash-unavailable-note, .dash-no-data, .dash-caliber, .dash-loading {
+  color: #6b7280; font-size: 0.72rem; margin: 8px 0 0; }
+/* CL231 使用率四卡（异常优先；异常卡给"复制修复指令"按钮） */
+.dash-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px; margin: 0 0 16px; }
+.dash-card { background: #15151f; border: 1px solid #2a2a3e; border-left-width: 3px;
+  border-radius: 8px; padding: 10px 12px; position: relative; }
+.dash-card.lv-critical { border-left-color: #ef4444; }
+.dash-card.lv-warn { border-left-color: #f59e0b; }
+.dash-card.lv-ok { border-left-color: #22c55e; }
+.dash-card.lv-unknown { border-left-color: #6b7280; }
+.dash-card-badge { position: absolute; top: 8px; right: 8px; padding: 1px 6px;
+  border-radius: 4px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em;
+  line-height: 1.5; }
+.dash-card-badge.is-danger { background: #ef4444; color: #fff; }
+.dash-card-badge.is-warn { background: #f59e0b; color: #111; }
+.dash-card-label { display: block; color: #9ca3af; font-size: 0.72rem; margin-bottom: 4px; }
+.dash-card-value { display: block; color: #e5e7eb; font-size: 1.02rem; font-weight: 600; }
+.dash-card-note { display: block; color: #6b7280; font-size: 0.7rem; margin-top: 4px; }
+.dash-card-fix { margin-top: 8px; background: #1f2937; color: #e5e7eb; border: 1px solid #374151;
+  border-radius: 6px; padding: 4px 8px; font-size: 0.72rem; cursor: pointer; }
+.dash-card-fix:hover { background: #374151; }
+.dash-toast { position: fixed; right: 16px; bottom: 16px; background: #111827; color: #e5e7eb;
+  border: 1px solid #374151; border-radius: 8px; padding: 8px 12px; font-size: 0.75rem;
+  max-width: 60vw; z-index: 200; opacity: 0; transition: opacity .18s; pointer-events: none; }
+.dash-toast.show { opacity: 1; }
+/* CL373: 叙事层 —— 顶部结论条 + 每段一句结论 + 附录折叠 */
+.dash-verdict { margin: 0 0 14px; padding: 12px 14px; border-radius: 10px; font-size: 0.86rem;
+  border: 1px solid #374151; background: #111827; color: #e5e7eb; }
+.dash-verdict.lv-ok { border-color: #065f46; background: #052e26; }
+.dash-verdict.lv-warn { border-color: #92400e; background: #2b1d05; }
+.dash-verdict.lv-critical { border-color: #991b1b; background: #2b0b0b; }
+.dash-verdict b { color: #fff; }
+.dash-headline { margin: 6px 0 10px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; }
+.dash-appendix { margin-top: 10px; }
+.dash-appendix > summary { cursor: pointer; font-size: 0.78rem; color: #93c5fd; padding: 4px 0; }
 </style>
 <style>
 /* site chrome: github corner（dark-theme）—— 旧双层导航已废弃，只保留 corner */
@@ -31,8 +104,8 @@
 <style>.wc-nav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:8px max(16px, calc((100% - var(--page-max, 1400px)) / 2 + var(--page-pad, 16px)));background:var(--surface-900,#15151f);border-bottom:1px solid #2a2a3e;font-size:0.8rem;position:sticky;top:0;z-index:50;}.wc-nav .wc-brand{font-weight:700;margin-right:10px;color:#e0e0e0;}.wc-nav a{color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px;white-space:nowrap;}.wc-nav a:hover{background:rgba(79,70,229,.15);color:#e0e0e0;}.wc-nav a.active{background:var(--cobalt-600,#4f46e5);color:#fff;}.wc-nav .wc-pub{margin-left:auto;display:flex;gap:2px;}.wrapper{padding-left:16px;padding-right:16px;}</style>
 <div class="wc-nav">
 <span class="wc-brand">Hermes 控制台 · 公开镜像</span>
-<span class="wc-nav-item is-disabled" aria-disabled="true" title="仅本地服务可访问">Dashboard</span>
-<span class="wc-nav-item is-active" aria-current="page">Task</span>
+<span class="wc-nav-item is-active" aria-current="page">Dashboard</span>
+<span class="wc-nav-item is-disabled" aria-disabled="true" title="仅本地服务可访问">Task</span>
 <span class="wc-nav-item is-disabled" aria-disabled="true" title="仅本地服务可访问">Session</span>
 <span class="wc-nav-item is-disabled" aria-disabled="true" title="仅本地服务可访问">Memory</span>
 <span class="wc-nav-item is-disabled" aria-disabled="true" title="仅本地服务可访问">Cron Job</span>
@@ -43,93 +116,20 @@
 <span class="wc-nav-item is-disabled" aria-disabled="true" title="仅本地服务可访问">待办</span>
 <span class="wc-nav-item is-disabled" aria-disabled="true" title="仅本地服务可访问">文档</span>
 </span></div>
-
-<div class="board-wrap">
-  <!-- CL088 C4a: 顶栏(header.topbar)删除 — 职责上移全局菜单栏 / 右移 Tab 行控件
-       CL088 C4b: 原 div.filter-bar 项目标签列表升格为页内 Tab（#project-tabs）;
-                  运行态 / 历史态并入同一张表 ⇒ 不再有页面级「运行态|历史」双 Tab -->
-  <div class="tabs-row" id="tabs-row">
-    <!-- D5: 顶部标签组 = 状态维度（全部/待执行/进行中/已完成/异常）；项目筛选下沉到行内项目标签 -->
-    <nav class="nav-tabs status-chips" id="status-chips" aria-label="按状态筛选"></nav>
-    <span class="chip-slot" id="project-chip"></span>
-    <span class="chip-slot" id="stats-chip"></span>
-    <span class="tabs-actions"><button class="tab-ctl" id="ratioBtn" type="button" title="分栏比例">⇔</button><button class="tab-ctl" id="colToggleBtn" type="button" title="列设置">⚙</button></span>
-  </div>
-  <div class="table-desc">跨项目任务板 · Task（运行态 + 近 30 天历史态 <strong>单表</strong>; 行键 = 编号; 数据源 hm loop list --global --json + lib_loop.py history --days 30（同一 live 源 data/live.js）; 自动刷新 每 10 分钟）</div>
-  <div id="view-run">
-  <div id="data-alert" class="notice" style="display:none"></div>
-  <!-- CL233: 异常计数条（数据层 window.LIVE_ANOMALY; 无异常时为空） -->
-  <div class="anom-bar" id="anom-bar"></div>
-
-  <div class="stats-section" id="stats-section">
-    <div id="stats-root"></div>
-    <div id="stats-notice" class="notice" style="display:none">统计暂不可用（stats 数据源失败; 任务表仍为最新, 下次 cron 刷新自动重试）</div>
-  </div>
-  <div class="board-main">
-    <div class="table-side">
-      <div class="table-card">
-        <div class="table-wrap">
-          <table class="data-table" id="main-table">
-            <thead id="th-full">
-              <tr>
-                <th data-col="number" data-sort="number" class="sortable col-number">编号</th>
-                <th data-col="project" data-sort="project" class="sortable col-project">项目</th>
-                <th data-col="status" data-sort="status" class="sortable">状态</th>
-                <th data-col="progress" data-sort="progress" class="sortable col-progress">进度</th>
-                <th data-col="desc" data-sort="desc" class="sortable col-desc">描述</th>
-                <th data-col="created_at" data-sort="created_at" class="sortable col-time col-hidden">创建时间</th>
-                <th data-col="updated_at" data-sort="updated_at" class="sortable col-time">更新时间</th>
-                <th data-col="tokens" data-sort="tokens" class="sortable col-num">Tokens</th>
-                <th data-col="cache_read" data-sort="cache_read" class="sortable col-num col-hidden">Cache Read</th>
-                <th data-col="cost" data-sort="cost" class="sortable col-num col-hidden">Cost($)</th>
-                <th data-col="duration" data-sort="duration" class="sortable col-num">耗时</th>
-                <th data-col="span_days" data-sort="span_days" class="sortable col-num col-hidden">跨度(天)</th>
-                <th data-col="review" data-sort="review" class="sortable col-num col-hidden">设计评审</th>
-                <th data-col="ops_check" data-sort="ops_check" class="sortable col-num col-hidden">OPS核查</th>
-                <th data-col="impl_audit" data-sort="impl_audit" class="sortable col-num col-hidden">实现审计</th>
-              </tr>
-            </thead>
-            <thead id="th-split" style="display:none">
-              <tr>
-                <th class="col-number">编号</th>
-              </tr>
-            </thead>
-            <tbody id="board-body"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="pager" id="pager"></div>
-    </div>
-    <!-- CL088 C4d: 分栏拖拽分隔条（标记由 web_console_lib.split_handle_html 单点渲染,
-         生成器替换下方占位符; 模板不写字面控件 ⇒ 无第二份实现） -->
-    <div class="split-handle" id="split-handle" role="separator" aria-orientation="vertical" title="拖拽调节分栏比例（主表 ↔ 详情面; 两侧各有最小宽度）"></div>
-    <aside class="detail-panel closed" id="detail-panel">
-      <div class="detail-head">
-        <button class="detail-close" id="detail-close" type="button">✕ 关闭</button>
-        <div class="detail-number" id="d-number"></div>
-        <div class="detail-proj" id="d-proj"></div>
-      </div>
-      <div id="detail-body"></div>
-    </aside>
-  </div>
-  </div><!-- /view-run -->
-
-  <div class="wc-footer" style="padding:14px;color:#6b7280;font-size:0.72rem;text-align:center;border-top:1px solid #2a2a3e;"><div id="wc-meta-bar" style="padding:6px 16px;color:#6b7280;font-size:0.72rem;border-bottom:1px solid #1f1f2e;"><span title="壳文件仅模板变更时更新（CL039 壳/数据分离）">静态壳</span><span id="meta-generated" title="数据生成时间（data/live.js 的 WEB_DATA_META）; 超 30 小时未刷新标 ⚠️">生成 –</span><span id="meta-count">共 0 条</span></div><button type="button" class="wc-footer-version docs-entry" data-docs-toggle aria-controls="docs-panel" aria-expanded="false" title="查看本文档（最近变更 / 功能清单 / 服务状态）">hermes-manager · 1.11(20261015)</button><div class="wc-footer-brand">跨项目任务板 · Task · 公开镜像 · 自动同步 · 已脱敏过滤</div></div>
-  <div class="docs-overlay" data-docs-close hidden></div><aside id="docs-panel" class="docs-panel" data-docs-panel style="overflow:hidden" role="dialog" aria-modal="true" aria-labelledby="docs-title" hidden><header class="docs-head"><span class="docs-title" id="docs-title">Task 板 · 文档</span><span class="docs-sub" id="docs-sub"></span><button type="button" class="docs-close" id="docs-close" data-docs-close aria-label="关闭文档面板">✕</button></header><nav class="docs-tabs" role="tablist"><button type="button" class="docs-tab active" role="tab" aria-selected="true" data-docs-tab="history">最近变更</button><button type="button" class="docs-tab" role="tab" aria-selected="false" data-docs-tab="features">功能清单</button><button type="button" class="docs-tab" role="tab" aria-selected="false" data-docs-tab="service">服务状态</button></nav><div class="docs-body" id="docs-body" style="overflow:auto"></div></aside>
-<script id="BOARD_DOCS" type="application/json">{"page":{"version":"1.11","date":"2026-11-12","file":"web/1acl/index.html","updated":null},"note":"服务端/管理器版本由页脚版本行提供（CL039 壳零版本戳原则）；本块只放页面文档与履历，不含运行时数据","sections":{"history":[{"version":"1.11","date":"2026-11-12","items":["表头显式标出**窗口外停滞 N 条**：30 天看板窗之外的停滞（400 天扫描窗内），归零不再等于处置完成（CL352）"]},{"version":"1.10","date":"2026-11-11","items":["详情面板与 `hm loop show` 显示豁免依据：提交笔数 / sha / 批准人 / 理由（CL347）"]},{"version":"1.9","date":"2026-11-11","items":["📊 统计 Prompt（异常/待补件/待执行/进行中，0 值省略）（CL344）","豁免入「已完成」档并标「已豁免」（CL342）"]},{"version":"1.8","date":"2026-11-11","items":["停滞分层：git log 无提交=异常，有提交缺件=「待补件」独立档（CL341）"]},{"version":"1.7","date":"2026-11-11","items":["「停滞」第四态：未验收且末件超 7 天改判 stale（CL340）"]},{"version":"1.6","date":"2026-11-11","items":["复制 Prompt（批量/行级）与 ⌘F 搜索跳转（CL332/CL333）"]},{"version":"1.5","date":"2026-11-08","items":["深链 `?status=`/`?anomaly=` 覆盖 localStorage，URL 即视图态","分页/空态/行内明细与统计卡片；窄屏 chip 折叠进「更多」"]},{"version":"1.3","date":"2026-11-07","items":["六列固定占比 15/15/30/10/10/15（编号/进度/描述/耗时/Tokens/更新时间），项目列固定 96px；状态列并入默认隐藏（CL262）","分栏表头与行只保留编号列，默认比例 15:85，左栏最小宽三处同源 320→140（CL262）","页面文档三件套落地：版本行入口 + 同页抽屉 + 内联 BOARD_DOCS（CL263）"]},{"version":"1.2","date":"2026-11-06","items":["壳/渲染外置：index.html + assets/shell-render.js 拆分，数据面独立（CL230）","异常计数条与异常优先级排序（CL233）；Task 页 15 列 + 7 隐列口径"]},{"version":"1.1","date":"2026-10-31","items":["分栏拖拽分隔条与比例持久化（CL088 C4d）；列设置（⚙）与 URL 覆盖（N3/M12）"]},{"version":"1.0","date":"2026-09-23","items":["单表口径：运行态 + 历史态按编号合并（CL039 / CL088 C4b）"]}],"index":[{"entry":"1.5（2026-11-08）当前 · 深链参数优先 + 窄屏「更多」折叠（CL283）","note":"URL > localStorage > 默认；两参数正交可同时生效"},{"entry":"1.4（2026-11-08）· 状态五 chip + 三件套换型（最近变更/功能清单/服务状态）+ Tokens 标签与表体裁切 + 菜单「文档」入口","note":"顶部筛选按状态五档（全部/待执行/进行中/已完成），异常为正交开关；项目维度下沉到行内项目标签"},{"version":"1.3","date":"2026-11-07","note":"当前 · 六列固定占比 + 编号单列分栏 + 页面文档三件套","entry":""},{"version":"1.2","date":"2026-11-06","note":"壳/渲染外置 + 异常视图"},{"version":"1.1","date":"2026-10-31","note":"分栏拖拽 + 列设置"},{"version":"1.0","date":"2026-09-23","note":"单表基础版"}],"features":[{"version":"Task 页 · 功能清单（业务视角）","date":"2026-11-08","items":["Task 页 · 顶部筛选 · 点「待执行 / 进行中 / 已完成 / 异常」— 只保留该状态任务，标签上显示条数；再点回到「全部」","Task 页 · 顶部筛选 · 点「异常」— 与任一状态叠加，用来回答「正在跑但卡住的有几条」","Task 页 · 项目列 · 点项目名称标签 — 只保留该项目任务，与状态筛选叠加；再点清除","Task 页 · 编号列 · 点编号 — 打开右侧分栏：左栏只留编号，右栏显示需求、步骤、证据与下一步","Task 页 · 进度列 · 看「N/6」与当前步骤 — 判断进行到哪一步；无步骤条目的归入待执行","Task 页 · 更新时间列 · 看时间或悬停 — 判断任务是否停滞；异常行带彩色圆点与底色提示","Task 页 · 表头 · 点列头 — 按该列升降序排序；「列设置」可增减列并记忆到本地","Task 页 · 页脚版本行 · 点击 — 打开文档抽屉，看最近变更、功能清单、服务状态","顶部菜单 · 文档入口 · 点「文档」— 新页签打开治理知识库（跨页面导航，不在本页内跳）"]}],"service":[{"version":"服务状态 · 未接入","date":"2026-11-08","items":["实时状态不可用：本页尚未接入服务状态通道（规范 §2-17a）","说明：pid / 端口 / 已运行时长 / RSS / CPU 属运行时事实，不得固化为静态块；此处不展示任何数值","接入方式：由托管服务（http-server）在每次 HTML 响应时注入 SVC_STATE 内联块；跨仓需求已登记"]}]}}</script>
+<main class="dash-wrap">
+<div class="dash-range" id="dash-range-row"><span class="range-label">时间范围</span><button class="range-btn active" type="button" data-range="7">近 7 天</button><button class="range-btn" type="button" data-range="30">近 30 天</button><button class="range-btn" id="dash-refresh" type="button">刷新</button></div>
+<div id="dash-sections"><p class="dash-loading">指标加载中…（data/dashboard.js）</p></div>
 <script>
+/* CL088 C4c: Dashboard 四域指标渲染（壳内**只**渲染, 数据来自 data/dashboard.js）
+   口径: 四域指标由生成器按 C1 新口径产出（独占会话归因 / 共享池单列 / 上限 / model 分布）;
+        壳不写任何数值 ⇒ 与数据无关, byte 稳定。
+   安全: 一律 createElement + textContent（禁 innerHTML 赋值）。
+   刷新: 时间范围（M15, 默认近 7 天, localStorage + ?range=）; 刷新按钮走 cache-bust ?t=。
+   降级: 数据未达/不可用 ⇒ 显式占位（不静默显示 0）。 */
 (function () {
-  var blob = document.getElementById("BOARD_DOCS");
-  if (!blob) { return; }
-  var data;
-  try { data = JSON.parse(blob.textContent); } catch (e) { data = null; }
-  var panel = document.getElementById("docs-panel");
-  var overlay = document.querySelector(".docs-overlay");
-  var body = document.getElementById("docs-body");
-  var sub = document.getElementById("docs-sub");
-  var toggles = document.querySelectorAll("[data-docs-toggle]");
-  var tabs = document.querySelectorAll("[data-docs-tab]");
-  var current = "history";
+  "use strict";
+  var KEY = "wc-dashboard:range";
+  var DEFAULT_RANGE = "7";
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -139,134 +139,288 @@
     }
     return e;
   }
-  function render() {
-    if (!body) { return; }
-    body.textContent = "";
-    if (!data || !data.sections) {
-      body.appendChild(el("p", "docs-empty", "暂无文档数据（数据块缺失或解析失败）"));
-      return;
-    }
-    if (sub) {
-      sub.textContent = "页面 " + ((data.page && data.page.version) || "-")
-        + (data.page && data.page.date ? " · " + data.page.date : "");
-    }
-    function renderEntries(list) {
-      (list || []).forEach(function (entry) {
-        var sec = el("section", "docs-entry-item");
-        sec.appendChild(el("h3", "docs-entry-head",
-          (entry.version || "") + (entry.date ? "（" + entry.date + "）" : "")));
-        (entry.items || [entry.note || ""]).forEach(function (line) {
-          if (line) { sec.appendChild(el("p", "docs-entry-line", line)); }
-        });
-        body.appendChild(sec);
-      });
-    }
-    var rows = data.sections[current];
-    if (!rows || !rows.length) {
-      body.appendChild(el("p", "docs-empty", "暂无文档数据（数据块缺失或解析失败）"));
-      return;
-    }
-    renderEntries(rows);
-    /* 版本索引并入「最近变更」尾部（D4: tab 恒为 3 个, 尺寸零跳动） */
-    if (current === "history" && data.sections.index && data.sections.index.length) {
-      body.appendChild(el("h2", "docs-group-head", "版本索引"));
-      renderEntries(data.sections.index);
-    }
-  }
-  function setOpen(open) {
-    if (!panel) { return; }
-    panel.hidden = !open;
-    if (overlay) { overlay.hidden = !open; }
-    document.body.style.overflow = open ? "hidden" : "";
-    Array.prototype.forEach.call(toggles, function (t) {
-      t.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    if (open) { body.scrollTop = 0; }
-  }
-  Array.prototype.forEach.call(toggles, function (t) {
-    t.addEventListener("click", function () { render(); setOpen(panel.hidden); });
-  });
-  Array.prototype.forEach.call(tabs, function (t) {
-    t.addEventListener("click", function () {
-      current = t.getAttribute("data-docs-tab");
-      Array.prototype.forEach.call(tabs, function (o) {
-        var on = o === t;
-        o.classList.toggle("active", on);
-        o.setAttribute("aria-selected", on ? "true" : "false");
-      });
-      render();
-      if (body) { body.scrollTop = 0; }
-    });
-  });
-  Array.prototype.forEach.call(document.querySelectorAll("[data-docs-close]"),
-    function (b) { b.addEventListener("click", function () { setOpen(false); }); });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && panel && !panel.hidden) { setOpen(false); }
-  });
-})();
-</script>
-</div>
 
-<script>
-/* CL039 壳/数据分离: data 异步加载 + ready 事件 gate + 30m 整页刷新(H1) + 失败占位(J1) */
-(function () {
+  function readRange() {
+    try {
+      var qs = new URLSearchParams(location.search);
+      return qs.get("range") || localStorage.getItem(KEY) || DEFAULT_RANGE;
+    } catch (e) { return DEFAULT_RANGE; }
+  }
+
+  function applyActive(range) {
+    var btns = document.querySelectorAll(".dash-range .range-btn[data-range]");
+    Array.prototype.forEach.call(btns, function (b) {
+      b.classList.toggle("active", b.getAttribute("data-range") === range);
+    });
+  }
+
+  function renderStat(s) {
+    var box = el("div", "dash-stat");
+    box.appendChild(el("span", "dash-stat-label", s.label));
+    box.appendChild(el("span", "dash-stat-value", s.value));
+    if (s.note) { box.appendChild(el("span", "dash-stat-note", s.note)); }
+    return box;
+  }
+
+  function renderAnalysis(a) {
+    var box = el("div", "dash-anal");
+    box.appendChild(el("h3", "dash-anal-title", a.title));
+    if (a.note) { box.appendChild(el("p", "dash-anal-note", a.note)); }
+    var rows = a.rows || [];
+    if (!rows.length) {
+      box.appendChild(el("p", "dash-anal-empty", "（无数据）"));
+      return box;
+    }
+    var ul = el("ul", "dash-anal-list");
+    rows.forEach(function (r) {
+      var li = el("li", "dash-anal-row");
+      li.appendChild(el("span", "dash-anal-label", r.label));
+      li.appendChild(el("span", "dash-anal-value", r.value));
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    return box;
+  }
+
+  /* CL231: 使用率四卡（异常优先）+ 修复指令一键复制（点按钮 → clipboard → toast） */
+  function showToast(msg) {
+    var t = document.getElementById("dash-toast");
+    if (!t) {
+      t = el("div", "dash-toast");
+      t.id = "dash-toast";
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(showToast._tm);
+    showToast._tm = setTimeout(function () { t.classList.remove("show"); }, 1800);
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return legacyCopy(text); });
+    }
+    return Promise.resolve(legacyCopy(text));
+  }
+
+  function legacyCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  /* CL373: 顶部一句话结论 —— 先回答「今天要不要人动手」，再往下读 */
+  function renderVerdict(cards) {
+    var n = { critical: 0, warn: 0, unknown: 0, ok: 0 };
+    cards.forEach(function (c) { n[c.level] = (n[c.level] || 0) + 1; });
+    var level = n.critical ? "critical" : (n.warn ? "warn" : "ok");
+    var box = el("div", "dash-verdict lv-" + level);
+    var say;
+    if (n.critical) {
+      say = "有 " + n.critical + " 处需要人处理";
+    } else if (n.warn) {
+      say = "没有要命的问题，" + n.warn + " 处建议看一眼";
+    } else {
+      say = "全部正常，不需要动手";
+    }
+    box.appendChild(el("b", "", say));
+    box.appendChild(document.createTextNode(
+      "（临界 " + n.critical + " · 预警 " + n.warn + " · 正常 " + n.ok +
+      (n.unknown ? " · 未知 " + n.unknown : "") + "）"));
+    return box;
+  }
+
+  function renderCards(cards) {
+    var sec = el("section", "dash-cards-sec");
+    var grid = el("div", "dash-cards");
+    cards.forEach(function (c) {
+      var card = el("div", "dash-card lv-" + (c.level || "unknown"));
+      card.setAttribute("data-card", c.key);
+      if (c.level === "critical" || c.level === "warn") {
+        var danger = c.level === "critical";
+        var badge = el("span", "dash-card-badge " + (danger ? "is-danger" : "is-warn"),
+                       danger ? "DANGER" : "WARN");
+        badge.setAttribute("data-level", c.level);
+        badge.setAttribute("role", "status");
+        card.appendChild(badge);
+      }
+      card.appendChild(el("span", "dash-card-label", c.label));
+      card.appendChild(el("span", "dash-card-value", c.value));
+      if (c.note) { card.appendChild(el("span", "dash-card-note", c.note)); }
+      if (c.copy_cmd && c.level !== "ok" && c.level !== "unknown") {
+        /* CL373: 按钮复制的是 5W2H Prompt（AI 能接手），命令只在 Prompt 的 How 段里出现 */
+        var text = c.prompt || c.copy_cmd;
+        var btn = el("button", "dash-card-fix", "⧉ " + (c.action_label || "复制排查 Prompt"));
+        btn.type = "button";
+        btn.title = "复制 5W2H Prompt（Who/What/When/Where/Why/How/How much）后粘贴给任意 AI";
+        btn.setAttribute("aria-label", btn.title);
+        btn.addEventListener("click", function () {
+          copyText(text).then(function (ok) {
+            showToast(ok ? ("已复制 Prompt（" + text.length + " 字），可直接粘贴给 AI")
+                         : "复制失败：请手动选择 Prompt 文本");
+          });
+        });
+        card.appendChild(btn);
+      }
+      grid.appendChild(card);
+    });
+    sec.appendChild(grid);
+    return sec;
+  }
+
+  function renderDomain(d) {
+    var sec = el("section", "dash-domain");
+    sec.setAttribute("data-domain", d.key);
+    var head = el("h2", "dash-domain-head");
+    var link = el("a", "dash-domain-link", d.label);
+    link.href = d.href;
+    head.appendChild(link);
+    head.appendChild(el("span", "dash-window", d.window || ""));
+    sec.appendChild(head);
+    if (d.unavailable) {
+      sec.appendChild(el("div", "dash-unavailable",
+        "⚠️ 数据不可用：" + d.unavailable));
+      sec.appendChild(el("p", "dash-unavailable-note",
+        "未显示 0（口径不可用时显式占位）；生成器刷新后自动重试"));
+      return sec;
+    }
+    if (d.headline) { sec.appendChild(el("p", "dash-headline", d.headline)); }
+    var stats = el("div", "dash-stats");
+    (d.stats || []).forEach(function (s) { stats.appendChild(renderStat(s)); });
+    sec.appendChild(stats);
+    /* CL373: 分布/构成属诊断面 ⇒ 默认折叠，主线只读结论与支撑数 */
+    if ((d.analysis || []).length) {
+      var det = el("details", "dash-appendix");
+      det.appendChild(el("summary", "", "附录 · 明细（分布 / 构成：模型、阶段、Profile、成本）"));
+      var anal = el("div", "dash-analysis");
+      (d.analysis || []).forEach(function (a) { anal.appendChild(renderAnalysis(a)); });
+      det.appendChild(anal);
+      sec.appendChild(det);
+    }
+    return sec;
+  }
+
+  function paint(range) {
+    var root = document.getElementById("dash-sections");
+    if (!root) { return; }
+    while (root.firstChild) { root.removeChild(root.firstChild); }
+    var payload = window.DASHBOARD || null;
+    var sec = payload && payload.ranges ? payload.ranges[String(range)] : null;
+    if (!sec) {
+      root.appendChild(el("p", "dash-no-data",
+        "该时间范围无数据（dashboard 载荷缺 range=" + range + "）"));
+      return;
+    }
+    if (payload.cards && payload.cards.length) {
+      root.appendChild(renderVerdict(payload.cards));
+      root.appendChild(renderCards(payload.cards));
+    }
+    (sec.domains || []).forEach(function (d) { root.appendChild(renderDomain(d)); });
+    if (payload.caliber) {
+      root.appendChild(el("p", "dash-caliber", payload.caliber));
+    }
+  }
+
+  function setRange(range) {
+    try { localStorage.setItem(KEY, range); } catch (e) { /* 私隐模式 */ }
+    applyActive(range);
+    try {
+      var url = location.pathname + location.search.replace(
+        /([?&])range=[^&]*/g, "$1").replace(/[?&]$/, "");
+      history.replaceState(null, "", url + (url.indexOf("?") >= 0 ? "&" : "?")
+        + "range=" + range);
+    } catch (e) { /* 无 history 权限 */ }
+    paint(range);
+  }
+
+  function bindRange() {
+    var btns = document.querySelectorAll(".dash-range .range-btn[data-range]");
+    Array.prototype.forEach.call(btns, function (b) {
+      b.addEventListener("click", function () {
+        setRange(b.getAttribute("data-range"));
+      });
+    });
+    var rf = document.getElementById("dash-refresh");
+    if (rf) {
+      rf.addEventListener("click", function () {
+        var search = location.search.replace(/[?&](?:cb|t)=\d+/g, "");
+        location.replace(location.pathname + search + (search ? "&" : "?")
+          + "t=" + Date.now());
+      });
+    }
+  }
+
+  function initOnce() {
+    if (window.__PAGE_INITED) { return; }
+    var range = readRange();
+    applyActive(range);
+    bindRange();
+    paint(range);
+    window.__PAGE_INITED = true;
+  }
+
+  /* 数据未达/加载失败 ⇒ 显式占位（gate 契约: 判据 = 渲染哨兵 __PAGE_INITED） */
+  function dataPlaceholder() {
+    var root = document.getElementById("dash-sections");
+    if (!root) { return; }
+    while (root.firstChild) { root.removeChild(root.firstChild); }
+    root.appendChild(el("div", "dash-unavailable",
+      "⚠️ 数据暂不可用（data/dashboard.js 未就绪）：指标占位, 30 分钟后自动重试"));
+  }
+  window.__DASH_PLACEHOLDER = dataPlaceholder;
+
   var ts = Date.now();
   var s = document.createElement("script");
-  s.src = "data/live.js?t=" + ts;
+  s.src = "data/dashboard.js?t=" + ts;
   s.onerror = function () { window.WEB_DATA_FAILED = true; };
   document.head.appendChild(s);
   setTimeout(function () { if (!window.WEB_DATA_READY) { window.WEB_DATA_FAILED = true; } }, 5000);
   setTimeout(function () { var search = location.search.replace(/[?&](?:cb|t)=\d+/g, ""); location.replace(location.pathname + search + (search ? "&" : "?") + "t=" + Date.now()); }, 30 * 60 * 1000);
+
+  if (window.WEB_DATA_READY) {
+    initOnce();
+  } else {
+    window.addEventListener("web-data-ready", initOnce);
+    setTimeout(function () { if (!window.__PAGE_INITED) { dataPlaceholder(); } }, 5000);
+  }
 })();
 </script>
-<script src="assets/common.js" defer></script>
-<script src="assets/shell-render.js" defer></script>
 <script>
-/* CL212 gate — CL055 契约（哨兵语义, 禁改）不动; 本段只做双哨兵衔接, 不承载渲染逻辑:
-   · 容器: web-data-ready 必须在 window 上监听（生成器在 window 派发）;
-   · 双哨兵: window.WEB_DATA_READY = 数据到达（生成器写）,
-     window.__PAGE_INITED = 本页渲染完成（壳写）; 置位点在 init() 返回之后
-     ⇒ init 抛异常时哨兵保持 false, 5s 后占位可见（失败不再静默）;
-   · 时序: 渲染器 defer ⇒ 必在 DOMContentLoaded 前执行完; boot 挂 DCL,
-     不赌「defer 脚本相对 inline script」的执行顺序;
-   · 幂等: 重复触发只渲染一次; 慢加载先占位, 数据到达后由 initOnce 覆盖为真实内容;
-   · 占位 dataPlaceholder() = 全量重置（stats-root + 表格区 + 分页 + 项目标签）, 禁改成只清表格。 */
+/* CL364: 数据时效自证（值取数据层 WEB_DATA_META; 壳内无时间戳 ⇒ byte 稳定） */
 (function () {
-  "use strict";
-  function init() { window.ONEACL_RENDER.init(); }
-  function dataPlaceholder() {
-    if (window.ONEACL_RENDER) { window.ONEACL_RENDER.dataPlaceholder(); return; }
-    /* CL214 / SEC-212-02: 渲染器未加载（assets/shell-render.js 404 或解析失败）⇒
-       直接写静态占位; 否则 init 与 5s 兜底双双 no-op, 页面留白且零提示。 */
-    var body = document.getElementById("board-body");
-    if (body) {
-      body.textContent = "";
-      var tr = document.createElement("tr");
-      var td = document.createElement("td");
-      td.className = "empty-row";
-      td.textContent = "页面脚本加载失败（assets/shell-render.js）; 请刷新或稍后重试";
-      tr.appendChild(td);
-      body.appendChild(tr);
+  function fill() {
+    var m = window.WEB_DATA_META || {};
+    var g = document.getElementById("wc-generated");
+    if (g) { g.textContent = m.generated_at || "未知"; }
+    var s = document.getElementById("wc-source");
+    if (s && m.source) { s.textContent = " · " + m.source; }
+    var st = document.getElementById("wc-stale");
+    if (!st) { return; }
+    var max = (typeof m.max_age_ms === "number" && m.max_age_ms > 0)
+      ? m.max_age_ms : 30 * 3600 * 1000;
+    var t = Date.parse(String(m.generated_at || "").replace(" ", "T"));
+    if (!isNaN(t) && (Date.now() - t) > max) {
+      var mins = Math.round(max / 60000);
+      st.textContent = " ⚠️ 数据偏旧（超过 "
+        + (mins >= 90 ? Math.round(mins / 60) + " 小时" : mins + " 分钟")
+        + " 未刷新）";
+      st.style.display = "";
     }
-    var notice = document.getElementById("stats-notice");
-    if (notice) {
-      notice.textContent = "页面脚本加载失败（assets/shell-render.js）; 刷新重试";
-      notice.style.display = "";
-    }
-    var cnt = document.getElementById("meta-count");
-    if (cnt) { cnt.textContent = "脚本加载失败"; }
   }
-  function initOnce() {
-    if (window.__PAGE_INITED) { return; }
-    if (!window.ONEACL_RENDER) { return; }
-    init();
-    window.__PAGE_INITED = true;
-  }
-  function boot() { if (window.WEB_DATA_READY) { initOnce(); } }
-  window.addEventListener("web-data-ready", initOnce);
-  document.addEventListener("DOMContentLoaded", boot);
-  setTimeout(function () { if (!window.__PAGE_INITED) { dataPlaceholder(); } }, 5000);
+  window.addEventListener("web-data-ready", fill);
+  if (window.WEB_DATA_READY) { fill(); }
 })();
 </script>
+</main>
+
+<div class="wc-footer" style="padding:14px;color:#6b7280;font-size:0.72rem;text-align:center;border-top:1px solid #2a2a3e;"><div id="wc-meta-bar" style="padding:6px 16px;color:#6b7280;font-size:0.72rem;border-bottom:1px solid #1f1f2e;">数据生成: <span id="wc-generated">–</span><span id="wc-source"></span><span id="wc-stale" style="display:none;color:#fca5a5;"> ⚠️ 数据偏旧（>30 小时未刷新）</span></div><div class="wc-footer-version">hermes-manager · 1.11(20261015)</div><div class="wc-footer-brand">Hermes 控制台</div></div>
 </body>
 </html>
