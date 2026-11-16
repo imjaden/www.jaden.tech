@@ -546,6 +546,12 @@ def status_selftest():
                                      lambda t: t.replace(FAVICON_STAMP, "static/img/nope.png?t="))),
         ("根绝对引用回流", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace("<footer>", '<footer><a href="/x">x</a>', 1))),
+        ("删快照时间标注", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace("快照 ", "时间 "))),
+        ("删下次生成说明", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace("下次生成", "生成"))),
+        ("小球 href 改坏", lambda d: _mutate(d, "index.html",
+                                     lambda t: t.replace('href="./sync-status.html"', 'href="./nope.html"'))),
         ("组件表少一行", lambda d: _mutate(d, "sync-status.html",
                                     lambda t: re.sub(r'<tr>' + re.escape(ROWS_CELL) + r'.*?</tr>', "",
                                                      t, count=1, flags=re.S))),
@@ -700,7 +706,7 @@ def main():
               f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c} active={_ok_d}")
 
         # S25 判别力自证：四种破坏（球色/ favicon / 根绝对 / 少一行）⇒ 判据必红
-        check("S26", "V17 判别力自证：球色不同源 / 删 favicon / 根绝对回流 / 少一行 ⇒ S25 必红",
+        check("S26", "V17 判别力自证：7 个变异（球色/favicon/根绝对/快照/下次生成/href/少一行）⇒ S25 必红",
               status_selftest(), "")
 
     fails = [r for r in results if not r[2]]
