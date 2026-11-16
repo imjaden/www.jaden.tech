@@ -45,7 +45,7 @@ BADGE_START = "<!-- sync-badge:start -->"
 BADGE_END = "<!-- sync-badge:end -->"
 FAVICON = "static/img/favicon-64.png?t=1794394182"
 GEN_MARK = "由 scripts/sync-status-gen.py 生成，勿手改"
-NEXT_RUN = "每日 21:50（ledger-sync 之后）"
+NEXT_RUN = "随 sync-check 每次运行重出（见快照时间）"
 
 V_CLASS = {0: "ok", 1: "warn", 2: "bad", 3: "warn"}
 V_TEXT = {0: "全部正常", 1: "有陈旧或过渡项", 2: "结构违规", 3: "无法判定"}
@@ -108,18 +108,6 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:#
   .data-table td::before{content:attr(data-l);color:var(--muted);font-size:.72rem;text-transform:uppercase}
 }
 """
-
-BADGE_CSS = """
-.now-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.sync-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 auto;
-box-shadow:0 0 0 0 rgba(63,185,80,.6);animation:syncPulse 2.4s ease-out infinite}
-.sync-dot.is-ok{background:#3fb950}
-.sync-dot.is-warn{background:#d29922;box-shadow:none;animation:none}
-.sync-dot.is-bad{background:#f85149;box-shadow:0 0 0 0 rgba(248,81,73,.6)}
-@keyframes syncPulse{0%{box-shadow:0 0 0 0 rgba(63,185,80,.55)}70%{box-shadow:0 0 0 7px rgba(63,185,80,0)}100%{box-shadow:0 0 0 0 rgba(63,185,80,0)}}
-@media (prefers-reduced-motion:reduce){.sync-dot{animation:none}}
-"""
-
 
 def run_sync_check() -> dict:
     proc = subprocess.run([sys.executable, str(SCRIPTS / "sync-check.py"), "--json"],
@@ -337,11 +325,18 @@ def main(argv=None) -> int:
     subprocess.run([sys.executable, str(SCRIPTS / "sync-check.py"), "--emit-history"],
                    capture_output=True, text=True)
     history = load_history()
-    gates = {} if args.no_gates else collect_gates()
     incidents = load_incidents()
 
-    html = build_page(payload, history, gates, incidents)
+    # 第 1 遍：不带门禁（只为让 portal-check 有可读的「新页」）
+    html = build_page(payload, history, {}, incidents)
     PAGE.write_text(html, encoding="utf-8")
+    # 第 2 遍：门禁数字取自刚刚写下的页面 ⇒ 页面上的 portal 数字不会再落后一轮
+    if not args.no_gates:
+        gates = collect_gates()
+        html = build_page(payload, history, gates, incidents)
+        PAGE.write_text(html, encoding="utf-8")
+    else:
+        gates = {}
 
     STATE_JSON.parent.mkdir(parents=True, exist_ok=True)
     STATE_JSON.write_text(json.dumps(
