@@ -497,6 +497,9 @@ def status_page_guard(root=None):
         problems.append(f"状态徽章数 {len(_badge_hits)} != 组件表行数 {_rows_now}")
     if not set(_badge_hits) <= {"ok", "warn", "bad", "muted"}:
         problems.append(f"状态徽章类越界 {sorted(set(_badge_hits))}")
+    for _cls in set(_badge_hits) - {"ok"}:
+        if f".badge-{_cls}{{" not in html:
+            problems.append(f"徽章类 badge-{_cls} 无对应样式定义（会渲染成无底色）")
     bars = len(re.findall(r'<span class="(?:ok|warn|bad|none)" title=', html))
     colored = len(re.findall(r'<span class="(?:ok|warn|bad)" title=', html))
     try:
