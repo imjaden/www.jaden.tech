@@ -2693,6 +2693,50 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — LIVE_ANOMALY 四处 fail-open 收口 + 导航 96px（3 笔已推）：上轮 4 处逐条闭合（9 例负控复刻通过），但同类 fail-open 仍余 1 处（第二处赋值透传，实测泄漏）与 1 处 deny 派生面缺口；产物层零泄漏已端到端验证 → PASS 94
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/tokens-tracker-mirror.py:352-458`（`transform_live` 的 deny 补集、`ANOMALY_ASSIGN`/`ANOMALY_BLOCK`/`ANOMALY_TASK_HEAD`/`ALLOWED_ANOMALY_KEYS`/`_deny_hit`/`sanitize_anomaly`、`NAV_ITEM_CSS:111-114`）· `scripts/portal-check.py:407-409`（S22 tab-bar 钉）· 产物 `tokens-tracker/{index.html,data/live.js}` · 台账两本
+- **Tracking**: JT-SEC-043 上轮 JT-SEC-042 四项 fail-open 收口 + 导航右让位 96px
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计）
+
+### 一、验收（生产侧只读 + 隔离 clone + 本机 `http.server:8099` CDP 量测）
+
+1. **改动面**：`git diff --numstat ab86a83..HEAD` = 6 文件 / +131 −24，三笔各单面 —— 产物 `f4cff77`（`live.js` +11/−11、`index.html` +2/−2）、代码 `c532e70`（mirror +60/−11、`portal-check` +2）、台账 `064b4be`（`.review-level.yaml` +8、`review-log.md` +48）；无夹带，subject 全 ASCII。
+2. **上轮 9 例负控逐条复刻（自建夹具，非引用自述）**：(a1) `var LIVE_ANOMALY=` 与 (a2) `window["LIVE_ANOMALY"]=` **通过且输出零残留**（块丢弃 + 【已过滤】计数）；(a3) `window.LIVE_ANOMALY.prompt=`、(a4) `LIVE_ANOMALY["prompt"]=` **raise「赋值形态不认识」**；(b1) 非 ASCII 头、(b2) 带 `/` 头 **块丢弃**；(c) 白名单块正文含 `cd script-miner` **块丢弃 + 🔒 打印（不 raise）**；(d) 未知键 `extra_prompts`、(d2) 已知键 `skipped` 携带仓名 **均 raise**；(ok) 纯白名单块无过滤标记。与上轮 🟡1 建议清单**逐项对应**，无一项空转。
+3. **与建议不同的那处予以裁定：同意「块级丢弃 + 键级 raise」**。理由成立 —— 白名单仓的 prompt 正文提到别仓是常态（实测 (c) 即此类），整段 raise 会把常态当异常，夜间 cron `deliver=local` 下就是 rc=2 静默停更（与 2026-09-23 数据冻结同族）。丢弃后仍由「过滤后全文 deny 扫描 ⇒ raise」兜底，泄漏面为零；代价只从「可用性」换成「信息量」，可接受。
+4. **产物端到端（非自述）**：隔离 clone（`--site` 指向 `scratch/mirror-e2e/clone`，HEAD = 本次审计体）跑 `tokens-tracker-mirror.py --write-only` ⇒ 产物与仓内产物 **0 字节差异**，即产物 = 当前代码 × 当前上游源的确定性输出（排除手改产物）；运行期无 rc=2。产物泄漏面 `script-miner` / `personal-cinema` / `/Users/` / `~/CodeSpace` / `jadenli` 在 `data/live.js` 与 `index.html` **全 0**，`prompt` 面仅剩 2 个 `hermes-manager` 块 + 首行「【已过滤】10 条…」，与自述一致。
+5. **导航 96px 实量（before/after 对照，8 档 320–1280，CDP `Emulation.setDeviceMetricsOverride`）**：判据 = 每个 `.wc-nav-item`/`.wc-pub` 的 rect 与 `.github-corner`（fixed 72×72，z999）rect 的交集非空即「压在 corner 下」。**after 8 档全 0**；**before**（`deleteRule` 剥掉注入的 `padding-right:96px`）`320=Dashboard+Cron Job`、`375=Task`、`600=Cron Job` 命中 ⇒ 修复非空转；computed `padding-right` 16px → 96px 确认生效。
+6. **门禁逐值**：`perf-check` rc=0 · `portal --mode post` **18/18** rc=0（S22 `disabled=8 active=1 title=8 href=0`）· `--selftest` **24/24** · `sync-check --selftest` **15/15** · `sync-check` rc=1（过渡态 `artifacts 6`）· 台账 `.review-level.yaml` `safe_load` 通过（78 条，末条 8 字段齐）。
+7. **S22 新增 tab-bar 钉的判别力（手工探针）**：在临时副本注入历史形态 `class="tab-bar home-tab"`（`25761f9:168` 的旧常量）⇒ `nav_guard` 返回红「产物出现 tab-bar」；现产物仍绿。钉成立且走 `html` 全文（不受 `wc-nav` 块范围限制）。
+8. **凭据面**：三笔 diff 对 `sk-` / `ghp_` / `github_pat_` / `AKIA` / `PRIVATE KEY` / `xox?-` **0 命中**（唯一命中行是台账里自述该检查的那句话本身）。
+9. **推送三验**：前 `HEAD=064b4be` / `origin/main=ab86a83` / ahead 3 / 树空 ⇒ `ab86a83..064b4be`；后 `git rev-parse HEAD` = `git rev-parse origin/main` = `git ls-remote refs/heads/main` = **`064b4be2d24542867dcbae76ff01493097e93952`**，ahead 0 / behind 0 / 树空。
+
+### 二、发现（🔴 0 / 🟡 4 / 🟢 4）
+
+- **🟡 1（同类 fail-open 未收尽：第二处 `LIVE_ANOMALY` 赋值仍透传，实测泄漏）** —— `sanitize_anomaly` 用 `ANOMALY_BLOCK.search` 只取**首个**匹配，拼接后不再回扫剩余尾部；`if not m` 分支的 `ANOMALY_ASSIGN` raise 只覆盖「整段没有块」的情形。实测：正常块之后追加 `window.LIVE_ANOMALY.prompt = "【任务】script-miner · SM1 全文";` ⇒ **无 raise、`script-miner` 明文入输出**（放在块之前同理）。上游当前只有 1 处赋值（`web/1acl/data/live.js:1309`）⇒ 潜在而非在燃。**修法 1 行**：`return` 前加 `assert not ANOMALY_ASSIGN.search(tail[m.end()+end:])`（或改成「`ANOMALY_ASSIGN` 匹配数必须恰为 1」），并补一条负控。
+- **🟡 2（`deny` 的派生面与被保护面不同源）** —— deny 取 `LIVE_ITEMS` 的 project 集 − 白名单，但 `LIVE_ANOMALY.prompt` 与 items 不是同一批数据：某仓整行被过滤、归档出 items、或只在 prompt 正文里被提到时，它**不在 deny 里** ⇒ 正文命中不丢块、不变式也不响。实测：白名单块正文含 `cd internal-infra`（该名不在 items）⇒ 原样保留、无告警。今天 items 覆盖了 prompt 里全部项目（`daily-tracker`/`html-gen`/`http-server`/`jaden-tech`/`script-miner` 五个 deny 名），故未触发。**修法**：`_deny = (items project ∪ 静态内部项目表) − PROJECT_WHITELIST`，静态表与白名单同处一地（白名单增仓仍只改一处）。
+- **🟡 3（`ANOMALY_ASSIGN` 缺左标识符边界 ⇒ 可用性误拦）** —— 实测 `var X_LIVE_ANOMALY = 1;` 也 raise。上游任何以此结尾的标识符/注释都会让夜间镜像 rc=2 静默停更。**修法**：正则前置 `(?<![A-Za-z0-9_$])`。与 🟡1 同源（一个正则同时承担「拦漏」与「拦多」两职），建议一并改并同批补负控。
+- **🟡 4（`prompt` 非字符串形态静默跳过过滤）** —— `isinstance(prompt, str)` 为假时整块既不过滤也不 raise（实测把 `prompt` 换成块数组时，仅因内容命中 deny 名才红）。若上游改成块数组/对象且内容全是白名单仓 ⇒ 不过滤、`.replace("~/CodeSpace/","")` 也不执行。**修法**：`if prompt is not None and not isinstance(prompt, str): raise`。
+- **🟢 1**：新增的 tab-bar 钉**没有 selftest 判别探针**（selftest 仍 24/24，未增一条）。我手工注入旧 markup 证明它会红，但这份判别力没人守 ⇒ 下次改判据时可能被顺手改坏。建议并入 S23 探针组。
+- **🟢 2（`desc` 词级是否收口 —— 用户问的口径，我的推荐：下一批收，用掩码、不用丢弃）** 现状两处命中都在**白名单行 `desc`**：`DAILY-CHECKER-CL189 跨仓 daily-tracker …`、`DAILY-CHECKER-CL259 向 html-gen 回灌 …`；`index.html` 里的 `http-server` 是上游壳的说明文（「由托管服务（http-server）在每次 HTML 响应时注入…」），与 npm 包名同形。口径建议：(i) 项目名不是凭据/路径/PII，A1「管行不管词」下现行合规，**不阻断**；(ii) 但 prompt 面已按词收口而 desc 面留明文，「同一条 deny 词」在产物里仍有命中 —— 两套口径迟早互相打脸，建议把 A1 升级为「行 + 词」两层；(iii) 收法：`project_items()` 里对 `desc` 跑同一个 `_deny_hit`，命中即替换为「其他项目」（或截到命中点前 + 省略号），**整行不丢** —— CL189/CL259 消失才是真损失，掩码零信息损失；(iv) 钉子须限定在**数据行**（`live.js` 的 items + prompt），不要扫 shell，否则 `http-server` 这类上游正常文案会被钉子判红、逼着去掩正常文字。本批不动，符合「不在本批擅动」的要求。
+- **🟢 3（注释里的量测声明与实际不完全一致；不阻断，但本仓纪律是注释即证据）** —— (i) `NAV_ITEM_CSS:113` 称「8 档 320–768 残留全清零，无横向溢出」，实测 **320 仍有 17px 横向溢出**，来源是 `button.chip.chip-more`（right 318 > clientWidth 305），**不是 nav**，且 before 同为 17px ⇒ 非本笔引入，但该句应限定为「nav 无溢出」。(ii) 代价写「480/375 各多一行」，实测 **320 也从 2 行变 3 行**（navH 110→167）。(iii) before 残留档位我复现到的是 320/375/600，未复现 420「Session」/480「Memory」（应是注释取的是 `.wc-pub` 80px 生效前的历史值）—— 建议改写成「历史（无 80px 时）…；本轮 96px 前实测 320/375/600」。
+- **🟢 4**：`anomaly_total` / `doc_missing` / `prompt_count` / `total` / `ledger_total` 仍原样披露非白名单项目的异常**条数**（上轮 🟢4 结转，本轮未变；公开面看不到名字与正文）。
+
+### 三、计分与推送
+
+**94 → PASS**（0 🔴；4 🟡 全为非阻断 —— 1 处潜在形态 fail-open、1 处 deny 派生面缺口、1 处可用性误拦、1 处形态静默；产物层零泄漏已端到端验证，门禁 6 项零漂移，凭据面 0 命中，生产面零写）
+
+- **推送**：`ab86a83..064b4be`（3 笔 6 文件 / +131 −24）；后三验同值 `064b4be`，ahead 0 / behind 0 / 树空
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树（未提交），由 ops 下一笔携带；本次推送只含被审的 3 笔
+- **建议修序**（批次）：🟡1 + 🟡3（同一正则两职，一并改 + 补负控）→ 🟡2 静态 deny 表 → 🟡4 非字符串 `prompt` raise → 🟢2 `desc` 掩码口径 → 🟢1 selftest 探针 → 🟢3 注释口径
+
+**待决 0 项**（本轮无阻断项；🟢2 的口径推荐已给，等下一批落）。
+
+---
+
 ## 条目格式说明
 
 ```
