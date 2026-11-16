@@ -5,14 +5,14 @@
    "rc": 0,
    "verdict": "PASS",
    "artifacts": {
-    "bmi-tracker": "exempt",
-    "dt-archive": "exempt",
+    "bmi-tracker": "ok",
+    "dt-archive": "ok",
     "tokens-board": "ok",
-    "daily-poetry": "exempt",
+    "daily-poetry": "ok",
     "poetry-titles": "ok",
     "tokens-live": "ok"
    },
-   "ok_ratio": 0.5
+   "ok_ratio": 1.0
   }
  }
 }
