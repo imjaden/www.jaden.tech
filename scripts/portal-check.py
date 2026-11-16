@@ -558,6 +558,9 @@ S25_FILES = ("sync-status.html", "index.html", "data/sync-status.json",
 def _seed_s25(root):
     """把 S25 判据读到的**全部**输入拷进副本（少一个 ⇒ 每条变异都会被同一个原因判红）。"""
     import shutil
+    missing = [rel for rel in S25_FILES if not (ROOT / rel).exists()]
+    if missing:
+        raise FileNotFoundError("S25 判据输入缺失: " + ", ".join(missing))
     for rel in S25_FILES:
         dest = root / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -575,14 +578,20 @@ def _add_hist_day(root):
     base = datetime.fromisoformat(m.group(1)).date() if m else datetime.now(timezone.utc).date()
     p = Path(root) / "data/sync-history.json"
     data = json.loads(p.read_text(encoding="utf-8"))
-    day = (base - timedelta(days=5)).isoformat()          # 窗口内、且当前无记录
+    # 取窗口内**第一个空缺日**：写死「快照日-5」在历史攒满 5 天后会撞上已有记录 ⇒ 变异空转、
+    # 负控恒 ❌（review 指出 2026-11-21 起必现）。
+    days = data.get("days") or {}
+    day = next(((base - timedelta(days=i)).isoformat() for i in range(1, 90)
+                if (base - timedelta(days=i)).isoformat() not in days), None)
+    if day is None:                                        # 90 天全满 ⇒ 退回最早空缺约定
+        day = (base - timedelta(days=89)).isoformat()
     data.setdefault("days", {})[day] = {"rc": 0, "verdict": "PASS",
                                         "artifacts": {}, "ok_ratio": 1.0}
     p.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def status_selftest():
-    """S25 判别力自证：在临时副本里造 4 种破坏，判据必须逐条转红。"""
+    """S25 判别力自证：副本基线必绿 + 10 种破坏各自必红（共 12 条断言）。"""
     import tempfile
     import shutil
 
