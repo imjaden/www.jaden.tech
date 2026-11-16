@@ -167,6 +167,23 @@ def bar_cell(age_h, budget_h):
             f'<i style="width:{ratio * 100:.0f}%"></i></div>')
 
 
+def _snapshot_date(payload):
+    """窗口基准 = 本次快照时刻（UTC 日期）；解析失败退回当前时刻。"""
+    _ck = str(payload.get("checked_at") or "")
+    try:
+        return datetime.fromisoformat(_ck.replace("Z", "+00:00")).astimezone(timezone.utc).date()
+    except ValueError:
+        return datetime.now(timezone.utc).date()
+
+
+def _window_keys(payload, history):
+    """落在 90 天窗口内的历史日键（页面彩色格与机器 JSON 的 days_recorded 同口径）。"""
+    from datetime import timedelta
+    today = _snapshot_date(payload)
+    lo = today - timedelta(days=89)
+    return sorted(d for d in history if lo.isoformat() <= d <= today.isoformat())
+
+
 def build_page(payload, history, gates, incidents) -> str:
     rc = payload["rc"]
     vcls, vtext = V_CLASS[rc], V_TEXT[rc]
@@ -207,8 +224,10 @@ def build_page(payload, history, gates, incidents) -> str:
             "</tr>")
 
     # 90 天条（自首个记录日起；无记录 = 灰）
+    # 窗口基准取**本次快照时刻**（payload.checked_at，UTC），不取渲染时刻：
+    # 采集到渲染之间跨 UTC 午夜会让窗口平移一天，页面与 JSON 口径分裂（review 🟡1/🟡3）。
     from datetime import timedelta
-    today = datetime.now(timezone.utc).date()
+    today = _snapshot_date(payload)
     cells = []
     for i in range(89, -1, -1):
         day = (today - timedelta(days=i)).isoformat()
@@ -334,7 +353,8 @@ def main(argv=None) -> int:
         STATE_JSON.parent.mkdir(parents=True, exist_ok=True)
         STATE_JSON.write_text(json.dumps(
             {"rc": payload["rc"], "verdict": V_TEXT[payload["rc"]], "checked_at": payload["checked_at"],
-             "artifacts": payload["artifacts"], "gates": gates_map, "days_recorded": len(history)},
+             "artifacts": payload["artifacts"], "gates": gates_map,
+             "days_recorded": len(_window_keys(payload, history))},
             ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         return page_html
 
