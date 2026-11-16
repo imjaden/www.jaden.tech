@@ -2360,6 +2360,46 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — F-4″/F-4‴ 收口（含 O-12/O-15/O-16）审计（1 笔已推）：路径 ∧ origin 双身份判据成立、正则 14 例零漂移；O-15 收口不彻底（守卫落在写盘之后）→ PASS 97
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/sync-run.py`（`CANONICAL_REMOTE_RE` 锚尾 + `re.I`、`PROD_ROOT`/`production_checkout_reason()` 路径∧origin、守卫 × `args.apply`、dry-run 提示）· `scripts/tokens-tracker-mirror.py`（`--site` 错误走 stderr、`.git` 校验）· 台账 2 文件
+- **Tracking**: JT-SEC-035 F-4″/F-4‴/O-12/O-15/O-16
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成
+
+### 一、验收（隔离 clone `…/scratch/f4pp/base` @ `c0892bb` + `git worktree add …/f4pp/wt`；生产 worktree 全程 `porcelain` 空、未跑任何 `--apply`）
+
+1. **正例（生产检出）**：`--include-upstream` dry **rc=0**、**stderr 空**、4 DRY / 2 DUP 正常列出（路径身份与 origin 身份同时成立）。
+2. **路径判否（同仓第二份 clone）**：`ROOT=…/f4pp/base` ⇒ dry **rc=0** + `⚠️ 非生产检出（ROOT=… ≠ 生产检出 …）`（O-12 生效：预览不再被硬拒）；同参数 `--apply` ⇒ **rc=2** 拒绝并点名 `ROOT ≠ PROD_ROOT`。
+3. **linked worktree**：`git worktree add …/f4pp/wt` 且**把 origin 设为规范 ssh** ⇒ dry 仍 `⚠️`、`--apply` **rc=2** ⇒ 路径判据先于 origin，worktree/clone 不再靠 origin 身份混过（F-4″ 目标达成）。
+4. **`SYNC_PROD_ROOT` 覆写双向可用**：生产中设 `SYNC_PROD_ROOT=<副本>` ⇒ 生产检出被判非生产（dry `⚠️`）；副本 worktree 设 `SYNC_PROD_ROOT=<自身>` + 规范 origin ⇒ **通过（stderr 空）** ⇒ 换目录/换机器可迁移，且仍是「与」关系。
+5. **正则（importlib 加载真常量，14 例）**：ssh / https / `ssh://` / 带不带 `.git` / 尾斜杠 / 大小写 `IMJaden` **9 例全 True**；`www.jaden.tech-fork`、`.bak`、他人 owner、本机路径、`www.jaden.techx` **5 例全 False** ⇒ 与上轮 8 例结论一致、零漂移。
+6. **O-15 × `--write-only` 不误伤**：干净空目录 `--write-only --site <空目录>` ⇒ **rc=0** 且五文件落盘（预览用途保留）。
+7. **O-16**：`--site` 指向不存在路径 ⇒ **rc=2**、stdout 空、stderr 单行、该路径**未被创建**。
+8. **门禁逐值**：`perf-check` **rc=0** · `portal-check --mode post` **16/16 rc=0**（S17 `rc=1`、`artifacts=6`）· `portal-check --selftest` **20/20** · `sync-check --selftest` **15/15** · `sync-check` **rc=1**（过渡态 `artifacts 6`）· `py_compile` **rc=0**；生产 `tokens-tracker/index.html` + `data/live.js` sha256 未变（本笔审计零写生产面）。
+
+### 二、发现（🔴 0 / 🟡 1，非阻断）
+
+- **🟡 O-15 收口不彻底：守卫落在写盘之后**。`.git` 校验在 `scripts/tokens-tracker-mirror.py:483-486`，而 `mkdir` + 五次写盘在 `:451-481` ⇒ 指向「已存在非仓目录」且不带 `--write-only` 时，**目录与五个产物已经写出**，随后才 rc=2（实测 `emptyG/tokens-tracker/` 五文件在 rc=2 后完好存在）。即注释「非仓目录不得静默建目录+提交」只兑现了「不静默 + 不提交」，未兑现「不建目录」。**修法**：把该校验前移到 `:363` `is_dir()` 旁（任何 mkdir/写盘之前），`--write-only` 分支保持放行。
+- **🟢 O-17**：`--include-upstream` 的守卫不看 plan 是否真含 emit-site 步 ⇒ 副本里 `--only poetry-titles`（纯本仓腿）也整笔 rc=2，clone 端到端/数据修复场景 false positive（fail-closed 方向，无风险）。修法：`_why` 只在 plan 出现 emit-site `run` 步时求值。
+- **🟢 O-18（F-4‴ 残留）**：只锚尾未锚 host ⇒ `https://mirror.example.com/proxy/github.com/imjaden/www.jaden.tech` 仍 MATCH；因路径身份取「与」且只在生产路径生效，单独不可利用。
+- **🟢 O-19**：`.git` **存在性**判据对「仓内子目录」误拒（fail-closed 方向，可接受）。
+- **结转未动**：O-13（`--force-upstream` 未与 `DT_SANDBOX=1` 绑定）、O-14（`detail` 仍取首个非空行）、O-9（`commit_info.paths` ≠ 实际提交面）。
+
+### 三、计分与推送
+
+**100 − 2（O-15 部分收口：守卫在写盘后，注释口径与行为不符）− 1（O-17 可用性 false positive）= 97 → PASS**（0 🔴；上轮两项 🟡 F-4″/F-4‴ 均 CLOSED；门禁 6 项零漂移；生产面零写）。
+
+- **推送**：前 `HEAD=c0892bb` / `origin/main=a919756` / ahead **1** / behind 0 / 树空 ⇒ `git push origin HEAD:main` = `a919756..c0892bb  HEAD -> main`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`c0892bbd09f9832c6f74945a6a612c1ae18ad53b`**，ahead **0** / behind **0** / 树空
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带；推送后未追加提交
+- **建议修序**（批次）：**O-15 校验前移 → O-13 → O-17 → O-14/O-18/O-19/O-9**
+
+**待决 1 项**：O-15 修法位置取「前移到 `is_dir()` 旁（推荐，写盘前 fail-closed）」还是「保留在提交前 + 先写临时目录再落位」，推荐前者（改动最小、与 O-8 同口径）。
+
+---
+
 ## 条目格式说明
 
 ```

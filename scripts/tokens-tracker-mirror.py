@@ -363,6 +363,17 @@ def main() -> int:
     if not _site.is_dir():
         print(f"⚠️ tokens-tracker mirror: --site 不是目录 {_site}", file=sys.stderr)   # O-16：错误走 stderr
         return 2
+    # O-15：非仓目录必须在**任何写盘之前**拒绝（原位置在 mkdir+五次写之后，只拦住了 commit）
+    if not args.write_only:
+        if not (_site / ".git").exists():
+            print(f"⚠️ tokens-tracker mirror: --site 不是 git 仓 {_site}（只读预览请加 --write-only）",
+                  file=sys.stderr)
+            return 2
+        probe = subprocess.run(["git", "-C", str(_site), "rev-parse", "--show-toplevel"],
+                               capture_output=True, text=True)      # O-19：仓内子目录也认
+        if probe.returncode != 0:
+            print(f"⚠️ tokens-tracker mirror: --site 不是 git 工作树 {_site}", file=sys.stderr)
+            return 2
     if _site.resolve() != WWW_REPO.resolve():
         WWW_REPO = _site.resolve()
         DST_DIR = WWW_REPO / "tokens-tracker"
@@ -479,11 +490,6 @@ def main() -> int:
     if old_css != src_css:
         (DST_ASSETS / "style.css").write_bytes(src_css)
         changed = True
-
-    if not args.write_only and not (_site / ".git").exists():   # O-15：非仓目录不得静默建目录+提交
-        print(f"⚠️ tokens-tracker mirror: --site 不是 git 仓 {_site}（只读预览请加 --write-only）",
-              file=sys.stderr)
-        return 2
 
     if args.write_only:
         print("✅ tokens-tracker mirror: files written (write-only)")
