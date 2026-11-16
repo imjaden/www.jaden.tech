@@ -105,6 +105,9 @@ NAV_ITEM_CSS = (
     ".wc-nav .wc-nav-item.is-active{background:var(--cobalt-600,#4f46e5);color:#fff;}"
     ".wc-nav .wc-nav-item.is-disabled{color:#9ca3af;opacity:.45;cursor:not-allowed;}"
     ".wc-nav .wc-nav-item.is-disabled:hover{background:transparent;color:#9ca3af;}"
+    # 右上角 github-corner 是 fixed 72px（z999），会把 .wc-pub 的右端顶到它下面 —— 实测 1280/1024/768
+    # 命中「待办/文档」两项、600/420 命中三项。给右端留出 80px 安全区；改 padding 无效（被页内简写覆盖）。
+    ".wc-nav .wc-pub{margin-right:80px;}"
 )
 
 _SITE_ROOT = Path(__file__).resolve().parent.parent   # F-4：降级目标存在性校验用
@@ -164,13 +167,6 @@ GH_CORNER_HTML = (
     "</svg></a>"
 )
 
-HOME_TAB_HTML = (
-    '<div class="tab-bar home-tab">'
-    '<a class="tab-btn" href="../index.html">🏠 首页</a>'
-    '<span class="tab-btn active" aria-current="page">🧩 1ACL Task</span>'
-    "</div>"
-)
-
 CHROME_CSS = """
 /* site chrome: github corner（dark-theme）—— 旧双层导航已废弃，只保留 corner */
 .github-corner {
@@ -196,7 +192,7 @@ def _stamp_generated(live_text: str) -> str:
 
 
 def inject_chrome(html: str) -> str:
-    """Add github-corner + home tab-bar to the mirrored page (deterministic)."""
+    """Add github-corner to the mirrored page (deterministic)；导航由上游 wc-nav 承担。"""
     if "github-corner" in html:
         raise RuntimeError("chrome already present — refusing double inject")
     # 0) JT-SEC-015: referrer policy meta (idempotent; fail-closed if <head> anchor is gone)
@@ -349,6 +345,7 @@ def transform_live(js: str) -> str:
     # 2026-10-09: 尾部不再原样透传 —— 上游追加的历史明细块（HIST_TASKS，1.5MB）必须先置空，
     # 否则它带着 personal-cinema 行 / 全文字段进入公开页（守卫会拦，站点数据因此冻结自 09-23）。
     tail = empty_hist_tasks(tail)
+    tail = sanitize_anomaly(tail)
 
     meta = json.loads(m_meta.group(1))
     for field in META_DROP_FIELDS:
@@ -366,6 +363,50 @@ def transform_live(js: str) -> str:
         + "window.BOARD_STATS = " + dump(stats) + ";\n"
         + tail.lstrip("\n")
     )
+
+
+ANOMALY_BLOCK = re.compile(r"(window\.LIVE_ANOMALY\s*=\s*)")
+ANOMALY_TASK_HEAD = re.compile(r"【任务】\s*([A-Za-z0-9_.-]+)\s*·")
+
+
+def sanitize_anomaly(tail: str) -> str:
+    """把 `LIVE_ANOMALY.prompt` 里的任务块按项目白名单过滤（🟡 2026-11-16）。
+
+    上游把整段异常 Prompt 塞进数据面：里面带**非白名单项目名**、内部 CLI（`hm loop list`）、
+    台账编号与 `~/CodeSpace/...` 路径。计数类字段（anomaly_total/doc_missing/...）保留，
+    只过滤 prompt 正文；保留白名单项目的块，其余整块丢弃并标注条数。
+    fail-closed：过滤后若仍有非白名单项目名出现，抛错中止。
+    """
+    m = ANOMALY_BLOCK.search(tail)
+    if not m:
+        return tail                      # 上游没给该块 ⇒ 无需处理
+    try:
+        obj, end = json.JSONDecoder().raw_decode(tail[m.end():])
+    except (json.JSONDecodeError, ValueError):
+        raise RuntimeError("LIVE_ANOMALY 不是合法 JSON — fail-closed")
+    if not isinstance(obj, dict):
+        raise RuntimeError("LIVE_ANOMALY 顶层不是对象 — fail-closed")
+    prompt = obj.get("prompt")
+    if isinstance(prompt, str) and prompt.strip():
+        blocks = [b for b in re.split(r"(?=【任务】)", prompt) if b.strip()]
+        kept, dropped = [], 0
+        for block in blocks:
+            head = ANOMALY_TASK_HEAD.search(block)
+            if head and head.group(1) in PROJECT_WHITELIST:
+                kept.append(block.strip())
+            elif head:
+                dropped += 1
+            else:
+                kept.append(block.strip())     # 无项目名的说明性文字保留
+        if dropped:
+            kept.insert(0, f"【已过滤】{dropped} 条非白名单项目的异常明细（公开面不列）")
+        obj["prompt"] = "\n\n".join(kept).replace("~/CodeSpace/", "")
+    # 不变式：prompt 里不得再出现非白名单项目名
+    bad = [h.group(1) for h in ANOMALY_TASK_HEAD.finditer(str(obj.get("prompt") or ""))
+           if h.group(1) not in PROJECT_WHITELIST]
+    if bad:
+        raise RuntimeError(f"LIVE_ANOMALY 仍含非白名单项目 {bad} — fail-closed")
+    return tail[: m.end()] + json.dumps(obj, ensure_ascii=False, indent=2) + tail[m.end() + end:]
 
 
 def transform_js(js: str) -> str:
