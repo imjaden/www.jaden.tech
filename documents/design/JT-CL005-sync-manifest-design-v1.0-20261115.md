@@ -263,3 +263,23 @@ sync-check                 rc=1（3 条上游 emit-site 过渡态，6 artifacts�
 sync-run --apply           rc=0（幂等：二次运行工作树无数据面变化）
 AGENTS.md                  3666 B（< 4 KB）
 ```
+
+## 十五、第三轮 review（N-1…N-4）收口
+
+| 编号 | 处置 |
+|:--|:--|
+| **N-1** 🟡 | F-4 的存在性探针用原始串 ⇒ `/static/x?t=<ts>`、`#frag` 被判「不存在」而保留根绝对、夜间 mirror 变 rc=2 硬失败。已修：探针先剥 `?`/`#` 判存在，**降级时原样保留**查询串与锚点（本站全局 `?t=` 缓存清除约定不被破坏）。实测三档：`?t=123` 降级保留查询串 / 无查询串正常 / 目标不存在则原样交守卫 |
+| **N-2** 🟡P1 | `sync-run --apply` 非只读：emit-site 腿会让上游仓自己 commit+push（`DT_SITE_NO_COMMIT` 只关站点侧），且与他仓并发会话交错。已加**默认跳过**：emit-site 腿须显式 `--include-upstream` 才跑；routine 运行只碰本仓三腿（tokens-board / tokens-live / poetry-titles）。上游「只写不提交」模式列入跨仓待办（`DT-EMIT-WRITE-ONLY`），收敛前不得全量 `--apply` |
+| **N-3** 🟢 | `/static/../x` 相对穿越可绕字符串型守卫（既有缺口，非本轮引入）⇒ 登记入 `JT-SEC-020` 结转面 |
+| **N-4** 🟡 | 不可读分支覆写 `worst`，可把 `mismatch` 降级为 `unknown`（rc 2→3 分类漂移）。已修：仅在 `none/ok/unstamped/stale` 时才提级为 unknown |
+
+### 基线（2026-11-16 10:2x）
+
+```
+portal-check --mode post   16/16
+portal-check --selftest    20/20
+perf-check                 rc=0
+sync-check --selftest      15/15
+sync-check                 rc=1（过渡态，6 artifacts）
+sync-run（默认）            rc=0：本仓三腿 DRY/DUP，emit-site 三条 SKIP
+```

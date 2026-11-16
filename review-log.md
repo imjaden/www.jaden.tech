@@ -1716,6 +1716,66 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — JT-CL005 F1–F5 收口审计（2 笔待推）：F-1…F-5 全部实测闭合 / 门禁 6 项与期望逐项吻合 → PASS 100
+
+- **review者**: Security Reviewer（review profile，cli 会话，prompt `jt-cl005-fix-review-push` v1.0）
+- **范围**: `origin/main = 2ac6af8` → 本地 HEAD `53ecbd1`，**ahead 2 / behind 0**，`git status --short` 空；2 笔 = `171f1f5`（F-1…F-5 修复，5 文件 +65/−11）+ `53ecbd1`（设计 §十四 + 上轮 review-log + `.review-level.yaml`，3 文件 +118）
+- **Tracking**: 安全面 **0 新发现**；上轮 **F-1…F-5 全部实测闭合**；本轮新增 **N-1…N-4**（🟡×2 / 🟢×2，均非安全回归，不开 SEC 号）；结转 JT-SEC-019 / 020 / 022 / 023（🟢 LOW）OPEN
+- **状态**: ✅ PASS（**100 / 100**，Rating A；🔴 0 / 🟡 安全类 0）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计，非设计评审）
+
+### 一、门禁（全部实跑，与 prompt 期望逐项吻合）
+
+| 判据 | 实测 | 期望 |
+|:--|:--|:--|
+| `portal-check.py --mode post` | **16/16 rc=0** | 16/16 ✅ |
+| `portal-check.py --selftest` | **20/20 rc=0**（含 S18、S19） | 20/20 ✅ |
+| `perf-check.py` | **rc=0**（`OK all perf assertions passed`，含 poetry-titles 同步项） | rc=0 ✅ |
+| `sync-check.py --selftest` | **15/15 rc=0**（含新增「不可读产物 ⇒ unknown 且 record 带 producer」） | 15/15 ✅ |
+| `sync-check.py` | **rc=1**（3 条 `unstamped` + 3 条 ok，artifacts=6） | rc=1 过渡态 ✅ |
+| `sync-run.py --apply`（连跑两次） | **rc=0 / rc=0**，两次输出**逐字节相同**，HEAD 未变，本仓工作树空 | rc=0 + 无数据面变化 ✅ |
+| `grep -rn "/Users/\|jadenli" config/ sync-status.html` | **0** | 0 ✅ |
+| `len(AGENTS.md)` | **3666 B** < 4096 | 3666 ✅ |
+
+`rc` 一律 `cmd > out 2>&1; echo $?` 口径（不经管道，避免取到 `tail` 的 rc）。
+
+### 二、F-1…F-5 闭合证据（逐条构造输入实跑，非读 diff）
+
+| # | 判据 | 实测 | 结论 |
+|:-:|:--|:--|:--|
+| F-1 | 产物不可 utf-8 ⇒ 默认 human 模式不崩、`❓ … unreadable`、record 带 `producer` | 把 `bmi-tracker.html` 覆写为 6 B 非 utf-8 ⇒ 无参运行输出 `❓ bmi-tracker.html: unreadable ('utf-8' codec can't decode byte 0xff …)`，`grep -c Traceback = 0`，rc=3（`UNKNOWN`）；`--json` 该 record = `producer: daily-tracker/scripts/daily-tracker-update.py`，`stamp/generated/age_h` 均 null；selftest 同项绿。验证后 `git checkout --` 复原（`d2ca9ea3`） | ✅ 闭合 |
+| F-2 | `sync_gate({not valid json)` ⇒ `(False, "manifest unparsable…")` 不抛 | 直接调 `sync_gate` 三态：`{not valid json` / `[1,2,3]` / `42` 全部返回 `(False, 'manifest unparsable (non-JSON or non-object)')`；缺失清单仍 `(False,'manifest missing')`；S19 实测绿 | ✅ 闭合 |
+| F-3 | `--apply` 后 `sync-check` rc≥2 ⇒ 脚本非零退出 | 临时把 `bmi-tracker.verify.hash` 改 `required` ⇒ `sync-check` rc=2（structural 1 条）⇒ `sync-run.py --apply --only tokens-board` **rc=1**（修复前同一路径 `return 0`）；随后 `cp` 备份还原清单，`git status` 归零、`sync-check` 回 rc=1，工作树与 HEAD 逐字节复原 | ✅ 闭合 |
+| F-4 | 降级只在 `static/...` 目标真实存在时发生，否则原样交守卫 | 正例 `/static/img/favicon.png`（实存 50998 B）⇒ `../static/img/favicon.png`，`ROOT_ABS_REF` 残留 **0**；负例 `/static/img/definitely-not-there.png` ⇒ 原样保留 + `⚠️ 站点资源不存在…` 警告，残留 **1** ⇒ `main()` 的 rc=2 分支持续生效 | ✅ 闭合 |
+| F-5 | AGENTS.md 口径与基线一致 | `AGENTS.md:63` = 「三颗（前两颗 rc=0 才算绿，第三颗 rc≤1 即绿：0 全绿 / 1 过渡态）」；计数 16/16 · **20/20** · **15/15** 与实测逐一相同；体积 3666 B | ✅ 闭合 |
+
+### 三、其余复核
+
+- **幂等**：`sync-run --apply` 两轮输出 `diff` 为空（`bmi-tracker OK / DUP dt-archive / tokens-board OK / daily-poetry OK / poetry-titles OK / DUP tokens-live / sync-check rc=1`），本仓 `git status` 空、`HEAD` 未变 ⇒ mirror 未被触发隐式 commit（`changed=False` 路径）。
+- **凭证面**：2 笔新增行密钥族（`BEGIN * PRIVATE` / `api_key` / `secret` / `password` / `AKIA` / `ghp_` / `xox[bp]-`）**0**；7 处 `/Users` 全在 review-log 叙述与 S18 探针 fixture（`portal-check.py`，有意为之）；`config/` 与 `sync-status.html` 家目录前缀 0。
+- **文档一致性**：设计 §十四 表内 6 条数字（16/16 · 20/20 · 15/15 · rc=1 · rc=0 · 3666 B）与实测全部吻合；F-6 的 `>=5` 条目数断言与 selftest 输出「当前 6：含 tokens-live」一致。
+- **YAML 完整性**：`.review-level.yaml` `safe_load` 通过，`review_history` 58 条，新条目六字段齐（date/reviewer/level/verdict/score/findings_*）、`tracking` 2499 字符无单引号。
+
+### 四、本轮新增发现（不阻断 2 笔判据，均非安全回归）
+
+| # | Level | 结论（证据） | 建议 |
+|:-:|:--|:--|:--|
+| N-1 | 🟡 | F-4 的存在性探针用**原始串**判 `_SITE_ROOT/target`：`/static/img/favicon.png?t=<ts>` 与 `…png#x` 均判「不存在」⇒ 保留根绝对 ⇒ `main()` **rc=2 硬失败**（修复前是静默降级成功）。本站 `?t=` 是全局缓存刷新约定（AGENTS.md），上游下一次带 `?t=` 的 `/static/` 引用即触发夜间 mirror 停摆。方向 fail-closed、不泄密 | 探针剥 `?`/`#` 再判存在，降级时保留原查询串 |
+| N-2 | 🟡 P1 | `sync-run.py --apply` **不是只读编排**：按本 prompt 全量跑两次，daily-tracker `--emit-site` 各自在其仓**建 commit 并 push**（`974ada9` 09:48:44 / `2ca95a1` 09:48:51，`origin/master` 已到 `2ca95a1`）；其 `DT_SITE_NO_COMMIT=1` 只关站点侧提交，不关本仓快照提交。与「不动他仓」边界直接冲突，且与该仓内并发会话（09:46–09:49 `review@audit` 三笔）交错 | 给 emit-site 加「只写不提交」模式（mirror 已有 `--write-only`），提交统一归编排器；`--apply` 帮助文本标注「会写上游仓并可能 push」 |
+| N-3 | 🟢 | 相对穿越逃逸：`/static/../config/sync-manifest.json` 被降级为 `../static/../config/sync-manifest.json`，字符串型 `ROOT_ABS_REF` 不再命中 ⇒ JT-SEC-018 的 fail-closed 面存在 `..` 缺口。**既有**（旧正则同样盲改写），F-4 未引入亦未收口 | 降级后 `Path.resolve()` 断言仍位于 `_SITE_ROOT` 内 |
+| N-4 | 🟢 | `check_artifact` 不可读分支直接覆写 `worst`：同一条目已有 `mismatch`(rank3) 时会被降级为 `unknown`(rank2)（rc 2→3）。两者皆红，仅分类漂移 | 改用 rank 比较而非直接赋值 |
+
+### 五、计分、结论与推送
+
+**100 − 0 = 100 / 100 → A → PASS**。安全面 0 新发现、0 回归：4 笔差异无新增 `innerHTML`/`eval`/外链域，无守卫放宽（`ROOT_ABS_REF`、`SENSITIVE_LEAK` 严格档、戳后于守卫、`gitignored` 覆写点全部成立），无凭据外泄。上轮 5 项 🟡 工具项本轮**全部实测闭合**，无一条"读 diff 就算修"。
+
+**推送**：ff-only `git push origin HEAD:main` —— 前 `HEAD=53ecbd1` / `origin/main=2ac6af8` / `rev-list --count origin/main..HEAD=2` / `merge-base --is-ancestor` 通过 / 工作树空；输出 `2ac6af8..53ecbd1  HEAD -> main` rc=0；后 `git rev-parse origin/main` = `git ls-remote origin refs/heads/main` = `53ecbd107cc2e164030e8839cd6713169cf8f636`，ahead **0** / behind **0**。**未新增提交、未改 `AGENTS.md`、未改设计件**（本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔 `docs@handoff` 携带）。
+
+**待决 2 项** —— ① N-2：`--apply` 的上游写/推面是否收（推荐：mirror 同款只写模式 + 编排器统一提交；在接受前**审计流程不再全量跑 `--apply`**，改用 `--only` 限本仓三腿）；② N-1：`?t=` 探针剥查询串（3 行，推荐收）。
+
+---
+
 ## 条目格式说明
 
 ```
