@@ -240,3 +240,26 @@ sync-check                 rc=1（3 条上游 emit-site 过渡态；6 artifacts�
 poetry-titles-gen --check  rc=0
 grep -rn "/Users/\|jadenli" config/ sync-status.html  → 0
 ```
+
+## 十四、第二轮 review 发现收口（2026-11-16 10:0x）
+
+| 编号 | 级别 | 问题 | 处置 |
+|:--|:--|:--|:--|
+| F-1 | 🟡 P1 | `sync-check` human 模式在「产物不可读」分支取不到 `record["producer"]` ⇒ **KeyError traceback**（最该报错的输入上崩） | record 先建（含 producer）再读文件；`print_human` 全改 `.get()`；selftest 增「不可读 ⇒ unknown 且带 producer」 |
+| F-2 | 🟡 | `sync_gate()` 末尾 `json.loads(raw)` 无保护 ⇒ 畸形清单直接抛，S17 不成行 | 读文件 / 解析各自 try；畸形 ⇒ `manifest unparsable` 判红；selftest 增 **S19** 回归 |
+| F-3 | 🟡 P1 | `sync-run --apply` 后 `sync-check` 结果只打印、不参与退出码 ⇒ 结构违规也 `return 0` | `check.rc >= 2` 计入 failures ⇒ 非零退出 |
+| F-4 | 🟡 | `/static/` 降级不校验目标存在 ⇒ 坏链被静默改成坏相对链 | 只在 `_SITE_ROOT/<target>` 存在时降级；不存在保持原样交 `ROOT_ABS_REF` 守卫 rc=2（实测正/负例双向） |
+| F-5 | 🟡 | `AGENTS.md` 自称「三颗钉子 rc=0 才算绿」而第三条基线是 rc=1，自相矛盾 | 改为「前两颗 rc=0，第三颗 rc≤1 即绿（0 全绿 / 1 过渡态）」；计数 16/16 · **20/20** · 15/15 |
+| F-6…F-9 | 🟢 | 条目数断言放宽（⇒ 现为 `>=5`）、S18 钉 `sync_gate` 而非 S17 行、死码/冗余 import、live.js 戳新增 producer 别名（JT-SEC-020 面 +1） | F-6 已随 Q 系列改为 `>=5` 并注释；F-7 由新增 S19 直接钉函数返回值；F-8 未逐条清理（无功能影响，留待下次触碰该文件时顺带）；F-9 登记入 `JT-SEC-020` 结转面 |
+
+### 收口后基线（2026-11-16 10:05 实测）
+
+```
+portal-check --mode post   16/16
+portal-check --selftest    20/20（S17 + S18 + S19）
+perf-check                 rc=0
+sync-check --selftest      15/15
+sync-check                 rc=1（3 条上游 emit-site 过渡态，6 artifacts）
+sync-run --apply           rc=0（幂等：二次运行工作树无数据面变化）
+AGENTS.md                  3666 B（< 4 KB）
+```

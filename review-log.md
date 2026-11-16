@@ -1629,6 +1629,93 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — JT-CL005 P4+P5 落地审计（4 笔待推）：S17/S18 判别力 / Q1–Q4 收口 / sync-run 编排 / tokens-live 打戳 → PASS 100
+
+- **review者**: Security Reviewer（review profile，cli 会话，prompt `jt-cl005-p4p5-review-push` v1.0）
+- **范围**: `origin/main = 5eb2799` → 本地 HEAD `2ac6af8`，**ahead 4 / behind 0**，`git status --short` 空；4 笔 = `a87d97f`（P4/P5 代码）+ `c6d4201`（data@update 拉取式刷新）+ `35cdf12`（tokens-tracker mirror 自提交）+ `2ac6af8`（设计 §十三 + sync-status 重出 + 上轮 review-log）；聚合 15 文件 +329/−55
+- **Tracking**: 安全面 **0 新发现**；工具健壮性 **F-1…F-5（🟡，不开 SEC 号）** / 卫生与自检 **F-6…F-9（🟢）**；上轮 Q-1…Q-4 **收口实测确认**；JT-SEC-019 / 020 / 022 / 023（🟢 LOW）结转 OPEN（020 面扩 1 处 = `live.js` 戳内 producer 别名 + `generated`）
+- **状态**: ✅ PASS（**100 / 100**，Rating A；🔴 0 / 🟡 安全类 0 / 🟡 工具类 5）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计，非设计评审）
+
+### 一、门禁（全部实跑，与 prompt 期望逐项吻合）
+
+| 判据 | 实测 | 期望 |
+|:--|:--|:--|
+| `portal-check.py --mode post` | **16/16 rc=0** | 16/16 ✅ |
+| `portal-check.py --selftest` | **19/19 rc=0** | 19/19 ✅ |
+| `perf-check.py` | **28 PASS rc=0**（含 `?t=` parity `1794394182`） | rc=0 ✅ |
+| `sync-check.py --selftest` | **14/14 rc=0** | 14/14 ✅ |
+| `sync-check.py` | **rc=1**（3 条 `unstamped`：bmi-tracker / dt-archive / daily-poetry；3 条 ok；artifacts=6） | rc=1 过渡态 ✅ |
+| `grep -rn "/Users/\|jadenli" config/ sync-status.html` | **0** | 0 ✅ |
+| `len(AGENTS.md.encode())` | **3602** | < 4096 ✅ |
+
+`rc` 均用 `>/dev/null; echo $?` 口径复测（首轮经 `| tail` 取到的是 tail 的 rc，已在复测中纠正）。
+
+### 二、重点复审面逐条
+
+**① S17 真判（三分支全部实测红）** —— `portal-check.py:299-330` 的 `sync_gate()` 三分支逐一在**仓外 `git archive` 副本**上验证（副本不改本仓，探针后已删）：
+
+| 注入 | sync-check | S17 结果 |
+|:--|:--|:--|
+| `mv config/sync-manifest.json` | rc=1（自造） | ❌ `[manifest missing]`，15/16 |
+| 清单含 `/Users/probe/repo` | — | ❌ 脱敏违规（S18 同路径） |
+| `echo ab >> tokens-tracker/data/live.js`（正文哈希不符） | **rc=2** | ❌ `[manifest v1 / artifacts=6 / rc=2]`，15/16 |
+| 写入非 utf-8 字节（产物不可读） | **rc=3** | ❌ `[manifest v1 / artifacts=6 / rc=3]`，15/16 |
+
+⇒ `rc<=1` 的边界成立，**rc=2 与 rc=3 都红**，非「只看 rc=0」。S17 读的是 `--json` 的 `payload["rc"]`（非进程退出码），这一点在 F-1 下有独立意义。
+
+**② S18 非恒真** —— `:373-383` 用 `tempfile` 注入一条含 `/Users/probe/repo` 的临时清单，断言 `sync_gate(probe)[0] is False`；实跑 `S17_ok=False`。**判别力成立**，但钉的是 `sync_gate` helper 而非 S17 那一行（S17 是 `ok, detail = sync_gate(...)` 的一行包装，已核代码，逃逸面为零）⇒ 记 F-7（🟢）。
+
+**③ Q1–Q4 收口（逐条实测，非仅读 diff）**
+
+- **Q-1 unknown ⇒ rc=3**：非 utf-8 产物实测 `--json` 口径 rc=3、S17 红（见 ① ）。**但默认 human 模式该输入直接 traceback（F-1）** ⇒ 修复只在门禁口径成立。
+- **Q-2 戳 v 非数字不抛**：`sync-check.py:112-121` 用 `try/except (TypeError, ValueError)` 且用 `stamp_v is None` 做哨兵；selftest 新增用例 14/14 绿。
+- **Q-3 `verify.hash` 语义**：副本把 `bmi-tracker.verify.hash` 由 `optional` 改 `required`（保持 `stamp=pending`）⇒ **rc=2**，`❌ bmi-tracker.html: 契约要求打戳（hash=required）但缺失`；现状 `optional` ⇒ `unstamped` rc=1。语义与文档一致，双向都实测。
+- **Q-4 `tokens-live` 双侧覆盖**：`manifest.watch` 与 `artifacts` 都含 `tokens-tracker/data/live.js`，`unregistered=[]`，`artifacts=6`；产物首行即戳 `id=tokens-live … sha256=de6801916e9b0197`。
+
+**④ `sync-run.py`**
+
+- `run_in` 优先：`repo_path(producer.run_in or producer.repo)` ⇒ tokens-board/tokens-live 解析到**本仓**（hermes-manager 声明 + 脚本在本仓），dry-run 实测 `cwd=/Users/jadenli/CodeSpace/www.jaden.tech` ✅
+- `{site}` 展开：`resolve_cmd()` 逐 token 比对 `{site}` ⇒ `daily-poetry deploy --target <ROOT>` ✅
+- 同 `(cwd, cmd)` 去重：dry-run 实测输出 `DUP dt-archive`（bmi-tracker 同入口）与 `DUP tokens-live`（tokens-board 同入口）✅
+- **公开清单零绝对路径**：`config/sync-manifest.json` 只出现仓别名 + 仓内相对路径；覆写点 `cache/sync-paths.json` 在 `.gitignore:5`（`cache/`）内 ✅
+- `--apply` 幂等：本地可执行段实测 —— `tokens-tracker-mirror.py --write-only` 重跑 **rc=0 且 `git status --short` 空**（逐字节同）；`--emit-status` 重出与仓内 `sync-status.html` 仅 `age_h 0.0h → 0.1h` 差异（时间自然流逝）⇒ 内容面无漂移 ✅。跨仓 emit-site 段**未重跑**（边界「不动他仓」）⇒ 待确认 1。
+
+**⑤ `tokens-tracker-mirror.py` 戳序与守卫面**
+
+- 戳在守卫**之后**：`index.html` 走 `INLINE_DATA → ROOT_ABS_REF → REFERRER_META → guard_ok(SENSITIVE_CONTENT)` 全过才 `html_stamp`（`:346-378`）；`data/live.js` 走 `guard_ok(new_live, …, SENSITIVE_LEAK)`（严格档）通过后才 `js_stamp`（`:385-395`）。**戳永不进入守卫视野 ⇒ 无「戳掩护敏感词」通道** ✅
+- 数据面复核：`live.js` 13246 B，`/Users/` 0、邮箱 0、站内敏感词（`personal-cinema|磁力|迅雷|飞书|阿里云`）0，`window.HIST_TASKS = []`（历史明细致空生效），键仅 `WEB_DATA_META/LIVE_ITEMS/BOARD_STATS/HIST_*` ✅
+- `/static/` 降级：只在 `transform_shell` 做 `href|src="/static/` → `../static/`，`ROOT_ABS_REF` 与 `main()` 的 fail-closed 次序未改，`/1acl/`、`/session/` 等仍 rc=2 ✅；产物唯一降级链 `href="../static/img/favicon.png"`，站内该资源实存 **50998 B** ✅。但降级本身**不校验目标存在**（F-4）。
+
+**⑥ `AGENTS.md`（受保护文件，2026-11-16「P5 同意」）** —— 新增两行（`sync-status.html`、`config/sync-manifest.json`）属实；三颗钉子计数与实测一致（post 16/16、selftest 19/19、sync selftest 14/14）；体积 3602 B < 4096 ✅。与第三条钉子存在措辞自相矛盾（F-5，**按边界未改**，留 ops）。
+
+**⑦ 凭证 / 公开面** —— 4 笔新增行密钥族（`BEGIN * PRIVATE` / `api_key` / `secret` / `password` / `AKIA` / `ghp_` / `xox[bp]-`）**0**；唯一 `/Users/` 命中是 S18 的探针 fixture 字面量（`portal-check.py:228`，有意为之）；`config/` 与 `sync-status.html` 家目录前缀 0。
+
+### 三、发现表
+
+| # | Level | 类别 | 结论（证据） | 建议 |
+|:-:|:--|:--|:--|:--|
+| F-1 | 🟡 P1 | 工具健壮性（Q-1 半收口） | `sync-check.py:138-150`「产物不可读」分支 `record` 只带 `id/artifact`，缺 `producer/generated/age_h`；`print_human():209` 直接取 `row['producer']` ⇒ **默认 human 模式 traceback + 退出 1**（实测：`--json` rc=3 ✅ / 无参 rc=1 带 KeyError）。该行也不进人读表。文档 `:11` 的「3 = 无法判定」在默认 CLI 口径不成立 | `record` 兜底 `producer`（取 `art["producer"]`）与三字段置 None；或 `print_human` 全改 `.get()`；补 selftest 用例（非 utf-8 产物 ⇒ rc=3 且 human 不抛） |
+| F-2 | 🟡 | S17 守卫健壮性 | `sync_gate()` 末尾 `json.loads(raw).get("version")` 无保护：清单为**畸形 JSON** ⇒ `JSONDecodeError`；为**合法非 dict**（`[]`）⇒ `AttributeError`（两者实测抛）。S17 不成行而是 portal-check traceback。方向仍安全（非绿），但恰好把「清单损坏」这一最该点名的场景变成崩溃 | 把 `json.loads(raw)` 收进 `try/except (ValueError, AttributeError)` ⇒ `return False, "manifest unparsable"` |
+| F-3 | 🟡 P1 | 门禁完整性 | `sync-run.py:132-160`：`--apply` 后自动跑 `sync-check --json`，结果**只打印不参与退出码**（`failures` 只统计各 step rc，尾部 `return 0`）⇒ 编排跑完留下 rc=2/3 结构违规时仍报成功 | `if check and check.get("rc", 0) >= 2: return 1`（或独立 rc=4），并在 `--json` 里给 `ok` 布尔 |
+| F-4 | 🟡 | 守卫面弱化 | `/static/` 一律降级为 `../static/` 但**不校验目标存在**：该类引用由「命中 `ROOT_ABS_REF` ⇒ rc=2 中止」变为「静默改写为相对链」。当前唯一命中（favicon.png）实存，故无实际损害；上游下次引 `/static/x` 而本站无此资源时会静默 404 而非告警 | 降级后逐跳校验 `ROOT / 相对路径` 存在，缺失则 `rc=2`（把 fail-closed 补回） |
+| F-5 | 🟡 | 文档一致性（AGENTS.md） | 同一段既写「三颗钉子，`rc=0` 才算绿」，又写 sync-check「`rc=1` 过渡态」，而实测基线正是 **rc=1** ⇒ 文字自相矛盾。受保护文件，本轮**未改** | 改为「perf/portal 必须 rc=0；sync-check 允许 rc=1 过渡态，rc≥2 为红」 |
+| F-6 | 🟢 | 自检强度 | `sync-check --selftest` 条目数断言由 `== 5` 放宽为 `>= 5`（message 写「当前 6」）。回归仍有 `unregistered` + S17 detail 兜底，但 watch 与 artifact 条目**同时**删除时可静默 | 断言 `set(ids) >= {...}` 或独立 `EXPECTED_ARTIFACTS = 6` 常量 |
+| F-7 | 🟢 | 自检真伪 | S18 断言的是 `sync_gate()` helper（S17 的一行包装）而非 S17 行本身；且 `manifest_path` 注入无法驱动内层 `sync-check` 的 rc 分支（内层恒读仓内清单）⇒ rc=2/rc=3 两分支靠仓外副本补测（见 ① ，已补） | 若要 S18 覆盖全三分支，`sync_gate` 增加 `runner` 注入点，S18 传桩返回 rc=2/rc=3 |
+| F-8 | 🟢 | 代码卫生（既有，上轮 Q-5 结转） | `tokens-tracker-mirror.py:366-369` 死码 `_meta = new_live if 'new_live' in dir() else ""`（此处 `new_live` 未赋值，恒空）、`transform_live()` 调三次；`sync_gate` 内 `import subprocess as _sp` 冗余（模块已 import）；`sync-run.py:160` `all(skip)` 不含 `dup` ⇒ 全 dup 计划返回 0 而非 3；mirror 未被传 `--write-only` ⇒ `sync-run --apply` 仍隐含本仓 `git commit`（`35cdf12`/`c6d4201` 即此来路） | 清死码、`sync-run` 对 mirror 传 `--write-only` 由编排器统一提交 |
+| F-9 | 🟢 | 公开面披露 | `live.js` 新戳内含 `producer=hermes-manager/1acl-board-gen` + `generated`（上游数据时刻）⇒ JT-SEC-020「公开仓别名披露」面扩 1 处（数据面本体，此前仅 index.html）。无凭据无内网路径 | 并入 JT-SEC-020 处置（列裁剪或接受），不新开号 |
+
+### 四、计分与结论
+
+**100 − 0 = 100 / 100 → A → PASS**。安全面 0 新发现、0 回归：无凭据/密钥外泄，无脚本注入面新增（4 笔无新增 `innerHTML`/`eval`/外链域），无守卫放宽（戳序、`ROOT_ABS_REF`、`SENSITIVE_LEAK` 严格档、`gitignored` 覆写点全部成立）。F-1…F-5 为**审计/编排工具自身**的健壮性与文档项（沿上轮口径不扣安全分），其中 **F-1、F-3 建议 24h 内修**（前者让「产物不可读」的默认 CLI 崩溃，后者让编排器的校验结论失效）。
+
+**推送**：ff-only `git push origin HEAD:main`，**前后实测** —— 前 `HEAD=2ac6af8` / `origin/main=5eb2799` / `rev-list --count origin/main..HEAD=4` / `merge-base --is-ancestor` 通过；推送输出 `5eb2799..2ac6af8  HEAD -> main` rc=0；后 `git rev-parse origin/main` = `ls-remote origin refs/heads/main` = `2ac6af8b69730b193e10640f783bd3fb0f406803`，ahead **0** / behind **0**，`git status --short` 空。**未新增提交、未动他仓、未改 `AGENTS.md`**（本 entry 与 `.review-level.yaml` 的 `review_history` 留工作树，由 ops 下一笔 `docs@handoff` 携带）。
+
+**待确认 2 项** —— ① 跨仓 emit-site 两段（daily-tracker `--emit-site` / script-miner `deploy --target`）本轮**未重跑**（边界「不动他仓」），其幂等性依赖上游自述与设计 §十三 的实跑记录，建议 ops 下次例行 `sync-run --apply` 时观察 `git status` 是否为空；② F-4 是否按建议把「降级后资源存在性」升为 fail-closed（推荐：升，代价 3 行）。
+
+---
+
 ## 条目格式说明
 
 ```
