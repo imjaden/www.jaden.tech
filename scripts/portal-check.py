@@ -302,6 +302,9 @@ def run(mode, html=None, css=None):
     check_s20()
     # S22 镜像页导航契约（2026-11-16 决策 A1/B1）
     check_s22()
+    # S24 台账外置（JT-SEC-044）
+    _ok24, _d24 = ledger_guard()
+    check("S24", "台账面外置私有仓：公开仓不得再跟踪 review-log / .review-level / documents/", _ok24, _d24)
 
 
 # S17（JT-CL005）：同步面契约齐备 —— 清单存在、公开面脱敏、校验器不红
@@ -411,6 +414,29 @@ def nav_guard(board_path=None):
     if titled != dis:
         return False, f"禁用项带 title 的只有 {titled}/{dis}"
     return True, f"disabled={dis} active={act} title={titled} href=0"
+
+
+# S24（2026-11-16 JT-SEC-044）：台账面已外置私有仓 —— 公开仓不得再跟踪台账。
+# 判据走 `git ls-files`（跟踪面），不是文件存在性：本地副本仍在（review 写入缓冲），但不进公开仓。
+LEDGER_PATHS = ("review-log.md", ".review-level.yaml", "documents/")
+
+
+def ledger_guard(root=None):
+    """返回 (ok, detail)。公开仓被跟踪了台账 ⇒ 红。"""
+    root = Path(root or ROOT)
+    try:
+        out = subprocess.run(["git", "-C", str(root), "ls-files"], capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.SubprocessError) as exc:
+        return False, f"git ls-files 失败: {type(exc).__name__}"
+    if out.returncode:
+        return False, f"git ls-files rc={out.returncode}"
+    tracked = [ln.strip() for ln in out.stdout.splitlines() if ln.strip()]
+    hit = [f for f in tracked if f in ("review-log.md", ".review-level.yaml") or f.startswith("documents/")]
+    if hit:
+        return False, f"公开仓仍跟踪台账 {len(hit)} 个文件（如 {hit[0]}）"
+    if not tracked:
+        return False, "git ls-files 为空 —— 判据可能失效"
+    return True, f"台账 0 个被跟踪（全仓 {len(tracked)} 个文件）"
 
 
 def check_s22(board_path=None):
