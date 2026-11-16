@@ -176,7 +176,10 @@ def check_artifact(art):
                     elif age > limit:
                         status, detail = "stale", f"{rel}: 已 {age:.1f}h > {limit:g}h"
                     else:
-                        status, detail = "ok", f"{rel}: {age:.1f}h ≤ {limit:g}h"
+                        _raw_ts = str(rec.get("stamp") or rec.get("generated") or "")
+                        _tz_note = ("（上游戳无时区偏移，按本地解释）"
+                                    if _raw_ts and "+" not in _raw_ts and not _raw_ts.endswith("Z") else "")
+                        status, detail = "ok", f"{rel}: {age:.1f}h ≤ {limit:g}h{_tz_note}"
         recs.append(rec)
         rank = {"ok": 0, "exempt": 0, "unstamped": 1, "stale": 1, "unknown": 2,
                 "mismatch": 3, "missing": 3}
