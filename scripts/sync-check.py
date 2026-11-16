@@ -55,10 +55,14 @@ def load_manifest(path=MANIFEST):
     ids = [a.get("id") for a in data.get("artifacts", [])]
     if len(ids) != len(set(ids)):
         problems.append("duplicate artifact id in manifest")
+    modes = {"emit-site", "mirror", "local"}      # JT-CL005 §84 契约枚举
     for art in data.get("artifacts", []):
         for key in REQUIRED:
             if key not in art:
                 problems.append(f"{art.get('id', '?')}: missing field {key}")
+        mode = (art.get("producer") or {}).get("mode")
+        if mode is not None and mode not in modes:
+            problems.append(f"{art.get('id', '?')}: producer.mode {mode!r} 不在契约枚举 {sorted(modes)}")
     return data, problems
 
 
@@ -415,7 +419,11 @@ def main():
 
     rc, payload, _ = run()
     if args.emit_status:
-        size = emit_status(payload, args.emit_status)
+        # 2026-11-16：旧内联模板已退役（它产出的页面没有横幅/小球/90 格 ⇒ S25 必红）。
+        # 为兼容旧调用，这里转调生成器；--emit-status 的 PATH 参数不再使用。
+        print("note: --emit-status 已退役，转调 scripts/sync-status-gen.py", file=sys.stderr)
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "sync-status-gen.py")], cwd=str(ROOT))
+        size = (ROOT / "sync-status.html").stat().st_size if (ROOT / "sync-status.html").exists() else 0
         print(f"status page written: {args.emit_status} ({size} B)", file=sys.stderr)
     if args.emit_history:
         days = emit_history(payload, args.emit_history)
