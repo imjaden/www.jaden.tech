@@ -142,10 +142,11 @@
         "pii": "none"
       },
       "verify": {
-        "freshness_h": 48,
+        "freshness_h": 2160,
         "hash": "required",
         "guard": "none"
-      }
+      },
+      "_freshness_note": "预生成月档：戳的 generated = 正文最后一次变化的时刻（页面约每 30 天随版本更新一次，实测 5 次提交跨度 68 天）⇒ freshness 按季度给 2160h；静止期不判 stale，真正的数据新鲜度在 today-poetry-*.js（未纳清单）。"
     },
     {
       "id": "poetry-titles",
