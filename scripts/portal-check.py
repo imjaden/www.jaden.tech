@@ -483,6 +483,10 @@ def status_page_guard(root=None):
     # 根绝对路径会 404（页面在站点根，但仍统一要求相对引用，避免迁目录再翻车）
     if re.search(r'(?:href|src)="/', html):
         problems.append("存在根绝对引用")
+    if "快照 " not in html or "（UTC）" not in html:
+        problems.append("缺快照时间标注（构建期快照必须显式）")
+    if "下次生成" not in html:
+        problems.append("缺「下次生成」说明")
     bars = len(re.findall(r'<span class="(?:ok|warn|bad|none)" title=', html))
     if bars != 90:
         problems.append(f"90 天条格数 {bars} != 90")
@@ -500,6 +504,8 @@ def status_page_guard(root=None):
     m_dot = re.search(r'class="sync-dot (is-ok|is-warn|is-bad)"', ih)
     if not m_dot:
         problems.append("index.html 小球缺失")
+    elif 'href="./sync-status.html"' not in ih:
+        problems.append("小球 href 不指向 ./sync-status.html")
     elif m_banner and DOT_OF_BANNER[m_banner.group(1)] != m_dot.group(1):
         problems.append(f"小球 {m_dot.group(1)} 与横幅 {m_banner.group(1)} 不同源")
     if STATUS_JSON.exists():
@@ -523,7 +529,7 @@ def status_page_guard(root=None):
 
 def check_s25(root=None):
     ok, detail = status_page_guard(root)
-    check("S25", "状态页契约：横幅/小球/机器 JSON 同源 + favicon 戳 + 90 格 + 行数=清单", ok, detail)
+    check("S25", "状态页契约：三处同源 + favicon 戳 + 90 格 + 行数=清单 + 快照/下次生成标注 + 小球 href", ok, detail)
     return ok
 
 
@@ -535,8 +541,7 @@ def status_selftest():
     results = []
     src = ROOT
     for name, breaker in (
-        ("球色与横幅不同源", lambda d: _mutate(d, "index.html",
-                                       lambda t: re.sub(r'class="sync-dot is-\w+"', 'class="sync-dot is-ok"', t))),
+        ("球色与横幅不同源", lambda d: _mutate(d, "index.html", _flip_dot)),
         ("删 favicon 戳", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace(FAVICON_STAMP, "static/img/nope.png?t="))),
         ("根绝对引用回流", lambda d: _mutate(d, "sync-status.html",
@@ -562,6 +567,15 @@ def status_selftest():
         print(f"  {'✅' if cond else '❌'} {name}")
     print(f"\n{sum(1 for _, c in results if c)}/{len(results)} 通过（S25 判别力）")
     return all(c for _, c in results)
+
+
+def _flip_dot(text):
+    """把小球换成「与当前不同」的类（恒产生变异，避免当前色恰好等于注入色时假绿）。"""
+    m = re.search(r'class="sync-dot (is-ok|is-warn|is-bad)"', text)
+    if not m:
+        return text
+    other = {"is-ok": "is-warn", "is-warn": "is-bad", "is-bad": "is-ok"}[m.group(1)]
+    return text[:m.start()] + f'class="sync-dot {other}"' + text[m.end():]
 
 
 def _mutate(root, rel, fn):
