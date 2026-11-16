@@ -493,8 +493,14 @@ def status_page_guard(root=None):
         hist = json.loads((root / "data/sync-history.json").read_text(encoding="utf-8"))
         # 页面只画最近 90 天窗口，历史文件不裁剪 ⇒ 拿全量天数比会在第 91 天起恒红。
         _days = sorted((hist.get("days") or {}).keys())
-        _cut = (datetime.now(timezone.utc).date() - timedelta(days=89)).isoformat()
-        days_recorded = sum(1 for d in _days if d >= _cut)
+        # 基准取**页面快照**（`快照 YYYY-MM-DDTHH:MM（UTC）`）而不是 now()：
+        # 采集到审计之间跨过 UTC 午夜时，now() 的窗口会比页面对齐的窗口多一天 ⇒ 每日约 14h 误红。
+        _snap = re.search(r"快照 (\d{4}-\d{2}-\d{2})T", html)
+        _base = (datetime.fromisoformat(_snap.group(1)).date() if _snap
+                 else datetime.now(timezone.utc).date())
+        _cut = (_base - timedelta(days=89)).isoformat()
+        _top = _base.isoformat()
+        days_recorded = sum(1 for d in _days if _cut <= d <= _top)
         if colored != days_recorded:
             problems.append(f"彩色格数 {colored} != 历史记录天数 {days_recorded}")
     except (OSError, json.JSONDecodeError, AttributeError):
@@ -559,11 +565,19 @@ def _seed_s25(root):
 
 
 def _add_hist_day(root):
-    """历史多一天、页面没重出 —— 只该由「彩色格数 != 天数」抓到（90 格不动）。"""
+    """历史多一天、页面没重出 —— 只该由「彩色格数 != 天数」抓到（90 格不动）。
+
+    ⚠️ 必须落在**页面快照的 90 天窗口内**：窗口基准取快照日（不是 now()），
+    所以 2999-01-01 这类未来日会落在窗口外 ⇒ 变异失效（实测过一次）。
+    """
+    page = (Path(root) / "sync-status.html").read_text(encoding="utf-8", errors="replace")
+    m = re.search(r"快照 (\d{4}-\d{2}-\d{2})T", page)
+    base = datetime.fromisoformat(m.group(1)).date() if m else datetime.now(timezone.utc).date()
     p = Path(root) / "data/sync-history.json"
     data = json.loads(p.read_text(encoding="utf-8"))
-    data.setdefault("days", {})["2999-01-01"] = {"rc": 0, "verdict": "PASS",
-                                                "artifacts": {}, "ok_ratio": 1.0}
+    day = (base - timedelta(days=5)).isoformat()          # 窗口内、且当前无记录
+    data.setdefault("days", {})[day] = {"rc": 0, "verdict": "PASS",
+                                        "artifacts": {}, "ok_ratio": 1.0}
     p.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
