@@ -353,7 +353,8 @@ def config_guard(config_path=None):
         return False, "_config.yml missing（隐私面已静默失守）"
     # O-24：`.nojekyll` 一旦出现，GitHub Pages 跳过 Jekyll ⇒ 所有 exclude 静默失效，
     # 而配置本身仍然「正确」——必须单独钉死这个前提。
-    if (ROOT / ".nojekyll").exists():
+    # 判据随 `config_path` 走（与 exclude/keep_files 同源），而不是绑死 ROOT —— 便于隔离探针。
+    if (path.parent / ".nojekyll").exists():
         return False, ".nojekyll 存在 ⇒ Pages 不走 Jekyll，exclude 全部失效（隐私面回退）"
     try:
         import yaml

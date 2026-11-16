@@ -2562,6 +2562,50 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — O-23/O-24 收口实施审计（1 笔已推）：path-scoped 提交与 `.nojekyll` 前提钉均带前后对照证伪；门禁 5/5 零漂移 → PASS 100
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/tokens-tracker-mirror.py`（提交腿 path-scope `:515-526`）· `scripts/portal-check.py`（S20 `config_guard` 前置 `.nojekyll` 判据 `:354-357`）· 台账 2 文件
+- **Tracking**: JT-SEC-040 O-23/O-24 实施收口
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计）
+
+### 一、验收（隔离 clone `…/scratch/o2324/{clone,clone_old}`；生产侧只读门禁；推送后三验）
+
+1. **O-23 绿侧成立**：clone @ `56449a2`，先 `git add README.md`（模拟他人 staged）再 `--site clone` 跑 mirror、`git reset --soft HEAD~1` 造 O-22 遗留脏面后复跑 ⇒ 新提交 `a825902` **只含** `tokens-tracker/data/live.js` + `tokens-tracker/index.html`；`git diff --cached --name-only` 仍只剩 `README.md`。
+2. **O-23 红侧判别力（前后对照）**：同一脚本以 `635c51c` 版（`git commit -m` 无 pathspec `:519`）在 `clone_old` 复现同一现场 ⇒ 提交 `5504c74` **含 `README.md`**（3 文件）。即修复不是空转，触发面确实被剪掉。
+3. **O-23 边界**：仅在 `tokens-tracker/assets/` 放未跟踪 `probe-new.js` ⇒ 提交 `c9bbefd` 收编该文件、`README.md` 未裹入（pathspec 目录覆盖生效）。
+4. **O-24 绿侧 + 反证**：`--mode post` 基线 **17/17**（`S20 … exclude=6 keep=2`）；clone 内 `touch .nojekyll` ⇒ **16/17**，S20 红且文案为「.nojekyll 存在 ⇒ Pages 不走 Jekyll，exclude 全部失效」，进程 **rc=1**；`rm .nojekyll` 后恢复 **17/17**；`--selftest` 在 `.nojekyll` 存在时 **21/22**（S21 仍过，见 🟢1）。
+5. **前提核对**：生产根无 `.nojekyll`（`ls` 实证）；`_config.yml` `exclude` 6 项含 `*.md`/`documents/`/`scripts/`/`.review-level.yaml`/`AGENTS.md`/`cache/`，`keep_files`=static/tokens-tracker。
+6. **类级排查（同族缺陷无第二处）**：全仓 `git commit` 仅两处 —— mirror `:521` 与 `sync-run.py:233`（`--only -- <paths>`），均 path-scoped；无 `-A`/`--amend`/裸提交。
+7. **门禁逐值**：`perf-check` rc=0 · `portal --mode post` **17/17** rc=0 · `--selftest` **22/22** · `sync-check --selftest` **15/15** · `sync-check` **rc=1**（过渡态 `artifacts 6`）· 生产树 `porcelain` 0 行。
+8. **台账/凭据面**：`.review-level.yaml` `safe_load` **75 条**、末条 8 字段齐；本笔 diff 对 `sk-/ghp_/github_pat_/AKIA/password/api_key/PRIVATE KEY` 八类形态 **0 命中**。
+9. **推送三验**：前 `HEAD=56449a2` / `origin/main=635c51c` / ahead 1 / 树空 ⇒ `635c51c..56449a2`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`56449a25fffe82f8ba1d7c3111f095c40dead62e`**，ahead 0 / behind 0 / 树空。
+
+### 二、发现（🔴 0 / 🟡 0 / 🟢 5）
+
+- **🟡 1（O-23，本轮闭合）**：提交腿 name-only 裸提交会裹入索引内他人改动 —— 已改 path-scoped，并以 `635c51c` 对照复现红侧，闭合。
+- **🟡 2（O-24，本轮闭合）**：S20 只钉配置内容、不钉「Pages 走 Jekyll」前提 —— 已补 `.nojekyll` 断言，`touch` 即红、`rm` 即绿，闭合。
+- **🟢 1（O-24 判据耦合）**：`config_guard(config_path)` 的 `.nojekyll` 判据固定取 `ROOT`，不随显式 `config_path`（S21 夹具走 tempfile）移动 ⇒ `.nojekyll` 存在时 S21 因「另一原因」得 False 而非「删 documents/」的判别（`--selftest` 21/22 实测）。方向 fail-closed，仅在 S20 已红时掩盖 S21 自身的主张；建议判据改取 `path.parent / ".nojekyll"`。
+- **🟢 2（O-22 拓宽面）**：脏面收编 + path-scoped ⇒ `tokens-tracker/` 三路径下任意未跟踪杂物会被一并发布到站点（实测 `c9bbefd` 只收 `probe-new.js`）。无凭据泄露、面窄，记备查；若要收口，收编前按已知产物白名单过滤。
+- **🟢 3（O-24 前提面 lookahead）**：`.nojekyll` 只是 Jekyll 旁路之一；若将来改 Pages Actions 部署（`upload-pages-artifact`），`exclude` 同样失效而钉仍绿。现仓无 `.github/`（已验），届时应补钉。
+- **🟢 4（mirror 失败态对齐）**：提交腿失败分支不 `git reset`，与 `sync-run` F-1′ 清理不对称；留 staged 态靠下一轮 O-22 收编，实测可恢复（`a825902` 即由脏面收编产出），无操作面损失。
+- **🟢 5（公开面结转）**：`review-log.md` / `.review-level.yaml` 站点 404（`exclude` 生效），但公开 GitHub 仓仍可浏览（内部路径与未闭合待办）。归属既有 `sec-030-handoff-public` 议题，不在本笔展开。
+- **结转未动**：无（O-23/O-24 两项均闭合）。
+
+### 三、计分与推送
+
+**100 → PASS**（0 🔴；2 🟡 按推荐修法落地且各自带红侧对照，门禁 5 项零漂移，生产面零写，凭据面 0 命中）。
+
+- **推送**：`635c51c..56449a2`（单笔 4 文件 / +60 −1）；后三验同值 `56449a2`，ahead 0 / behind 0
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带
+- **建议修序**（批次，全 🟢）：🟢1 `.nojekyll` 判据随 `config_path` → 🟢2 收编白名单 → 🟢4 失败态 `git reset` 对齐 → 🟢3 部署面 lookahead
+
+**待决 0 项**（两项 🟡 已闭合，余下 🟢 归批次）。
+
+---
+
 ## 条目格式说明
 
 ```
