@@ -42,7 +42,11 @@ def parse_iso(value):
         dt = datetime.fromisoformat(value)
     except (TypeError, ValueError):
         return None
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    if dt.tzinfo:
+        return dt
+    # 2026-11-16（review SEC-6）：naive 戳由本机生成器写入（无偏移）⇒ 按本地时区解释。
+    # 之前按 UTC 解释 ⇒ 年龄恒 -7.8h，真陈旧 3 天仍算 16h 判绿（新鲜度判据宽松 8 小时）。
+    return dt.astimezone() if dt.tzinfo is None else dt
 
 
 def load_manifest(path=MANIFEST):
@@ -319,7 +323,9 @@ def emit_history(payload, dest=None):
     }
     data["days"] = dict(sorted(data["days"].items()))
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    tmp = dest.with_suffix(dest.suffix + ".tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    tmp.replace(dest)                     # 原子替换：半写不会留下坏 JSON
     return len(data["days"])
 
 
