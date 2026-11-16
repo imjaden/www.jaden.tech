@@ -483,8 +483,8 @@ def status_page_guard(root=None):
     # 根绝对路径会 404（页面在站点根，但仍统一要求相对引用，避免迁目录再翻车）
     if re.search(r'(?:href|src)="/', html):
         problems.append("存在根绝对引用")
-    if "快照 " not in html or "（UTC）" not in html:
-        problems.append("缺快照时间标注（构建期快照必须显式）")
+    if not re.search(r"快照 \d{4}-\d{2}-\d{2}T\d{2}:\d{2}", html) or "（UTC）" not in html:
+        problems.append("快照时间标注缺值（须形如「快照 2026-11-16T08:12（UTC）」）")
     if "下次生成" not in html:
         problems.append("缺「下次生成」说明")
     bars = len(re.findall(r'<span class="(?:ok|warn|bad|none)" title=', html))
@@ -508,9 +508,10 @@ def status_page_guard(root=None):
         problems.append("小球 href 不指向 ./sync-status.html")
     elif m_banner and DOT_OF_BANNER[m_banner.group(1)] != m_dot.group(1):
         problems.append(f"小球 {m_dot.group(1)} 与横幅 {m_banner.group(1)} 不同源")
-    if STATUS_JSON.exists():
+    status_json = root / "data" / "sync-status.json"     # 走 root，副本/负控才有判别力
+    if status_json.exists():
         try:
-            rc = json.loads(STATUS_JSON.read_text(encoding="utf-8")).get("rc")
+            rc = json.loads(status_json.read_text(encoding="utf-8")).get("rc")
             want_cls = {0: "ok", 1: "warn", 2: "bad", 3: "warn"}.get(rc)
             if m_banner and want_cls and m_banner.group(1) != want_cls:
                 problems.append(f"横幅类与机器 JSON rc={rc} 不一致")
@@ -552,6 +553,10 @@ def status_selftest():
                                      lambda t: t.replace("下次生成", "生成"))),
         ("小球 href 改坏", lambda d: _mutate(d, "index.html",
                                      lambda t: t.replace('href="./sync-status.html"', 'href="./nope.html"'))),
+        ("删一格 90 天条", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: re.sub(r'<span class="(?:ok|warn|bad|none)" title="[^"]*"></span>',
+                                                      "", t, count=1))),
+        ("横幅类与 JSON rc 不同源", lambda d: _flip_banner_or_json(d)),
         ("组件表少一行", lambda d: _mutate(d, "sync-status.html",
                                     lambda t: re.sub(r'<tr>' + re.escape(ROWS_CELL) + r'.*?</tr>', "",
                                                      t, count=1, flags=re.S))),
@@ -573,6 +578,22 @@ def status_selftest():
         print(f"  {'✅' if cond else '❌'} {name}")
     print(f"\n{sum(1 for _, c in results if c)}/{len(results)} 通过（S25 判别力）")
     return all(c for _, c in results)
+
+
+def _flip_banner_or_json(root):
+    """横幅 ↔ 机器 JSON 不同源：优先把 JSON rc 改成与横幅不一致的值（两边都在就必红）。"""
+    p = Path(root) / "data" / "sync-status.json"
+    page = Path(root) / "sync-status.html"
+    if not p.exists() or not page.exists():
+        return page
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return page
+    cur = data.get("rc")
+    data["rc"] = 2 if cur != 2 else 0
+    p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    return page
 
 
 def _flip_dot(text):
@@ -706,7 +727,7 @@ def main():
               f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c} active={_ok_d}")
 
         # S25 判别力自证：四种破坏（球色/ favicon / 根绝对 / 少一行）⇒ 判据必红
-        check("S26", "V17 判别力自证：7 个变异（球色/favicon/根绝对/快照/下次生成/href/少一行）⇒ S25 必红",
+        check("S26", "V17 判别力自证：9 个变异（球色/favicon/根绝对/快照/下次生成/href/少一格/横幅↔JSON/少一行）⇒ S25 必红",
               status_selftest(), "")
 
     fails = [r for r in results if not r[2]]
