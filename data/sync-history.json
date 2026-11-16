@@ -2,13 +2,13 @@
  "schema": 1,
  "days": {
   "2026-11-16": {
-   "rc": 1,
-   "verdict": "PASS（含过渡/陈旧项）",
+   "rc": 0,
+   "verdict": "PASS",
    "artifacts": {
-    "bmi-tracker": "unstamped",
-    "dt-archive": "unstamped",
+    "bmi-tracker": "exempt",
+    "dt-archive": "exempt",
     "tokens-board": "ok",
-    "daily-poetry": "unstamped",
+    "daily-poetry": "exempt",
     "poetry-titles": "ok",
     "tokens-live": "ok"
    },
