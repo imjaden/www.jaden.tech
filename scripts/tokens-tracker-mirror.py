@@ -374,23 +374,27 @@ def transform_live(js: str) -> str:
     )
 
 
-# 赋值形态全收：`window.LIVE_ANOMALY =` / `var LIVE_ANOMALY =` / `window["LIVE_ANOMALY"] =`
-# （🟡1(a)：只认一种形态 ⇒ 换写法即整段透传，三条实测全部 NO ERROR）
-# 🟡3：`(?<![A-Za-z0-9_$.])` 左边界 —— 否则 `var X_LIVE_ANOMALY = 1` 也会误 raise（可用性风险）
-ANOMALY_SPLIT = re.compile(r"""LIVE_["']?\s*\+\s*["']?ANOMALY""")
-ANOMALY_ASSIGN = re.compile(
-    r"""(?<![A-Za-z0-9_$.])(?:window\.|var\s+|let\s+|const\s+)?"""
-    r"""LIVE_ANOMALY(?:\.[A-Za-z_$][\w$]*|\[["'][^"']*["']\])?\s*=""")
+# 被赋值对象的形态（`window.` / bare / `window["…"]` / `LIVE_ANOMALY["…"]`），左边界防误拦。
 ANOMALY_BLOCK = re.compile(
     r"""(?<![A-Za-z0-9_$.])(?:(?:window\.|var\s+|let\s+|const\s+)?"""
     r"""LIVE_ANOMALY|window\[["']LIVE_ANOMALY["']\]|LIVE_ANOMALY\[["'][^"']*["']\])\s*=\s*""")
-# 🟡1(b)：头正则放宽到非 ASCII / 含 `/` 的项目名，并把「块内含【任务】但解析不出项目」计为 dropped
+# 任务块头：放宽到非 ASCII / 含 `/` 的项目名；块内含【任务】但解析不出项目 ⇒ 计 dropped
 ANOMALY_TASK_HEAD = re.compile(r"【任务】\s*(.+?)\s*·")
-# 🟡1(d)：键面白名单 —— 新增任何携带明细的键都会因未知而被拦下
-# 🟡2：`deny` 若只从 LIVE_ITEMS 派生，则「整行被过滤 / 已归档 / 只在 prompt 正文里被提到」的仓
-# 不在表里 ⇒ 正文命中既不丢块也不响。这里补一份静态内部项目表与之取并集。
+# 赋值形态全收：`window.LIVE_ANOMALY =` / `var LIVE_ANOMALY =` / `window["LIVE_ANOMALY"] =`
+# （🟡1(a)：只认一种形态 ⇒ 换写法即整段透传，三条实测全部 NO ERROR）
+# JT-SEC-045：把「看起来不像这个字」的写法先归一化再计数 —— `"LIVE_"+"ANOMALY"`、
+# `"LIVE\u005fANOMALY"`、反引号拼接、跨行加号，全部拉平成同一个串。
+_ANOMALY_UESC = re.compile(r"\\u([0-9a-fA-F]{4})")
+_ANOMALY_NOISE = re.compile(r"""[\s"'`+]""")
+
+
+def _normalize_anomaly(text: str) -> str:
+    return _ANOMALY_NOISE.sub("", _ANOMALY_UESC.sub(lambda m: chr(int(m.group(1), 16)), text))
+
 # 🟡3（第 9 轮）：按 `~/CodeSpace` 现有 28 个仓的规范名维护（去掉 .cli/.lab/.archived 后缀），
 # 词边界放宽后 `html-gen.cli` 这类带后缀的写法也会命中。新增仓请同步这里（或靠 deny 的 items 派生兜底）。
+# deny 若只从 LIVE_ITEMS 派生，则「整行被过滤 / 已归档 / 只在正文里被提到」的仓不在表里
+# ⇒ 正文命中既不丢块也不响（JT-SEC-043）。静态表与派生面取并集。
 INTERNAL_PROJECTS_STATIC = frozenset({
     "12306-mcp", "Horizon", "JadenVault", "agent-loop", "andrej-karpathy-skills",
     "bash-scripts", "cloudwise", "daily-tracker", "delete-browsing-history", "git-cloner",
@@ -398,6 +402,7 @@ INTERNAL_PROJECTS_STATIC = frozenset({
     "models.dev", "personal-cinema", "python-scripts", "ruby-scripts", "script-miner",
     "test-hello-world", "www.jaden.tech-gitee",
 }) - PROJECT_WHITELIST
+# 键面白名单：新增任何携带明细的键都会因未知而被拦下（JT-SEC-042(d)）
 ALLOWED_ANOMALY_KEYS = frozenset({
     "anomaly_total", "doc_missing", "idle", "ledger_total", "prompt", "prompt_count",
     "skipped", "timeout", "total", "unknown",
@@ -476,7 +481,7 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
     if not handled:
         # 🟡2（第 10 轮）：只认「赋值形态」不够 —— `self.LIVE_ANOMALY =` / `globalThis["…"] =` /
         # `window["LIVE_"+"ANOMALY"] =` 都会原样透传。改为「出现该字样即中止」。
-        if "LIVE_ANOMALY" in tail or ANOMALY_SPLIT.search(tail):
+        if "LIVE_ANOMALY" in _normalize_anomaly(tail):
             raise RuntimeError("LIVE_ANOMALY 出现但形态不认识 — fail-closed")
         return tail
     pieces.append(tail[pos:])
@@ -486,11 +491,11 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
     # 而未识别的接收者（`self.LIVE_ANOMALY =` / `globalThis["LIVE_ANOMALY"] =` / 动态拼接）
     # 必然落在未消费区 ⇒ 计数不符 ⇒ 中止。
     residual = "".join(prefixes) + tail[pos:]
-    if ANOMALY_SPLIT.search(residual):
-        raise RuntimeError("LIVE_ANOMALY 出现动态拼接键名 — fail-closed")
-    if residual.count("LIVE_ANOMALY") != handled:
+    _norm = _normalize_anomaly(residual)
+    if _norm.count("LIVE_ANOMALY") != handled:
         raise RuntimeError(
-            f"LIVE_ANOMALY 守恒失败：未消费区出现 {residual.count('LIVE_ANOMALY')} 次、已处理 {handled} 块 — fail-closed")
+            f"LIVE_ANOMALY 守恒失败：未消费区归一化后出现 {_norm.count('LIVE_ANOMALY')} 次、"
+            f"已处理 {handled} 块 — fail-closed")
     return result
 
 
@@ -522,6 +527,8 @@ ANOMALY_SELFTEST = (
     ("a6 globalThis 接收者", r'globalThis["LIVE_ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
     ("a7 动态拼接键名", r'window["LIVE_" + "ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
     ("a8 白名单块正文提及该词", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】daily-checker · D\n修 LIVE_ANOMALY 守恒断言"};', "pass"),
+    ("a9 三段拆分键名", r'window["LIVE" + "_" + "ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
+    ("a10 unicode 转义键名", r'window["LIVE\u005fANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
     ("b 后缀形态 html-gen.cli", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H\ncd html-gen.cli"};', "pass_dropped"),
     ("c 未知键", r'window.LIVE_ANOMALY = {"anomaly_total":1,"extra_prompts":[]};', "raise"),
     ("d 非字符串 prompt", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":["x"]};', "raise"),
