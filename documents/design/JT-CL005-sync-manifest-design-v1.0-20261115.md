@@ -159,3 +159,42 @@ python3 scripts/perf-check.py                 → 28 PASS
 ## 十一、变更记录
 
 - v1.0（2026-11-15）：初稿。基于仓内 5 个流入面的实测测绘（含三仓只读核对：daily-tracker 无 CLI、script-miner 已有 `deploy --target`、hermes-manager 壳/数据契约），采纳 D1–D9 全采推荐。
+
+## 十二、实施记录（2026-11-16，P2 + P3 已落地）
+
+| 交付 | 文件 | 状态 |
+|:--|:--|:--|
+| 契约清单 | `config/sync-manifest.json`（5 条 + `watch` 覆盖面） | ✅ |
+| 戳实现（生产者与校验器共用） | `scripts/sync_stamp.py`（strip/stamp/parse/digest 单一实现） | ✅ |
+| 校验器 | `scripts/sync-check.py`（rc 0/1/2/3、`--json`、`--strict`、`--selftest` 13 项、`--emit-status`） | ✅ |
+| 编排器 | `scripts/sync-run.py`（dry-run 默认，`--apply` 执行，emit-site 显式 SKIP） | ✅ |
+| 生产者打戳 | `scripts/poetry-titles-gen.py`（5 个月份文件）、`scripts/tokens-tracker-mirror.py`（壳页） | ✅ |
+| 状态页 | `sync-status.html`（由 `--emit-status` 生成，5 行表格 + 结论） | ✅ |
+
+实测（2026-11-16 09:32）：
+```
+sync-check --selftest                 13/13
+sync-check                            rc=1（tokens-board ✅ 0.0h；poetry-titles ✅ hash 自证；3 条上游 emit-site 过渡态未打戳）
+sync-run --apply                      幂等：第二次运行 poetry-titles 全 ok、mirror 无输出（无变化不写）
+portal-check --mode post / --selftest 15/15 · 17/17
+perf-check                            28 PASS（poetry-titles 各月 gzip 481–511 B ≤ 1500 B）
+portal 实机                            tokens-tracker 页正常渲染（6 行数据）、sync-status.html 5 行
+```
+
+### 本轮偏差（按「最小改动 + 受保护文件不直写」取值，均记假设）
+
+1. **假设：P5 门禁未并入 `portal-check.py`**（依据：加入断言会改变 15/15 → 16/16 的公开口径，而 `AGENTS.md` 是受保护文件、需逐次审批）。过渡期内由 `hm check handoff` + 收工清单 + review 夜间轮引用 `sync-check` 结果；升门禁时一并改 `AGENTS.md` 与断言计数。
+2. **假设：`index.html` 未加入口图标**（依据：首屏 gzip 预算 5197/8000 B 尚有余量，但 `perf-check` 有「exactly 5 entries — pills=3 + icon-links=2」硬断言，加入口要改断言 + 改 `AGENTS.md`）。`sync-status.html` 已可通过 URL 直达，入口留待 P5 同批。
+3. **假设：`poetry-titles` 的 `freshness_h = 0`（关闭时间判据）**（依据：月包为预生成多月脚本，源 mtime 先天偏旧——实测 2026-09-09，已 1625h；该产物是**派生缓存**，正确判据是 hash + `poetry-titles-gen.py --check` 与源月包一致，而不是时间）。
+4. **假设：`tokens-board` 的戳 `producer` 写 `hermes-manager/1acl-board-gen`**（依据：壳与数据由上游 `1acl-board-gen` 产出，本仓 mirror 只做投影与降级；manifest 里同时记录本仓入口 `scripts/tokens-tracker-mirror.py`）。
+5. **假设：过渡态 rc=1 而非 rc=2**（依据：设计 §六 D4「先 warn 两周再升 fail」，三条上游 emit-site 条目在 P4 前无法打戳）。
+
+### 实施中发现的旁支缺陷（已修）
+
+`tokens-tracker-mirror.py` 自 2026-11-15 20:45 起**每晚 fail-closed 中止**：上游壳新增 `<link rel="icon" href="/static/img/favicon.png">`（根绝对路径），命中 `JT-SEC-018` 守卫 ⇒ 镜像数据停在 11-14。
+修法（本仓内）：`transform_shell` 先把 `href|src="/static/…"` 降级为 `../static/…`（镜像页发布在 `/tokens-tracker/`，上一级即站点根，资源确实存在），守卫本身保持 fail-closed 不放宽。修后 09:29 重渲成功，`data/live.js` 的 `generated_at` 已推进到当日。
+
+### 未做（明确留待）
+
+- P4 跨仓：daily-tracker 增 `--emit-site`、script-miner 切 `deploy --target`、hermes-manager 声明契约号（需点名授权）
+- P5 门禁：`portal-check` 增断言 + `AGENTS.md` 登记（需审批）

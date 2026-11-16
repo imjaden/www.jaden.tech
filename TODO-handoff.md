@@ -1,11 +1,11 @@
-<!-- generated: 2026-11-16 · source: cache/draft/TODO-20261116.md · sha256:25a641cd -->
+<!-- generated: 2026-11-16 · source: cache/draft/TODO-20261116.md · sha256:e6db8455 -->
 > 派生: 待执行 **3** 条 · 最近闭环 **CL5** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261116.md）
 
 | 编号 | 标题 | 状态（派生摘要·全文见 draft） | kind | priority | 方案文档 |
 |:--|:--|:--|:--|:--|:--|
-| 待开（sync-manifest） | JT-CL005 P2 实施（manifest+check+run+戳） | 待办 | feature | normal | - |
+| 待开（sync-manifest） | JT-CL005 P2+P3 实施（已落地，待核实） | 待核实 | feature | normal | - |
 | 待开（sec-029） | JT-SEC-029 复核（上游已修复并上线，等 review 关号） | 待核实 | verify | high | - |
 | 待开（hm-rotate-done） | hm draft 轮转丢完成节（工具缺陷） | 待办 | bug | normal | - |
 <!-- generated end -->
@@ -13,7 +13,7 @@
 ## 二、基线（人工维护）
 
 - 仓: `~/CodeSpace/www.jaden.tech` · branch `main`
-- 本地 HEAD: `82d421e`（收口 11-15）· `origin/main` = `69ebf7d` · ahead = **4**（均文档/设计面，未推）
+- 本地 HEAD: `2859398`（JT-CL005 P2+P3）· `origin/main` = `69ebf7d` · ahead = **8**（5 笔 11-15 文档面 + 3 笔 11-16 同步面，均未推）
 - 🆕 **2026-11-15 23:15 落地 JT-CL005 设计件**：`documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md`（门户同步面契约化：`config/sync-manifest.json` 单文件 + 产物内注释戳 + `sync-check.py` + `sync-status.html` + push→pull 模型）。三仓只读核对结论：daily-tracker **无 CLI**（monolithic，直写本仓 + 内部 commit + `_SITE_NIGHT_SLOT=(21,45)`）、script-miner **已有** `daily-poetry.py deploy --target`、hermes-manager 为壳/数据分离契约（CL039/CL058，双哨兵）
 - ✅ **`JT-SEC-029` 已由上游修复并上线**（2026-11-15 22:54/22:56 两次重渲，`b35ff95`/`69ebf7d`）：daily-tracker 源码 3146–3160 行 `_MIRROR_RESTORE_TAB_JS` 只恢复本页确实存在的 tab（含 `getElementById` 检查 + `removeItem`）；真机对照实测 —— `archived` 陈旧值下 **修复前**：四页签全 `display:none`、`bodyText` 38 字符、`_wtChart` undefined（=review 报的空白）；**修复后**：`localStorage` 归一 `null`、`tab-today` 可见、1005 字符、chart `object`；`omad`/`faq`/`junk-tab` 三档均安全。线上与本地 sha256 一致 `82c6488e…`（47283 B）⇒ 线上缺陷已消除，**待 review 下轮 L2 复核关号**（本会话不自行关号）
 - 同轮复核：`JT-SEC-028` ✅ CLOSED（bundle 已删）；`JT-SEC-019/020/022/023` 🟢 结转
@@ -33,19 +33,24 @@
 
 ### 待审计 commit 清单
 
-| 待审计笔 | 内容 | 复审面 | 前置 / 连带 |
-|:--|:--|:--|:--|
-| `77ee77d` `docs@design: JT-CL005 sync-manifest contract v1.0` | 新增同步面契约设计件（§一实测测绘 + §三架构 + §六判据 + §八 pull 迁移 + §九 D1–D9 + §十验收） | `documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md`（157 行） | 纯设计件，无运行时风险 |
-| `1a89fdc` `docs@handoff: JT-SEC-029 verified fixed upstream …` | 029 复验取证（真机对照 38→1005 字符 / chart undefined→object）+ 设计件补实证案由 | `TODO-handoff.md`、设计件 §一（证据源 `cache/scratch/sec029/bmi-old.html`，gitignored） | 建议 review 同轮复核并关 `JT-SEC-029`（线上 sha `82c6488e…` = 本地） |
-| `b8a72b5` `docs@handoff: nightly close-out 2026-11-15 - audit list=2 …` | 首次收口（清单 2 笔） | `TODO-handoff.md` | 其内容已被 `d44651b` 取代 |
-| `82d421e` `docs@handoff: close-out 2026-11-15 - restore done section (5), audit list=4 docs commits, register hm rotation bug` | 补回被 hm 轮转删除的完成节 5 条 + 登记 `hm` 轮转缺陷 + 清单校正（`d44651b` 系 amend 前旧号，已失效） | `TODO-handoff.md` | 无 |
+共 **9 笔**（下表 8 笔 + 本笔「docs@handoff: JT-CL005 P2+P3 landed」，以 `git rev-list --count origin/main..HEAD` 为准）；全部为文档/设计/同步面；无前端展示层改动（index.html 未动）
 
-- 未推笔：`77ee77d` · `1a89fdc` · `b8a72b5` · `82d421e` + 本笔 morning-open = **5**（以 `git rev-list --count origin/main..HEAD` 为准），全部为文档/设计面，无源码或生成物改动
-- 今日串行序（2026-11-16，两条，顺序有依赖）
-  ① **派 review 评审 + push 这 4 笔**（顺带复核 `JT-SEC-029` 关号：线上/本地 sha256 一致、`archived`/`omad`/`faq`/`junk-tab` 四档陈旧值真机实测均无空白）
-  ② `待开（sync-manifest）` — JT-CL005 P2 实施：`config/sync-manifest.json`（5 条）+ `scripts/sync-check.py`（rc 0/1/2/3）+ `scripts/sync-run.py` + 给 tokens-tracker / poetry-titles 补 SYNC 戳；判据见设计件 §十
-- 明早首跑：`python3 scripts/portal-check.py --mode post`（15/15）+ `--selftest`（17/17）+ `python3 scripts/perf-check.py`（28 PASS）+ `python3 cache/scratch/raw-pii-probe.py`（期望 `rc=0`）
-- 放行口径：review PASS 后 `git push origin HEAD:main`（**ff-only**）；`JT-SEC-029` 由 review 关号，本会话不自行关
+| sha | subject |
+|:--|:--|
+| `2859398` | data@sync: poetry-titles stamped (5 months) + sync-status page |
+| `f96d953` | data@update: tokens-tracker - manual resync after mirror favicon fix |
+| `12b9a58` | feat@sync: JT-CL005 sync-manifest - manifest, stamp module, checker, orchestrator |
+| `e4882c4` | docs@handoff: morning-open 2026-11-16 - draft rotated, baseline refreshed (ahead 4) |
+| `82d421e` | docs@handoff: close-out 2026-11-15 - restore done section (5), audit list=4 docs commits, register hm rotation bug |
+| `b8a72b5` | docs@handoff: nightly close-out 2026-11-15 - audit list=2 (design + 029 verify), next=review push |
+| `1a89fdc` | docs@handoff: JT-SEC-029 verified fixed upstream (live sha match) + design case note |
+| `77ee77d` | docs@design: JT-CL005 sync-manifest contract v1.0 - config/ single manifest, inline stamps, pull model |
+
+- 今日串行序
+  ① **派 review 评审 + push 这 9 笔**（顺带复核 `JT-SEC-029` 关号：线上/本地 sha256 一致、四档陈旧值真机实测无空白；`tokens-tracker` 已 manual resync，`sync-check` rc=1 属过渡态）
+  ② 余下 JT-CL005 收尾：P4 跨仓（daily-tracker `--emit-site` / script-miner `deploy --target` / hermes-manager 契约号）**需点名授权**；P5 门禁（`portal-check` 断言 15→16 + `AGENTS.md` 登记）**需审批**
+- 明早首跑：`portal-check --mode post`（15/15）+ `--selftest`（17/17）+ `perf-check`（28 PASS）+ `sync-check --selftest`（13/13）+ `sync-check`（rc≤1）+ `raw-pii-probe.py`（rc=0）
+- 放行口径：review PASS 后 `git push origin HEAD:main`（ff-only）
 
 ### 其他
 
