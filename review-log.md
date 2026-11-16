@@ -2061,6 +2061,53 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — JT-CL005 SEC-2/3 隐私面收口审计（1 笔已推）：`_config.yml` 排除规则成立、handoff 脱敏到位；站点面 `scripts/*.py` 与 `plan-omad` 同族未收 → PASS 95
+
+- **review者**: review/cli（Security Reviewer · L2）
+- **范围**: `origin/main` `3911c96` → `HEAD` `3c0c154`，1 笔（新增 `_config.yml` +17 / `TODO-handoff.md` +4/-4），聚合 2 文件 +21/-4，工作树空，ahead 1
+- **Tracking**: JT-SEC-020 / JT-SEC-022（022 站点面收窄、同类面扩 2 处，按同族不开新号）；承接上轮 SEC-2/SEC-3 实测
+- **状态**: ✅ PASS
+- **报告**: 本 entry（单日志口径，不新建 `documents/reviews` 件）
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计）
+
+### 一、验收（逐条实跑）
+
+1. **`_config.yml` 可解析**：`python3 -c "yaml.safe_load(...)"` → keys `['exclude','keep_files']`，5 条排除 + 2 条 keep，无锚点/多文档/重复键。
+2. **排除不吞站点资产**：本地无 jekyll 二进制（`gem install jekyll -v 3.9.5` 400s 内未完成，sassc 原生编译，未落盘），改用**上游 `jekyll/jekyll@v3.9.5/lib/jekyll/entry_filter.rb` 实取源码逐函数移植的 ruby 探针**（`cache/scratch/jek_filter_sim.rb`：`special?`/`backup?`/`glob_include?`/`filter` 同构，`File.fnmatch?` 默认 flags=0 + `entry_path.start_with?(item)` 前缀规则），输入 `git ls-files` 全 **93** 个 tracked 文件 ⇒ **kept 49 / dropped 44**：
+   - dropped = 40 个 `.md`（根级 8 个 + `documents/**` 任意深度 31 个 + `.opencode/commands/*.md` 2 个）· `.gitignore`/`.hermes-project.yaml`/`_config.yml`（`special?` 首字符 `.`/`_` 规则，非 exclude 命中）· `.review-level.yaml`（同 `special?`）
+   - kept 站点面 = `index.html`/`wechat.html`/`bmi-tracker.html`/`daily-poetry.html`/`daily-tracker-archive-202607-202610.html`/`sync-status.html`/`config/sync-manifest.json`/`tokens-tracker/**` 5 文件/`static/**` 26 文件/`scripts/*.py` 9 文件/`documents/plan-omad-v1.0.html` ⇒ **`static/**`、`tokens-tracker/**`、`*.html`、`config/`、`sync-status.html` 零命中排除**，与 prompt 要求逐项一致
+   - 口径附注：Jekyll 的 `glob_include?` **未置 `FNM_PATHNAME`** ⇒ `*.md` 实际匹配任意深度，`documents/**/*.md` 与 `AGENTS.md` 属冗余但无害；`cache/` 未跟踪、`.review-level.yaml` 本就被 `special?` 挡下 ⇒ 两条 exclude 对 Pages 产物**零增量**（O-1）
+   - `keep_files` 清的是 destination 残留，不参与排除判定；GitHub Pages 每次全量构建 ⇒ 实为 no-op（站点资产真正的保障是「无规则命中它们」）
+3. **`TODO-handoff.md` 脱敏到位**：`grep -nE "/Users/|CodeSpace/|jaden\.li@|\.bundle"` ⇒ **0 命中 rc=1**；`hm check handoff .` ⇒ **errors=0 warns=0**、机器段 5 行、差异知会 0（机器段未被手改）；4 处改写为「站点仓 / 镜像仓复核 / 夜间链时点 / 一份干净备份」中性表述且**未丢可执行性**（复核动作、时点、回滚口径全保留）
+4. **门禁 6 项实跑与期望逐值吻合**：`portal-check --mode post` **16/16 rc=0**（S17 `artifacts=6` rc=1）· `--selftest` **20/20** · `perf-check` **rc=0**（28 PASS，`?t=` parity `1794394182`）· `sync-check --selftest` **15/15** · `sync-check` **rc=1**（3 过渡态 + 3 ok）；未跑 `--apply` / `--include-upstream`
+5. **推送前基线实测**（未依赖 ops 自述）：`/TODO-handoff` **200 / 21018 B** · `/review-log` **200 / 673984 B** · `/AGENTS` **200** · `/review-log.md` 404（Jekyll 出无扩展名路径）⇒ 本笔目标面确在暴露
+
+### 二、发现
+
+- **🔴 0 项**
+- **🟡 F-1 `scripts/*.py` 站点面仍披露本地绝对路径（SEC-022 同族，pre-existing，非本笔引入）**：实测 `/scripts/tokens-tracker-mirror.py` **200 / 25518 B**、`/scripts/sync-check.py` **200 / 18028 B**；`scripts/tokens-tracker-mirror.py:52-53` 硬编码 `/Users/jadenli/CodeSpace/www.jaden.tech` 与 `/Users/jadenli/CodeSpace/hermes-manager/web/1acl`，`scripts/timestamp-manager.py:33` 同类。本笔把 `.md` 面收了，同内容的 `.py` 面未收，口径不一致。**修法**：`_config.yml` 加 `- "scripts/"`（站点面零引用已实测：`grep -rnE '(src|href)="[^"]*scripts/'` 对 6 页面 + `static/js/` + `tokens-tracker/` **rc=1 零命中**，`AGENTS.md` 明定脚本「not deployed」）⇒ 关闭整类。
+- **🟡 F-2 `documents/plan-omad-v1.0.html` 未被任何规则收**：`.md` 只覆盖 md，线上实测 **200 / 11366 B**（「减重冲刺计划 OMAD + 居家健身 v1.0」个人健康计划页）。**修法**：把 `documents/**/*.md` 换成目录级 `- "documents/"`（探针已验证目录前缀规则生效），一条规则同时覆盖 md + html。**待确认**：该页是否本就意图公开。
+
+### 三、🟢 观察项（不计发现、不扣分）
+
+| # | 观察 | 处置建议 |
+|:-:|:--|:--|
+| O-1 | `exclude` 覆盖 Jekyll 默认值（默认含 `Gemfile`/`node_modules`/`vendor/*`），本仓三者在库外 ⇒ 当前零影响；将来若引 bundler 需在 `exclude` 里补回 | `_config.yml` 注释加一行「本表为全量替换」 |
+| O-2 | 本笔只改**站点面**；仓库 `visibility=public` 实测（`gh repo view`），`raw.githubusercontent.com/imjaden/www.jaden.tech/3911c96/{review-log.md,TODO-handoff.md,.review-level.yaml,AGENTS.md,documents/reports/…,documents/handoff/…}` **六路径全 200** ⇒ 文档仍可从仓库直取 | 已由 draft `sec-030-handoff-public` 承接（本笔注释已写明），属用户已裁后续项 |
+| O-3 | 脱敏只对 HEAD 生效，`git log -p -- TODO-handoff.md` 历史仍留 26 行 `/Users/`、`CodeSpace/`、`.bundle` 绝对路径（含 pre-rewrite bundle 名） | 与 SEC-020/022 同族历史残留，随 sec-030 一并裁（重写历史或改可见性） |
+
+### 四、计分与推送
+
+**100 − 5（F-1 站点面披露同类未收口，非阻断）= 95 / 100 → PASS**。门禁零漂移、排除规则经同构探针证无吞资产、脱敏 0 命中，无阻推项；F-1/F-2 均为 pre-existing 同族残留，按「评审只处理被审的笔」不代改。
+
+- **推送**：ff-only `git push origin HEAD:main` —— 前 `HEAD=3c0c154` / `origin/main=3911c96` / ahead **1** behind **0** / 树空；输出 `3911c96..3c0c154  HEAD -> main`；后 `git rev-parse HEAD` = `git rev-parse origin/main` = `git ls-remote origin refs/heads/main` = **`3c0c154ebc2822ffa27e155b1f5ee0fff560ed96`**，ahead **0** / behind **0** / 树空
+- **未新增提交、未动他仓、未改 `AGENTS.md`**（本 entry 与 `.review-level.yaml` 更新留工作树，由 ops 下一笔 `docs@handoff` 携带）
+- **线上复核留给 ops**（按 prompt：构建需时间，review 不自行 curl）：Pages `built` 后核 `/TODO-handoff` **404**、`/review-log` **404**、`/AGENTS` **404**，四页 `/`、`/bmi-tracker.html`、`/wechat.html`、`/tokens-tracker/` 仍 **200**
+
+**待决 1 项** —— F-1 `- "scripts/"` 与 F-2 `documents/` 目录化是否合并下一笔 `docs@handoff` 收（推荐：收，两行 `_config.yml`；F-2 先确认 plan-omad 页是否意图公开）。
+
+---
+
 ## 条目格式说明
 
 ```

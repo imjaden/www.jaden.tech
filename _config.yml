@@ -6,7 +6,8 @@
 # 属待裁决策项（见 cache/draft 的 sec-030-handoff-public）。
 exclude:
   - "*.md"
-  - "documents/**/*.md"
+  - "documents/"          # 目录级：内部设计/方案（md 与 html 均不发布）
+  - "scripts/"            # 开发脚本（含本机路径注释），站点零引用
   - "cache/"
   - ".review-level.yaml"
   - "AGENTS.md"
