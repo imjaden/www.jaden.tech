@@ -84,7 +84,7 @@
       "producer": {
         "repo": "www.jaden.tech",
         "entry": "scripts/tokens-tracker-mirror.py",
-        "mode": "overwrite",
+        "mode": "mirror",
         "profile": "ops",
         "cmd": [
           "python3",
@@ -185,7 +185,7 @@
       "producer": {
         "repo": "www.jaden.tech",
         "entry": "scripts/tokens-tracker-mirror.py",
-        "mode": "overwrite",
+        "mode": "mirror",
         "profile": "ops",
         "cmd": [
           "python3",
