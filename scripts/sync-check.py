@@ -237,6 +237,9 @@ def print_human(payload):
     print(f"\n{verdict} · artifacts {len(payload['artifacts'])} · rc={payload['rc']}")
 
 
+VERDICT = {0: "PASS", 1: "PASS（含过渡/陈旧项）", 2: "FAIL（结构违规）", 3: "UNKNOWN"}
+
+
 def emit_history(payload, dest=None):
     """把本次校验压缩成「一天一行」写进历史（幂等：同一天重复跑 = 覆盖当天行）。
 
@@ -307,6 +310,23 @@ def selftest():
     _n = len(manifest.get("artifacts", []))
     ok("清单条目数 ≥ 5（当前 6：含 tokens-live）", _n >= 5, str(_n))
     ok("清单无绝对路径", "/Users/" not in json.dumps(manifest))
+
+    # emit_history 往返：同一 payload 连写两次，天数不增（同日幂等），且 rc/verdict 落盘
+    _hp = ROOT / "cache" / "scratch" / "_history_probe.json"
+    _hp.parent.mkdir(parents=True, exist_ok=True)
+    _payload = {"rc": 1, "artifacts": [{"id": "x", "status": "ok", "detail": "ok"}],
+                "details": [], "checked_at": now_utc().isoformat()}
+    try:
+        n1 = emit_history(_payload, _hp)
+        n2 = emit_history(_payload, _hp)
+        _j = json.loads(_hp.read_text(encoding="utf-8"))
+        ok("emit_history 同日幂等", n1 == n2 == len(_j["days"]), f"{n1}/{n2}")
+        _day = _j["days"][sorted(_j["days"])[0]]
+        ok("emit_history 落 verdict（日记录内）", _day.get("verdict") == VERDICT[1], str(_day.get("verdict")))
+    except NameError as exc:                     # 本次事故形态：VERDICT 被误删
+        ok("emit_history 可用（无 NameError）", False, str(exc))
+    finally:
+        _hp.unlink(missing_ok=True)
 
     # 清单契约的判别力自证：缺 mode ⇒ 红、超枚举 ⇒ 红（2026-11-16 review ⑤）
     import copy as _copy
