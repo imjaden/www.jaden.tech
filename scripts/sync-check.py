@@ -320,6 +320,20 @@ def selftest():
     ok("html 解析字段", parsed.get("id") == "x")
     ok("html 哈希自证", sync_stamp.digest(stamped) == parsed.get("sha256"))
 
+    # DOCTYPE 不在首行（实测 daily-poetry.html 在第 14 行）时，插在 DOCTYPE 之后 parse 读不到
+    # ⇒ 必须退回打首行，否则站点会把带戳的产物判成 unstamped。
+    late = "<!--\n 版本说明：v1.5\n-->\n" + "\n" * 8 + "<!DOCTYPE html>\n<html><body>x</body></html>\n"
+    late_stamped = sync_stamp.html_stamp(late, id="x", producer="r/s.py", v="1",
+                                         generated="2026-11-16T00:00:00+08:00",
+                                         sha256=sync_stamp.digest(late))
+    ok("DOCTYPE 靠后时戳打首行且可解析",
+       late_stamped.splitlines()[0].startswith("<!-- SYNC ") and sync_stamp.parse(late_stamped) is not None,
+       repr(late_stamped.splitlines()[0][:40]))
+    ok("DOCTYPE 靠后时哈希仍自证", sync_stamp.digest(late_stamped) == sync_stamp.parse(late_stamped)["sha256"])
+    ok("DOCTYPE 靠后时幂等", sync_stamp.html_stamp(late_stamped, id="x", producer="r/s.py", v="1",
+                                                   generated="2026-11-16T00:00:00+08:00",
+                                                   sha256=sync_stamp.digest(late)) == late_stamped)
+
     tampered = stamped.replace("hi", "h1")
     ok("篡改可检出", sync_stamp.digest(tampered) != parsed.get("sha256"))
 

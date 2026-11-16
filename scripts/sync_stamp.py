@@ -32,13 +32,22 @@ def _line(fields):
 
 
 def html_stamp(text, **fields):
-    """在 <!DOCTYPE html> 之后就位打戳（幂等：已有戳先剥再打）。"""
+    """打戳并保证 `parse()` 读得到（幂等：已有戳先剥再打）。
+
+    `parse()` 只扫**前 3 行**，而 DOCTYPE 不一定在第 1 行：有的页面把版权/版本注释
+    写在 DOCTYPE 之前（实测 daily-poetry.html 的 DOCTYPE 在第 14 行）⇒ 插在 DOCTYPE
+    之后等于白打（parse 返回 None，站点判「未打戳」）。所以插入后要回读校验，
+    读不到就退回「打首行」。
+    """
     anchor = "<!DOCTYPE html>"
-    if anchor not in text:
-        raise ValueError("no <!DOCTYPE html> anchor — cannot stamp (fail-closed)")
     body = strip_stamp(text)
     line = "<!-- SYNC " + _line(fields) + " -->"
-    return body.replace(anchor, anchor + "\n" + line, 1)
+    if anchor in body:
+        out = body.replace(anchor, anchor + "\n" + line, 1)
+        if parse(out):          # 回读：戳落在前 3 行内才算成功
+            return out
+    # 兜底：DOCTYPE 在第 3 行之后，或页面根本没有 DOCTYPE ⇒ 打首行
+    return line + "\n" + body
 
 
 def js_stamp(text, **fields):
