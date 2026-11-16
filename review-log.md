@@ -2400,6 +2400,44 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — O-15 收口 + O-19 声明审计（1 笔已推）：非仓目录零写盘成立、O-19「仓内子目录也认」未兑现 → PASS 98
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/tokens-tracker-mirror.py`（`.git` 校验前移至 `--site` 解析旁 + `git -C … rev-parse --show-toplevel` 探针）· 台账 2 文件
+- **Tracking**: JT-SEC-036 O-15/O-19
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成
+
+### 一、验收（隔离 clone `…/scratch/o15p/clone` @ `f053c61`；生产面只读指纹）
+
+1. **O-15 CLOSED**：`--site <已存在空目录>`（不带 `--write-only`）⇒ **rc=2**、stderr 单行「不是 git 仓」、该目录内**文件数 0**（`find` 只列目录自身）⇒ 守卫确在任何 `mkdir`/写盘之前（原 `:483` 已删、现 `:366-376`）。
+2. **`--write-only` 预览不受损**：空目录 ⇒ **rc=0**，五文件落盘（`index.html` / `data/live.js` / `assets/{common.js,shell-render.js,style.css}`）。
+3. **仓根正例**：`--site <clone>`（非 write-only）⇒ **rc=0**「mirrored & committed」，clone 内新增一笔 `data@update: tokens-tracker - auto sync`，生产面无变化。
+4. **O-19 判据**：`--site <clone>/scripts`（`git -C` 同路径自报 toplevel = clone 根）⇒ 仍 **rc=2「--site 不是 git 仓」**，子目录 `tokens-tracker/` 未创建 ⇒ **O-19 未兑现**（见发现 1）。
+5. **探针分支可达（非死代码）**：非仓目录内放空 `.git` 文件 ⇒ `.exists()` 通过、rev-parse rc≠0 ⇒ **rc=2「不是 git 工作树」**、零写盘 ⇒ 兜住 `.git` 损坏 / dubious ownership。
+6. **门禁逐值**：`perf-check` rc=0 · `portal-check --mode post` **16/16** rc=0（S17 rc=1 `artifacts=6`）· `--selftest` **20/20** · `sync-check --selftest` **15/15** · `sync-check` **rc=1**（过渡态 `artifacts 6`）· `py_compile` rc=0。
+7. **生产指纹零变**：`tokens-tracker/index.html` sha256 `2f927abb…` / `data/live.js` sha256 `e37dd242…` 审计前后逐字相同，工作树 `porcelain` 空。
+
+### 二、发现（🔴 0 / 🟡 1，非阻断）
+
+- **🟡 1. O-19 承诺未落地（注释 / commit / 回执三处口径均超前实现）**：`.git` 存在性门在 `scripts/tokens-tracker-mirror.py:368`，位于 `:372` 探针**之前** ⇒ 仓内子目录（无 `.git`）在 `:368` 即 return 2，`git rev-parse --show-toplevel` 只对「`.git` 落在 `_site` 内」的形态（仓根 / linked worktree）可达。实测 `clone/scripts` rc=2，而同路径 `git -C … rev-parse --show-toplevel` 正常返回 clone 根 ⇒ `:373` 注释「O-19：仓内子目录也认」与行为不符。**方向为 fail-closed（不写盘、不提交），无新增风险**；仓内 `grep` 零命中（无生产调用传子目录），故非阻断。
+- **🟢 O-20（O-19 正确修法的前置）**：即使删掉 `.exists()` 门，`probe.stdout` 的 toplevel 也未被使用 ⇒ 子目录放行后会写 `<子目录>/tokens-tracker` 而非仓根。修法：`toplevel = Path(probe.stdout.strip()).resolve()`，与 `_site.resolve()` 取和后统一赋给 `WWW_REPO`。
+- **🟢 O-21**：探针 `subprocess.run` 无 `timeout`；git 缺失时 `FileNotFoundError` 未捕获（裸栈 rc=1）；失败分支不回显 `probe.stderr` 首行（dubious ownership 等真实原因丢失，与 O-14 同族）。
+- **结转未动**：O-13（`--force-upstream` 未绑 `DT_SANDBOX=1`）、O-14、O-17、O-18、O-9。
+
+### 三、计分与推送
+
+**100 − 2（O-19 声明与实现不符：注释 / commit message / 回执宣称已支持仓内子目录，实测仍拒）= 98 → PASS**（0 🔴；O-15 CLOSED；门禁 6 项零漂移；生产面零写；方向 fail-closed）。
+
+- **推送**：前 `HEAD=f053c61` / `origin/main=c0892bb` / ahead **1** / behind 0 / 树空 ⇒ `git push origin HEAD:main` = `c0892bb..f053c61  HEAD -> main`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`f053c6163e8a5106ec914085a1493d76ad0dbb91`**，ahead **0** / behind **0** / 树空
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带；推送后未追加提交
+- **建议修序**（批次）：**O-19 同修 O-20（取 toplevel 归一）→ O-21 → O-13 → O-17 → O-14/O-18/O-9**
+
+**待决 1 项**：O-19 修法取「删 `.exists()` 门、按 toplevel 归一（推荐，顺带闭合 O-20）」还是「保留双门、`.git` 缺失时退化到 rev-parse」；推荐前者（判据单一，子目录与仓根同口径）。
+
+---
+
 ## 条目格式说明
 
 ```

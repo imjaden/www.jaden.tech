@@ -365,15 +365,21 @@ def main() -> int:
         return 2
     # O-15：非仓目录必须在**任何写盘之前**拒绝（原位置在 mkdir+五次写之后，只拦住了 commit）
     if not args.write_only:
-        if not (_site / ".git").exists():
-            print(f"⚠️ tokens-tracker mirror: --site 不是 git 仓 {_site}（只读预览请加 --write-only）",
-                  file=sys.stderr)
+        # O-19：不要用 `<site>/.git` 存在性判仓（仓内子目录会被误拒）；交给 git 自己判定，
+        # 并**归一到仓根**，否则 `--site <clone>/scripts` 会写出 `<clone>/scripts/tokens-tracker`（O-20）。
+        try:
+            probe = subprocess.run(["git", "-C", str(_site), "rev-parse", "--show-toplevel"],
+                                   capture_output=True, text=True, timeout=15)
+        except (OSError, subprocess.SubprocessError) as exc:      # O-21：git 缺失/超时不吃裸栈
+            print(f"⚠️ tokens-tracker mirror: 无法调用 git（{exc}）", file=sys.stderr)
             return 2
-        probe = subprocess.run(["git", "-C", str(_site), "rev-parse", "--show-toplevel"],
-                               capture_output=True, text=True)      # O-19：仓内子目录也认
         if probe.returncode != 0:
-            print(f"⚠️ tokens-tracker mirror: --site 不是 git 工作树 {_site}", file=sys.stderr)
+            print(f"⚠️ tokens-tracker mirror: --site 不是 git 工作树 {_site}"
+                  f"（{(probe.stderr or '').strip().splitlines()[:1]}）", file=sys.stderr)
             return 2
+        _top = Path(probe.stdout.strip())
+        if _top.is_dir():
+            _site = _top
     if _site.resolve() != WWW_REPO.resolve():
         WWW_REPO = _site.resolve()
         DST_DIR = WWW_REPO / "tokens-tracker"
