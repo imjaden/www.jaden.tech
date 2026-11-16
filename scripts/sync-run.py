@@ -27,6 +27,7 @@ import argparse
 import fnmatch
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -74,6 +75,18 @@ def resolve_cmd(art):
     return _expand(LOCAL_ENTRIES.get(producer.get("mode")))
 
 
+CANONICAL_REMOTE_RE = r"github\.com[:/]+imjaden/www\.jaden\.tech"   # 兼容 ssh(git@host:owner/repo) 与 https
+
+
+def is_production_checkout():
+    """本仓是否就是生产检出（F-4′：只有这里跑 --include-upstream 才是安全的）。
+
+    判据 = `git remote get-url origin` 指向本仓规范远端；克隆/临时副本 origin 不同 ⇒ 判否。
+    """
+    r = subprocess.run(["git", "remote", "get-url", "origin"], cwd=ROOT, capture_output=True, text=True)
+    return bool(re.search(CANONICAL_REMOTE_RE, (r.stdout or "").strip()))
+
+
 def load():
     data = json.loads(MANIFEST.read_text(encoding="utf-8"))
     return data
@@ -112,8 +125,9 @@ def plan(manifest, only=None, include_upstream=False):
 def run_step(step):
     env = None
     if step.get("mode") == "emit-site":
-        # F-4：上游 `SITE_REPO` 默认硬编码生产检出；DT_SITE_REPO 是它的沙箱 seam。
-        # 不注入 ⇒ 在克隆/测试里跑会把产物写到生产仓（实测污染 records.json/index.html/snapshots）。
+        # F-4′：上游 `SITE_REPO` 是硬编码常量，`DT_SITE_REPO` 只在 **DT_SANDBOX=1** 时才被采信。
+        # 因此这里的注入是**惰性的**（无沙箱标记就无效），不能当作隔离手段；
+        # 真正的护栏是 main() 里的 `--include-upstream` 生产检出校验。
         env = {**os.environ, "DT_SITE_REPO": str(ROOT)}
     proc = subprocess.run(step["cmd"], cwd=step.get("cwd") or ROOT, capture_output=True, text=True, env=env)
     out = ((proc.stdout or "") + (proc.stderr or "")).strip()
@@ -206,8 +220,10 @@ def commit_artifacts(paths, message):
     if com.returncode:
         # F-1′：提交失败不得把索引留在「已暂存」态（{bmi 删除 / 改名} 的半截提交现场）
         subprocess.run(["git", "reset", "-q", "--"] + todo, cwd=ROOT, capture_output=True)
-    return com.returncode, ((com.stdout or "") + (com.stderr or "")).strip().splitlines()[0][:160] if (
-        (com.stdout or "") + (com.stderr or "")).strip() else "committed"
+    _out = ((com.stdout or "") + (com.stderr or "")).strip()
+    if com.returncode:
+        return com.returncode, (_out.splitlines()[0][:160] if _out else "commit failed")
+    return 0, (_out.splitlines()[0][:160] if _out else "committed")
 
 
 def main():
@@ -217,7 +233,9 @@ def main():
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--skip-check", action="store_true", help="执行后不跑 sync-check")
     ap.add_argument("--include-upstream", action="store_true",
-                    help="同时跑 emit-site 上游腿（上游跑完整流水线，只写不提交；副作用自负）")
+                    help="同时跑 emit-site 上游腿（上游写的是它自己 SITE_REPO 里的固定资产路径）")
+    ap.add_argument("--force-upstream", action="store_true",
+                    help="在非生产检出里也允许 --include-upstream（上游仍会写生产路径，危险）")
     ap.add_argument("--commit", action="store_true",
                     help="执行后把清单 path 下的改动做 path-scoped 提交（配合 --apply；默认不提交）")
     ap.add_argument("--message", default="data@update: sync artifacts",
@@ -228,6 +246,15 @@ def main():
         manifest = load()
     except (OSError, json.JSONDecodeError) as exc:
         print(f"manifest unreadable: {exc}", file=sys.stderr)
+        return 2
+
+    if args.include_upstream and not is_production_checkout() and not args.force_upstream:
+        # F-4′：上游 emit-site 写的是它**自己配置的**（生产）站点路径，本工具的 env 注入无效；
+        # 在克隆/副本里跑会把产物写进生产仓（实测污染 records.json / index.html / snapshots）。
+        print("拒绝执行：`--include-upstream` 只在生产检出内允许（当前 ROOT 的 origin 不是规范远端）。",
+              file=sys.stderr)
+        print("  如确需在副本里跑，先设好上游沙箱四件套（DT_SANDBOX=1 + DT_BASE + DT_HEALTH_DATA + "
+              "DT_SITE_REPO）再加 --force-upstream；否则请在生产检出执行。", file=sys.stderr)
         return 2
 
     steps = plan(manifest, args.only, args.include_upstream)

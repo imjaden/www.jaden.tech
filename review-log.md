@@ -2256,6 +2256,62 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — F-1′/F-3′/F-4 收口审计（1 笔已推）：改名/删除提交后零残留实测闭合、mirror `--site` 隔离成立；F-4 的 `DT_SITE_REPO` 注入实测惰性（缺 `DT_SANDBOX=1`）→ PASS 94
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/sync-run.py`（`changed()`/`commit_artifacts()`/`_expand()`/`run_step()`）· `scripts/tokens-tracker-mirror.py`（`--site`）· 台账 2 文件
+- **Tracking**: JT-SEC-033 F-1′/F-3′/F-4′
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成
+
+### 一、验收（隔离 clone `scratch/f134/w1`，本地 clone HEAD=`f68031a`；生产侧只读指纹 + worktree 全程 porcelain 空）
+
+1. **F-1′ 改名/删除 —— 八例函数级（真代码，非重写）**：
+   - A `git mv 202609→202699`（已暂存改名）：`changed()` 返两侧 → `commit rc=0` → `git show --name-status -M` = **`R100`**；提交后 `changed()=[]`、`porcelain` 空。
+   - B 未暂存删除（`rm`）：`rc=0`、记录 `D`、提交后空。
+   - C 已暂存删除（`git rm`）：`rc=0`、记录 `D`、提交后空 —— 上轮的 `rc=128` 形态**已消失**。
+   - D `mv` 不经 git（上游滚动改名的真实形态：` D` + `??` 双记录）：两侧同批进提交，`git show -M` 记 **`R100`**。
+   - E 负控：已暂存 `notes.tmp` + 改名 ⇒ 只提交改名（`1 file changed`），`notes.tmp` 仍留 `A ` 未提交（提交面未外溢）。
+   - F 失败复位：`pre-commit` hook `exit 1` ⇒ `rc=1`、HEAD 不变、索引**无 staged 残留**（剩 ` D` 未暂存）、`changed()` 仍可二次认出。
+   - G 目录前缀 `tokens-tracker/`：目录内改名 ⇒ `R100`、提交后空；边界用 `pre + "/"`，`tokens-tracker2/` 这类同前缀不致误吃。
+   - H 越界改名（`index.html→i2.html`，非产物）⇒ 三套 patterns 的 `changed()` 全空。
+   - 附：非 ASCII + 空格文件名（`poetry-titles-中文 空格.js`）正常 add+commit ⇒ `-z` 解析顺带解掉上轮 O-1 的 `quotePath` 隐患。
+2. **CLI 端到端**：clone 内 `--apply --commit --only poetry-titles --skip-check` ⇒ step `rc=0`、`COMMIT rc=0`、提交后 `porcelain` 空。
+3. **F-3′ `--site` 写面隔离**：`--write-only --site <tmp>` ⇒ `rc=0`、5 个文件落 tmp；生产 5 个产物 sha256 **前后逐字相同**；`--only tokens-board` 的镜像腿实展为 `… --write-only --site <clone>`，写盘落 clone、生产指纹不变。输出内容与生产面同源：剥掉 `generated=` 戳后 `diff` 空、payload `sha256=d98e67f7abda681a` 两侧一致。**缺省不破 cron**：默认值 `str(WWW_REPO)` ⇒ `Path(args.site).resolve() != WWW_REPO.resolve()` 为假 ⇒ 重绑分支跳过，`cwd=WWW_REPO` 的 `git add/commit` 与改前同路径。
+4. **F-4 机械面成立、语义面不成立**：`{site}` 对 `producer.cmd`（`daily-poetry --target {site}`，上游确有此 flag：`script-miner/daily-poetry/daily-poetry.py:422`）与内置入口（mirror）都展开；`emit-site` 档注入 `DT_SITE_REPO=<ROOT>`、`local` 档不注入 —— 注入本身实测生效，**但见 F-4′**。
+5. **门禁逐值复跑**：`sync-check --selftest` **15/15 rc=0** · `sync-check` **rc=1**（`artifacts 6`）· `perf-check` **rc=0** · `portal-check --mode post` **16/16 rc=0**（S17 `rc=1`）· `portal-check --selftest` **20/20 rc=0** · `sync-run` dry **rc=0**（2 DRY/3 SKIP/1 DUP，mirror 行含 `--site /…/www.jaden.tech`）· `py_compile` **rc=0**。
+
+### 二、发现（🔴 0 / 🟡 1）
+
+- **F-1′ ✅ CLOSED**（A–H 八例，含失败复位与两条负控）。
+- **F-3′ ✅ CLOSED**（提交面 `--write-only` + 写面 `--site`，两半都闭；cron 缺省路径未动）。
+- **🟡 F-4′（重开）`DT_SITE_REPO` 单独注入是惰性的 ⇒ 克隆里不隔离，注释造成假置信**：上游 `daily-tracker-update.py:137-142` 的 `_seam` 只在 `DT_SANDBOX=="1"` 时接受覆盖，`:149` 绑定 `SITE_REPO`、`:3362` 才消费。**取证**：用 AST 把上游真实源码的 `_seam` + 三条 seam 赋值抽出单独执行 —— `DT_SITE_REPO=/tmp/x` 且 `DT_SANDBOX` 未设 ⇒ `SITE_REPO=/Users/jadenli/CodeSpace/www.jaden.tech`（生产）；同值加 `DT_SANDBOX=1` ⇒ `/tmp/x`。即 `sync-run.py:113-118` 的注入在克隆里**不改变写面**，而注释「不注入 ⇒ …会把产物写到生产仓」读起来像是「注入即修好」，按此在克隆跑 `--include-upstream` 仍会重演上轮 O-6（写生产仓 + 改上游 stamp）。
+  - **无新增生产风险**（两条实测）：生产侧 `ROOT` 等于上游默认值且变量被忽略；若 shell 已导出 `DT_SANDBOX=1`，该注入被 preflight 硬拒 —— `rc=3`、`reason=prod_path:DT_SITE_REPO;toplevel:DT_BASE;prod_remote:DT_SITE_REPO`、tmp 树与生产指纹零变化 ⇒ **fail-closed**。
+  - **修法（择一）**：① 最省 —— `--include-upstream` 且 `ROOT != 生产检出` 时直接拒绝，提示「上游 seam 需 `DT_SANDBOX=1` 且三 seam 齐备」；② 由 `cache/sync-paths.json` 提供 daily-tracker 沙箱后注入 `DT_SANDBOX=1 + DT_BASE + DT_HEALTH_DATA + DT_SITE_REPO` 四件套；③ 至少把注释改成「今日惰性，仅为 `DT_SANDBOX` 化预留」。**推荐 ①+③**。
+
+### 三、🟢 观察（不计分）
+
+| # | 观察 | 处置建议 |
+|:-:|:--|:--|
+| O-7 | 提交失败且 git 无输出时 `detail` 报 `committed`（F 例实测 `rc=1` / `msg='committed'`，`sync-run.py:209-210` 三元） | 失败分支改 `commit failed` 或带 stderr 首行 |
+| O-8 | `--site` 指向不存在的多级目录 ⇒ `DST_DIR.mkdir` 抛 `FileNotFoundError` 裸栈（`mirror:447`，`exist_ok` 无 `parents`） | `parents=True`，或 argparse 阶段 `is_dir()` 明确报错 |
+| O-9 | `commit_info["paths"]` 用 `artifact_paths()`（现存文件数），实际提交面是 `changed(patterns)`，两者可不等（改名例：提交 2、显示 6） | 改 `len(changed(_pats))` 或键名改 `declared` |
+| O-10 | 上轮 O-3 的逃逸面被顺带收窄：`changed()` 只产出 `git status` 的仓内相对路径 ⇒ `commit_paths` 现在只当**过滤器**，`../x`/绝对路径无法命中记录、不再能越界 add | 可留作声明面，或补显式校验 |
+| O-11 | `_paths_guess` 用海象在 dict 字面量里赋值（`sync-run.py:278`），可读性差 | 提为独立变量 |
+
+### 四、计分与推送
+
+**100 − 6（F-4′ 重开：claim 与实现不符）= 94 → PASS**（0 🔴；F-1′/F-3′ 全闭；门禁 6 项零漂移；生产面零写）。
+
+- **推送**：前 `HEAD=f68031a` / `origin/main=666465f` / ahead **1** / behind 0 / 树空 ⇒ `git push origin HEAD:main` = `666465f..f68031a  HEAD -> main`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`f68031a734cd6b0a4615a7e06be5c3f34e2c4340`**，ahead **0** / behind **0** / 树空
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带；推送后未追加提交
+- **建议修序**（下笔）：**F-4′（守卫 + 注释）→ O-7/O-9（提交腿反馈准确性）→ O-8**
+
+**待决 1 项**：F-4′ 采哪条修法，推荐 **①+③**（守卫 + 注释改正），四件套 seam 留给 daily-tracker 侧沙箱批次。
+
+---
+
 ## 条目格式说明
 
 ```

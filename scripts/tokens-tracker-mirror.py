@@ -359,8 +359,12 @@ def main() -> int:
     # F-3′：允许把目标仓指到别处（隔离克隆 / 预览），默认仍是生产检出 ⇒ cron 行为不变
     ap.add_argument("--site", default=str(WWW_REPO), help="目标站点仓根（默认生产检出）")
     args = ap.parse_args()
-    if Path(args.site).resolve() != WWW_REPO.resolve():
-        WWW_REPO = Path(args.site).resolve()
+    _site = Path(args.site).expanduser()
+    if not _site.is_dir():
+        print(f"⚠️ tokens-tracker mirror: --site 不是目录 {_site}")
+        return 2
+    if _site.resolve() != WWW_REPO.resolve():
+        WWW_REPO = _site.resolve()
         DST_DIR = WWW_REPO / "tokens-tracker"
         DST_INDEX = DST_DIR / "index.html"
         DST_LIVE = DST_DIR / "data" / "live.js"
