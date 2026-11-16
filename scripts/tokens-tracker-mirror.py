@@ -380,21 +380,51 @@ ANOMALY_BLOCK = re.compile(
     r"""LIVE_ANOMALY|window\[["']LIVE_ANOMALY["']\]|LIVE_ANOMALY\[["'][^"']*["']\])\s*=\s*""")
 # 任务块头：放宽到非 ASCII / 含 `/` 的项目名；块内含【任务】但解析不出项目 ⇒ 计 dropped
 ANOMALY_TASK_HEAD = re.compile(r"【任务】\s*(.+?)\s*·")
-# 赋值形态全收：`window.LIVE_ANOMALY =` / `var LIVE_ANOMALY =` / `window["LIVE_ANOMALY"] =`
-# （🟡1(a)：只认一种形态 ⇒ 换写法即整段透传，三条实测全部 NO ERROR）
-# JT-SEC-045：把「看起来不像这个字」的写法先归一化再计数 —— `"LIVE_"+"ANOMALY"`、
-# `"LIVE\u005fANOMALY"`、反引号拼接、跨行加号，全部拉平成同一个串。
-_ANOMALY_UESC = re.compile(r"\\u([0-9a-fA-F]{4})")
-_ANOMALY_NOISE = re.compile(r"""[\s"'`+]""")
+# JT-SEC-045/046：JS 字符串字面量的拼法远多于一种 —— 先把「看起来不像这个字」的写法归一化，
+# 再计数。覆盖：`\u{5f}` / `\u005f` / `\x5f` / 八进制 `\137` / 行续行 `\`+换行；
+# 噪声面（引号、反引号、加号、空白、`${}` 插值）一并抹掉。
+# 两套投影各自与 handled 比对（**不拼接**，拼接会翻倍计数导致真产物误 raise）：
+#   P1 直接归一化 ｜ P2 先抹注释再归一化
+_ANOMALY_ESC = re.compile(
+    r"\\u\{([0-9a-fA-F]{1,6})\}"          # \u{5f}
+    r"|\\u([0-9a-fA-F]{4})"                # \u005f
+    r"|\\x([0-9a-fA-F]{2})"                 # \x5f
+    r"|\\([0-7]{1,3})"                     # 八进制 \137
+    r"|\\\r?\n"                          # 行续行
+)
+_ANOMALY_NOISE = re.compile(r"""[\s"'`+$]|\$\{""")
+_ANOMALY_LINE_COMMENT = re.compile(r"//[^\n]*")
+_ANOMALY_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.S)
+
+
+def _decode_anomaly_escapes(text: str) -> str:
+    def repl(m):
+        raw = m.group(0)
+        if raw.endswith("\n"):          # 行续行：反斜杠+换行，直接接起来
+            return ""
+        for g, base in ((1, 16), (2, 16), (3, 16), (4, 8)):
+            val = m.group(g)
+            if val is not None:
+                try:
+                    return chr(int(val, base))
+                except (ValueError, OverflowError):
+                    return raw          # 非法码点原样保留（不吞字符）
+        return raw
+    return _ANOMALY_ESC.sub(repl, text)
+
+
+def _strip_anomaly_comments(text: str) -> str:
+    return _ANOMALY_LINE_COMMENT.sub("", _ANOMALY_BLOCK_COMMENT.sub("", text))
 
 
 def _normalize_anomaly(text: str) -> str:
-    return _ANOMALY_NOISE.sub("", _ANOMALY_UESC.sub(lambda m: chr(int(m.group(1), 16)), text))
+    return _ANOMALY_NOISE.sub("", _decode_anomaly_escapes(text))
 
-# 🟡3（第 9 轮）：按 `~/CodeSpace` 现有 28 个仓的规范名维护（去掉 .cli/.lab/.archived 后缀），
-# 词边界放宽后 `html-gen.cli` 这类带后缀的写法也会命中。新增仓请同步这里（或靠 deny 的 items 派生兜底）。
+
 # deny 若只从 LIVE_ITEMS 派生，则「整行被过滤 / 已归档 / 只在正文里被提到」的仓不在表里
 # ⇒ 正文命中既不丢块也不响（JT-SEC-043）。静态表与派生面取并集。
+# 按 `~/CodeSpace` 现有 28 个仓的规范名维护（去掉 .cli/.lab/.archived 后缀），
+# 词边界放宽后 `html-gen.cli` 这类带后缀的写法也会命中。新增仓请同步这里。
 INTERNAL_PROJECTS_STATIC = frozenset({
     "12306-mcp", "Horizon", "JadenVault", "agent-loop", "andrej-karpathy-skills",
     "bash-scripts", "cloudwise", "daily-tracker", "delete-browsing-history", "git-cloner",
@@ -409,7 +439,7 @@ ALLOWED_ANOMALY_KEYS = frozenset({
 })
 
 
-def _deny_hit(text: str, deny: set):
+def _deny_hit(text: str, deny):
     """返回第一个命中的项目名（词边界，避免 `jaden-tech` 命中 `jaden.tech` 之类误判），无命中返回 None。"""
     for name in sorted(deny):
         if re.search(r"(?<![A-Za-z0-9_-])" + re.escape(name) + r"(?![A-Za-z0-9_-])", text):
@@ -417,7 +447,7 @@ def _deny_hit(text: str, deny: set):
     return None
 
 
-def _filter_anomaly_obj(obj: dict, deny: set) -> dict:
+def _filter_anomaly_obj(obj: dict, deny) -> dict:
     """按 deny 过滤 `prompt` 的任务块，并做键面/内容面不变式。返回同一对象（原地修改）。"""
     unknown = set(obj) - ALLOWED_ANOMALY_KEYS
     if unknown:
@@ -458,7 +488,7 @@ def _filter_anomaly_obj(obj: dict, deny: set) -> dict:
     return obj
 
 
-def sanitize_anomaly(tail: str, deny: set) -> str:
+def sanitize_anomaly(tail: str, deny) -> str:
     """把 `LIVE_ANOMALY` 的明细按项目白名单过滤（公开面不列非白名单项目）。
 
     🟡1：尾部可能**多次**出现 `LIVE_ANOMALY`（追加赋值），必须逐个处理；
@@ -481,7 +511,8 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
     if not handled:
         # 🟡2（第 10 轮）：只认「赋值形态」不够 —— `self.LIVE_ANOMALY =` / `globalThis["…"] =` /
         # `window["LIVE_"+"ANOMALY"] =` 都会原样透传。改为「出现该字样即中止」。
-        if "LIVE_ANOMALY" in _normalize_anomaly(tail):
+        if "LIVE_ANOMALY" in _normalize_anomaly(tail) or \
+                "LIVE_ANOMALY" in _normalize_anomaly(_strip_anomaly_comments(tail)):
             raise RuntimeError("LIVE_ANOMALY 出现但形态不认识 — fail-closed")
         return tail
     pieces.append(tail[pos:])
@@ -491,11 +522,12 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
     # 而未识别的接收者（`self.LIVE_ANOMALY =` / `globalThis["LIVE_ANOMALY"] =` / 动态拼接）
     # 必然落在未消费区 ⇒ 计数不符 ⇒ 中止。
     residual = "".join(prefixes) + tail[pos:]
-    _norm = _normalize_anomaly(residual)
-    if _norm.count("LIVE_ANOMALY") != handled:
-        raise RuntimeError(
-            f"LIVE_ANOMALY 守恒失败：未消费区归一化后出现 {_norm.count('LIVE_ANOMALY')} 次、"
-            f"已处理 {handled} 块 — fail-closed")
+    for _label, _proj in (("归一化", _normalize_anomaly(residual)),
+                          ("抹注释+归一化", _normalize_anomaly(_strip_anomaly_comments(residual)))):
+        _n = _proj.count("LIVE_ANOMALY")
+        if _n != handled:
+            raise RuntimeError(
+                f"LIVE_ANOMALY 守恒失败：未消费区（{_label}）出现 {_n} 次、已处理 {handled} 块 — fail-closed")
     return result
 
 
@@ -529,6 +561,10 @@ ANOMALY_SELFTEST = (
     ("a8 白名单块正文提及该词", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】daily-checker · D\n修 LIVE_ANOMALY 守恒断言"};', "pass"),
     ("a9 三段拆分键名", r'window["LIVE" + "_" + "ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
     ("a10 unicode 转义键名", r'window["LIVE\u005fANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
+    ("a11 hex 转义键名", r'window["LIVE\x5fANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
+    ("a12 码点转义键名", r'window["LIVE\u{5f}ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
+    ("a13 八进制转义键名", r'window["LIVE\137ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
+    ("a14 行续行键名", 'window["LIVE_\\\nANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
     ("b 后缀形态 html-gen.cli", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H\ncd html-gen.cli"};', "pass_dropped"),
     ("c 未知键", r'window.LIVE_ANOMALY = {"anomaly_total":1,"extra_prompts":[]};', "raise"),
     ("d 非字符串 prompt", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":["x"]};', "raise"),
