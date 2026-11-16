@@ -50,14 +50,20 @@ import sys
 from pathlib import Path
 
 WWW_REPO = Path("/Users/jadenli/CodeSpace/www.jaden.tech")
-SRC_DIR = Path("/Users/jadenli/CodeSpace/hermes-manager/web/1acl")
+# 2026-11-16（用户决策：第五条 A 方案）：镜像源从 1ACL Task 板切到 **Dashboard 页**。
+# 上游 Dashboard 是自包含单壳（无 assets/），动态加载 data/dashboard.js ⇒ 产物只剩两件：
+#   tokens-tracker/index.html（壳投影）+ tokens-tracker/data/dashboard.js（数据投影）。
+SRC_DIR = Path("/Users/jadenli/CodeSpace/hermes-manager/web")
 SRC_INDEX = SRC_DIR / "index.html"
-SRC_LIVE = SRC_DIR / "data" / "live.js"
-SRC_ASSETS = SRC_DIR / "assets"
+SRC_DATA = SRC_DIR / "data" / "dashboard.js"
+# 旧源（1ACL Task 板）：保留常量供回滚/对照，主流程不再读取。
+SRC_LIVE = SRC_DIR / "1acl" / "data" / "live.js"
+SRC_ASSETS = SRC_DIR / "1acl" / "assets"
 DST_DIR = WWW_REPO / "tokens-tracker"
 DST_INDEX = DST_DIR / "index.html"
-DST_LIVE = DST_DIR / "data" / "live.js"
-DST_ASSETS = DST_DIR / "assets"
+DST_DATA = DST_DIR / "data" / "dashboard.js"
+DST_LIVE = DST_DIR / "data" / "live.js"      # 旧产物，切换后删除
+DST_ASSETS = DST_DIR / "assets"              # 旧资产（Dashboard 壳不引用），切换后删除
 
 # A1 privacy boundary (2026-09-06): only these projects' task rows are public-safe.
 PROJECT_WHITELIST = {"daily-checker", "hermes-manager", "llm-radar"}
@@ -97,7 +103,7 @@ WC_NAV_BLOCK = re.compile(r'<div class="wc-nav">.*?</div>', flags=re.S)
 NAV_ITEM_RE = re.compile(r"<a\b([^>]*)>([^<]*)</a>", re.S)
 NAV_DISABLED_TITLE = "仅本地服务可访问"
 NAV_ITEMS_EXPECTED = 10          # 上游 wc-nav 当前项数；变化即中止（不猜）
-NAV_CURRENT_MATCH = 'href="/1acl/index.html"'   # 本页（1ACL Task 板）对应项
+NAV_CURRENT_MATCH = 'class="active" href="/index.html"'   # 本页（Dashboard）对应项
 NAV_BRAND_OLD = '<span class="wc-brand">Hermes 控制台</span>'
 NAV_BRAND_NEW = '<span class="wc-brand">Hermes 控制台 · 公开镜像</span>'
 NAV_ITEM_CSS = (
@@ -193,7 +199,7 @@ def _stamp_generated(live_text: str) -> str:
     m = _re.search(r'"generated_at"\s*:\s*"([^"]+)"', live_text)
     if m:
         return m.group(1)
-    return _dt.fromtimestamp(SRC_LIVE.stat().st_mtime).astimezone().isoformat(timespec="seconds")
+    return _dt.fromtimestamp(SRC_DATA.stat().st_mtime).astimezone().isoformat(timespec="seconds")
 
 
 def inject_chrome(html: str) -> str:
@@ -615,13 +621,198 @@ def _selftest() -> int:
         print(f"FAIL  结构钉: {prob}")
     if not _structure_ok():
         print("PASS  结构钉: 静态表 22 / 键白名单 10 / 7 个关键符号齐")
-    total = len(ANOMALY_SELFTEST) + 1
-    print(f"\n{total - fails}/{total} 通过（LIVE_ANOMALY 形态负控 + 结构钉）")
+    dash_pass, dash_total = _dash_selftest()
+    fails += dash_total - dash_pass
+    total = len(ANOMALY_SELFTEST) + 1 + dash_total
+    print(f"\n{total - fails}/{total} 通过（LIVE_ANOMALY 形态负控 + 结构钉 + Dashboard 投影）")
     return 0 if fails == 0 else 1
 
 
+PUBLIC_CALIBER = ("口径：四域指标由本机 Dashboard 生成器按 C1 新口径聚合（独占会话归因 + 共享池单列 + 上限 + "
+                  "model 分布）。公开镜像只列白名单项目的任务行与聚合数字，不列项目明细与本地命令。")
+MASK_TERM = "其他项目"
+LOCAL_CMD = "（本地命令）"
+# 词表档（公开面禁列的具体词）：项目名走 deny 集合，另外这两个词按内容档替换
+MASK_TERMS = (("飞书", "消息通道"), ("阿里云", "云服务商"),
+              ("~/.hermes/state.db", "本地会话库"), ("state.db", "本地会话库"),
+              ("~/.hermes/", ""), ("1ACL 台账", "台账"),
+              ("web/data/dashboard.js", "数据层"), ("web/index.html", "页面壳"))
+# 掩码后仍出现在产物里即中止（比逐字段断言更可信；也是「新字段带新专名」的兜底）
+POST_MASK_FORBIDDEN = re.compile(r"state\.db|~/\.hermes|/Users/|lib_hist_caliber|(?<![A-Za-z0-9_])hm ")
+CLI_CMD_RE = re.compile(r"(?<![A-Za-z0-9_])hm [a-z][a-z0-9 .\-/]{0,60}")
+WHERE_LINE_RE = re.compile(r"^\s*(Where|Where：)\s*[:：]", re.M)
+
+
+def mask_text(text: str, deny) -> str:
+    """把项目名 / 内部 CLI / 本地路径替换成中性词（公开面「管行不管词」的落地实现）。"""
+    if not isinstance(text, str) or not text:
+        return text or ""
+    out = text
+    for name in sorted(deny, key=len, reverse=True):
+        out = re.sub(r"(?<![A-Za-z0-9_-])" + re.escape(name) + r"(?![A-Za-z0-9_-])", MASK_TERM, out)
+    for raw, neutral in MASK_TERMS:
+        out = out.replace(raw, neutral)
+    out = CLI_CMD_RE.sub(LOCAL_CMD, out)
+    out = out.replace("~/CodeSpace/", "").replace("/Users/jadenli", "")
+    return out
+
+
+def project_board_rows(rows, deny) -> list:
+    """白名单行 + 列裁剪 + 词级掩码 + 行级守卫（仍有敏感词则丢整行）。"""
+    kept = []
+    for it in rows or []:
+        if not isinstance(it, dict) or it.get("project") not in PROJECT_WHITELIST:
+            continue
+        row = {"number": it.get("number"), "project": it.get("project"), "status": it.get("status"),
+               "level": it.get("level"), "progress": it.get("progress"),
+               "updated_at": it.get("updated_at"), "signals": it.get("signals"),
+               "desc": mask_text(trunc(it.get("desc")), deny), "copy_cmd": LOCAL_CMD}
+        if SENSITIVE_LEAK.search(json.dumps(row, ensure_ascii=False)):
+            print(f"🔒 dashboard.rows: 丢弃仍含敏感词的 {row.get('number')!r}")
+            continue
+        kept.append(row)
+    return kept
+
+
+def project_card(card, deny) -> dict:
+    out = {k: card.get(k) for k in ("key", "label", "level", "value", "action_label")}
+    out["note"] = mask_text(card.get("note") or "", deny)
+    out["copy_cmd"] = LOCAL_CMD
+    prompt = WHERE_LINE_RE.sub("", mask_text(card.get("prompt") or "", deny))
+    # 二次扫描：掩码后仍命中 deny ⇒ 整段换成占位（不 raise，避免上游改文案就停更）
+    if _deny_hit(prompt, deny) or SENSITIVE_LEAK.search(prompt):
+        print(f"🔒 dashboard.cards[{card.get('key')}]: prompt 整段不公开")
+        prompt = "（排查 Prompt 仅本地可见）"
+    out["prompt"] = prompt
+    return out
+
+
+def project_range(rng, deny) -> dict:
+    domains = []
+    for d in rng.get("domains") or []:
+        domains.append({
+            "key": d.get("key"), "label": mask_text(d.get("label") or "", deny),
+            "window": mask_text(d.get("window") or "", deny),
+            "headline": mask_text(d.get("headline") or "", deny),
+            "href": "",                                  # 内部路由不公开（防死链 + 防页面地图泄漏）
+            "unavailable": d.get("unavailable"),
+            "stats": [{"label": mask_text(s.get("label") or "", deny), "value": s.get("value"),
+                       "raw": s.get("raw"), "note": mask_text(s.get("note") or "", deny)}
+                      for s in (d.get("stats") or [])],
+            "analysis": [{"title": mask_text(a.get("title") or "", deny),
+                          "note": mask_text(a.get("note") or "", deny),
+                          "rows": [{"label": mask_text(x.get("label") or "", deny),
+                                    "value": x.get("value"), "raw": x.get("raw")}
+                                   for x in (a.get("rows") or [])]}
+                         for a in (d.get("analysis") or [])],
+        })
+    return {"days": rng.get("days"), "label": rng.get("label"), "domains": domains}
+
+
+def transform_dashboard(js: str) -> str:
+    """把上游 Dashboard 数据层投影成公开面（A 方案：全量投影，去专名）。
+
+    保留：结构（board/cards/caliber/ranges）⇒ 页面四张卡与两张图照常渲染；
+    去掉：非白名单任务行、项目名、内部 CLI、内部模块名（caliber）、内部路由（href）。
+    """
+    m_meta = re.search(r"window\.WEB_DATA_META\s*=\s*", js)
+    m_dash = re.search(r"window\.DASHBOARD\s*=\s*", js)
+    m_ready = re.search(r"window\.WEB_DATA_READY", js)
+    if not (m_meta and m_dash and m_ready):
+        missing = [n for n, m in (("WEB_DATA_META", m_meta), ("DASHBOARD", m_dash),
+                                  ("WEB_DATA_READY", m_ready)) if not m]
+        raise RuntimeError(f"dashboard.js blocks not found: {', '.join(missing)}")
+    meta, _ = json.JSONDecoder().raw_decode(js[m_meta.end():])
+    raw, _ = json.JSONDecoder().raw_decode(js[m_dash.end():])
+    if not isinstance(raw, dict):
+        raise RuntimeError("DASHBOARD 顶层不是对象 — fail-closed")
+    tail = js[m_ready.start():]
+    if "web-data-ready" not in tail:
+        raise RuntimeError("web-data-ready dispatch missing — fail-closed")
+
+    board = raw.get("board") or {}
+    rows_raw = board.get("rows") or []
+    deny = ({str(r.get("project")) for r in rows_raw if isinstance(r, dict) and r.get("project")}
+            | INTERNAL_PROJECTS_STATIC) - PROJECT_WHITELIST
+    counts = dict(board.get("counts") or {})
+    counts = _filter_anomaly_obj(counts, deny)      # 键面/正文面与 LIVE_ANOMALY 同一套判据
+    if isinstance(counts.get("prompt"), str):
+        counts["prompt"] = mask_text(counts["prompt"], deny)   # 块内 CLI/路径/模块名再做一遍词级掩码
+    for field in META_DROP_FIELDS:
+        meta.pop(field, None)
+
+    out = {
+        "board": {"counts": counts, "note": mask_text(board.get("note") or "", deny),
+                  "rows": project_board_rows(rows_raw, deny), "status": board.get("status")},
+        "caliber": PUBLIC_CALIBER,
+        "cards": [project_card(c, deny) for c in (raw.get("cards") or []) if isinstance(c, dict)],
+        "default_range": raw.get("default_range"),
+        "ranges": {str(k): project_range(v, deny) for k, v in (raw.get("ranges") or {}).items()},
+    }
+
+    def dump(value) -> str:
+        return json.dumps(value, ensure_ascii=False, indent=2)
+
+    body = ("window.WEB_DATA_META = " + dump(meta) + ";\n"
+            + "window.DASHBOARD = " + dump(out) + ";\n")
+    # 尾部（READY 哨兵 + 事件派发）原样保留，但同样过一遍形态守卫：出现未知 LIVE_ANOMALY 形态即 raise
+    tail = sanitize_anomaly(tail, deny)
+    return body + tail.lstrip("\n")
+
+
+def _dash_selftest():
+    """Dashboard 投影判别力：5 例（非白名单行 / 未知键 / desc 掩码 / CLI 掩码 / caliber 替换）。"""
+    import json as _json
+
+    def make(rows, counts=None, caliber="内部口径 lib_hist_caliber / state.db", desc=None):
+        meta = {"generated_at": "2026-11-16T00:00:00", "generator": "hub-build", "source": "/Users/x/y"}
+        counts = counts or {"anomaly_total": 0, "doc_missing": 0, "idle": 0, "ledger_total": 1,
+                           "prompt": "", "prompt_count": 0, "skipped": 0, "timeout": 0,
+                           "total": 1, "unknown": 0}
+        board = {"counts": counts, "note": "共 1 条", "rows": rows, "status": "ok"}
+        card = {"key": "k", "label": "L", "level": "info", "value": 1, "note": "n",
+                "action_label": "复制", "copy_cmd": "hm loop list --done",
+                "prompt": "【任务】hermes-manager · X\nWhere：仓 hermes-manager；数据 web/data/dashboard.js"}
+        rng = {"7": {"days": 7, "label": "近 7 天", "domains": [
+            {"key": "task", "label": "Task", "window": "w", "headline": "h", "href": "/1acl/index.html",
+             "unavailable": None, "stats": [{"label": "任务键数", "value": "1", "raw": 1, "note": "state.db"}],
+             "analysis": [{"title": "t", "note": "n", "rows": [{"label": "script-miner", "value": "3", "raw": 3}]}]}]}}
+        obj = {"board": board, "caliber": caliber, "cards": [card],
+               "default_range": "7", "ranges": rng}
+        if desc:
+            obj["board"]["rows"][0]["desc"] = desc
+        return ("window.WEB_DATA_META = " + _json.dumps(meta) + ";\n"
+                "window.DASHBOARD = " + _json.dumps(obj, ensure_ascii=False) + ";\n"
+                "window.WEB_DATA_READY = true;\n"
+                "if (window.dispatchEvent) { window.dispatchEvent(new Event('web-data-ready')); }\n")
+
+    rows = [{"project": "script-miner", "number": "SM-1", "status": "active", "desc": "x",
+             "copy_cmd": "hm x", "level": "info", "progress": "[1/6]"},
+            {"project": "hermes-manager", "number": "HM-1", "status": "active", "desc": "y",
+             "copy_cmd": "hm y", "level": "info", "progress": "[2/6]"}]
+    cases = []
+    out = transform_dashboard(make(rows, desc="协作 script-miner 与 html-gen"))
+    cases.append(("非白名单行被丢", "SM-1" not in out and "HM-1" in out))
+    cases.append(("desc 项目名被掩码", "script-miner" not in out and "html-gen" not in out and MASK_TERM in out))
+    cases.append(("CLI 命令被掩码", "hm loop list" not in out and LOCAL_CMD in out))
+    cases.append(("caliber 被替换", "lib_hist_caliber" not in out and "state.db" not in out
+                  and PUBLIC_CALIBER in out))
+    cases.append(("内部路由 href 置空", '"/1acl/index.html"' not in out))
+    bad = {"anomaly_total": 0, "prompt": "", "extra_prompts": "x"}
+    try:
+        transform_dashboard(make(rows, counts=bad))
+        cases.append(("counts 未知键 ⇒ raise", False))
+    except RuntimeError:
+        cases.append(("counts 未知键 ⇒ raise", True))
+
+    passed = sum(1 for _, c in cases if c)
+    for name, cond in cases:
+        print(f"{'PASS ' if cond else 'FAIL '} dash: {name}")
+    return passed, len(cases)
+
+
 def main() -> int:
-    global WWW_REPO, DST_DIR, DST_INDEX, DST_LIVE, DST_ASSETS
+    global WWW_REPO, DST_DIR, DST_INDEX, DST_DATA, DST_LIVE, DST_ASSETS
     ap = argparse.ArgumentParser()
     ap.add_argument("--write-only", action="store_true", help="transform + write files, no git ops")
     # F-3′：允许把目标仓指到别处（隔离克隆 / 预览），默认仍是生产检出 ⇒ cron 行为不变
@@ -657,10 +848,11 @@ def main() -> int:
         WWW_REPO = _site.resolve()
         DST_DIR = WWW_REPO / "tokens-tracker"
         DST_INDEX = DST_DIR / "index.html"
+        DST_DATA = DST_DIR / "data" / "dashboard.js"
         DST_LIVE = DST_DIR / "data" / "live.js"
         DST_ASSETS = DST_DIR / "assets"
 
-    for src in (SRC_INDEX, SRC_LIVE):
+    for src in (SRC_INDEX, SRC_DATA):
         if not src.exists():
             print(f"⚠️ tokens-tracker mirror: source missing {src}")
             return 2
@@ -684,13 +876,9 @@ def main() -> int:
     if not guard_ok(new_html, "index.html", SENSITIVE_CONTENT):
         return 2
     # JT-CL005: 打 SYNC 戳（守卫通过之后、写盘之前）。
-    # generated 取上游 data/live.js 的 WEB_DATA_META.generated_at ⇒ 数据不变则逐字节不变（幂等，
+    # generated 取上游 data/dashboard.js 的 WEB_DATA_META.generated_at ⇒ 数据不变则逐字节不变（幂等，
     # 不会每次运行都脏工作树）。哈希口径 = 去戳后正文，见 scripts/sync_stamp.py。
-    try:
-        _meta = new_live if 'new_live' in dir() else ""
-    except Exception:
-        _meta = ""
-    _generated = _stamp_generated(transform_live(SRC_LIVE.read_text(encoding="utf-8")))
+    _generated = _stamp_generated(SRC_DATA.read_text(encoding="utf-8"))
     new_html = sync_stamp.html_stamp(
         new_html,
         id="tokens-board",
@@ -700,47 +888,32 @@ def main() -> int:
         sha256=sync_stamp.digest(new_html),
     )
 
-    new_live = transform_live(SRC_LIVE.read_text(encoding="utf-8"))
-    if not guard_ok(new_live, "data/live.js"):
+    new_data = transform_dashboard(SRC_DATA.read_text(encoding="utf-8"))
+    if not guard_ok(new_data, "data/dashboard.js"):
+        return 2
+    # 公开面专名断言：掩码后产物里不得再出现任何内仓名 / 本地路径（fail-closed，比逐字段可信）
+    _deny_all = INTERNAL_PROJECTS_STATIC
+    _hit = _deny_hit(new_data, _deny_all)
+    if _hit:
+        print(f"⚠️ tokens-tracker mirror: 产物仍含内仓名 {_hit!r}（掩码遗漏），aborting")
+        return 2
+    _forbidden = POST_MASK_FORBIDDEN.search(new_data)
+    if _forbidden:
+        print(f"⚠️ tokens-tracker mirror: 产物仍含内部标识 {_forbidden.group(0)!r}（掩码遗漏），aborting")
         return 2
     # JT-CL005 / review Q-4：数据面本体（PII 承载产物）也要受戳约束 —— 守卫通过后再打，
     # 不构成「戳掩护敏感词」通道（守卫读的是打戳前的文本）。
-    new_live = sync_stamp.js_stamp(
-        new_live,
+    new_data = sync_stamp.js_stamp(
+        new_data,
         id="tokens-live",
         producer="hermes-manager/1acl-board-gen",
         v="1",
         generated=_generated,
-        sha256=sync_stamp.digest(new_live),
+        sha256=sync_stamp.digest(new_data),
     )
 
-    new_js = transform_js((SRC_ASSETS / "common.js").read_text(encoding="utf-8"))
-    if not guard_ok(new_js, "common.js", SENSITIVE_CONTENT):
-        return 2
-
-    # CL212: 壳内渲染块已外置成独立资产（上游 web/1acl/assets/shell-render.js, defer 加载）。
-    # 镜像必须同步拷贝，否则线上 <script src="assets/shell-render.js"> 404 ⇒ 页面不 init。
-    # 纯 JS 代码、无数据块 ⇒ 走内容档守卫（与 common.js 同级），不做 transform_js（无 retro 明细注入点）。
-    render_src = SRC_ASSETS / "shell-render.js"
-    if render_src.exists():
-        new_render = render_src.read_text(encoding="utf-8")
-        if not guard_ok(new_render, "shell-render.js", SENSITIVE_CONTENT):
-            return 2
-    else:
-        # CL214 / SEC-212-04: 壳引用该资产而上游缺失 ⇒ 静默跳过会让线上 404（页面白板）。
-        # 只有「壳自己没引用」时才允许跳过（兼容旧版壳），否则 fail-closed。
-        if "assets/shell-render.js" in new_html:
-            print("⚠️ tokens-tracker mirror: 壳引用 assets/shell-render.js 但上游缺失, aborting")
-            return 2
-        new_render = None
-
-    src_css = (SRC_ASSETS / "style.css").read_bytes()
-    if not guard_ok(src_css.decode("utf-8", errors="replace"), "style.css", SENSITIVE_CONTENT):
-        return 2
-
     DST_DIR.mkdir(exist_ok=True)
-    DST_LIVE.parent.mkdir(exist_ok=True)
-    DST_ASSETS.mkdir(exist_ok=True)
+    DST_DATA.parent.mkdir(exist_ok=True)
 
     changed = False
     # B3：提交面由“本轮会写/已写的产物”生成，新增产物自动纳入（硬编码三路径会漏新文件）
@@ -751,30 +924,21 @@ def main() -> int:
         DST_INDEX.write_text(new_html, encoding="utf-8")
         changed = True
 
-    old_live = DST_LIVE.read_text(encoding="utf-8") if DST_LIVE.exists() else None
-    outputs.append(DST_LIVE)
-    if old_live != new_live:
-        DST_LIVE.write_text(new_live, encoding="utf-8")
+    old_data = DST_DATA.read_text(encoding="utf-8") if DST_DATA.exists() else None
+    outputs.append(DST_DATA)
+    if old_data != new_data:
+        DST_DATA.write_text(new_data, encoding="utf-8")
         changed = True
 
-    outputs.extend([DST_ASSETS / "common.js", DST_ASSETS / "style.css"])
-    old_js = (DST_ASSETS / "common.js").read_text(encoding="utf-8") if (DST_ASSETS / "common.js").exists() else None
-    if old_js != new_js:
-        (DST_ASSETS / "common.js").write_text(new_js, encoding="utf-8")
-        changed = True
-
-    if new_render is not None:
-        dst_render = DST_ASSETS / "shell-render.js"
-        outputs.append(dst_render)
-        old_render = dst_render.read_text(encoding="utf-8") if dst_render.exists() else None
-        if old_render != new_render:
-            dst_render.write_text(new_render, encoding="utf-8")
-            changed = True
-
-    old_css = (DST_ASSETS / "style.css").read_bytes() if (DST_ASSETS / "style.css").exists() else None
-    if old_css != src_css:
-        (DST_ASSETS / "style.css").write_bytes(src_css)
-        changed = True
+    # 切换清理（A 方案）：旧产物 data/live.js 与旧资产 assets/ 不再被壳引用 ⇒ 删除，
+    # 避免公开面留 122 KB 死代码 + 让 S22/S17 的「页面地图」多一处入口。
+    stale = [q for q in (DST_LIVE, *sorted(DST_ASSETS.glob("*"))) if q.exists()]
+    outputs.extend(stale)
+    if stale and not args.write_only:
+        for q in stale:
+            q.unlink(missing_ok=True)
+        if DST_ASSETS.exists() and not any(DST_ASSETS.iterdir()):
+            DST_ASSETS.rmdir()
 
     if args.write_only:
         print("✅ tokens-tracker mirror: files written (write-only)")
