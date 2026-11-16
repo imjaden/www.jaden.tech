@@ -273,7 +273,7 @@ AGENTS.md                  3666 B（< 4 KB）
 | **N-3** 🟢 | `/static/../x` 相对穿越可绕字符串型守卫（既有缺口，非本轮引入；归属按 SEC 台账 = **JT-SEC-018 面**）。已加防御：降级前用 `resolve()` 断言落点仍在站点根内，**越根 / 不存在一律保持原样**交 `ROOT_ABS_REF` 守卫 fail-closed（实测 `/static/../../../../etc/passwd` 不被降级、`/static/img/favicon.png` 正常降级） |
 | **N-4** 🟡 | 不可读分支覆写 `worst`，可把 `mismatch` 降级为 `unknown`（rc 2→3 分类漂移）。已修：仅在 `none/ok/unstamped/stale` 时才提级为 unknown |
 
-### 基线（2026-11-16 10:2x）
+### 基线（2026-11-16 09:57）
 
 ```
 portal-check --mode post   16/16

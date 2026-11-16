@@ -12,7 +12,10 @@
   python3 scripts/sync-run.py                 # 预览全部
   python3 scripts/sync-run.py --apply         # 执行 local/mirror 两类，emit-site 仍 SKIP
   python3 scripts/sync-run.py --apply --only tokens-board
+  python3 scripts/sync-run.py --apply --include-upstream   # 含 emit-site 上游腿（上游会自行 commit/push）
   python3 scripts/sync-run.py --json          # 机器读
+
+注意：不带 --include-upstream 时，mode=emit-site 的产物一律 SKIP（--only <emit-site id> 亦为 SKIP/rc=3）。
 退出码：0 未出现失败 / 1 有失败 / 2 清单不可读 / 3 仅 SKIP（无可执行项）
 """
 import argparse

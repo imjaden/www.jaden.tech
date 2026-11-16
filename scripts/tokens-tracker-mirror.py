@@ -264,7 +264,7 @@ def transform_shell(html: str) -> str:
         # 越根 / 不存在一律保持原样，交 ROOT_ABS_REF 守卫 rc=2（fail-closed）。
         try:
             inside = cand.resolve().is_relative_to(_SITE_ROOT.resolve())
-        except (OSError, ValueError):
+        except (OSError, ValueError, AttributeError):   # O-3：py<3.9 无 is_relative_to ⇒ fail-closed
             inside = False
         if not (cand.exists() and inside):
             print(f"⚠️ 站点资源越根或不存在，保留原样交守卫拦截: {m.group(0)}")

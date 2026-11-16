@@ -1832,6 +1832,76 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — JT-CL005 N-3 加固 + R-1 口径修正审计（1 笔待推）：N-3 ✅ 闭合、R-1 ✅ 闭合 → PASS 100
+
+- **review者**: Security Reviewer（review profile，cli 会话，prompt `jt-cl005-n3-review-push` v1.0）
+- **范围**: `origin/main = 13250fb` → 本地 HEAD `93a0a27`，**ahead 1 / behind 0**，`git status --short` 空；1 笔 = `93a0a27`（`scripts/tokens-tracker-mirror.py` +11/−3、设计 §十五 1 行、`review-log.md` +56、`.review-level.yaml` +8，4 文件 +74/−3）
+- **Tracking**: 上轮待决 2 项 **全部闭合** —— **N-3 ✅ CLOSED**（`resolve()` 落点断言）、**R-1 ✅ CLOSED**（SEC 号改挂 `JT-SEC-018` 面，与台账一致）；本轮**新增 0 发现**（🟢 观察 3 条，不计分）
+- **状态**: ✅ PASS（**100 / 100**，Rating A；🔴 0 / 🟡 0）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告
+- **实现 prompt**: ⬜ 无需生成（实现/集成验证审计，非设计评审）
+
+### 一、验收点（4/4 逐条构造输入实跑 `transform_shell`，非读 diff）
+
+| 输入 | 实测输出 | `ROOT_ABS_REF` 残留 | 判据 |
+|:--|:--|:--:|:--:|
+| `/static/../../../../etc/passwd` | 原样保留 + `⚠️ 站点资源越根或不存在…` | **1** | ✅ 不降级、rc=2 分支生效 |
+| `/static/../config/sync-manifest.json` | `../static/../config/sync-manifest.json` | 0 | ✅ 根内允许降级 |
+| `/static/img/favicon.png?t=9` | `../static/img/favicon.png?t=9` | 0 | ✅ 降级且查询串保留 |
+| `/static/nope.png` | 原样保留 + 警告 | **1** | ✅ 不存在不降级 |
+
+补充越根/编码面（同为 fail-closed）：`/static/../..`、`/static/../static/../../README.md`、`/static/x/../../config/…`（中间段不存在）、`/static/..%2f..%2fetc/passwd`（百分号编码不做解码）⇒ 全部原样保留、残留 1；`/static/../`、`/static/..`、`/static/./../index.html` ⇒ 落点为站点根本身/根内文件，允许降级（改写 `../` 等价语义，无越界）。仓内 `git ls-files -s` 符号链接 **0** 个 ⇒ 无 symlink 逃逸样本，`resolve()` 仍按 realpath 判（对将来引入的链接同样 fail-closed）。
+
+### 二、门禁（全部实跑，与 prompt 期望逐项吻合）
+
+| 判据 | 实测 | 期望 |
+|:--|:--|:--|
+| `portal-check.py --mode post` | **16/16 rc=0**（S17 `artifacts=6 / rc=1`） | 16/16 ✅ |
+| `portal-check.py --selftest` | **20/20 rc=0** | 20/20 ✅ |
+| `perf-check.py` | **rc=0**（含 `?t=` parity `1794394182`） | rc=0 ✅ |
+| `sync-check.py --selftest` | **15/15 rc=0** | 15/15 ✅ |
+| `sync-check.py` | **rc=1**（3 `unstamped` + 3 ok，artifacts 6） | rc=1 ✅ |
+| `tokens-tracker-mirror.py --write-only` | **rc=0** 且跑后 `git status --short` 空（幂等） | rc=0 ✅ |
+
+`rc` 口径 `cmd > out 2>&1; echo $?`（不经管道）。本轮**未跑** `sync-run --apply` / `--include-upstream`。
+
+### 三、代码面复核（改的是守卫本身，重点看有没有放宽）
+
+- **收紧而非放宽**：判据从 `(_SITE_ROOT / probe).exists()` 变为 `cand.exists() and cand.resolve().is_relative_to(_SITE_ROOT.resolve())` —— 新增「落点必在站点根内」的必要条件，原 `F-4` 存在性判据保留，`ROOT_ABS_REF` 正则、`main()` rc=2 分支、戳序（守卫后打戳）全部未动 ⇒ 不构成新放行面。
+- **`is_relative_to` 路径语义**：按路径组件比较而非字符串前缀 ⇒ `/…/www.jaden.tech-evil` 类同前缀目录不误判；两侧同 `resolve()` ⇒ 站点根本身是符号链接时口径一致。异常兜底 `(OSError, ValueError)` 覆盖路径内嵌 NUL 的 `ValueError`，落到 `inside=False`（fail-closed）。
+- **无 TOCTOU 利用面**：`exists()`/`resolve()` 结果只决定「是否改写一条 href」，不随后读取该文件内容；改写后不引入服务端读取。
+- **无新注入面**：新增行仅 `Path`/`str` 运算与一条 `print`（输出 `m.group(0)`，即原始属性串，不外带绝对路径）；无 `eval`/`subprocess`/`open`/外链。
+- **产物面复核**：`tokens-tracker/index.html:8` favicon 链为 `../static/img/favicon.png`，全目录 `href="/` / `src="/` 命中 **0** ⇒ 发布面无根绝对残留。
+
+### 四、R-1 口径修正核对（文档追溯，非代码）
+
+`.review-level.yaml:177/185/193` 三处沿用 `JT-SEC-018 = tokens-tracker wc-nav/根绝对内链守卫`，`:217/225/233` 起 `JT-SEC-020 = documents/handoff 本地绝对路径披露` ⇒ 上轮「N-3 挂 `JT-SEC-020`」确为错挂，本笔改「按 SEC 台账 = **JT-SEC-018 面**」**与台账定义一致｜✅ 闭合**。全仓 `grep -rn "N-3"` 除 `cache/review-prep`（评审输入件，非受版本控制真值）外无残留错挂表述。
+
+### 五、其余复核
+
+- **凭证/PII**：本笔 74 新增行密钥族（`BEGIN * PRIVATE` / `api_key` / `secret` / `password` / `AKIA` / `ghp_` / `xox[bp]-` / `sk-` / `Bearer `）**0 命中**（唯一命中为 review-log 自述扫描词表行）；新增行 `/Users/`、`/home/`、`C:\` **0**。
+- **YAML 完整性**：`safe_load` 通过，`review_history` **60 条**，末条 `score=95 / findings_total=2 / findings_open=7`，`tracking` 2212 字符内无 `"`。
+- **设计件数字**：§十五 基线 6 行与本轮实跑逐值相同；N-3 行内「实测 `/static/../../../../etc/passwd` 不被降级、`/static/img/favicon.png` 正常降级」与我的四档实测一致 ⇒ 无自述与实测漂移。
+- **AGENTS.md** 未改动（3666 B < 4 KB），commit subject 全英文；`--name-only` 4 文件与本笔声明一致，无他流水线夹带，无 `--diff-filter=DR`。
+
+### 六、🟢 观察项（不计发现、不扣分）
+
+| # | 观察 | 处置建议 |
+|:-:|:--|:--|
+| O-1 | **R-2 仍未收（上轮结转）**：§十五 基线小标题仍写 `2026-11-16 10:2x`（该文件随 `13250fb` 09:51:06 提交）；`scripts/sync-run.py:12-15` usage 仍无 `--include-upstream`，且 `--only <emit-site-id>` 现为 SKIP/rc=3 | 下一笔 `docs@handoff` 顺带改两行 |
+| O-2 | **containment 是「站点根宽」而非「`/static` 宽」**：只要落点在根内即可降级（含 `/static/../scripts/…`、`/static/../.git/config`）。披露增量 = 0 —— 仓 `visibility=public`、Pages `source=main:/`（`gh api …/pages` 实测），根内任何文件本就公开可取；且输入正则仍限于 `/static/` 前缀 | 维持现状；若日后改「仅 static 可相对化」需先推翻 §十五 已裁定的 `config/sync-manifest.json` 用例 |
+| O-3 | **解释器前提**：`Path.is_relative_to` 需 py≥3.9。实测本机四个解释器 3.9.6 / 3.12.13 / 3.13.13 / 3.14.5 均有；`sync-run.py:29-30` 用 `python3`（PATH ⇒ `/usr/bin/python3` 3.9.6）。若某日落到 py3.8 会 `AttributeError`（不在 `except` 元组内）⇒ 崩而非误放行，仍 fail-closed | 无需改；如要更稳可把 `AttributeError` 并入兜底 |
+
+### 七、计分、结论与推送
+
+**100 − 0 = 100 / 100 → A → PASS**。N-3 的修法**收紧判据**（新增根内断言，原存在性与守卫均未放宽），四档验收 + 四档越界/编码补充全按 fail-closed 表现，`--write-only` 幂等。R-1 文档错挂已按台账改正且与台账三处定义吻合。安全面 0 新发现、0 回归。
+
+**推送**：ff-only `git push origin HEAD:main` —— 前 `HEAD=93a0a27` / `origin/main=13250fb` / `ls-remote=13250fb` / `rev-list --count origin/main..HEAD=1` / `merge-base --is-ancestor` 通过 / 工作树空；输出 `13250fb..93a0a27  HEAD -> main` rc=0；后 `git rev-parse HEAD` = `git rev-parse origin/main` = `git ls-remote origin refs/heads/main` = **`93a0a274b6cd6ffd4478ee8208a288f4f4ec7d89`**，ahead **0** / behind **0**，树空。**未新增提交、未动他仓、未改 `AGENTS.md`**（本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔 `docs@handoff` 携带）。
+
+**待决 1 项** —— O-1：R-2 两处文档时效/用法缺口是否在下一笔 `docs@handoff` 一并收（推荐：收，纯文本两行，无判据面影响）。
+
+---
+
 ## 条目格式说明
 
 ```
