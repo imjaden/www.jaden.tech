@@ -2018,6 +2018,49 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — JT-CL005 SEC-1b 收尾审计（1 笔已推）：两处残留确认去除、D-2 落地 sha 溯源成立 → PASS 100
+
+- **review者**: review/security-reviewer (Security Reviewer, cli)
+- **范围**: `115c4d0`（1 笔，纯文档：`TODO-handoff.md` +3/−3，去写死门禁计数 + 队列 ① 标 ✅ D-2）
+- **Tracking**: JT-CL005-SEC-1b
+- **状态**: ✅ PASS
+- **报告**: review-log.md（本 entry；单日志口径不新建 `documents/reviews` 件）
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计）
+
+### 一、验收点（4 项，实跑）
+
+| # | 验收 | 实测 |
+|:-:|:--|:--|
+| 1 | 旧计数残留 | `grep -nF '15/15** + `--selftest` **17/17'` ⇒ **rc=1 / 0 命中**；放宽到 `grep -nE '15/15\|17/17'` 全文件仅 `:54`「sync-check --selftest **15/15**」一处，属现行合法值（sync 案例数），非残留 |
+| 2 | `:29` harness 行自洽 | 三颗钉子文件名 `git ls-files` **3/3** 在仓；交叉引用「§三「明早首跑」」实测落点 `:54`，位于 `## 三、待执行`(`:34`) 与 `### 其他`(`:57`) 之间 ⇒ 解析成立，未指向空锚 |
+| 3 | `:52` D-2 ✅ 溯源 | `2fd0f92` 设计件 `:232` 同笔完成两处：`### §十四 时点基线（2026-11-16 09:50，含已废止的 19/19、14/14）` → `### §十三 时点基线（含已废止的 19/19、14/14，现行值见 §十五）`（**去 09:50** + **节号对齐其实际所在的 §十三**）；`git log -S'09:50'` 全仓现存命中 = `TODO-handoff.md:52`（引用式说明行，合法）+ 设计件 `:255`（收口后基线，合法）⇒ **sha 归属正确，无虚假关号** |
+| 4 | `hm check handoff .` | ✅ **errors=0 warns=0** · 机器段 4 行 · 差异知会 0 |
+
+### 二、发现（0 条）
+
+本笔纯文档、零代码面 ⇒ 无漏洞/越权/信息泄露面新增；无发现、不扣分。
+
+### 三、🟢 观察项（不计发现、不扣分，按本轮「只写回执不阻断推送」口径）
+
+| # | 观察 | 处置建议 |
+|:-:|:--|:--|
+| O-1 | `:51` 小标题「今日串行序（**下一轮**）」下 ① 已标 `✅ 已落` ⇒「下一轮」与已完成项混排，语义轻微失真（非事实矛盾，② 仍属下一轮） | 推荐下笔改「今日串行序（收口中）」或把 ① 移入 §三「其他」已闭合段 |
+| O-2 | `:53` 本笔新增的括注「② 跨仓待办（**需点名授权**）：…—— **均需点名授权**」同一短语出现两次（本笔引入的编辑性重复） | 推荐删尾部「—— 均需点名授权」，保留括注 |
+| O-3 | `:29`「三颗钉子」与 `:54` 明早首跑 6 项（含 `raw-pii-probe.py`）口径差异属**预期**：`AGENTS.md` §Notes 明定「回归钉子 = 三颗」，`raw-pii-probe.py` 为探针且位于 `cache/scratch/`（gitignored，未入仓） | 维持；记录以免下轮误判为口径漂移。本轮亦未跑 probe（纯文档面，不在 prompt 门禁清单内） |
+
+### 四、计分与推送
+
+**100 − 0 = 100 / 100 → A → PASS**。门禁 6 项实跑与期望逐值吻合，本笔未触 `scripts/`、未改 `AGENTS.md`、无 D/R ⇒ 无运行时/安全面影响，无阻推项。
+
+- 门禁（实跑）：`portal-check --mode post` **16/16 rc=0**（S17 `artifacts=6` rc=1 过渡态）· `--selftest` **20/20 rc=0** · `perf-check` **rc=0**（`?t=` parity `1794394182`）· `sync-check --selftest` **15/15 rc=0** · `sync-check` **rc=1**（3 过渡态 + 3 ok，artifacts 6）；未跑 `--apply` / `--include-upstream`
+- 凭证/披露面：`git diff --name-status origin/main..HEAD` = **1 文件全 M，无 D/R、无 scripts/**；新增 3 行密钥族与 `/Users`、`/home`、`C:\` 命中 **0**
+- **推送**：ff-only `git push origin HEAD:main` —— 前 `HEAD=115c4d0` / `origin/main=a01be29` / `ls-remote=a01be29` / ahead **1** behind **0** / `merge-base --is-ancestor` 通过 / 树空；输出 `a01be29..115c4d0  HEAD -> main` **rc=0**；后 `git rev-parse HEAD` = `git rev-parse origin/main` = `git ls-remote origin refs/heads/main` = **`115c4d046eb5155117aa77afe306f4c0a4ae291f`**，ahead **0** / behind **0** / 树空
+- **未新增提交、未动他仓、未改 `AGENTS.md`**（本 entry 与 `.review-level.yaml` 更新留工作树，由 ops 下一笔 `docs@handoff` 携带）
+
+**待决 1 项** —— O-1 / O-2 两处编辑性小瑕是否合并一次 `docs@handoff` 收（推荐：收，两行文本；本轮已按 prompt 口径不阻断推送）。
+
+---
+
 ## 条目格式说明
 
 ```
