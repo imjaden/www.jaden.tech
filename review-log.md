@@ -1776,6 +1776,62 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — JT-CL005 N-1…N-4 收口审计（3 笔待推）：N-1/N-2/N-4 逐条实测闭合、N-3 结转确认 → PASS 95
+
+- **review者**: Security Reviewer（review profile，cli 会话，prompt `jt-cl005-n-review-push` v1.0）
+- **范围**: `origin/main = 53ecbd1` → 本地 HEAD `13250fb`，**ahead 3 / behind 0**，`git status --short` 空；3 笔 = `e0a382a`（N-1/N-2/N-4 修复，3 脚本 +17/−4）+ `9951e9e`（mirror 数据刷新，2 文件 +8/−8）+ `13250fb`（设计 §十五 + review-log + handoff + `.review-level.yaml`，4 文件 +91/−2）
+- **Tracking**: 本轮 **N-1 / N-2 / N-4 闭合（✅）**、**N-3 结转确认（🟢 既有，改挂 `JT-SEC-018` 面）**；新增 2 项（🟡×1 文档追溯 + 🟢×1 时效/用法文本），均非安全回归，不带 SEC 号；结转 JT-SEC-019 / 020 / 022 / 023（🟢 LOW）OPEN
+- **状态**: ✅ PASS（**95 / 100**，Rating A；🔴 0 / 🟡 安全类 0）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告
+- **实现 prompt**: ⬜ 无需生成（实现/集成验证审计，非设计评审）
+
+### 一、门禁（全部实跑，与 prompt 期望逐项吻合）
+
+| 判据 | 实测 | 期望 |
+|:--|:--|:--|
+| `portal-check.py --mode post` | **16/16 rc=0**（S17 `manifest v1 / artifacts=6 / rc=1`） | 16/16 ✅ |
+| `portal-check.py --selftest` | **20/20 rc=0**（S18/S19 判别力自证绿） | 20/20 ✅ |
+| `perf-check.py` | **rc=0**（`OK all perf assertions passed`） | rc=0 ✅ |
+| `sync-check.py --selftest` | **15/15 rc=0**（含「不可读 ⇒ unknown 且 record 带 producer」） | 15/15 ✅ |
+| `sync-check.py` | **rc=1**（3 `unstamped` 过渡态 + 3 ok，artifacts=6） | rc=1 ✅ |
+| `sync-run.py`（无参） | **rc=0**：3 条 emit-site `SKIP` / tokens-board+poetry-titles `DRY` / tokens-live `DUP` | 本仓三腿 DRY/DUP ✅ |
+
+`rc` 口径 `cmd > out 2>&1; echo $?`（不经管道）。本轮**未执行 `sync-run --apply`**（mirror 腿会在本仓隐含 commit，且按 prompt 边界不新增提交）。
+
+### 二、N-1…N-4 闭合证据（逐条构造输入实跑，非读 diff）
+
+| # | 判据 | 实测 | 结论 |
+|:-:|:--|:--|:--|
+| N-1 | `/static/…?t=<ts>` 降级须**保留查询串**；不存在目标原样交守卫 | 直接调 `tokens-tracker-mirror.transform_shell`：`/static/img/favicon.png?t=123` ⇒ `../static/img/favicon.png?t=123`（查询串保留）；`…?t=123#frag` ⇒ 同式保留锚点；`/static/js/poetry-titles-202611.js?t=99` ⇒ 相对化保留 `?t=99`；`/static/nope.png?t=1` 与 `/static/nope.png` ⇒ **原样保留** + `⚠️ 站点资源不存在…`；`ROOT_ABS_REF.findall` 残留 = `['/static/nope.png?t=1']` ⇒ `main()` rc=2 分支仍生效 | ✅ 闭合 |
+| N-2 | 无参 ⇒ 三条 emit-site 腿 SKIP、不触上游；`--include-upstream` 才放行且 help 有副作用警告 | 无参实跑 6 条计划逐行如上；`git -C ~/CodeSpace/{daily-tracker,script-miner,hermes-manager} rev-parse HEAD` 跑前跑后**同一组** `6abf6d5 / e6e5caf / 86fa4bc`，三仓 `git status --porcelain` 0；`--apply --only bmi-tracker` ⇒ `SKIP` + **rc=3**（零执行）；`--help` 含「同时跑 emit-site 上游腿（会上游仓自行 commit/push，副作用自负）」。**按 prompt 未跑 `--include-upstream`** | ✅ 闭合 |
+| N-3 | 相对穿越是否仍可绕过字符串守卫 | `<link href="/static/../config/sync-manifest.json">` ⇒ 降级为 `../static/../config/sync-manifest.json`、`ROOT_ABS_REF` 残留 **0**（守卫盲区确认）。**既有缺口**（旧正则同盲），本轮未引入未收口；落点只能是站点根内已公开文件（GH Pages 根即仓根，越根即 404），属守卫完整性而非泄密面 | ✅ 结转确认（口径见 §四 R-1） |
+| N-4 | 一个 mismatch + 一个不可读共存 ⇒ worst=mismatch（rc=2），不被 unknown 降级 | 仓外临时根（monkeypatch `sync_check.ROOT`）造 glob 条目两文件：① mismatch 先读 / 不可读后读 ⇒ `mismatch`；② 不可读先读 / mismatch 后读 ⇒ `mismatch`（顺序无关）；③ 仅不可读 ⇒ `unknown`（未把 unknown 一并吞掉）。对照组：`53ecbd1` 旧版同一输入 ⇒ **`unknown`**（`b_unreadable.tgt: unreadable…`）⇒ 修复判别力成立。`run()` 中 mismatch 计入 `structural` ⇒ rc=2 | ✅ 闭合 |
+
+### 三、其余复核
+
+- **数据刷新（`9951e9e`）**：仅计数/时间戳/prompt 文本三处变化（`kept 13→14`、`ledger_total 22→23`、`skipped 1→0`、`total 21→23`、`generated_at 09:49:46`）；`tokens-board` 戳 sha 未变、`tokens-live` 戳 sha 随正文更新；`sync-check` 两产物 `0.0h` 且哈希相符 ⇒ 戳未掩护半写。
+- **脱敏面**：借 `tokens-tracker-mirror.py` 自身正则复扫 `tokens-tracker/data/live.js`（12396 B）与 `index.html`（18414 B）⇒ `LOCAL_ANY=False` / `SENSITIVE_LEAK=False`；`grep -rn "/Users/\|/home/\|C:\\" tokens-tracker/` = 0；`HIST_TASKS` 仍为空块。
+- **凭证面**：3 笔新增行密钥族（`BEGIN * PRIVATE` / `api_key` / `secret` / `password` / `AKIA` / `ghp_` / `xox[bp]-` / `sk-…` / `Bearer …`）**0 命中**（唯一命中是 review-log 里自述扫描词表的那一行）；新增行 `/Users`、`/home`、`C:\` **0**。
+- **YAML 完整性**：分两次 `safe_load` —— 进入本节前 `review_history` **59 条**（上轮 F1–F5 条目六字段齐、`tracking` 2078 字符无双引号）；本轮 entry 手写追加后 **60 条**，末条 `score=95 / findings_total=2 / findings_open=7`、`tracking` 2212 字符内无 `"`，全档可解析。
+- **远端面**：`git fetch --prune` 期间远端已无 `gh-pages` / `master` 分支（本地陈旧引用被清），Pages 部署仍走 `main`，与 AGENTS.md 记载一致 —— 非本轮改动，仅备案。
+
+### 四、本轮新增发现（不阻断 3 笔判据）
+
+| # | Level | 结论（证据） | 建议 |
+|:-:|:--|:--|:--|
+| R-1 | 🟡 | **SEC 号错挂**：设计件 §十五 写「**N-3** ⇒ 登记入 `JT-SEC-020` 结转面」，但 `JT-SEC-020` 的既有定义是「documents/handoff 本地绝对路径披露」（`.review-level.yaml:217/225/233…` 逐轮沿用），`/static/../x` 穿越属 `JT-SEC-018` 守卫面 —— 而本轮 `.review-level.yaml` tracking 自己也写「JT-SEC-018 面缺口」。两份权威件对同一发现的归属不一致，后续按号追溯会串档 | 把 §十五 该格改为「登记入 JT-SEC-018 面缺口（N-3 结转）」，或在 SEC 台账单开 `JT-SEC-0xx` 专号；只改文档一行，不动代码 |
+| R-2 | 🟢 | 两处文本时效/用法缺口：① §十五 基线小标题写「2026-11-16 **10:2x**」，而该文件随 `13250fb` 于 **09:51:06** 提交、基线测量发生在 09:39–09:51 ⇒ 时间戳与事实不符（不影响数字）；② `sync-run.py` 模块 docstring（`scripts/sync-run.py:12-16`）仍未列 `--include-upstream`，而 `--only <emit-site-id>` 现在会 SKIP 并 rc=3（旧习惯「`--only` 单腿补渲染」失效），运维只看 docstring 会误判为「跑成功但没输出」 | ① 基线时间改实测区间或去掉；② docstring 补一行 `--include-upstream` 与 `--only` 对 emit-site 的行为 |
+
+### 五、计分、结论与推送
+
+**100 − 5（🟡 R-1 文档追溯）= 95 / 100 → A → PASS**。N-1/N-2/N-4 三条修复均**实测判别力**（含与 `53ecbd1` 旧版的对照），N-2 的「不触上游」用三仓 HEAD 前后比对证伪了副作用；安全面 0 新发现、0 回归（无新增 `innerHTML`/`eval`/外链域，守卫未放宽，戳仍后于守卫）。
+
+**推送**：ff-only `git push origin HEAD:main` —— 前 `HEAD=13250fb` / `origin/main=53ecbd1` / `ls-remote` 同为 `53ecbd1` / `rev-list --count origin/main..HEAD=3` / `merge-base --is-ancestor` 通过 / 工作树空；输出 `53ecbd1..13250fb  HEAD -> main` rc=0；后 `git rev-parse HEAD` = `git rev-parse origin/main` = `git ls-remote origin refs/heads/main` = **`13250fbd0cfb94297d7496f1b3ac034cf75641c7`**，ahead **0** / behind **0**，树空。**未新增提交、未动他仓、未改 `AGENTS.md`**（本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔 `docs@handoff` 携带）。
+
+**待决 2 项** —— ① R-1 的 SEC 号归属以哪份为准（推荐：`JT-SEC-018` 面，权威件为 SEC 台账，改设计件一行）；② `N-3` 是否升 fail-closed（`Path.resolve()` 后断言仍在 `_SITE_ROOT` 内；推荐收，代价 3 行 + `sync-check` 无感）。
+
+---
+
 ## 条目格式说明
 
 ```

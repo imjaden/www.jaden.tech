@@ -259,8 +259,15 @@ def transform_shell(html: str) -> str:
         # N-1：存在性判定先剥查询串/锚点（本站全局用 ?t=<ts> 缓存清除），
         # 但降级时**原样保留**查询串与锚点，避免把 ?t= 丢掉。
         probe = target.split("?", 1)[0].split("#", 1)[0]
-        if not (_SITE_ROOT / probe).exists():
-            print(f"⚠️ 站点资源不存在，保留原样交守卫拦截: {m.group(0)}")
+        cand = (_SITE_ROOT / probe)
+        # N-3：字符串守卫看不见 `/static/../x` 这类穿越 ⇒ 降级前用 resolve() 断言仍在站点根内，
+        # 越根 / 不存在一律保持原样，交 ROOT_ABS_REF 守卫 rc=2（fail-closed）。
+        try:
+            inside = cand.resolve().is_relative_to(_SITE_ROOT.resolve())
+        except (OSError, ValueError):
+            inside = False
+        if not (cand.exists() and inside):
+            print(f"⚠️ 站点资源越根或不存在，保留原样交守卫拦截: {m.group(0)}")
             return m.group(0)
         return f'{m.group("attr")}="../{target}"'
 

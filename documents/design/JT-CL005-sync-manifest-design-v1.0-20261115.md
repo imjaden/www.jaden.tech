@@ -270,7 +270,7 @@ AGENTS.md                  3666 B（< 4 KB）
 |:--|:--|
 | **N-1** 🟡 | F-4 的存在性探针用原始串 ⇒ `/static/x?t=<ts>`、`#frag` 被判「不存在」而保留根绝对、夜间 mirror 变 rc=2 硬失败。已修：探针先剥 `?`/`#` 判存在，**降级时原样保留**查询串与锚点（本站全局 `?t=` 缓存清除约定不被破坏）。实测三档：`?t=123` 降级保留查询串 / 无查询串正常 / 目标不存在则原样交守卫 |
 | **N-2** 🟡P1 | `sync-run --apply` 非只读：emit-site 腿会让上游仓自己 commit+push（`DT_SITE_NO_COMMIT` 只关站点侧），且与他仓并发会话交错。已加**默认跳过**：emit-site 腿须显式 `--include-upstream` 才跑；routine 运行只碰本仓三腿（tokens-board / tokens-live / poetry-titles）。上游「只写不提交」模式列入跨仓待办（`DT-EMIT-WRITE-ONLY`），收敛前不得全量 `--apply` |
-| **N-3** 🟢 | `/static/../x` 相对穿越可绕字符串型守卫（既有缺口，非本轮引入）⇒ 登记入 `JT-SEC-020` 结转面 |
+| **N-3** 🟢 | `/static/../x` 相对穿越可绕字符串型守卫（既有缺口，非本轮引入；归属按 SEC 台账 = **JT-SEC-018 面**）。已加防御：降级前用 `resolve()` 断言落点仍在站点根内，**越根 / 不存在一律保持原样**交 `ROOT_ABS_REF` 守卫 fail-closed（实测 `/static/../../../../etc/passwd` 不被降级、`/static/img/favicon.png` 正常降级） |
 | **N-4** 🟡 | 不可读分支覆写 `worst`，可把 `mismatch` 降级为 `unknown`（rc 2→3 分类漂移）。已修：仅在 `none/ok/unstamped/stale` 时才提级为 unknown |
 
 ### 基线（2026-11-16 10:2x）
