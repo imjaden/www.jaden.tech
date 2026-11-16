@@ -428,7 +428,7 @@ def _normalize_anomaly(text: str) -> str:
 INTERNAL_PROJECTS_STATIC = frozenset({
     "12306-mcp", "Horizon", "JadenVault", "agent-loop", "andrej-karpathy-skills",
     "bash-scripts", "cloudwise", "daily-tracker", "delete-browsing-history", "git-cloner",
-    "html-gen", "http-server", "imjaden", "intfocus", "jaden-tech-ledger",
+    "html-gen", "http-server", "imjaden", "intfocus", "www.jaden.tech.ledger",
     "models.dev", "personal-cinema", "python-scripts", "ruby-scripts", "script-miner",
     "test-hello-world", "www.jaden.tech-gitee",
 }) - PROJECT_WHITELIST

@@ -32,7 +32,7 @@
   计算型键名（`fromCharCode` / `join`）**静默透传、无外层兜底** —— 改生成侧前先读 `AGENTS.md` 同句。
   剩余 🟢（八进制封顶、计算型键名硬化）挂「下次触碰该文件时顺手」，不再开轮。
 - 🆕 **2026-11-16 台账外置（JT-SEC-044）**：`review-log.md` / `.review-level.yaml` / `documents/`
-  移入私有仓 `imjaden/jaden-tech-ledger`（历史经 `git filter-repo` 导入 138 提交），本仓 `git rm --cached`
+  移入私有仓 `imjaden/www.jaden.tech.ledger`（历史经 `git filter-repo` 导入 138 提交），本仓 `git rm --cached`
   + `.gitignore` + **S24** 钉（`git ls-files` 断言 0 台账）。本地副本保留为 review 写入缓冲，
   同步用私有仓 `sync.py`（mtime 方向判据）。`AGENTS.md` 留在公开仓（0 敏感路径，会话上下文必需）。
   ⚠️ **历史不回收**：2026-11-16 之前的提交仍匿名可读；外置只保证此后不再新增。
@@ -43,7 +43,7 @@
   钉子：`portal-check` **S22**（8 禁用 + 1 active + 0 href + title 齐）+ **S23** 判别力自证（href/丢 title 必红）；
   manifest `publish.allowlist` 已补导航口径；`perf-check` 新增 `tokens-tracker/index.html`（11500B）与 `data/live.js`（4800B）两档预算
 - 夜间链（时点为快照）: 镜像同步 **20:45** → 数据生成 **21:45** → 评审推送 **21:50**；备份 `jobs.json.bak-20261109` 各仓可回滚
-- 工作树: 台账两本已外置私有仓 `imjaden/jaden-tech-ledger`（本仓 `.gitignore` + S24 双钉），本笔只含本文件
+- 工作树: 台账两本已外置私有仓 `imjaden/www.jaden.tech.ledger`（本仓 `.gitignore` + S24 双钉），本笔只含本文件
 
 ## 三、待执行（人工维护）
 

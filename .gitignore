@@ -4,7 +4,7 @@ __pycache__/
 *.pyc
 cache/
 
-# 台账面已外置到私有仓 imjaden/jaden-tech-ledger（2026-11-16 JT-SEC-044）
+# 台账面已外置到私有仓 imjaden/www.jaden.tech.ledger（2026-11-16 JT-SEC-044）
 # 本地保留副本作为写入缓冲（review 角色照旧在站点仓 cwd 写），由 ledger-sync 同步到私有仓提交。
 # portal-check S24 钉住它们不得再被 git 跟踪。
 review-log.md

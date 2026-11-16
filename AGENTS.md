@@ -72,9 +72,9 @@ python3 scripts/sync-check.py --selftest              # 15/15
 
 ## 台账归属（2026-11-16）
 
-`review-log.md`、`.review-level.yaml`、`documents/` 已外置到私有仓 `imjaden/jaden-tech-ledger`
-（本地 `~/CodeSpace/jaden-tech-ledger`）。本仓工作树保留副本作为 review 写入缓冲，但**不再被 git 跟踪**
-（`.gitignore` + `portal-check` **S24** 双钉）。同步：`cd ~/CodeSpace/jaden-tech-ledger && python3 sync.py`。
+`review-log.md`、`.review-level.yaml`、`documents/` 已外置到私有仓 `imjaden/www.jaden.tech.ledger`
+（本地 `~/CodeSpace/www.jaden.tech.ledger`）。本仓工作树保留副本作为 review 写入缓冲，但**不再被 git 跟踪**
+（`.gitignore` + `portal-check` **S24** 双钉）。同步：`cd ~/CodeSpace/www.jaden.tech.ledger && python3 sync.py`。
 
 **边界（必须照此理解）**：外置只做到「不再新增公开」，**不回收历史** —— 2026-11-16 之前的提交
 仍可被匿名读取（含台账原文）。已流出副本同样不可回收。
