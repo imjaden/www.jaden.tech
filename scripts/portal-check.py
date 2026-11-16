@@ -298,6 +298,8 @@ def run(mode, html=None, css=None):
 
     # S17 同步面契约（JT-CL005）
     check_s17()
+    # S20 隐私面回归钉（JT-SEC-032）
+    check_s20()
 
 
 # S17（JT-CL005）：同步面契约齐备 —— 清单存在、公开面脱敏、校验器不红
@@ -334,6 +336,40 @@ def sync_gate(manifest_path=None):
 def check_s17(manifest_path=None):
     ok, detail = sync_gate(manifest_path)
     check("S17", "同步面契约：清单在、公开面脱敏、sync-check rc<=1（0 全绿 / 1 过渡态）", ok, detail)
+    return ok
+
+
+# S20（JT-SEC-032 回归钉）：`_config.yml` 是隐私面的**唯一载体** —— 删掉或改错即静默回退
+# （`/review-log` `/scripts/*` `/documents/*` 又变 200），且站点无任何报错。钉住必填项与 keep_files。
+SITE_CONFIG = ROOT / "_config.yml"
+REQUIRED_EXCLUDES = {"*.md", "documents/", "scripts/", "cache/", ".review-level.yaml", "AGENTS.md"}
+REQUIRED_KEEP = {"static", "tokens-tracker"}
+
+
+def config_guard(config_path=None):
+    """返回 (ok, detail)。缺文件 / 缺必填 exclude / keep_files 不足 ⇒ 红。"""
+    path = Path(config_path or SITE_CONFIG)
+    if not path.exists():
+        return False, "_config.yml missing（隐私面已静默失守）"
+    try:
+        import yaml
+        cfg = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception as exc:  # noqa: BLE001  —— 解析失败同样视为失守
+        return False, f"_config.yml unparsable: {type(exc).__name__}"
+    if not isinstance(cfg, dict):
+        return False, "_config.yml top-level is not a mapping"
+    got = {str(x).strip() for x in (cfg.get("exclude") or [])}
+    keep = {str(x).strip() for x in (cfg.get("keep_files") or [])}
+    miss = sorted(REQUIRED_EXCLUDES - got)
+    keep_miss = sorted(REQUIRED_KEEP - keep)
+    if miss or keep_miss:
+        return False, f"exclude missing={miss} keep_files missing={keep_miss}"
+    return True, f"exclude={len(got)} keep={len(keep)}"
+
+
+def check_s20(config_path=None):
+    ok, detail = config_guard(config_path)
+    check("S20", "隐私面回归钉：_config.yml 存在、必填 exclude 齐、keep_files 保留 static/tokens-tracker", ok, detail)
     return ok
 
 
@@ -400,6 +436,24 @@ def main():
             if bad_path:
                 Path(bad_path).unlink(missing_ok=True)
         check("S19", "F-2 回归：畸形清单 ⇒ S17 判红不崩", bad_ok is False, str(bad_detail))
+
+        # S20 判别力自证：配置里删掉 `documents/` ⇒ S20 必红（钉不是恒真）
+        probe_ok = None
+        probe_path = None
+        try:
+            import yaml as _yaml
+            cfg = _yaml.safe_load(SITE_CONFIG.read_text(encoding="utf-8")) or {}
+            cfg["exclude"] = [x for x in (cfg.get("exclude") or []) if str(x).strip() != "documents/"]
+            with tempfile.NamedTemporaryFile("w", suffix=".yml", delete=False, encoding="utf-8") as fh:
+                _yaml.safe_dump(cfg, fh, allow_unicode=True)
+                probe_path = fh.name
+            probe_ok = config_guard(probe_path)[0]
+        except Exception as exc:  # noqa: BLE001
+            probe_ok = f"raised {type(exc).__name__}"
+        finally:
+            if probe_path:
+                Path(probe_path).unlink(missing_ok=True)
+        check("S21", "V15 判别力自证：_config.yml 删 documents/ ⇒ S20 必红", probe_ok is False, f"S20_ok={probe_ok}")
 
     fails = [r for r in results if not r[2]]
     for cid, desc, ok, detail in results:
