@@ -1,14 +1,14 @@
-/* SYNC id=tokens-live producer=hermes-manager/1acl-board-gen v=1 generated=2026-11-16T09:49:46+08:00 sha256=410c933c013f4b72 */
+/* SYNC id=tokens-live producer=hermes-manager/1acl-board-gen v=1 generated=2026-11-16T12:34:12+08:00 sha256=9a80dc901a511063 */
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 20,
+  "filtered": 22,
   "filtered_breakdown": {
-    "draft": 11,
+    "draft": 13,
     "empty": 9,
-    "kept": 14,
+    "kept": 20,
     "window": 9
   },
-  "generated_at": "2026-11-16T09:49:46+08:00",
+  "generated_at": "2026-11-16T12:34:12+08:00",
   "generator": "1acl-board-gen",
   "generator_version": "86fa4bc3",
   "max_age_ms": 1200000,
@@ -134,15 +134,15 @@ window.BOARD_STATS = {
   ]
 };
 window.LIVE_ANOMALY = {
-  "anomaly_total": 3,
-  "doc_missing": 1,
+  "anomaly_total": 11,
+  "doc_missing": 9,
   "idle": 0,
-  "ledger_total": 23,
-  "prompt": "【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-15（距今 3.82 天）\n【异常】实施停滞超阈值；复盘文档缺失 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值；台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/hermes-manager && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】html-gen · HTML-GEN-CL040\n【现状】台账状态=active；进度=[2/6] 设计评审；最近更新=2026-11-13（距今 2.51 天）\n【异常】实施停滞超阈值 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值\n【期望】回到该项目继续推进，并落一次步骤（step JSON），让「最近推进」刷新\n【验收】`cd ~/CodeSpace/html-gen.cli && hm loop status HTML-GEN-CL040` 的最近步骤时间已刷新，异常圆点消失\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
-  "prompt_count": 2,
-  "skipped": 0,
+  "ledger_total": 29,
+  "prompt": "【任务】script-miner · SCRIPT-MINER-CL290\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.52 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/script-miner && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】script-miner · SCRIPT-MINER-CL289\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.52 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/script-miner && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】script-miner · SCRIPT-MINER-CL288\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.52 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/script-miner && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】script-miner · SCRIPT-MINER-CL287\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.52 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/script-miner && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】script-miner · SCRIPT-MINER-CL286\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.52 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/script-miner && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】script-miner · SCRIPT-MINER-CL285\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.52 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/script-miner && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】script-miner · SCRIPT-MINER-CL284\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.52 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/script-miner && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】daily-tracker · DAILY-TRACKER-CL013\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.52 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/daily-tracker && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-15（距今 3.93 天）\n【异常】实施停滞超阈值；复盘文档缺失 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值；台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/hermes-manager && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】html-gen · HTML-GEN-CL040\n【现状】台账状态=active；进度=[2/6] 设计评审；最近更新=2026-11-13（距今 2.62 天）\n【异常】实施停滞超阈值 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值\n【期望】回到该项目继续推进，并落一次步骤（step JSON），让「最近推进」刷新\n【验收】`cd ~/CodeSpace/html-gen.cli && hm loop status HTML-GEN-CL040` 的最近步骤时间已刷新，异常圆点消失\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
+  "prompt_count": 10,
+  "skipped": 1,
   "timeout": 2,
-  "total": 23,
+  "total": 28,
   "unknown": 0
 };
 window.HIST_TASKS = [];
