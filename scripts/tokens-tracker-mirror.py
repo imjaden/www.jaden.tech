@@ -377,6 +377,7 @@ def transform_live(js: str) -> str:
 # 赋值形态全收：`window.LIVE_ANOMALY =` / `var LIVE_ANOMALY =` / `window["LIVE_ANOMALY"] =`
 # （🟡1(a)：只认一种形态 ⇒ 换写法即整段透传，三条实测全部 NO ERROR）
 # 🟡3：`(?<![A-Za-z0-9_$.])` 左边界 —— 否则 `var X_LIVE_ANOMALY = 1` 也会误 raise（可用性风险）
+ANOMALY_SPLIT = re.compile(r"""LIVE_["']?\s*\+\s*["']?ANOMALY""")
 ANOMALY_ASSIGN = re.compile(
     r"""(?<![A-Za-z0-9_$.])(?:window\.|var\s+|let\s+|const\s+)?"""
     r"""LIVE_ANOMALY(?:\.[A-Za-z_$][\w$]*|\[["'][^"']*["']\])?\s*=""")
@@ -458,7 +459,7 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
     🟡1：尾部可能**多次**出现 `LIVE_ANOMALY`（追加赋值），必须逐个处理；
     回扫不变式：处理完后「赋值语句数 == 已处理块数」，否则说明还有没被识别/过滤的赋值 ⇒ raise。
     """
-    pieces, pos, handled = [], 0, 0
+    pieces, prefixes, pos, handled = [], [], 0, 0
     for m in ANOMALY_BLOCK.finditer(tail):
         try:
             obj, end = json.JSONDecoder().raw_decode(tail[m.end():])
@@ -468,23 +469,28 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
             raise RuntimeError("LIVE_ANOMALY 顶层不是对象 — fail-closed")
         obj = _filter_anomaly_obj(obj, deny)
         pieces.append(tail[pos:m.end()])
+        prefixes.append(tail[pos:m.end()])
         pieces.append(json.dumps(obj, ensure_ascii=False, indent=2))
         pos = m.end() + end
         handled += 1
     if not handled:
-        # 🟡1(a)：尾部提到 LIVE_ANOMALY 却解析不出被赋值的对象 ⇒ 中止（不许整段透传）
-        if ANOMALY_ASSIGN.search(tail):
-            raise RuntimeError("LIVE_ANOMALY 出现但赋值形态不认识 — fail-closed")
+        # 🟡2（第 10 轮）：只认「赋值形态」不够 —— `self.LIVE_ANOMALY =` / `globalThis["…"] =` /
+        # `window["LIVE_"+"ANOMALY"] =` 都会原样透传。改为「出现该字样即中止」。
+        if "LIVE_ANOMALY" in tail or ANOMALY_SPLIT.search(tail):
+            raise RuntimeError("LIVE_ANOMALY 出现但形态不认识 — fail-closed")
         return tail
     pieces.append(tail[pos:])
     result = "".join(pieces)
-    # 🟡1（第 9 轮）：改用**守恒断言** —— 每个被处理的块其前缀恰含 1 次 `LIVE_ANOMALY` 字样，
-    # 任何未识别的追加 / 改写 / `Object.assign(...)` 都必然让它多出一次 ⇒ 比「数赋值语句」更严密。
-    if result.count("LIVE_ANOMALY") != handled:
+    # 🟡2/🟡3（第 10 轮）：守恒只在**未消费区间**上计数 —— 已消费的 JSON 正文（我们自己生成的、
+    # 以及白名单块里提到 `LIVE_ANOMALY` 的散文）不参与等式，否则会误 raise 让夜间镜像停更；
+    # 而未识别的接收者（`self.LIVE_ANOMALY =` / `globalThis["LIVE_ANOMALY"] =` / 动态拼接）
+    # 必然落在未消费区 ⇒ 计数不符 ⇒ 中止。
+    residual = "".join(prefixes) + tail[pos:]
+    if ANOMALY_SPLIT.search(residual):
+        raise RuntimeError("LIVE_ANOMALY 出现动态拼接键名 — fail-closed")
+    if residual.count("LIVE_ANOMALY") != handled:
         raise RuntimeError(
-            f"LIVE_ANOMALY 守恒失败：出现 {result.count('LIVE_ANOMALY')} 次、已处理 {handled} 块 — fail-closed")
-    if ANOMALY_ASSIGN.search(tail[pos:]):
-        raise RuntimeError("LIVE_ANOMALY 尾部仍有未处理的赋值 — fail-closed")
+            f"LIVE_ANOMALY 守恒失败：未消费区出现 {residual.count('LIVE_ANOMALY')} 次、已处理 {handled} 块 — fail-closed")
     return result
 
 
@@ -505,22 +511,27 @@ def guard_ok(text: str, what: str, pattern=SENSITIVE_LEAK) -> bool:
 
 
 ANOMALY_SELFTEST = (
-    ("a1 var 形态", 'var LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】script-miner · X"};\n', "pass"),
-    ("a2 window[] 形态", 'window["LIVE_ANOMALY"] = {"anomaly_total":1,"prompt":"【任务】llm-radar · R"};\n', "pass"),
-    ("a3 末端追加改写", 'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H"};\n'
-                        'window.LIVE_ANOMALY.prompt = "【任务】script-miner · SM";\n', "raise"),
-    ("a4 Object.assign 追加", 'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H"};\n'
-                              'Object.assign(LIVE_ANOMALY, {prompt:"x"});\n', "raise"),
-    ("b 后缀形态 html-gen.cli", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H\ncd html-gen.cli"};\n', "pass"),
-    ("c 未知键", 'window.LIVE_ANOMALY = {"anomaly_total":1,"extra_prompts":[]};\n', "raise"),
-    ("d 非字符串 prompt", 'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":["x"]};\n', "raise"),
-    ("ok 单块正常", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】daily-checker · D\n正文"};\n', "pass"),
-    ("ok 无该块", 'window.WEB_DATA_READY = true;\n', "pass"),
+    # want: pass（不丢块）/ pass_dropped（须丢块且留【已过滤】标记）/ raise（fail-closed）
+    ("a1 var 形态", r'var LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】script-miner · X"};', "pass_dropped"),
+    ("a2 window[] 白名单块", r'window["LIVE_ANOMALY"] = {"anomaly_total":1,"prompt":"【任务】llm-radar · R"};', "pass"),
+    ("a3 末端追加改写", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H"};'
+                        r'window.LIVE_ANOMALY.prompt = "【任务】script-miner · SM";', "raise"),
+    ("a4 Object.assign 追加", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H"};'
+                              r'Object.assign(LIVE_ANOMALY, {prompt:"x"});', "raise"),
+    ("a5 self 接收者", r'self.LIVE_ANOMALY = {"prompt":"【任务】script-miner · X"};', "raise"),
+    ("a6 globalThis 接收者", r'globalThis["LIVE_ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
+    ("a7 动态拼接键名", r'window["LIVE_" + "ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
+    ("a8 白名单块正文提及该词", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】daily-checker · D\n修 LIVE_ANOMALY 守恒断言"};', "pass"),
+    ("b 后缀形态 html-gen.cli", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H\ncd html-gen.cli"};', "pass_dropped"),
+    ("c 未知键", r'window.LIVE_ANOMALY = {"anomaly_total":1,"extra_prompts":[]};', "raise"),
+    ("d 非字符串 prompt", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":["x"]};', "raise"),
+    ("ok 单块正常", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】daily-checker · D\n正文"};', "pass"),
+    ("ok 无该块", r'window.WEB_DATA_READY = true;', "pass"),
 )
 
 
 def _selftest() -> int:
-    """异常面形态负控（JT-SEC-042/043 固化）。返回 rc：0 全过，1 有红。"""
+    """异常面形态负控（JT-SEC-042/043/044/045 固化）。返回 rc：0 全过，1 有红。"""
     deny = INTERNAL_PROJECTS_STATIC | {"internal-infra"}
     fails = 0
     for name, tail, want in ANOMALY_SELFTEST:
@@ -529,10 +540,15 @@ def _selftest() -> int:
             got, detail = "pass", ""
             if _deny_hit(out, deny):
                 got, detail = "leak", f"残留 {_deny_hit(out, deny)!r}"
-            if "=  {" in out or "} ;" in out:
+            elif "=  {" in out or "} ;" in out:
                 got, detail = "format", "双空格"
+            elif "【已过滤】" in out:
+                got = "pass_dropped"
+            # 🟢3：区分「整块丢弃」与「只是正文被擦净」—— 丢块必须留【已过滤】标记
+            if want == "pass_dropped" and got != "pass_dropped":
+                got, detail = "no-marker", "应丢块但产物无【已过滤】标记"
         except RuntimeError as exc:
-            got, detail = "raise", str(exc)[:40]
+            got, detail = "raise", str(exc)[:46]
         ok = got == want
         fails += 0 if ok else 1
         print(f"{'PASS ' if ok else 'FAIL '} {name}: {got}" + (f"（{detail}）" if detail else ""))

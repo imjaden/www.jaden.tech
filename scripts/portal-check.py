@@ -431,7 +431,11 @@ def ledger_guard(root=None):
     if out.returncode:
         return False, f"git ls-files rc={out.returncode}"
     tracked = [ln.strip() for ln in out.stdout.splitlines() if ln.strip()]
-    hit = [f for f in tracked if f in ("review-log.md", ".review-level.yaml") or f.startswith("documents/")]
+    # 🟡4（第 10 轮）：macOS 大小写不敏感 FS —— `Documents/` 与 `documents/` 是同一目录，
+    # 索引路径却不同；扩展名变体（`.yml`）同理。判据统一小写化后再比。
+    _names = {"review-log.md", ".review-level.yaml", ".review-level.yml"}
+    hit = [f for f in tracked
+           if f.lower() in _names or f.lower().startswith("documents/")]
     if hit:
         return False, f"公开仓仍跟踪台账 {len(hit)} 个文件（如 {hit[0]}）"
     if not tracked:

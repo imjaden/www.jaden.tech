@@ -71,6 +71,10 @@ python3 scripts/sync-check.py --selftest              # 15/15
 （本地 `~/CodeSpace/jaden-tech-ledger`）。本仓工作树保留副本作为 review 写入缓冲，但**不再被 git 跟踪**
 （`.gitignore` + `portal-check` **S24** 双钉）。同步：`cd ~/CodeSpace/jaden-tech-ledger && python3 sync.py`。
 
+**边界（必须照此理解）**：外置只做到「不再新增公开」，**不回收历史** —— 2026-11-16 之前的提交
+仍可被匿名读取（含台账原文）。已流出副本同样不可回收。
+🔴 红线：台账若要写入凭据、真实姓名、私人联系方式等敏感材料，**必须先做历史改写再写**（另需一次性授权）。
+
 ## Notes
 
 - No build tools, no package manager; 回归钉子 = 三颗（前两颗 rc=0 才算绿，第三颗 rc≤1 即绿：0 全绿 / 1 过渡态）：
