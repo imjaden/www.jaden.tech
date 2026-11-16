@@ -2206,6 +2206,56 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — F-1/F-2/F-3 收口审计（1 笔已推）：F-2 全闭、F-1 部分闭（改名仍 rc=128）、F-3 仅闭提交面 → PASS 88
+
+- **review者**: review/cli（Security Reviewer · L2）
+- **范围**: `origin/main` `6d42ab2` → `HEAD` `666465f`，1 笔（`scripts/sync-run.py` +30/−7、`config/sync-manifest.json` +10/−2〔两条 `commit_paths: ["tokens-tracker/"]`〕、`review-log.md` +50、`.review-level.yaml` +8），工作树空，ahead 1
+- **Tracking**: JT-SEC-032（承接 JT-SEC-031 的 F-1/F-2/F-3）
+- **状态**: ✅ PASS（0 🔴；F-2 关闭，F-1/F-3 部分关闭 + 1 新 🟡，均非阻断）
+- **报告**: 本 entry（单日志口径）；**实现 prompt**: ⬜ 无需生成（实现审计）
+
+### 一、验收（全部实跑：隔离 clone `scratch/f123`，镜腿仅把 `WWW_REPO` 指向 clone 以隔离写面）
+
+1. **F-2 提交腿绑运行结果 —— 两分支均实证**：
+   - 运行失败支（fixture producer 写半截 + `exit 2`）：`FAIL bmi-tracker rc=2` / `COMMIT SKIP 运行失败(failures=1) 或结构违规(sync-check rc=3) ⇒ 不提交` / HEAD 不变 / `EXIT=1`，截断产物留工作树**未提交**。
+   - 结构违规支（`rm bmi-tracker.html`，`sync-check` rc=2、failures=0）：`COMMIT SKIP … rc=2 ⇒ 不提交` / HEAD 不变 / `EXIT=1` / 索引仅 `D bmi-tracker.html`（未暂存）。
+   - 顺序亦已改正：`check` 在 `sync-run.py:208–215` 先算，`commit_info` 在其后 `:217` 才判，闸口 = `failures or _check_rc >= 2`（`:220–223`）。
+2. **成功路径（干净仓 + 一条真实产物改动 ⇒ 真提交）**：fixture producer 向 `daily-poetry.html` 追加一行后 `--apply --commit --only daily-poetry --include-upstream` ⇒ step `OK rc=0`、`sync-check rc=1`、`COMMIT rc=0 [main b96f226]`，`git show --name-only` 仅 `daily-poetry.html`；同时脏的非产物 `index.html` 仍留工作树 ⇒ 提交面未外溢。
+3. **`--commit` × `--only` × `--include-upstream`**：`--commit` 不带 `--apply` ⇒ JSON `commit=None`、HEAD 不变、索引未污染；`--only` 使 `artifact_paths` 收窄（`（清单产物 1 个）`，只提 1 文件）；`--include-upstream` 不影响提交腿语义（仍按 `artifact_paths(manifest, args.only)`）。
+4. **F-3 mirror 走 `--write-only`**：`--apply --only tokens-board` ⇒ `✅ tokens-tracker mirror: files written (write-only)`、HEAD 不变（**无内部提交**）、写盘落在 clone；反向对照：直接跑 `tokens-tracker-mirror.py`（无 flag，模拟夜里 cron）仍自提交 `9505702` ⇒ 夜间路径未被破坏。
+5. **F-1**：函数级 `rm static/js/poetry-titles-202609.js`（未暂存）⇒ `artifact_paths` 含旧路径（`git ls-files` 补齐生效）+ `changed()` 认出删除；**但 `git mv` 场景仍破**（见 F-1′）。
+6. **门禁 6 项逐值吻合**：`sync-check --selftest` **15/15 rc=0** · `sync-check` **rc=1**（3 过渡态 + 3 ok，`artifacts 6`）· `portal-check --mode post` **16/16 rc=0**（S17 `artifacts=6 / rc=1`）· `portal-check --selftest` **20/20 rc=0** · `perf-check` **rc=0**（`poetry-titles-*.js in sync`）· `sync-run` dry **rc=0**（2 DRY / 3 SKIP / 1 DUP，mirror 行现为 `python3 scripts/tokens-tracker-mirror.py --write-only`）。`py_compile` 通过（`else:` 下 10 空格缩进合法）。
+
+### 二、发现（🔴 0 / 🟡 3）
+
+- **F-2 ✅ 关闭** —— 两分支实测均不提交，`COMMIT SKIP` 文案区分清楚，rc=1 传递正确。
+- **F-1′ 🟡 只闭「未暂存删除」，改名/已暂存删除仍破且报错形态是 rc=128** —— `artifact_paths` 的 `git ls-files`（`sync-run.py:127–130`）只看**索引**：文件从工作树删掉但仍在索引时能补上（本轮实测通过）；一旦删除已进索引（`git mv` / `git rm` / 上一轮失败分支留下的 staged `D`，见 O-4），索引里已无该路径 ⇒ 补不回来。实测 `git mv poetry-titles-202609.js → -202999.js` 后跑 `--apply --commit --only poetry-titles`：`changed()` 把 porcelain 的 `R  old -> new` 整行当一条路径，`git commit --only -- 'old -> new'` ⇒ `fatal: pathspec … did not match any files`，`COMMIT rc=128`、`EXIT=1`、索引留 `R`。**属 fail-closed（无错误提交、无数据丢失）**，但提交腿整条失效且留下脏索引。**修法**：`changed()` 改 `git status --porcelain -z --untracked-files=all` 并按 NUL/`R`/`C` 双路径解析（与上轮 O-1 同一处），或对 `R` 行拆出两侧路径；失败分支补 `git reset -- <todo>`。
+- **F-3′ 🟡 只闭「提交归属」，写面仍硬编码生产检出** —— `tokens-tracker-mirror.py:52` 的 `WWW_REPO` 未改（本轮 prompt 只声明 `--write-only`），故任何非生产检出跑 `sync-run --apply`（mode=mirror）**仍会把 `tokens-tracker/{index.html,data/live.js,assets}` 写进生产工作树**，只是不再提交（本轮隔离测试必须先把 `WWW_REPO` 指向 clone 才能跑）。**修法**：mirror 支持 `--target` / 读环境变量，由 `sync-run` 传 `cwd`（上轮建议的第二半尚未实施）。
+- **F-4 🟡（新，pre-existing）`--include-upstream` 无法隔离目标站点** —— `resolve_cmd` 的 `{site}` 替换对现有清单是**死代码**（6 条 artifact 的 `producer.cmd` 无一条含 `{site}`），上游 `daily-tracker-update.py:149` 的 `SITE_REPO` 硬编码生产检出。实测在 clone 里跑 `--apply --commit --only bmi-tracker --include-upstream`（真实 producer，非 fixture）驱动的上游流水线：**写的是生产仓路径**、并改写上游仓工作树三处 stamp（`data/records.json` `updated_at 10:52:05`、`index.html` 与 `snapshots/…-20261116.html` 的 cron 卡 `10:52`）。本次未造成生产仓脏（`git status` 空、HEAD 仍 `666465f`，站点门禁未过故未重渲），但「副本里试跑 = 动生产」这条与 F-3 同类。**修法**：`sync-run` 对 emit-site 腿传 `DT_SITE_REPO=<本检出>` 或让清单 cmd 用 `{site}`；否则在 docstring 明写「`--include-upstream` 只能在生产检出跑」。
+
+### 三、🟢 观察项（不计发现、不扣分）
+
+| # | 观察 | 处置建议 |
+|:-:|:--|:--|
+| O-1 | `sync-check.py:95` 在 manifest 缺 `producer.entry` 时抛 `KeyError`（stdout 空）⇒ `sync-run.py:212–215` 判 `rc=3`（fail-closed，但形态是「无法判定」而非「结构违规」） | `check_artifact` 用 `.get()` 并归 `structural` rc=2 |
+| O-2 | `--apply --commit --only <emit-site id>`（不加 `--include-upstream`）真提交后仍 `EXIT=3`（`sync-run.py:263` 的「steps 全 SKIP」判据没计入 commit 腿） | 有 `commit_info.rc==0` 时不算「无可执行项」 |
+| O-3 | `commit_paths` 不经 `ROOT` 包含性校验（`sync-run.py:131–132`），且写入 `tokens-tracker/` 目录级 pathspec ⇒ 该目录下任何游离文件都会被 `git commit --only` 带走（与 mirror 自身 `git add 目录` 等价，属声明面） | 校验相对路径 + 拒绝 `..`/绝对路径 |
+| O-4 | 提交腿 `else:` 下 `try:` 用 10 空格缩进（`sync-run.py:225`），与全文件 4/8 空格风格不一致 | 顺手改 12 空格 |
+| O-5 | `--commit` 不带 `--apply` 仍静默（上轮 O-5 未收） | 显式 warn 一行 |
+| O-6 | **审计副作用披露（跨仓，未复位）**：本轮 1 次真实 producer 的 `--include-upstream` 使 `~/CodeSpace/daily-tracker` 工作树出现 3 处 stamp 时间漂移（`data/records.json` / `index.html` / `snapshots/…-20261116.html`，均为我的运行写入，其余 `.review-level.yaml` + `review-log.md` 属该线既有未提交工作）。按纪律不代改他仓 | 建议由 ops 在该仓执行 `git checkout -- data/records.json index.html snapshots/dailytracker-snapshot-v1.0-20261116.html`（仅回滚这 3 个 stamp 面） |
+
+### 四、计分与推送
+
+**100 − 4(F-1′ 部分) − 3(F-3′ 部分) − 5(F-4 新) = 88 → PASS**（0 🔴；F-2 关闭上轮 −5；门禁 6 项零漂移；提交腿成功路径与两条 SKIP 分支均实测）。
+
+- **推送**：前 `HEAD=666465f` / `origin/main=6d42ab2` / ahead **1** / 树空 ⇒ `git push origin HEAD:main` 输出 `6d42ab2..666465f  HEAD -> main`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`666465f93ac9f37a96c2a0c598d9d50ae7d7ce12`**，ahead **0** / behind **0** / 树空
+- **边界**：本 entry 与 `.review-level.yaml` 更新留工作树，由 ops 下一笔携带；未在推送后追加提交
+- **建议修序**（下笔）：**F-1′（`-z` 解析 + 失败 `git reset`）→ F-3′（mirror 目标可传）→ F-4（`{site}`/env 传递）**
+
+**待决 1 项**：跨仓副作用（O-6）是否即时回滚，推荐按上述 `git checkout --` 三文件执行。
+
+---
+
 ## 条目格式说明
 
 ```

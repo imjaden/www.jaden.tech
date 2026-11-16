@@ -353,9 +353,18 @@ def guard_ok(text: str, what: str, pattern=SENSITIVE_LEAK) -> bool:
 
 
 def main() -> int:
+    global WWW_REPO, DST_DIR, DST_INDEX, DST_LIVE, DST_ASSETS
     ap = argparse.ArgumentParser()
     ap.add_argument("--write-only", action="store_true", help="transform + write files, no git ops")
+    # F-3′：允许把目标仓指到别处（隔离克隆 / 预览），默认仍是生产检出 ⇒ cron 行为不变
+    ap.add_argument("--site", default=str(WWW_REPO), help="目标站点仓根（默认生产检出）")
     args = ap.parse_args()
+    if Path(args.site).resolve() != WWW_REPO.resolve():
+        WWW_REPO = Path(args.site).resolve()
+        DST_DIR = WWW_REPO / "tokens-tracker"
+        DST_INDEX = DST_DIR / "index.html"
+        DST_LIVE = DST_DIR / "data" / "live.js"
+        DST_ASSETS = DST_DIR / "assets"
 
     for src in (SRC_INDEX, SRC_LIVE):
         if not src.exists():

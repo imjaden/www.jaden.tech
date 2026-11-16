@@ -24,7 +24,9 @@
 退出码：0 未出现失败 / 1 有失败 / 2 清单不可读 / 3 仅 SKIP（无可执行项）
 """
 import argparse
+import fnmatch
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -37,7 +39,7 @@ LOCAL_ENTRIES = {
     "local": ["python3", "scripts/poetry-titles-gen.py"],
     # F-3：mirror 的 commit 面（硬编码 WWW_REPO、无 --only）交回本工具的提交腿统一处理；
     # `--write-only` = 只变换+写盘，不做 git 操作（夜里 cron 仍直接跑 mirror 自带提交，互不影响）。
-    "mirror": ["python3", "scripts/tokens-tracker-mirror.py", "--write-only"],
+    "mirror": ["python3", "scripts/tokens-tracker-mirror.py", "--write-only", "--site", "{site}"],
 }
 
 # 跨仓路径解析：**不得**写进 config/sync-manifest.json（那是公开面）。
@@ -58,13 +60,18 @@ def repo_path(repo):
     return Path.home() / "CodeSpace" / repo
 
 
+def _expand(cmd):
+    """`{site}` = 本仓根（隔离克隆时随 ROOT 走，指不到生产检出）。"""
+    return None if cmd is None else [str(ROOT) if tok == "{site}" else tok for tok in cmd]
+
+
 def resolve_cmd(art):
     """优先用清单里的 producer.cmd（跨仓 emit-site）；否则按 mode 用本仓内置入口。"""
     producer = art.get("producer", {})
     cmd = producer.get("cmd")
     if cmd:
-        return [str(ROOT) if tok == "{site}" else tok for tok in cmd]
-    return LOCAL_ENTRIES.get(producer.get("mode"))
+        return _expand(cmd)
+    return _expand(LOCAL_ENTRIES.get(producer.get("mode")))
 
 
 def load():
@@ -103,7 +110,12 @@ def plan(manifest, only=None, include_upstream=False):
 
 
 def run_step(step):
-    proc = subprocess.run(step["cmd"], cwd=step.get("cwd") or ROOT, capture_output=True, text=True)
+    env = None
+    if step.get("mode") == "emit-site":
+        # F-4：上游 `SITE_REPO` 默认硬编码生产检出；DT_SITE_REPO 是它的沙箱 seam。
+        # 不注入 ⇒ 在克隆/测试里跑会把产物写到生产仓（实测污染 records.json/index.html/snapshots）。
+        env = {**os.environ, "DT_SITE_REPO": str(ROOT)}
+    proc = subprocess.run(step["cmd"], cwd=step.get("cwd") or ROOT, capture_output=True, text=True, env=env)
     out = ((proc.stdout or "") + (proc.stderr or "")).strip()
     return proc.returncode, out
 
@@ -133,17 +145,46 @@ def artifact_paths(manifest, only=None):
     return sorted(set(out))
 
 
-def changed(paths):
-    """在给定路径里取「工作树有改动」的子集（含未跟踪）。"""
-    if not paths:
+def artifact_patterns(manifest, only=None):
+    """清单声明的匹配模式（artifact glob + commit_paths），供 `changed()` 匹配改名/删除两侧。"""
+    pats = []
+    for art in manifest.get("artifacts", []):
+        if only and art["id"] not in only:
+            continue
+        raw = art.get("artifact") or art.get("path")
+        if raw:
+            pats.append(raw)
+        pats.extend(art.get("commit_paths") or [])
+    return sorted(set(pats))
+
+
+def changed(patterns):
+    """在给定模式集合里取「工作树有改动」的路径（含未跟踪、删除、改名两侧）。
+
+    F-1′：不能只靠 `git status -- <paths>` —— 改名后旧路径已不在索引/磁盘，pathspec
+    会把整条 `R old -> new` 记录滤掉（或不解析成假路径 `old -> new`）。
+    改为：全仓 `-z` 取记录，再按 artifact glob / 目录前缀匹配「记录内任一侧」。
+    """
+    globs = [p for p in patterns if any(ch in p for ch in "*?[")]
+    prefixes = [p for p in patterns if p not in globs]
+    if not globs and not prefixes:
         return []
-    proc = subprocess.run(["git", "status", "--porcelain", "--"] + paths, cwd=ROOT,
+    proc = subprocess.run(["git", "status", "--porcelain", "-z"], cwd=ROOT,
                           capture_output=True, text=True)
-    out = []
-    for line in (proc.stdout or "").splitlines():
-        if len(line) > 3:
-            out.append(line[3:].strip().strip('"'))
-    return out
+    parts = [x for x in (proc.stdout or "").split("\0") if x]
+    out, i = [], 0
+    while i < len(parts):
+        rec = parts[i]
+        paths = [rec[3:]] if len(rec) > 3 else []
+        if paths and rec[0] in "RC" and i + 1 < len(parts):   # 改名/复制：下一项是原路径
+            paths.append(parts[i + 1])
+            i += 1
+        i += 1
+        hit = any(fnmatch.fnmatch(pp, g) for pp in paths for g in globs) or \
+              any(pp == pre or pp.startswith(pre.rstrip("/") + "/") for pp in paths for pre in prefixes)
+        if hit:
+            out.extend(paths)
+    return sorted(set(out))
 
 
 def commit_artifacts(paths, message):
@@ -151,11 +192,20 @@ def commit_artifacts(paths, message):
     todo = changed(paths)
     if not todo:
         return 0, "no-changes"
-    add = subprocess.run(["git", "add", "--"] + todo, cwd=ROOT, capture_output=True, text=True)
+    # F-1′：只 add「磁盘上还存在」的路径 —— 已 staged 的改名源/已删除路径会让
+    # `git add` 直接 rc=128（pathspec did not match），而 `git commit --only -- <path>`
+    # 本身能记录删除与改名（两路径一起点名）。
+    to_add = [p for p in todo if (ROOT / p).exists()]
+    add = subprocess.run(["git", "add", "--"] + to_add, cwd=ROOT, capture_output=True, text=True) if to_add \
+        else subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
     if add.returncode:
+        subprocess.run(["git", "reset", "-q", "--"] + todo, cwd=ROOT, capture_output=True)
         return add.returncode, (add.stderr or "git add failed").strip()[:200]
     com = subprocess.run(["git", "commit", "-m", message, "--only", "--"] + todo,
                          cwd=ROOT, capture_output=True, text=True)
+    if com.returncode:
+        # F-1′：提交失败不得把索引留在「已暂存」态（{bmi 删除 / 改名} 的半截提交现场）
+        subprocess.run(["git", "reset", "-q", "--"] + todo, cwd=ROOT, capture_output=True)
     return com.returncode, ((com.stdout or "") + (com.stderr or "")).strip().splitlines()[0][:160] if (
         (com.stdout or "") + (com.stderr or "")).strip() else "committed"
 
@@ -223,9 +273,9 @@ def main():
                            "reason": f"运行失败(failures={failures}) 或结构违规(sync-check rc={_check_rc}) ⇒ 不提交"}
         else:
           try:
-            _paths = artifact_paths(manifest, args.only)
-            _rc, _msg = commit_artifacts(_paths, args.message)
-            commit_info = {"rc": _rc, "detail": _msg, "paths": len(_paths)}
+            _pats = artifact_patterns(manifest, args.only)
+            _rc, _msg = commit_artifacts(_pats, args.message)
+            commit_info = {"rc": _rc, "detail": _msg, "paths": len(_paths_guess := artifact_paths(manifest, args.only))}
             if _rc:
                 failures += 1
           except Exception as exc:                    # 提交腿失败不得吞掉执行结果
