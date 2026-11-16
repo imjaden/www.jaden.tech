@@ -26,13 +26,17 @@
 - 线上: https://www.jaden.tech 首页 200（1.4s）· `bmi-tracker.html` 200 · `tokens-tracker/` 200；Pages `built` / `cname=www.jaden.tech` / `https_enforced=true`
 - harness（三颗钉子均已入仓；**现行计数见 §三「明早首跑」一行，此处不写死数字**）：`scripts/portal-check.py`、`scripts/perf-check.py`、`scripts/sync-check.py`
   - ⚠️ 旧口径作废: 历史里写的 `13/13`（10-25）、`9/9`/`10/10` 均为 S9/S10 修复前数字
+- 🆕 **2026-11-16 台账外置（JT-SEC-044）**：`review-log.md` / `.review-level.yaml` / `documents/`
+  移入私有仓 `imjaden/jaden-tech-ledger`（历史经 `git filter-repo` 导入 138 提交），本仓 `git rm --cached`
+  + `.gitignore` + **S24** 钉（`git ls-files` 断言 0 台账）。本地副本保留为 review 写入缓冲，
+  同步用私有仓 `sync.py`（mtime 方向判据）。`AGENTS.md` 留在公开仓（0 敏感路径，会话上下文必需）。
 - 🆕 **2026-11-16 导航契约（决策 A1/B1）**：镜像页 `wc-nav` 由「整块替换成品牌条」改为「逐项渲染」——
   本页项 `Task` 为 active 纯文本，其余项禁用态 `<span title="仅本地服务可访问">`（无 href），
   命中最严档敏感词的项（`飞书`）整项不列；旧 `tab-bar` 双层导航废弃。
   钉子：`portal-check` **S22**（8 禁用 + 1 active + 0 href + title 齐）+ **S23** 判别力自证（href/丢 title 必红）；
   manifest `publish.allowlist` 已补导航口径；`perf-check` 新增 `tokens-tracker/index.html`（11500B）与 `data/live.js`（4800B）两档预算
 - 夜间链（时点为快照）: 镜像同步 **20:45** → 数据生成 **21:45** → 评审推送 **21:50**；备份 `jobs.json.bak-20261109` 各仓可回滚
-- 工作树: 本轮为台账两本（`review-log.md` / `.review-level.yaml`）+ 本文件，随本笔提交；`cache/**` gitignored
+- 工作树: 台账两本已外置私有仓 `imjaden/jaden-tech-ledger`（本仓 `.gitignore` + S24 双钉），本笔只含本文件
 
 ## 三、待执行（人工维护）
 
@@ -58,7 +62,7 @@
 - 今日串行序（下一轮）
   ① ✅ 已落（`2fd0f92`）：`D-2` 文档一处（`§十三 时点基线` 去 `09:50`）
   ② 跨仓待办（需点名授权）：`DT-EMIT-WRITE-ONLY`（上游 emit-site 只写不提交）、`DT-SEC-417`（`site_commit` 字段）、`DT-SEC-425/426`（断言鉴别力/命名）—— 均需点名授权
-- 明早首跑（现行基线）：`portal-check --mode post`（**18/18**）+ `--selftest`（**24/24**）+ `perf-check`（rc=0）+ `sync-check --selftest`（**15/15**）+ `sync-check`（**rc=1** 过渡态）+ `raw-pii-probe.py`（rc=0）
+- 明早首跑（现行基线）：`portal-check --mode post`（**19/19**）+ `--selftest`（**24/24**）+ `perf-check`（rc=0）+ `sync-check --selftest`（**15/15**）+ `sync-check`（**rc=1** 过渡态）+ `raw-pii-probe.py`（rc=0）
 - 放行口径：review PASS 后 `git push origin HEAD:main`（ff-only）；routine 不得跑 `sync-run --include-upstream`
 
 ### 其他

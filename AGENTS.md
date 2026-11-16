@@ -58,11 +58,17 @@ python3 -m http.server 8099   # 8080 长期被 http-server.cli 占用，浏览�
 - **Archived project links** — Intfocus, Cloudwise（与 BMI / Tokens / 诗词同处一条 icon band）
 - **wechat.html** — 5 color themes, html2canvas 改为点击导出时才注入 CDN，输出 1080×1800 PNG
 
+## 台账归属（2026-11-16）
+
+`review-log.md`、`.review-level.yaml`、`documents/` 已外置到私有仓 `imjaden/jaden-tech-ledger`
+（本地 `~/CodeSpace/jaden-tech-ledger`）。本仓工作树保留副本作为 review 写入缓冲，但**不再被 git 跟踪**
+（`.gitignore` + `portal-check` **S24** 双钉）。同步：`cd ~/CodeSpace/jaden-tech-ledger && python3 sync.py`。
+
 ## Notes
 
 - No build tools, no package manager; 回归钉子 = 三颗（前两颗 rc=0 才算绿，第三颗 rc≤1 即绿：0 全绿 / 1 过渡态）：
   `python3 scripts/perf-check.py`（体积预算 + 首次请求集 + `?t=` 一致）
-  `python3 scripts/portal-check.py`（S1–S22：页面结构 / 文案面 / 首帧进场 / 同步面契约 / 隐私面回归钉；`--mode post` 必须 **18/18**、`--selftest` 必须 **24/24**）
+  `python3 scripts/portal-check.py`（S1–S24：页面结构 / 文案面 / 首帧进场 / 同步面契约 / 隐私面回归钉 / 导航契约 / 台账外置钉；`--mode post` 必须 **19/19**、`--selftest` 必须 **24/24**）
   `python3 scripts/sync-check.py`（同步面：结构/内容/时间三类漂移，`rc=0` 全绿、`rc=1` 过渡态；`--selftest` **15/15**；`sync-run.py` 编排、`--apply` 才执行）
 - Static assets in `static/css/`, `static/js/`, `static/img/`
 - Python scripts are standalone dev tools (not deployed); `scripts/poetry-titles-gen.py` 从月包派生标题索引，新月包落地后须重跑（`--check` 可判同步）
