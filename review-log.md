@@ -2606,6 +2606,45 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — S20 `.nojekyll` 判据随 `config_path`（1 笔已推）：新旧版对照证非空转，S21 判别力侧不再被根 `.nojekyll` 掩盖；门禁 5/5 零漂移 → PASS 100
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/portal-check.py`（`config_guard` `.nojekyll` 判据 `:354-358`）· 台账 2 文件（结转 SEC-040）
+- **Tracking**: JT-SEC-041 O-24 判据同源收口
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计）
+
+### 一、验收（隔离 clone `…/scratch/nj/clone` @ `0cbff2a`；temp 夹具 `scratch/nj/{t1,t2}`；生产侧只读）
+
+1. **改动面最小**：`git show --numstat` = 3 文件（`scripts/portal-check.py` +2/−1、`review-log.md` +44、`.review-level.yaml` +8），无夹带；subject 全英文。
+2. **生产语义未弱化**：默认路径 `path = ROOT/"_config.yml"` ⇒ `path.parent is ROOT`，与原判据等价 —— 生产 `config_guard()` 实测 `(True, exclude=6 keep=2)`；clone 内 `touch .nojekyll` ⇒ `--mode post` **16/17** rc=1，唯一红为 S20 且文案为「.nojekyll 存在 ⇒ Pages 不走 Jekyll，exclude 全部失效」；`rm` 后恢复 **17/17** rc=0。
+3. **非空转（新旧版对照）**：同一 temp 夹具（`t2/_config.yml` + 同级 `.nojekyll`），`56449a2` 版 `config_guard` ⇒ `(True, exclude=6 keep=2)`（漏判）；`0cbff2a` 版 ⇒ `(False, .nojekyll 存在…)`。判据确实随 `config_path` 移动。
+4. **判别力方向验证**：无 `.nojekyll` 的 `t1` 副本 ⇒ `True`；缺文件 ⇒ `(False, _config.yml missing)`，与改前一致。
+5. **S21 掩蔽解除（原 🟢1 实测闭合）**：clone 根含 `.nojekyll` 时新旧版 `--selftest` 均为 **21/22** 且 S21 均 ✅ —— 文本层面不可区分，故用同 ROOT 直接探针（`clone_old/scripts/portal-check.py` 与就地放入的 `_new_pc.py`，`ROOT/.nojekyll` 存在，夹具为 temp 内「删 documents/」的配置）：旧版 `config_guard(probe)` ⇒ `(False, .nojekyll 存在…)`（**他因掩盖**，S21 属真空通过）；新版 ⇒ `(False, exclude missing=['documents/'])`（判据归位）。同一现场下两版对生产根均判 `(False, .nojekyll 存在…)`，即修复未削弱 S20 本钉。
+6. **门禁逐值（生产，只读）**：`perf-check` rc=0 · `portal --mode post` **17/17** rc=0 · `--selftest` **22/22** · `sync-check --selftest` **15/15** · `sync-check` rc=1（过渡态，与基线一致）。
+7. **台账**：`.review-level.yaml` `safe_load` **76 条**、末条 8 字段齐（`date/reviewer/review_level/verdict/score/findings_total/findings_open/tracking`）；本笔 diff 凭据形态（`sk-`/`ghp_`/`AKIA`/`PRIVATE KEY`）**0 命中**。
+8. **推送三验**：前 `HEAD=0cbff2a` / `origin/main=56449a2` / ahead 1 / 树空 ⇒ `56449a2..0cbff2a`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`0cbff2a378a04389f4e6b9be9889477ede749451`**，ahead 0 / behind 0 / 树空。
+
+### 二、发现（🔴 0 / 🟡 0 / 🟢 2）
+
+- **🟢 1（S21 夹具残留耦合）**：S21 夹具走 `tempfile.NamedTemporaryFile`（系统 temp 目录），新判据取 `path.parent/.nojekyll` ⇒ 该探针的正确性依赖「系统 temp 目录无 `.nojekyll`」。概率极低且比改前（依赖仓库根）窄得多；若要彻底隔离，可改 `tempfile.mkdtemp()` 专属目录并在 finally 内 `rmtree`。
+- **🟢 2（相对路径入参）**：`config_guard("_config.yml")` 时 `path.parent == Path(".")`，判据落到 CWD。现仓 0 处此类调用（只有 `None` 与 tempfile 绝对路径），建议入参统一 `Path(...).resolve()` 兜底。
+- **🟢 3（同源的代价，符合设计）**：判据与 `exclude`/`keep_files` 同源 ⇒ 仅当 `_config.yml` 不在仓库根时，根目录 `.nojekyll` 不再被 S20 捕获。Pages 的 `_config.yml` 必须位于发布根，故当前无暴露面；若将来改 `docs/` 之类的发布子目录需同步复核。
+- **结转未动**：上一轮 🟢2（O-22 收编白名单）/ 🟢4（失败态 `git reset` 对齐）/ 🟢3（部署面 lookahead）仍归批次，本笔未触及。
+
+### 三、计分与推送
+
+**100 → PASS**（0 🔴 / 0 🟡；改动 2 行且新旧对照证非空转，生产判据零弱化，门禁 5 项零漂移，凭据面 0 命中，生产面零写）。
+
+- **推送**：`56449a2..0cbff2a`（单笔 3 文件 / +54 −1）；后三验同值 `0cbff2a`，ahead 0 / behind 0
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带
+- **建议修序**（批次，全 🟢）：🟢2 `resolve()` 兜底 → 🟢1 S21 夹具独立目录 → 结转 O-22 白名单 → 失败态 `git reset`
+
+**待决 0 项**（本轮无阻断项，余下 🟢 归批次）。
+
+---
+
 ## 条目格式说明
 
 ```

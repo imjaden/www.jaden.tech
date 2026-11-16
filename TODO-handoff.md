@@ -1,14 +1,11 @@
-<!-- generated: 2026-11-16 · source: cache/draft/TODO-20261116.md · sha256:8e816cff -->
-> 派生: 待执行 **5** 条 · 最近闭环 **CL5** · 差异知会 无（未找到含「差异知会」的设计文档）
+<!-- generated: 2026-11-16 · source: cache/draft/TODO-20261116.md · sha256:717a38b1 -->
+> 派生: 待执行 **2** 条 · 最近闭环 **CL13** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261116.md）
 
 | 编号 | 标题 | 状态（派生摘要·全文见 draft） | kind | priority | 方案文档 |
 |:--|:--|:--|:--|:--|:--|
-| 待开（sync-manifest） | JT-CL005 P2+P3+P4+P5 实施（已落地，待核实） | 待核实 | feature | normal | - |
-| 待开（sec-030-handoff-public） | `TODO-handoff.md` 公开面口径（待裁） | 待开 | verify | normal | - |
-| 待开（dt-upstream-backlog） | 上游遗留（跨仓，需点名） | 待开 | feature | low | - |
-| 待开（dt-emit-write-only） | 上游 emit-site 只写不提交模式（DT-EMIT-WRITE-ONLY，跨仓） | 待开 | feature | normal | - |
+| 待开（sec-030-handoff-public） | 公开面口径（站点面已收口，仓库面待裁） | 待裁 | verify | normal | - |
 | 待开（hm-rotate-done） | hm draft 轮转丢完成节（工具缺陷） | 待办 | bug | normal | - |
 <!-- generated end -->
 
@@ -29,6 +26,11 @@
 - 线上: https://www.jaden.tech 首页 200（1.4s）· `bmi-tracker.html` 200 · `tokens-tracker/` 200；Pages `built` / `cname=www.jaden.tech` / `https_enforced=true`
 - harness（三颗钉子均已入仓；**现行计数见 §三「明早首跑」一行，此处不写死数字**）：`scripts/portal-check.py`、`scripts/perf-check.py`、`scripts/sync-check.py`
   - ⚠️ 旧口径作废: 历史里写的 `13/13`（10-25）、`9/9`/`10/10` 均为 S9/S10 修复前数字
+- 🆕 **2026-11-16 导航契约（决策 A1/B1）**：镜像页 `wc-nav` 由「整块替换成品牌条」改为「逐项渲染」——
+  本页项 `Task` 为 active 纯文本，其余项禁用态 `<span title="仅本地服务可访问">`（无 href），
+  命中最严档敏感词的项（`飞书`）整项不列；旧 `tab-bar` 双层导航废弃。
+  钉子：`portal-check` **S22**（8 禁用 + 1 active + 0 href + title 齐）+ **S23** 判别力自证（href/丢 title 必红）；
+  manifest `publish.allowlist` 已补导航口径；`perf-check` 新增 `tokens-tracker/index.html`（11500B）与 `data/live.js`（4800B）两档预算
 - 夜间链（时点为快照）: 镜像同步 **20:45** → 数据生成 **21:45** → 评审推送 **21:50**；备份 `jobs.json.bak-20261109` 各仓可回滚
 - 工作树: 本轮为 `documents/reports/JT-SEC-027-history-rewrite-20261111.md` + 本文件，随本笔提交；`cache/**` gitignored
 
@@ -48,11 +50,15 @@
 | O-1 / O-3 收口 | `cee3c00` |
 | D-1 / O-2 时效口径 | `ed94403` `f099f6a` |
 | A-1 / B-1 治本（基线行去冻结数字） | `2fd0f92` `c16dc01` `74be7e7` |
+| 隐私面收口（Jekyll exclude / scripts / documents 全 404） | `3c0c154` `01b303e` |
+| 同步面提交腿 + 镜像与守卫收口（N-1 / F-1…F-4‴ / O-9…O-24） | `6d42ab2` `666465f` `f68031a` `a919756` `c0892bb` `f053c61` `d2622b2` `1c5c76c` |
+| 全采推荐批次（S20 隐私钉 + O-9…O-24 + S20 判据随 config_path） | `b2a79b0` `635c51c` `56449a2` `0cbff2a` |
+| tokens-tracker 导航改造（S22/S23 + manifest 白名单 + perf 预算） | 本笔 |
 
 - 今日串行序（下一轮）
   ① ✅ 已落（`2fd0f92`）：`D-2` 文档一处（`§十三 时点基线` 去 `09:50`）
   ② 跨仓待办（需点名授权）：`DT-EMIT-WRITE-ONLY`（上游 emit-site 只写不提交）、`DT-SEC-417`（`site_commit` 字段）、`DT-SEC-425/426`（断言鉴别力/命名）—— 均需点名授权
-- 明早首跑（现行基线）：`portal-check --mode post`（**16/16**）+ `--selftest`（**20/20**）+ `perf-check`（rc=0）+ `sync-check --selftest`（**15/15**）+ `sync-check`（**rc=1** 过渡态）+ `raw-pii-probe.py`（rc=0）
+- 明早首跑（现行基线）：`portal-check --mode post`（**18/18**）+ `--selftest`（**24/24**）+ `perf-check`（rc=0）+ `sync-check --selftest`（**15/15**）+ `sync-check`（**rc=1** 过渡态）+ `raw-pii-probe.py`（rc=0）
 - 放行口径：review PASS 后 `git push origin HEAD:main`（ff-only）；routine 不得跑 `sync-run --include-upstream`
 
 ### 其他
