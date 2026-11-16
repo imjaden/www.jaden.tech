@@ -14,7 +14,8 @@
 ## 二、基线（人工维护）
 
 - 仓: `~/CodeSpace/www.jaden.tech` · branch `main`
-- 本地 HEAD: `f099f6a`（台账携带笔）· `origin/main` = `f099f6a` · ahead = **0** · 今日已推 **21 笔**（`69ebf7d..origin/main`，5 轮 review 逐批放行）· gitee `master` = `ed94403`（差最新台账笔，下次收工对齐）
+- 基线（**不写死数字**，A-1 治本）：本地 `git rev-parse --short HEAD` · 远端 `git rev-parse --short origin/main` · 未推 `git rev-list --count origin/main..HEAD` · 今日推送笔数 `git rev-list --count <今日首笔父>..origin/main` · 放行轮次见 `review-log.md` 当日 entry 数（各自现取，避免每笔自指滞后）
+- gitee 复核命令：`git -C ~/CodeSpace/www.jaden.tech-gitee ls-remote origin refs/heads/master`（收工时实取，勿只留旧 sha）
 - 🆕 **2026-11-15 23:15 落地 JT-CL005 设计件**：`documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md`（门户同步面契约化：`config/sync-manifest.json` 单文件 + 产物内注释戳 + `sync-check.py` + `sync-status.html` + push→pull 模型）。三仓只读核对结论：daily-tracker **无 CLI**（monolithic，直写本仓 + 内部 commit + `_SITE_NIGHT_SLOT=(21,45)`）、script-miner **已有** `daily-poetry.py deploy --target`、hermes-manager 为壳/数据分离契约（CL039/CL058，双哨兵）
 - ✅ **`JT-SEC-029` 已由上游修复并上线**（2026-11-15 22:54/22:56 两次重渲，`b35ff95`/`69ebf7d`）：daily-tracker 源码 3146–3160 行 `_MIRROR_RESTORE_TAB_JS` 只恢复本页确实存在的 tab（含 `getElementById` 检查 + `removeItem`）；真机对照实测 —— `archived` 陈旧值下 **修复前**：四页签全 `display:none`、`bodyText` 38 字符、`_wtChart` undefined（=review 报的空白）；**修复后**：`localStorage` 归一 `null`、`tab-today` 可见、1005 字符、chart `object`；`omad`/`faq`/`junk-tab` 三档均安全。线上与本地 sha256 一致 `82c6488e…`（47283 B）⇒ 线上缺陷已消除，**待 review 下轮 L2 复核关号**（本会话不自行关号）
 - 同轮复核：`JT-SEC-028` ✅ CLOSED（bundle 已删）；`JT-SEC-019/020/022/023` 🟢 结转
@@ -36,7 +37,7 @@
 
 **无待审计笔**（`origin/main..HEAD` = 0）。今日 21 笔已按 5 轮 review 逐批 PASS 并 ff-only 推送：
 
-| 批次 | 笔数 | 范围 |
+| 放行批次 | 笔数 | 范围 |
 |:--|:--|:--|
 | 第 1 轮（P2+P3 首推） | 9 | `5eb2799` … 及此前 8 笔文档/同步面 |
 | 第 2 轮（P4+P5） | 4 | `a87d97f` `c6d4201` `2ac6af8` `35cdf12` |
