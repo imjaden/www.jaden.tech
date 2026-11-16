@@ -462,7 +462,7 @@ def check_s22(board_path=None):
 # S25（2026-11-16）：状态页 + 首页小球契约 —— 三处同源（页面横幅 / 小球 / 机器 JSON）。
 STATUS_PAGE = ROOT / "sync-status.html"
 FAVICON_STAMP = "static/img/favicon-64.png?t="
-ROWS_CELL = '<td data-l="产物">'
+ROWS_CELL = '<td data-l="产物"'
 DOT_OF_BANNER = {"ok": "is-ok", "warn": "is-warn", "bad": "is-bad"}
 
 
