@@ -41,8 +41,10 @@ BUDGETS = {
     "static/img/wechat-qr-400.png": 45_000,
     # B5：部署面 lookahead —— tokens-tracker/ 是全站唯一多资产页面（壳 + 数据 + 3 个静态资产），
     # 之前完全不在预算内 ⇒ 一次上游壳膨胀可以静默上线。按实测 +30% 余量定档。
-    "tokens-tracker/index.html": 11_500,
-    "tokens-tracker/data/live.js": 4_800,
+    # 2026-11-16（A 方案：镜像切 Dashboard 页）：壳自包含（无 assets），数据从 live.js 换成 dashboard.js。
+    # 实测 gz 8,057 / 6,492，按 +15% 定档。
+    "tokens-tracker/index.html": 9_300,
+    "tokens-tracker/data/dashboard.js": 7_500,
 }
 
 

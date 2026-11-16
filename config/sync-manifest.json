@@ -5,7 +5,7 @@
     "bmi-tracker.html",
     "daily-tracker-archive-*.html",
     "tokens-tracker/index.html",
-    "tokens-tracker/data/live.js",
+    "tokens-tracker/data/dashboard.js",
     "daily-poetry.html",
     "static/js/poetry-titles-*.js"
   ],
@@ -178,7 +178,7 @@
     },
     {
       "id": "tokens-live",
-      "artifact": "tokens-tracker/data/live.js",
+      "artifact": "tokens-tracker/data/dashboard.js",
       "producer": {
         "repo": "hermes-manager",
         "entry": "scripts/tokens-tracker-mirror.py",
