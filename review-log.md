@@ -2477,6 +2477,47 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — O-20/O-21 实施审计（1 笔已推）：write-only 同归一、空 stdout fail-closed、stderr 单行整形逐条兑现；O-22「无变化不提交」复现归批次 → PASS 100
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/tokens-tracker-mirror.py`（探针+归一提至 `if not args.write_only:` 之外 `:366-383`；空 stdout / 非目录 toplevel 判死 `:372-376`；stderr 取首行 `:373`）· 台账 2 文件
+- **Tracking**: JT-SEC-038 O-20/O-21 实施收口
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成（0 🟡，无待派工）
+
+### 一、验收（隔离 clone `…/scratch/o2021p/clone{,2,3}` @ `1c5c76c`；生产面只读指纹）
+
+1. **修 1（O-20 全闭合）成立**：`--write-only --site <clone>/scripts` ⇒ **rc=0**，五文件落 `<clone>/tokens-tracker`，`<clone>/scripts/tokens-tracker` **不存在**；同一路径提交模式（干净 clone）⇒ rc=0 且新增一笔 `data@update`，`porcelain` **0** 行。
+2. **修 2（空 stdout fail-closed）成立**：PATH 前置「rc=0 零输出」git 桩 + 提交模式 ⇒ **rc=2**、stderr 单行 `rc=0 out=''`，`cwd/tokens-tracker` 与 `site/tokens-tracker` **均未创建**；假 git 吐非目录 toplevel（`/etc/hosts`）⇒ rc=2。`Path("")==Path(".")` 通道消失。
+3. **修 3（stderr 整形）成立**：多行 stderr 桩 ⇒ 只回显 `fatal: not a git repository …` 首行，list repr 计数 **0**；无 stderr 时整段省略。
+4. **拒绝面零回退**：非 git 空目录 ⇒ rc=2 + git 原话、目录内文件数 **0**；bare repo ⇒ rc=2「must be run in a work tree」零写盘；目录内坏 `.git` 文件 ⇒ rc=2 零写盘；`env -i PATH=/nonexistent` ⇒ rc=2 单行、`Traceback` 计数 **0**、cwd 无产物。
+5. **预览契约保持**：假 git + `--write-only` ⇒ rc=0 写进传入目录；`--write-only` 到非 git 空目录 ⇒ rc=0 五文件（O-15 不回退）；write-only 探针失败全程 **stderr 空**，与上轮待决裁定（静默保持原样）一致。
+6. **门禁逐值**：`perf-check` rc=0 · `portal-check --mode post` **16/16** rc=0（S17 rc=1 `artifacts=6`）· `--selftest` **20/20** · `sync-check --selftest` **15/15** · `sync-check` **rc=1**（过渡态 `artifacts 6`）· `py_compile` rc=0。
+7. **生产指纹零变**：`tokens-tracker/index.html` sha256 `2f927abb…` / `data/live.js` sha256 `e37dd242…` 审计前后逐字相同，`porcelain` **0** 行（审计中我自己 6 个重定向产物误落仓根，已删除并复验 0 行）。
+8. **回执对账**：dev 报「1b 剩余脏面 = 脚本副本 1 行」在干净 clone 复现为 **0 行**（判为 dev 侧 clone 自有状态，不影响结论）；其余回执逐条复现一致。
+
+### 二、发现（🔴 0 / 🟡 0 / 🟢 5，全部归批次）
+
+- **🟢 1（O-22，已复现）**：`:506-507 if not changed: return 0` 判据是「磁盘 vs 新生成」，不看 HEAD。复现：先 `--write-only` 预览落盘（disk≠HEAD）→ 再跑提交模式且上游数据未变 ⇒ **rc=0、不提交、脏面留存**（`porcelain` 2 行）。后果 = 镜像数据静默停滞 + 残留可被后续宽路径提交裹挟。**只影响「夜里裸跑 mirror 自带提交」这条路**：`sync-run --commit` 走 `git status` 判据（`scripts/sync-run.py:187/216`），不受影响。修法建议：除 `changed` 外补 `git diff --quiet HEAD -- tokens-tracker` 判据。
+- **🟢 2**：`_why` 在 write-only 失败分支被计算但丢弃（`:376` 死值，无害）；`_out[:80]!r` 截断可能切掉长路径尾段，排障时略损信息。
+- **🟢 3**：git 缺失时消息读作「不是 git 工作树 …（无法调用 git（…））」，双层括号；单行与非裸栈已达标，仅措辞。
+- **🟢 4**：输入面等权延续（`--site <生产>/scripts` 归一后等价默认、提交进生产检出）；mirror 自身无 origin/生产身份守卫（在 `sync-run`），不 push 无提权，记录备查。
+- **🟢 5（治理面，非本笔引入）**：`review-log.md` / `.review-level.yaml` 已 tracked，而 `github.com/imjaden/www.jaden.tech` 公开（未鉴权 API 200）⇒ 未闭合安全待办清单（O-13/O-14/O-17/O-18/O-22…）与内部检出路径 `/Users/jadenli/CodeSpace/…` 均在公开面。属既有条目既定实践、本笔延续，建议单列治理议题（台账拆私有仓或脱敏摘要），不在本批次改。
+- **结转未动**：O-13、O-14、O-17、O-18、O-9。
+
+### 三、计分与推送
+
+**100 − 0 = 100 → PASS**（0 🔴 / 0 🟡；O-20 全闭合、空 stdout fail-closed、stderr 整形三项 **CLOSED**；拒绝面 4 例零回退；门禁 6 项零漂移；生产面零写）。
+
+- **推送**：前 `HEAD=1c5c76c` / `origin/main=d2622b2` / ahead **1** / behind 0 / 树空 ⇒ `git push origin HEAD:main` = `d2622b2..1c5c76c  HEAD -> main`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`1c5c76c8c756e79cdffd254819550d08f6b15ee3`**，ahead **0** / behind **0**
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带；推送笔未追加提交
+- **建议修序**（批次）：**O-22 → O-13 → O-17 → O-14/O-18/O-9**
+
+**待决 1 项**：O-22 修法取「补 `git diff --quiet HEAD -- tokens-tracker` 判据」（推荐，覆盖预览残留）还是「把 `changed` 直接换成 `git status --porcelain` 非空」。
+
+---
+
 ## 条目格式说明
 
 ```

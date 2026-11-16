@@ -504,7 +504,12 @@ def main() -> int:
         return 0
 
     if not changed:
-        return 0  # silent (no_agent watchdog pattern)
+        # O-22：本轮无变化 ≠ 树上干净 —— 上一轮若留下未提交产物（失败/中断），
+        # 直接 return 0 会让脏面无限滞留。以 git 实况为准再决定是否收编。
+        _dirty = subprocess.run(["git", "status", "--porcelain", "--", "tokens-tracker"],
+                                cwd=WWW_REPO, capture_output=True, text=True)
+        if not (_dirty.stdout or "").strip():
+            return 0  # silent (no_agent watchdog pattern)
 
     subprocess.run(
         ["git", "add", "--", "tokens-tracker/index.html", "tokens-tracker/data/live.js", "tokens-tracker/assets"],

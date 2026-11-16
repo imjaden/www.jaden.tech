@@ -75,8 +75,11 @@ def resolve_cmd(art):
     return _expand(LOCAL_ENTRIES.get(producer.get("mode")))
 
 
-# F-4‴：必须锚定结尾（否则 `www.jaden.tech-fork` / `.bak` / 代理路径都能混过），大小写不敏感
-CANONICAL_REMOTE_RE = r"github\.com[:/]+imjaden/www\.jaden\.tech(?:\.git)?/?$"
+# F-4‴/O-18：ssh 与 https 两种形态分别锚定 **host 起点**与结尾，代理前缀/后缀变体一律不认。
+CANONICAL_REMOTE_RE = (
+    r"^(?:ssh://)?git@github\.com[:/]+imjaden/www\.jaden\.tech(?:\.git)?/?$"
+    r"|^https?://(?:[^@/]+@)?github\.com/imjaden/www\.jaden\.tech(?:\.git)?/?$"
+)
 
 
 # F-4″：路径身份默认取 `~/CodeSpace/www.jaden.tech`（不写用户名、只用 HOME 相对路径）；
@@ -217,7 +220,7 @@ def commit_artifacts(paths, message):
     """N-1：path-scoped 提交（禁 -A / 禁 .）；无改动返回 (0, 'no-changes')。"""
     todo = changed(paths)
     if not todo:
-        return 0, "no-changes"
+        return 0, "no-changes", 0
     # F-1′：只 add「磁盘上还存在」的路径 —— 已 staged 的改名源/已删除路径会让
     # `git add` 直接 rc=128（pathspec did not match），而 `git commit --only -- <path>`
     # 本身能记录删除与改名（两路径一起点名）。
@@ -226,16 +229,18 @@ def commit_artifacts(paths, message):
         else subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
     if add.returncode:
         subprocess.run(["git", "reset", "-q", "--"] + todo, cwd=ROOT, capture_output=True)
-        return add.returncode, (add.stderr or "git add failed").strip()[:200]
+        return add.returncode, (add.stderr or "git add failed").strip()[:200], 0
     com = subprocess.run(["git", "commit", "-m", message, "--only", "--"] + todo,
                          cwd=ROOT, capture_output=True, text=True)
     if com.returncode:
         # F-1′：提交失败不得把索引留在「已暂存」态（{bmi 删除 / 改名} 的半截提交现场）
         subprocess.run(["git", "reset", "-q", "--"] + todo, cwd=ROOT, capture_output=True)
-    _out = ((com.stdout or "") + (com.stderr or "")).strip()
+    # O-14：stdout/stderr 合并后取**首个非空行**（hook 两路都写时不再丢真因）
+    _lines = [ln.strip() for ln in ((com.stdout or "") + (com.stderr or "")).splitlines() if ln.strip()]
+    _first = _lines[0][:160] if _lines else ""
     if com.returncode:
-        return com.returncode, (_out.splitlines()[0][:160] if _out else "commit failed")
-    return 0, (_out.splitlines()[0][:160] if _out else "committed")
+        return com.returncode, (_first or "commit failed"), 0
+    return 0, (_first or "committed"), len(todo)
 
 
 def main():
@@ -260,7 +265,10 @@ def main():
         print(f"manifest unreadable: {exc}", file=sys.stderr)
         return 2
 
-    _why = production_checkout_reason() if args.include_upstream else None
+    steps = plan(manifest, args.only, args.include_upstream)
+    # O-17：只有本批真的含 emit-site 腿时，目录身份才有意义；纯本仓批次不该整笔被拒。
+    _why = production_checkout_reason() if (
+        args.include_upstream and any(s.get("mode") == "emit-site" for s in steps)) else None
     if _why and not args.force_upstream and args.apply:
         # F-4′：上游 emit-site 写的是它**自己配置的**（生产）站点路径，本工具的 env 注入无效；
         # 在克隆/副本里跑会把产物写进生产仓（实测污染 records.json / index.html / snapshots）。
@@ -268,12 +276,19 @@ def main():
         print("  如确需在副本里跑，先设好上游沙箱四件套（DT_SANDBOX=1 + DT_BASE + DT_HEALTH_DATA + "
               "DT_SITE_REPO）再加 --force-upstream；否则请在生产检出执行。", file=sys.stderr)
         return 2
+    if args.force_upstream and args.include_upstream:
+        _sb = os.environ.get("DT_SANDBOX") == "1"
+        _site = os.environ.get("DT_SITE_REPO")
+        if not (_sb and _site and Path(_site).resolve() == ROOT.resolve()):
+            print("拒绝执行：`--force-upstream` 要求 DT_SANDBOX=1 且 DT_SITE_REPO 指向当前站点根"
+                  f"（实测 DT_SANDBOX={os.environ.get('DT_SANDBOX')!r} DT_SITE_REPO={_site!r}）。",
+                  file=sys.stderr)
+            return 2
     if _why:
         # O-12：dry-run 允许预览，但必须显式提示这不是生产检出
         print(f"⚠️  非生产检出（{_why}）：dry-run 仅预览；真正 --apply 会被拒绝（除 --force-upstream）",
               file=sys.stderr)
 
-    steps = plan(manifest, args.only, args.include_upstream)
     # 同一 (cwd, cmd) 只执行一次：多个产物可能来自同一次生成（如 tokens-board + tokens-live 同属 mirror）
     seen, deduped = set(), []
     for step in steps:
@@ -317,8 +332,8 @@ def main():
         else:
           try:
             _pats = artifact_patterns(manifest, args.only)
-            _rc, _msg = commit_artifacts(_pats, args.message)
-            commit_info = {"rc": _rc, "detail": _msg, "paths": len(_paths_guess := artifact_paths(manifest, args.only))}
+            _rc, _msg, _n = commit_artifacts(_pats, args.message)
+            commit_info = {"rc": _rc, "detail": _msg, "paths": _n}
             if _rc:
                 failures += 1
           except Exception as exc:                    # 提交腿失败不得吞掉执行结果
