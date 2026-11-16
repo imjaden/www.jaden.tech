@@ -42,9 +42,9 @@ BUDGETS = {
     # B5：部署面 lookahead —— tokens-tracker/ 是全站唯一多资产页面（壳 + 数据 + 3 个静态资产），
     # 之前完全不在预算内 ⇒ 一次上游壳膨胀可以静默上线。按实测 +30% 余量定档。
     # 2026-11-16（A 方案：镜像切 Dashboard 页）：壳自包含（无 assets），数据从 live.js 换成 dashboard.js。
-    # 实测 gz 8,057 / 6,492，按 +15% 定档。
-    "tokens-tracker/index.html": 9_300,
-    "tokens-tracker/data/dashboard.js": 7_500,
+    # 实测 gz 8,057 / 6,492，按 +30~40% 留余量（review SEC-5：数据会自己长大）。
+    "tokens-tracker/index.html": 11_600,
+    "tokens-tracker/data/dashboard.js": 9_800,
 }
 
 

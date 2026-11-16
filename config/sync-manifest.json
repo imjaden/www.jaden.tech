@@ -82,11 +82,14 @@
       "id": "tokens-board",
       "artifact": "tokens-tracker/index.html",
       "producer": {
-        "repo": "hermes-manager",
+        "repo": "www.jaden.tech",
         "entry": "scripts/tokens-tracker-mirror.py",
-        "mode": "mirror",
+        "mode": "overwrite",
         "profile": "ops",
-        "run_in": "www.jaden.tech"
+        "cmd": [
+          "python3",
+          "scripts/tokens-tracker-mirror.py"
+        ]
       },
       "trigger": {
         "cron": "20:45",
@@ -99,8 +102,8 @@
         "deterministic": true
       },
       "publish": {
-        "pii": "allowlist",
-        "allowlist": "project whitelist + safe columns（见 mirror 头 §3）；导航区仅列菜单项名称，非本页项为禁用态（无 href、无内部路由），命中最严档敏感词的项整项不列"
+        "pii": "none",
+        "allowlist": "允许：profile 名（ops/review/personal/default/dev）、聚合数字、白名单项目任务行；禁止：非白名单项目名、内仓标识（含 1acl/feishu 的拼音与小写形态）、本地 CLI 命令、内部路由"
       },
       "verify": {
         "freshness_h": 26,
@@ -180,11 +183,14 @@
       "id": "tokens-live",
       "artifact": "tokens-tracker/data/dashboard.js",
       "producer": {
-        "repo": "hermes-manager",
+        "repo": "www.jaden.tech",
         "entry": "scripts/tokens-tracker-mirror.py",
-        "mode": "mirror",
+        "mode": "overwrite",
         "profile": "ops",
-        "run_in": "www.jaden.tech"
+        "cmd": [
+          "python3",
+          "scripts/tokens-tracker-mirror.py"
+        ]
       },
       "trigger": {
         "cron": "20:45",
@@ -197,8 +203,8 @@
         "deterministic": true
       },
       "publish": {
-        "pii": "allowlist",
-        "allowlist": "行级脱敏 + 白名单项目（见 mirror 头 §3）"
+        "pii": "none",
+        "allowlist": "允许：profile 名（ops/review/personal/default/dev）、聚合数字、白名单项目任务行；禁止：非白名单项目名、内仓标识（含 1acl/feishu 的拼音与小写形态）、本地 CLI 命令、内部路由"
       },
       "verify": {
         "freshness_h": 26,
