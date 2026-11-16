@@ -76,11 +76,15 @@ border-radius:var(--radius-md);padding:14px 16px;margin:14px 0 18px}
 .card .v{font-size:1.35rem;font-weight:700;margin-top:4px}
 .card .n{color:var(--muted);font-size:.74rem;margin-top:2px}
 h2{font-size:.86rem;font-weight:700;margin:26px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.data-table{width:100%;border-collapse:collapse}
+.data-table{width:100%;border-collapse:collapse;table-layout:fixed}
 .data-table th{position:sticky;top:0;z-index:10;background:var(--surface-900);border-bottom:1px solid var(--line);
 padding:8px 10px;text-align:left;font-size:.7rem;font-weight:600;color:var(--muted);
 text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
-.data-table td{padding:9px 10px;border-bottom:1px solid #1a1a2e;font-size:.8rem;vertical-align:middle}
+.data-table td{padding:9px 10px;border-bottom:1px solid #1a1a2e;font-size:.8rem;vertical-align:middle;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.data-table td>code{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+white-space:nowrap;vertical-align:bottom}
+.data-table td[data-l="状态"],.data-table td[data-l="年龄/预算"]{overflow:visible;text-overflow:clip}
 .data-table tbody tr:hover{background:rgba(79,70,229,.08)}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;
 background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px;color:#c9d1d9}
@@ -99,12 +103,17 @@ background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px;color:#c9d1d9
 .empty{color:var(--muted);font-size:.82rem;padding:10px 0}
 .gates{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:.78rem}
 .gates b{color:var(--fg);font-weight:600}
-footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:#6e7681;font-size:.76rem}
+footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:#6e7681;
+font-size:.76rem;text-align:center}
 @media (max-width:720px){
   .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   .data-table thead{display:none}
+  .data-table{table-layout:auto}
+  .data-table colgroup{display:none}
   .data-table tr{display:block;border:1px solid var(--line);border-radius:var(--radius-md);margin-bottom:8px;padding:4px 6px}
-  .data-table td{display:flex;justify-content:space-between;gap:10px;border:0;padding:4px 6px;white-space:normal}
+  .data-table td{display:flex;justify-content:space-between;gap:10px;border:0;padding:4px 6px;
+    white-space:normal;overflow:visible;text-overflow:clip}
+  .data-table td[data-l="状态"],.data-table td[data-l="年龄/预算"]{overflow:visible;text-overflow:clip}
   .data-table td::before{content:attr(data-l);color:var(--muted);font-size:.72rem;text-transform:uppercase}
 }
 """
@@ -167,6 +176,20 @@ def bar_cell(age_h, budget_h):
             f'<i style="width:{ratio * 100:.0f}%"></i></div>')
 
 
+def _fmt_ts(raw):
+    """打戳时间统一 `yyyy-mm-dd HH:MM:SS`（UTC，与快照同基准）；不可解析则原样返回。"""
+    s = str(raw or "").strip()
+    if not s or s in ("—", "-"):
+        return "—"
+    try:
+        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        return s
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+
 def _snapshot_date(payload):
     """窗口基准 = 本次快照时刻（UTC 日期）；解析失败退回当前时刻。"""
     _ck = str(payload.get("checked_at") or "")
@@ -219,10 +242,10 @@ def build_page(payload, history, gates, incidents) -> str:
         bc = f" / {budget}h" if budget else ""
         rows.append(
             "<tr>"
-            f'<td data-l="产物"><code>{esc(a.get("artifact") or a["id"])}</code></td>'
-            f'<td data-l="来源">{esc(a.get("producer") or "—")}</td>'
-            f'<td data-l="班次">{esc(a.get("trigger") or "—")}</td>'
-            f'<td data-l="上次打戳">{esc(gen)}</td>'
+            f'<td data-l="产物" title="{esc(a.get("artifact") or a["id"])}"><code>{esc(a.get("artifact") or a["id"])}</code></td>'
+            f'<td data-l="来源" title="{esc(a.get("producer") or "—")}">{esc(a.get("producer") or "—")}</td>'
+            f'<td data-l="班次" title="{esc(a.get("trigger") or "—")}">{esc(a.get("trigger") or "—")}</td>'
+            f'<td data-l="上次打戳" title="{esc(gen)}">{esc(_fmt_ts(gen))}</td>'
             f'<td data-l="年龄/预算">{age}{bc} {bar_cell(a.get("age_h"), budget)}</td>'
             f'<td data-l="状态"><span class="badge badge-{cls}">{label}</span></td>'
             "</tr>")
@@ -283,6 +306,7 @@ def build_page(payload, history, gates, incidents) -> str:
 
 <h2>组件状态 · Components</h2>
 <table class="data-table">
+<colgroup><col style="width:22%"><col style="width:24%"><col style="width:10%"><col style="width:15%"><col style="width:14%"><col style="width:15%"></colgroup>
 <thead><tr><th>产物</th><th>来源仓 / 入口</th><th>班次</th><th>上次打戳</th><th>年龄 / 预算</th><th>状态</th></tr></thead>
 <tbody>
 {chr(10).join(rows)}
@@ -306,6 +330,7 @@ def build_page(payload, history, gates, incidents) -> str:
 
 <footer>
 判据：结构漂移（缺失 / 未注册 / 缺戳 / 哈希不符）、内容漂移（正文哈希 ≠ 戳）、时间漂移（超 freshness_h 预算）。<br>
+时间基准：快照与「上次打戳」均按 UTC 显示（<code>yyyy-mm-dd HH:MM:SS</code>）。<br>
 机器入口 <a href="./data/sync-status.json">data/sync-status.json</a> ·
 <a href="./tokens-tracker/">公开镜像看板</a> · <a href="./">← 返回首页</a>
 </footer>
