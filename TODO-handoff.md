@@ -1,12 +1,11 @@
-<!-- generated: 2026-11-16 · source: cache/draft/TODO-20261116.md · sha256:e6db8455 -->
-> 派生: 待执行 **3** 条 · 最近闭环 **CL5** · 差异知会 无（未找到含「差异知会」的设计文档）
+<!-- generated: 2026-11-16 · source: cache/draft/TODO-20261116.md · sha256:78bf5f3f -->
+> 派生: 待执行 **2** 条 · 最近闭环 **CL5** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261116.md）
 
 | 编号 | 标题 | 状态（派生摘要·全文见 draft） | kind | priority | 方案文档 |
 |:--|:--|:--|:--|:--|:--|
-| 待开（sync-manifest） | JT-CL005 P2+P3 实施（已落地，待核实） | 待核实 | feature | normal | - |
-| 待开（sec-029） | JT-SEC-029 复核（上游已修复并上线，等 review 关号） | 待核实 | verify | high | - |
+| 待开（sync-manifest） | JT-CL005 P2+P3+P4+P5 实施（已落地，待核实） | 待核实 | feature | normal | - |
 | 待开（hm-rotate-done） | hm draft 轮转丢完成节（工具缺陷） | 待办 | bug | normal | - |
 <!-- generated end -->
 

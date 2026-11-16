@@ -198,3 +198,45 @@ portal 实机                            tokens-tracker 页正常渲染（6 行�
 
 - P4 跨仓：daily-tracker 增 `--emit-site`、script-miner 切 `deploy --target`、hermes-manager 声明契约号（需点名授权）
 - P5 门禁：`portal-check` 增断言 + `AGENTS.md` 登记（需审批）
+
+## 十三、P4 + P5 落地（2026-11-16，用户已授权跨仓与受保护文件）
+
+### P4 跨仓（pull 模型打通，四档打戳）
+
+| 项 | 落点 | 实测 |
+|:--|:--|:--|
+| daily-tracker `--emit-site` | 上游 `scripts/daily-tracker-update.py`（+ `DT_SITE_NO_COMMIT` seam）；配套 `test_step7_site_gate.py` TC8a–TC8e | 上游测试 **31 PASS / 0 FAIL**；本仓 `sync-run --apply` 实跑成功，`bmi-tracker.html` 重渲为当日数据（62.5 kg / D+37） |
+| script-miner 走 `deploy --target` | 清单 `producer.cmd` 指向其既有幂等 CLI | 实跑 rc=0，`daily-poetry.html` 刷新（+4/−1） |
+| hermes-manager 契约号 | 镜像头已记 CL039/CL058 壳/数据契约；清单 `producer.repo=hermes-manager` + `run_in=www.jaden.tech`（脚本在本仓） | 首次实跑暴露 `run_in` 缺失（去上游仓找 mirror 脚本）⇒ 已修 |
+| 新增 `tokens-live` 产物 | `tokens-tracker/data/live.js` 打 JS 戳（守卫**之后**打，不构成掩护通道） | review Q-4 收口：PII 承载的数据面本体受戳约束 |
+
+`sync-run.py` 关键行为：`cache/sync-paths.json`（gitignored）可覆写跨仓绝对路径，**公开清单里只出现仓别名**；同一 `(cwd, cmd)` 只执行一次（tokens-board/tokens-live 合并）。
+
+### P5 门禁（portal-check S17 + 判别力自证 S18）
+
+- `S17` 同步面契约：清单存在 + 公开面无 `/Users/`·用户名 + `sync-check rc ≤ 1`（`artifacts=6 / rc=1`）
+- `S18` 判别力自证：把含绝对路径的临时清单喂给同一函数 ⇒ S17 必红（非恒真断言）
+- 计数变化：`--mode post` **15/15 → 16/16**；`--selftest` **17/17 → 19/19**；`AGENTS.md` 同步登记（三颗钉子 + `sync-status.html` + 清单指针），受保护文件按用户 2026-11-16「P5 同意」逐审批落地，体积 3602 B（< 4 KB）
+
+### review（第一轮）四问收口
+
+| 编号 | 问题 | 处置 |
+|:--|:--|:--|
+| Q-1 | 非 utf-8 产物 status=unknown 却给 rc=1，与文档 rc=3 不一致 | 改为 unknown ⇒ **rc=3** |
+| Q-2 | 戳 `v=abc` 未捕获 ValueError ⇒ traceback | 捕获并判 `mismatch`；selftest 增「戳 v 非数字可解析」 |
+| Q-3 | `verify.hash` 从未被读取 | 语义落地：`required` + 无戳 ⇒ 结构违规 rc=2；`optional` + 无戳 ⇒ 过渡态 rc=1（bmi/dt-archive/daily-poetry 置 optional） |
+| Q-4 | `watch` 未覆盖 `tokens-tracker/data/live.js` | 新增 `tokens-live` 受戳产物 + `watch` 覆盖 |
+
+review 顺带指出的 🟢（既有缺口，不计分）：`ROOT_ABS_REF` 只匹配双引号属性，单引号 `href` / `srcset` / `action` 形态的内部路由不在守卫面内。
+
+### 当前门禁基线（2026-11-16 09:50）
+
+```
+portal-check --mode post   16/16
+portal-check --selftest    19/19
+perf-check                 28 PASS / rc=0
+sync-check --selftest      14/14
+sync-check                 rc=1（3 条上游 emit-site 过渡态；6 artifacts）
+poetry-titles-gen --check  rc=0
+grep -rn "/Users/\|jadenli" config/ sync-status.html  → 0
+```

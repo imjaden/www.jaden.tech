@@ -1581,6 +1581,54 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — JT-CL005 P2+P3 落地审计（9 笔待推）：sync-manifest 代码面 / 戳口径 / 校验器语义 / 产物面 → PASS 100，`JT-SEC-029` ✅ CLOSED
+
+- **review者**: Security Reviewer（review profile，cli 会话，prompt `jt-cl005-review-push` v1.0）
+- **范围**: `origin/main = 69ebf7d` → 本地 HEAD `5eb2799`，**ahead 9 / behind 0**，`git status --short` 空；9 笔 = 5 文档/设计 + 1 代码（`12b9a58`）+ 2 产物 + 1 收口；聚合 17 文件；单日志口径不新建 `documents/reviews/` 件
+- **Tracking**: `JT-SEC-029` **✅ CLOSED**（本轮独立真机复核）；JT-SEC-019 / 020 / 022 / 023（🟢 LOW）结转 OPEN（020 面扩 1 处 = `config/` 公开仓别名与入口路径）；新增 4 项**工具健壮性 Q-1…Q-4**（非安全面，不开 SEC 号）
+- **状态**: ✅ PASS（**100 / 100**，Rating A；🔴 0 / 🟡 安全类 0 / 🟢 4 结转）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计，非设计评审）
+
+### 发现摘要
+
+**门禁（全部实跑，结果与 prompt 期望一致）** —— `portal-check.py --mode post` ⇒ **15/15 rc=0**；`--selftest` ⇒ **17/17 rc=0**；`perf-check.py` ⇒ **rc=0 全 PASS**（含 `?t=` parity `1794394182`）；`sync-check.py --selftest` ⇒ **13/13 rc=0**；`sync-check.py` ⇒ **rc=1**（3 条 `unstamped` 过渡态：bmi-tracker / dt-archive / daily-poetry；2 条 ok）；`--strict` ⇒ **rc=2**（实测，语义符合文档）；`poetry-titles-gen.py --check` ⇒ **rc=0**（5 个月份文件）；`grep -rn "/Users/\|jadenli" config/ | wc -l` ⇒ **0**。
+
+**① 戳口径（`scripts/sync_stamp.py`，75 行）—— 三个不变量均成立**：`digest()` = `strip_stamp()` 后正文 sha256 前 16 hex（戳不参与自指）；`html_stamp` 锚 `<!DOCTYPE html>` 后插入、`js_stamp` 首行插入，两者先 `strip_stamp` 再打 ⇒ 幂等；`generated` 由调用方传入（生产者分别取 `src.mtime` / `LIVE_DATA_META.generated_at`），模块内无 `now()`。**实测（真实产物，非构造样本）**：`tokens-tracker/index.html` + `static/js/poetry-titles-202609..202701.js` 共 **6 件** `digest_ok=True`、用原字段重打戳 `idempotent=True`（逐字节相同）。戳形态为 HTML 注释 / JS 块注释，`<!DOCTYPE html>` 与 `<html>` 之间、JS 首行 ⇒ 不参与渲染。
+
+**② 渲染未被戳破坏（本地 8099 静态服 + 真实浏览器）** —— `/tokens-tracker/`：`WEB_DATA_READY=true`、`tbody tr` **6** 行、`favicon` 链存在且 `GET /static/img/favicon.png` **200**、页内 `[href^="/"]|[src^="/"]` **0** 个；`/index.html`：`window.poetryTitles` = **object**（戳注释不掉 JS 解析）、`now-card` **3**；`/sync-status.html`：`tbody tr` **5** 行、`innerText` 758 字符。推送后线上复测：`/sync-status.html` **200**、`/tokens-tracker/` 首行即新戳、`/static/js/poetry-titles-202611.js` 首行即新戳 ⇒ 产物按期上网。
+
+**③ `transform_shell` 新「`/static/…` → `../static/…`」未放宽 JT-SEC-018 守卫（符合期望）** —— 新规则 `(?P<attr>href|src)="/static/`（`tokens-tracker-mirror.py:252`）只做**路径降级**；守卫仍在 `transform_shell` **之后**执行且 `ROOT_ABS_REF` 未改：`/1acl/…`、`/session/` 等其它根绝对 href/src 一律命中 → `main()` rc=2 fail-closed（`inject_chrome` 后先查 `INLINE_DATA` / `ROOT_ABS_REF` / `REFERRER_META`，再查 `SENSITIVE_CONTENT`，最后才打戳写盘）。戳在守卫**之后**打（`:363-378`）⇒ 守卫永远看不到戳，无「戳掩护敏感词」通道。
+
+**④ `config/sync-manifest.json`（5 条，watch 5 项）** —— 无 `/Users/`、无用户名；`producer` 只写「仓别名/仓内相对路径」；`unregistered` 实测 **`[]`**（watch 覆盖的 tracked 文件全被条目认领）；`artifacts` 5 条 id 唯一、7 必填字段齐。**但同名 `_note` 允许「仓别名可用」的边界需用户确认在公开仓成立**（`www.jaden.tech` 为 public repo，manifest 与 `sync-status.html` 均公开 `hermes-manager` / `script-miner` / `daily-tracker` 三个仓别名 + 入口相对路径 + 定时 `20:45` / `10:00,21:45`）⇒ 不开 SEC 号（用户既定口径「仓别名可用」），记 JT-SEC-020 面扩 1 处。
+
+**⑤ `JT-SEC-029` 关号（本轮独立复核，不引用 handoff 自述）** —— ① sha256 一致：本地 `bmi-tracker.html` 与 `https://www.jaden.tech/bmi-tracker.html` 均 **`82c6488e1cb70cb5…`（47283 B，http 200）**；② 真机四档（浏览器置 `dt_active_tab` 后 reload）：`archived` ⇒ `stored=null`（`removeItem` 归一）、`tab-today` `display:block`、`innerText` **1005** 字符、`_wtChart` **object**；`junk-tab` ⇒ 同（`null` / block / 1005 / object）；`omad` ⇒ `tab-omad` 可见、1527 字符、chart object；`faq` ⇒ `tab-faq` 可见、1999 字符、chart object。**四档均无空白，与修复前（38 字符 / 四页签全 none / chart undefined）形成对照 ⇒ 守卫已回到上游且线上生效，✅ CLOSED。**
+
+**⑥ `sync-status.html` 公开面** —— `grep -E "/Users/|jadenli"` **0 命中**；无 `<script>`、无远端请求 ⇒ 纯静态快照，`checked_at` 为写入时点而非运行时取数；`producer`/`cron` 列即 ⑥ 的 020 面扩。页内 `index.html` 无链接（`grep -c sync-status index.html` = 0）⇒ 事实上的保守发布面。
+
+**⑦ 凭证面** —— 9 笔新增行密钥/凭据模式 **0**；`BEGIN (RSA|OPENSSH|PRIVATE)` / `api_key` / `password` / `token=` **0**；`tokens-tracker/` 全目录与 `sync-status.html`、`poetry-titles-*.js` 家目录前缀 **0**、站内敏感词（`personal-cinema|JAV|磁力|迅雷|飞书|阿里云|演员|actress`）**0**。
+
+### 发现表
+
+| # | Level | 类别 | 标题（证据） | 建议 |
+|:-:|:--|:--|:--|:--|
+| Q-1 | 🟡 | 工具健壮性 | `sync-check.py:180-185` 把 `unknown` 归入 `rc=1`，`print_human` 对 rc=1 输出「PASS（含过渡/陈旧项）」；文档 `:10` 却写 rc=3 =「无法判定（清单或**产物不可读**）」。**实测**：产物为不可 utf-8 解码的二进制 ⇒ `status=unknown` 但 `rc=1`；`git ls-files` 不可用时同理（全绿条目也被拖成 rc=1） | `unknown` 单列 rc=3，或 verdict 文本区分 UNKNOWN；文档与实现二者取一 |
+| Q-2 | 🟡 | 工具健壮性 | `sync-check.py:111` `int(stamp.get("v","0") or 0)` 未捕获 ⇒ 戳 `v=abc` 直接 `ValueError` traceback 退出（实测），退出码 1 与「stale」混淆，且无摘要输出 | `try/except (TypeError, ValueError)` → `mismatch`（rc=2） |
+| Q-3 | 🟡 | 清单语义 | `verify.hash` **从未被 `check_artifact` 读取**（只读 `freshness_h`）：`bmi-tracker` 声明 `hash:"required"` 但 `stamp:"pending"` ⇒ 永不校验；`dt-archive` 声明 `optional`。声明与实施不一致，`sync-status.html` 的「校验时间/正常」易被读作背书 | 过渡期把 bmi 的 `hash` 改 `none`，或让 `check_artifact` 消费 `hash`（`required` 且无戳 ⇒ 结构违规） |
+| Q-4 | 🟡 | 覆盖面 | `watch` 未覆盖 `tokens-tracker/data/live.js` 与 `tokens-tracker/assets/*`——**承载数据（PII 面）的产物本体无戳、未注册**；其新鲜度仅靠 `index.html` 戳的 `generated`（= 同一 `generated_at`）间接代理，`live.js` 被手改不可检出 | `live.js` 纳入 artifacts（`inline` 戳）或至少纳入 `watch` + 独立 hash 断言 |
+| 🟢 020+ | 🟢 LOW | 公开面 | `sync-status.html` 公开三仓别名 + 入口相对路径 + cron；无 `noindex`、未注册进 manifest（自身陈旧无守卫） | `<meta name="robots" content="noindex">`；列裁剪为「产物 / 结论 / 年龄」 |
+| 🟢 018+ | 🟢 LOW | 守卫覆盖 | `ROOT_ABS_REF` 仅匹配双引号属性（`="`）：实测 `href='/1acl/x'`、`srcset="/1acl/a.png 2x"`、`action="/1acl/y"` **均不命中** ⇒ 单引号/`srcset`/`action` 形态的内部路由可上线。**属既有缺口，非本次新增**（本次 `/static` 重写只降级双引号 `/static`） | 正则放宽为 `['"]` 并补 `srcset`/`action`/`data-*`；归 JT-SEC-018 同族 |
+| 🟢 Q-5 | 🟢 | 代码卫生 | `tokens-tracker-mirror.py:366-369` 死代码 `_meta = new_live if 'new_live' in dir() else ""`（此处 `new_live` 尚未赋值，恒空）且 `transform_live()` 被调两次；戳 `producer=hermes-manager/1acl-board-gen` 与 manifest `producer.entry=scripts/tokens-tracker-mirror.py` 不一致（校验器不比对）；`sync-run.py --apply` 走 mirror 默认路径 ⇒ mirror 会 `git add/commit`（编排器带隐式提交副作用） | 清死码、对齐 producer 字串、`sync-run` 传 `--write-only` |
+| 🟢 Q-6 | 🟢 | 自检真伪 | `--selftest` 13/13 只覆盖 `sync_stamp` 往返/幂等/篡改/解析 + 清单可解析/条目数/无绝对路径 + 两条算术；**未覆盖 `check_artifact` 的 stale / unstamped / mismatch / missing / unregistered 与 rc 映射** ⇒ 上表 Q-1/Q-2 正落在自检盲区，「13/13」不能证明判别力；`条目数 = 5` 硬编码会随清单增项必红 | 加临时目录 fixture 用例（4 状态 + rc 断言），条目数改 `>=1` |
+| — | 🟡 | **JT-SEC-029** | `archived` 等四档陈旧值空白页 | **✅ CLOSED**（sha 一致 + 四档真机无空白，见 ⑤） |
+| — | 🟢 | JT-SEC-019 / 020 / 022 / 023 | 版本披露 / 内部路径披露 / handoff 路径 / live.js 语义 | OPEN 结转（020 面扩 1 处） |
+
+计分：**100 − 0 = 100 / 100 → A → PASS**（安全面 0 新发现；Q-1…Q-6 为新增审计工具的健壮性/卫生项，未构成安全回归、不扣安全分；🟢 4 项结转不计扣分）。
+
+**推送**：PASS ⇒ 按 prompt 要求 ff-only `git push origin HEAD:main`，**推送前后实测**：前 `HEAD=5eb2799` / `origin/main=69ebf7d` / `rev-list --count origin/main..HEAD=9`；推送输出 `69ebf7d..5eb2799  HEAD -> main` rc=0；后 `origin/main=5eb2799` / ahead **0** / behind **0** / `ls-remote origin refs/heads/main` = `5eb27992c706…` 同值。**未改源码、未新增提交**（依边界「不新增提交」⇒ 本条 entry 与 `.review-level.yaml` 的 review_history 更新留在工作树，由 ops 下一笔 `docs@handoff` 携带）。**待确认 1 项：Q-4（`tokens-tracker/data/live.js` 是否升为受戳产物）—— 建议 P4 与「四档打戳」同批做。**
+
+---
+
 ## 条目格式说明
 
 ```
