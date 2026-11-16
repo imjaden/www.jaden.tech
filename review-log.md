@@ -1902,6 +1902,80 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — JT-CL005 O-1/O-3 收口终审（1 笔待推）：O-1a / O-1b / O-3 全 ✅ 闭合、§十四 基线残留同类时效缺陷 → PASS 95
+
+- **review者**: Security Reviewer（review profile，cli 会话，prompt `jt-cl005-o-review-push` v1.0）
+- **范围**: `origin/main = 93a0a27` → 本地 HEAD `cee3c00`，**ahead 1 / behind 0**，`git status --short` 空；1 笔 = `cee3c00`（5 文件 **+83/−2**：`scripts/sync-run.py` +3 docstring、`scripts/tokens-tracker-mirror.py` +1/−1、设计 §十五 1 行、`review-log.md` +70、`.review-level.yaml` +8）
+- **Tracking**: **O-1a ✅ CLOSED**（§十五 基线 `10:2x` → `09:57`）、**O-1b ✅ CLOSED**（usage 补 `--include-upstream` + emit-site SKIP/rc=3 口径）、**O-3 ✅ CLOSED**（`AttributeError` 并入兜底，py<3.9 fail-closed）；新增 **1 发现 D-1 🟡**（文档时效，非安全面）
+- **状态**: ✅ PASS（**95 / 100**，Rating A；🔴 0 / 🟡 1）
+- **报告**: 本项目 2026-09-07 起单日志口径 ⇒ 本 entry 即报告
+- **实现 prompt**: ⬜ 无需生成（实现/集成验证审计，非设计评审）
+
+### 一、验收点（5/5 全部实跑，非读 diff）
+
+| 验收 | 实测 | 期望 |
+|:--|:--|:--|
+| `sync-run.py`（无参） | **rc=0**：`bmi-tracker` / `dt-archive` / `daily-poetry` 三条 **SKIP**（emit-site 默认不跑）+ `tokens-board` DRY + `poetry-titles` DRY + `tokens-live` DUP（共用入口合并） | rc=0 ✅ |
+| usage 含 `--include-upstream` | `sync-run.py:15` 使用示例 + `:16` 注意行 + `--help` 首行 `[--include-upstream]` 三处齐 | ✅ |
+| usage 口径真值 | `--only bmi-tracker`（emit-site id）⇒ 单条 **SKIP + rc=3**；`--only tokens-board`（本地腿）⇒ **DRY + rc=0** ⇒ 文案与实现一致 | ✅ |
+| `mirror --write-only` | **rc=0**，跑后 `git status --short` 空（幂等） | rc=0 ✅ |
+| §十五 基线时间 `09:57` | 与该文件 mtime `09:57:53`、`cee3c00` 提交时刻 `09:57:56` 一致（实测窗口内），基线 6 行数值本轮复跑逐值相同 | ✅ |
+
+### 二、门禁（全部实跑，与 prompt 期望逐项吻合）
+
+| 判据 | 实测 | 期望 |
+|:--|:--|:--|
+| `portal-check.py --mode post` | **16/16 rc=0**（S17 `artifacts=6 / rc=1`） | 16/16 ✅ |
+| `portal-check.py --selftest` | **20/20 rc=0**（S18/S19 判别力自证在位） | 20/20 ✅ |
+| `perf-check.py` | **rc=0**（`?t=` parity `1794394182`、poetry-titles 同步） | rc=0 ✅ |
+| `sync-check.py --selftest` | **15/15 rc=0** | 15/15 ✅ |
+| `sync-check.py` | **rc=1**（3 `过渡态` + 3 ok，artifacts 6） | rc=1 ✅ |
+| `tokens-tracker-mirror.py --write-only` | **rc=0** 且跑后树空 | rc=0 ✅ |
+
+`rc` 口径 `cmd > out 2>&1; echo $?`（不经管道）。本轮未跑 `--apply` / `--apply --include-upstream`（仅 `--include-upstream` 无 `--apply` 的预览面，实测 6 腿全 DRY/DUP、rc=0、树未变 ⇒ 无副作用）。
+
+### 三、O-3 判别力（构造 py<3.9 实跑，非读 diff）
+
+`del pathlib.PurePath.is_relative_to` 模拟 py3.8（本机 `python3` = 3.9.6），同一输入 `<link rel="icon" href="/static/img/favicon.png">`：
+
+| 版本 | 结果 |
+|:--|:--|
+| `cee3c00`（本笔） | **无异常**；输出原样保留 + `⚠️ 站点资源越根或不存在…`；`ROOT_ABS_REF` 残留 **1** ⇒ fail-closed 交 rc=2 |
+| `93a0a27`（旧版） | **CRASH** `AttributeError: 'PosixPath' object has no attribute 'is_relative_to'` |
+
+⇒ 修复具判别力，方向为 **fail-closed 而非放宽**（py<3.9 下退化为「完全不降级」，不改写出任何相对链接）。`is_relative_to` 全仓仅 `scripts/tokens-tracker-mirror.py:266` 一处使用，无第二处同缺陷。
+
+### 四、其余复核
+
+- **代码面**：本笔实际代码变更仅 `:267` 的 `except` 元组扩 1 项（`AttributeError`）+ `sync-run.py` docstring 3 行；无 `eval` / `subprocess` / `open` / 外链，`sync-run` 执行路径未被触及（纯文档串）。
+- **产物面**：`--write-only` 后树空 ⇒ 公开面 `tokens-tracker/index.html`、`tokens-tracker/data/live.js` 与本笔无差异，无新增披露。
+- **凭证/PII**：83 新增行密钥族（`BEGIN * PRIVATE` / `api_key` / `secret` / `password` / `AKIA` / `ghp_` / `xox[bp]-` / `sk-` / `Bearer `）与 `/Users`、`/home`、`C:\` 命中 **0**（唯一命中为 review-log 自述扫描词表行，非披露）。
+- **YAML**：`safe_load` 通过，`review_history` **61 条**，末条 8 字段齐全、`tracking` 内无 `"`。
+- **提交卫生**：5 文件全 `M`（无 D/R），`AGENTS.md` 未改（3666 B）、无他流水线夹带，commit subject 全英文。
+
+### 五、发现（1 条，文档面，非安全回归）
+
+| 编号 | 级别 | 问题 | 建议 |
+|:-:|:-:|:--|:--|
+| **D-1** | 🟡 | **设计件 §十四 基线仍声称「实测」于未来时刻**：`documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md:255`「### 收口后基线（2026-11-16 **10:05 实测**）」+ `:244` 节标题「（2026-11-16 **10:0x**）」占位。`git log -S'10:05 实测'` 证该串随 `53ecbd1` 于 **09:46:42** 入库且此后未被改动 ⇒ 文本入库时 10:05 尚未到来，非实测；并与 §十五 已改的 `09:57` 形成**时序倒置**（前节 10:05 → 后节 09:57）。与 O-1a **同类**（占位/虚时间），本笔仅修 §十五 ⇒ 同文件同类缺陷尚存 2 处 | `:244` 去 `x` 写实际时点（`09:4x`）；`:255` 改实际测量窗口或删「实测」二字。纯文本、无判据面影响。**按边界本轮只记不修** |
+
+### 六、🟢 观察项（不计发现、不扣分）
+
+| # | 观察 | 处置 |
+|:-:|:--|:--|
+| O-1 | `AttributeError` 并入兜底后，若该行将来出现真正的 `AttributeError` 类编程错，会被静默降级为「不降级」 | 后果是夜间 mirror **rc=2 硬失败**（可见，非静默误放行），可接受；维持现状 |
+| O-2 | `:232`「### 当前门禁基线（2026-11-16 09:50）」数值为 `selftest 19/19` / `sync selftest 14/14`，已被 §十五 `20/20` / `15/15` 取代 ⇒「当前」字样失真 | 历史快照语义，下次触及时改「§十四 时点基线」 |
+
+### 七、计分、结论与推送
+
+**100 − 5（D-1 🟡 文档追溯）= 95 / 100 → A → PASS**。验收 5/5、门禁 6 项逐值吻合、O-3 判别力经 py3.8 构造实证（新 fail-closed / 旧崩），安全面 **0 新发现 0 回归**。D-1 为同文件既有文档时效缺陷（非本笔引入、无运行时影响），不阻推。
+
+**推送**：ff-only `git push origin HEAD:main` —— 前 `HEAD=cee3c00` / `origin/main=93a0a274` / `ls-remote=93a0a274` / `rev-list --count origin/main..HEAD=1` / `merge-base --is-ancestor` 通过 / 树空；输出 `93a0a27..cee3c00  HEAD -> main` **rc=0**；后 `git rev-parse HEAD` = `git rev-parse origin/main` = `git ls-remote origin refs/heads/main` = **`cee3c00a179cb07451afec5fecbeddb06efc316e`**，ahead **0** / behind **0**，树空（本 entry 与 `.review-level.yaml` 更新除外）。**未新增提交、未动他仓、未改 `AGENTS.md`**（本 entry 留工作树，由 ops 下一笔 `docs@handoff` 携带）。
+
+**待决 1 项** —— D-1 的两处时间是否下一笔 `docs@handoff` 一并收（推荐：收，纯文本两行）。
+
+---
+
 ## 条目格式说明
 
 ```
