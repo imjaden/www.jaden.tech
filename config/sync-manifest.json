@@ -5,6 +5,7 @@
     "bmi-tracker.html",
     "daily-tracker-archive-*.html",
     "tokens-tracker/index.html",
+    "tokens-tracker/data/live.js",
     "daily-poetry.html",
     "static/js/poetry-titles-*.js"
   ],
@@ -16,7 +17,12 @@
         "repo": "daily-tracker",
         "entry": "scripts/daily-tracker-update.py",
         "mode": "emit-site",
-        "profile": "personal"
+        "profile": "personal",
+        "cmd": [
+          "python3",
+          "scripts/daily-tracker-update.py",
+          "--emit-site"
+        ]
       },
       "trigger": {
         "cron": "10:00,21:45",
@@ -33,7 +39,7 @@
       },
       "verify": {
         "freshness_h": 36,
-        "hash": "required",
+        "hash": "optional",
         "guard": "none"
       },
       "_transition": "上游无 CLI、直写本仓（push 模型）；打戳待 P4 跨仓交接后启用"
@@ -45,7 +51,12 @@
         "repo": "daily-tracker",
         "entry": "scripts/daily-tracker-update.py",
         "mode": "emit-site",
-        "profile": "personal"
+        "profile": "personal",
+        "cmd": [
+          "python3",
+          "scripts/daily-tracker-update.py",
+          "--emit-site"
+        ]
       },
       "trigger": {
         "cron": "10:00,21:45",
@@ -74,7 +85,8 @@
         "repo": "hermes-manager",
         "entry": "scripts/tokens-tracker-mirror.py",
         "mode": "mirror",
-        "profile": "ops"
+        "profile": "ops",
+        "run_in": "www.jaden.tech"
       },
       "trigger": {
         "cron": "20:45",
@@ -103,7 +115,14 @@
         "repo": "script-miner",
         "entry": "daily-poetry/daily-poetry.py deploy --target",
         "mode": "emit-site",
-        "profile": "manual"
+        "profile": "manual",
+        "cmd": [
+          "python3",
+          "daily-poetry/daily-poetry.py",
+          "deploy",
+          "--target",
+          "{site}"
+        ]
       },
       "trigger": {
         "cron": "manual",
@@ -153,6 +172,36 @@
         "guard": "none"
       },
       "_transition": "派生缓存：新鲜度靠 hash + `python3 scripts/poetry-titles-gen.py --check` 判，freshness_h=0 表示不按时间判；月包预生成多月份 ⇒ 源 mtime 本就旧"
+    },
+    {
+      "id": "tokens-live",
+      "artifact": "tokens-tracker/data/live.js",
+      "producer": {
+        "repo": "hermes-manager",
+        "entry": "scripts/tokens-tracker-mirror.py",
+        "mode": "mirror",
+        "profile": "ops",
+        "run_in": "www.jaden.tech"
+      },
+      "trigger": {
+        "cron": "20:45",
+        "cadence_h": 24
+      },
+      "contract": {
+        "version": 1,
+        "write": "projection",
+        "stamp": "inline",
+        "deterministic": true
+      },
+      "publish": {
+        "pii": "allowlist",
+        "allowlist": "行级脱敏 + 白名单项目（见 mirror 头 §3）"
+      },
+      "verify": {
+        "freshness_h": 26,
+        "hash": "required",
+        "guard": "fail-closed rc=2"
+      }
     }
   ]
 }

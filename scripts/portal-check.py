@@ -19,6 +19,7 @@
 只读脚本：不写任何仓内文件。
 """
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -295,6 +296,39 @@ def run(mode, html=None, css=None):
               f"icons_lazy={icons_lazy} bg_eager={bg_eager} logo_eager={logo_eager} "
               f"qr_ondemand={qr_ondemand} once={once}")
 
+    # S17 同步面契约（JT-CL005）
+    check_s17()
+
+
+# S17（JT-CL005）：同步面契约齐备 —— 清单存在、公开面脱敏、校验器不红
+MANIFEST = ROOT / "config/sync-manifest.json"
+
+
+def sync_gate(manifest_path=None):
+    """返回 (ok, detail)。清单缺失/含绝对路径/校验器结构违规 ⇒ 红。"""
+    path = Path(manifest_path or MANIFEST)
+    if not path.exists():
+        return False, "manifest missing"
+    raw = path.read_text(encoding="utf-8")
+    if "/Users/" in raw or "jadenli" in raw:
+        return False, "absolute path / username in manifest (公开面脱敏违规)"
+    import subprocess as _sp
+    proc = _sp.run([sys.executable, "scripts/sync-check.py", "--json"], cwd=str(ROOT),
+                   capture_output=True, text=True)
+    try:
+        payload = json.loads(proc.stdout)
+        rc = payload.get("rc", proc.returncode)
+        arts = len(payload.get("artifacts", []))
+    except json.JSONDecodeError:
+        return False, f"sync-check json unparsable (rc={proc.returncode})"
+    return rc <= 1, f"manifest v{json.loads(raw).get('version')} / artifacts={arts} / rc={rc}"
+
+
+def check_s17(manifest_path=None):
+    ok, detail = sync_gate(manifest_path)
+    check("S17", "同步面契约：清单在、公开面脱敏、sync-check rc<=1（0 全绿 / 1 过渡态）", ok, detail)
+    return ok
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -333,6 +367,18 @@ def main():
               probe1, f"S1_ok={s1[2]} S6_ok={s6[2]}")
         check("S16", "V13 判别力自证：回退旧文案后 S14 必红",
               probe2, f"S14_ok={s14[0][2] if s14 else None}")
+
+        # S18 判别力自证：清单里塞一条绝对路径 ⇒ S17 必红
+        import tempfile
+        ok_probe = None
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as fh:
+            fh.write(json.dumps({"version": 1, "artifacts": [{"id": "probe", "producer": {"repo": "/Users/probe/repo"}}]}))
+            probe_path = fh.name
+        try:
+            ok_probe = sync_gate(probe_path)[0]
+        finally:
+            Path(probe_path).unlink(missing_ok=True)
+        check("S18", "V14 判别力自证：清单含绝对路径后 S17 必红", ok_probe is False, f"S17_ok={ok_probe}")
 
     fails = [r for r in results if not r[2]]
     for cid, desc, ok, detail in results:

@@ -101,15 +101,24 @@ def check_artifact(art):
                "trigger": art["trigger"].get("cron", "?"), "stamp": stamp,
                "generated": None, "age_h": None}
         if stamp is None:
-            if contract.get("stamp") == "pending":
-                status, detail = "unstamped", f"{rel}: 过渡态（上游未打戳）"
+            # Q-3：verify.hash 决定「无戳」的严重度 —— required ⇒ 结构违规；optional ⇒ 过渡态告警
+            if contract.get("stamp") == "pending" and art.get("verify", {}).get("hash") != "required":
+                status, detail = "unstamped", f"{rel}: 过渡态（上游未打戳，hash=optional）"
             else:
-                status, detail = "mismatch", f"{rel}: 契约要求 inline 戳但缺失"
+                status, detail = "mismatch", f"{rel}: 契约要求打戳（hash=required）但缺失"
         else:
-            if stamp.get("id") != art["id"]:
+            try:
+                stamp_v = int(stamp.get("v", "0") or 0)
+                contract_v = int(contract.get("version", 1))
+            except (TypeError, ValueError):
+                status, detail = "mismatch", f"{rel}: 戳版本不可解析 v={stamp.get('v')!r}（契约 v={contract.get('version')!r}）"
+                stamp_v = contract_v = None
+            if stamp_v is None:
+                pass  # 已判定 mismatch
+            elif stamp.get("id") != art["id"]:
                 status, detail = "mismatch", f"{rel}: 戳 id={stamp.get('id')} != {art['id']}"
-            elif int(stamp.get("v", "0") or 0) > int(contract.get("version", 1)):
-                status, detail = "mismatch", f"{rel}: 戳版本 v={stamp.get('v')} 高于契约版本"
+            elif stamp_v > contract_v:
+                status, detail = "mismatch", f"{rel}: 戳版本 v={stamp_v} 高于契约版本 {contract_v}"
             elif sync_stamp.digest(text) != stamp.get("sha256"):
                 status, detail = "mismatch", f"{rel}: 正文哈希不符（被手改或半写）"
             else:
@@ -179,7 +188,9 @@ def run():
     statuses = {d["status"] for d in details}
     if struct:
         rc = 2
-    elif statuses & {"stale", "unstamped", "unknown"}:
+    elif "unknown" in statuses:
+        rc = 3          # Q-1：存在不可判定的产物（如非 utf-8）⇒ 与文档一致，不再降级为 rc=1
+    elif statuses & {"stale", "unstamped"}:
         rc = 1
     else:
         rc = 0
@@ -299,13 +310,21 @@ def selftest():
 
     manifest, problems = load_manifest()
     ok("清单可解析", not problems, "; ".join(problems))
-    ok("清单条目数 = 5", len(manifest.get("artifacts", [])) == 5,
-       str(len(manifest.get("artifacts", []))))
+    _n = len(manifest.get("artifacts", []))
+    ok("清单条目数 ≥ 5（当前 6：含 tokens-live）", _n >= 5, str(_n))
     ok("清单无绝对路径", "/Users/" not in json.dumps(manifest))
 
     base = now_utc()
     ok("新鲜度边界（36h 内 ok）", (now_utc() - (base - timedelta(hours=35))) / timedelta(hours=1) < 36)
     ok("新鲜度边界（37h 超限）", (now_utc() - (base - timedelta(hours=37))) / timedelta(hours=1) > 36)
+
+    # Q-2 回归：戳版本不可解析不得抛异常
+    try:
+        bad_v = sync_stamp.parse(sync_stamp.js_stamp("var a=1;\n", id="z", producer="r/x.py", v="abc",
+                                                    generated="2026-11-16T00:00:00+00:00", sha256="0"))
+        ok("戳 v 非数字可解析（不抛）", (bad_v or {}).get("v") == "abc")
+    except Exception as exc:  # noqa: BLE001
+        ok("戳 v 非数字可解析（不抛）", False, str(exc))
 
     passed = sum(1 for _, cond, _ in checks if cond)
     for name, cond, note in checks:

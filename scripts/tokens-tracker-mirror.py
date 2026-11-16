@@ -367,18 +367,29 @@ def main() -> int:
         _meta = new_live if 'new_live' in dir() else ""
     except Exception:
         _meta = ""
+    _generated = _stamp_generated(transform_live(SRC_LIVE.read_text(encoding="utf-8")))
     new_html = sync_stamp.html_stamp(
         new_html,
         id="tokens-board",
         producer="hermes-manager/1acl-board-gen",
         v="1",
-        generated=_stamp_generated(transform_live(SRC_LIVE.read_text(encoding="utf-8"))),
+        generated=_generated,
         sha256=sync_stamp.digest(new_html),
     )
 
     new_live = transform_live(SRC_LIVE.read_text(encoding="utf-8"))
     if not guard_ok(new_live, "data/live.js"):
         return 2
+    # JT-CL005 / review Q-4：数据面本体（PII 承载产物）也要受戳约束 —— 守卫通过后再打，
+    # 不构成「戳掩护敏感词」通道（守卫读的是打戳前的文本）。
+    new_live = sync_stamp.js_stamp(
+        new_live,
+        id="tokens-live",
+        producer="hermes-manager/1acl-board-gen",
+        v="1",
+        generated=_generated,
+        sha256=sync_stamp.digest(new_live),
+    )
 
     new_js = transform_js((SRC_ASSETS / "common.js").read_text(encoding="utf-8"))
     if not guard_ok(new_js, "common.js", SENSITIVE_CONTENT):

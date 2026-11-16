@@ -24,11 +24,37 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "config" / "sync-manifest.json"
 
-# 本仓可执行的入口（mode -> 命令模板）；上游 emit-site 一律 SKIP，等 P4 跨仓交接
+# 本仓可执行的入口（mode -> 命令模板）
 LOCAL_ENTRIES = {
     "local": ["python3", "scripts/poetry-titles-gen.py"],
     "mirror": ["python3", "scripts/tokens-tracker-mirror.py"],
 }
+
+# 跨仓路径解析：**不得**写进 config/sync-manifest.json（那是公开面）。
+# 覆写文件 cache/sync-paths.json（gitignored）形如 {"daily-tracker": "/abs/path"}；
+# 缺省按 ~/CodeSpace/<repo> 解析，repo 为本仓时用仓库根。
+PATHS_FILE = ROOT / "cache" / "sync-paths.json"
+
+
+def repo_path(repo):
+    if repo in ("www.jaden.tech", "jaden-tech"):
+        return ROOT
+    try:
+        overrides = json.loads(PATHS_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        overrides = {}
+    if repo in overrides:
+        return Path(overrides[repo]).expanduser()
+    return Path.home() / "CodeSpace" / repo
+
+
+def resolve_cmd(art):
+    """优先用清单里的 producer.cmd（跨仓 emit-site）；否则按 mode 用本仓内置入口。"""
+    producer = art.get("producer", {})
+    cmd = producer.get("cmd")
+    if cmd:
+        return [str(ROOT) if tok == "{site}" else tok for tok in cmd]
+    return LOCAL_ENTRIES.get(producer.get("mode"))
 
 
 def load():
@@ -41,18 +67,25 @@ def plan(manifest, only=None):
     for art in manifest.get("artifacts", []):
         if only and art["id"] not in only:
             continue
-        mode = art.get("producer", {}).get("mode", "?")
-        cmd = LOCAL_ENTRIES.get(mode)
+        producer = art.get("producer", {})
+        mode = producer.get("mode", "?")
+        cmd = resolve_cmd(art)
         if cmd is None:
             steps.append({"id": art["id"], "mode": mode, "action": "skip",
-                          "reason": f"mode={mode} 需上游 CLI（P4 跨仓交接后启用）"})
+                          "reason": f"mode={mode} 无可用入口"})
             continue
-        steps.append({"id": art["id"], "mode": mode, "action": "run", "cmd": cmd})
+        cwd = repo_path(producer.get("run_in") or producer.get("repo", ""))
+        if not cwd.exists():
+            steps.append({"id": art["id"], "mode": mode, "action": "skip",
+                          "reason": f"producer repo 不存在: {producer.get('repo')}（可用 cache/sync-paths.json 覆写）"})
+            continue
+        steps.append({"id": art["id"], "mode": mode, "action": "run", "cmd": cmd,
+                      "cwd": str(cwd), "repo": producer.get("repo")})
     return steps
 
 
 def run_step(step):
-    proc = subprocess.run(step["cmd"], cwd=ROOT, capture_output=True, text=True)
+    proc = subprocess.run(step["cmd"], cwd=step.get("cwd") or ROOT, capture_output=True, text=True)
     out = ((proc.stdout or "") + (proc.stderr or "")).strip()
     return proc.returncode, out
 
@@ -72,14 +105,25 @@ def main():
         return 2
 
     steps = plan(manifest, args.only)
+    # 同一 (cwd, cmd) 只执行一次：多个产物可能来自同一次生成（如 tokens-board + tokens-live 同属 mirror）
+    seen, deduped = set(), []
+    for step in steps:
+        key = (step.get("cwd"), tuple(step["cmd"])) if step["action"] == "run" else (step["id"],)
+        if key in seen:
+            deduped.append({**step, "action": "dup", "reason": "与上一条共用同一入口，已合并执行"})
+            continue
+        seen.add(key)
+        deduped.append(step)
+    steps = deduped
     results = []
     failures = 0
     for step in steps:
-        if step["action"] == "skip":
-            results.append({**step, "rc": None})
+        if step["action"] in ("skip", "dup"):
+            results.append({**step, "rc": None, "action": step["action"]})
             continue
         if not args.apply:
-            results.append({**step, "rc": None, "preview": " ".join(step["cmd"])})
+            results.append({**step, "rc": None,
+                            "preview": f"[{step.get('repo')}] " + " ".join(step["cmd"])})
             continue
         rc, out = run_step(step)
         failures += 1 if rc else 0
@@ -98,8 +142,8 @@ def main():
         print(json.dumps({"apply": args.apply, "steps": results, "check": check}, ensure_ascii=False, indent=2))
     else:
         for r in results:
-            if r["action"] == "skip":
-                print(f"SKIP  {r['id']:<14} {r['reason']}")
+            if r["action"] in ("skip", "dup"):
+                print(f"{'SKIP' if r['action']=='skip' else 'DUP '}  {r['id']:<14} {r['reason']}")
             elif r.get("preview"):
                 print(f"DRY   {r['id']:<14} {r['preview']}")
             else:
