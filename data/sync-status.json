@@ -1,7 +1,7 @@
 {
  "rc": 0,
  "verdict": "全部正常",
- "checked_at": "2026-11-16T11:17:51+00:00",
+ "checked_at": "2026-11-16T11:23:13+00:00",
  "artifacts": [
   {
    "id": "bmi-tracker",
@@ -16,7 +16,7 @@
     "sha256": "930d1c7322226a40"
    },
    "generated": "2026-11-16T00:00:00+08:00",
-   "age_h": 19.3
+   "age_h": 19.4
   },
   {
    "id": "dt-archive",
@@ -31,7 +31,7 @@
     "sha256": "8730694993889926"
    },
    "generated": "2026-11-16T00:00:00+08:00",
-   "age_h": 19.3
+   "age_h": 19.4
   },
   {
    "id": "tokens-board",
@@ -46,7 +46,7 @@
     "sha256": "feb48256183d0be8"
    },
    "generated": "2026-11-16T19:09:34+08:00",
-   "age_h": 0.1
+   "age_h": 0.2
   },
   {
    "id": "daily-poetry",
@@ -61,7 +61,7 @@
     "sha256": "dcfaee32567df43d"
    },
    "generated": "2026-11-16T19:10:56+08:00",
-   "age_h": 0.1
+   "age_h": 0.2
   },
   {
    "id": "poetry-titles",
@@ -76,7 +76,7 @@
     "sha256": "ef1cb98e57028a6c"
    },
    "generated": "2026-09-09T16:34:17+08:00",
-   "age_h": 1634.7
+   "age_h": 1634.8
   },
   {
    "id": "tokens-live",
@@ -91,13 +91,13 @@
     "sha256": "53be29d6ee84d5b1"
    },
    "generated": "2026-11-16T19:09:34+08:00",
-   "age_h": 0.1
+   "age_h": 0.2
   }
  ],
  "gates": {
   "portal": "20/20",
   "perf": "PASS",
-  "sync": "25/25"
+  "sync": "28/28"
  },
  "days_recorded": 1
 }
