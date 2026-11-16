@@ -94,7 +94,8 @@ background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px;color:#c9d1d9
 .badge-warn{background:#3b351f;color:#fbbf24}
 .badge-bad{background:#3b1f1f;color:#f87171}
 .badge-muted{background:#262633;color:#9aa4b2;border:1px solid #33334a}
-.bar{height:6px;border-radius:3px;background:#232334;overflow:hidden;min-width:90px}
+.bar{height:6px;border-radius:3px;background:#232334;overflow:hidden;min-width:60px;
+display:inline-block;vertical-align:middle}
 .bar>i{display:block;height:100%;border-radius:3px}
 .bar-ok>i{background:#3fb950}.bar-warn>i{background:#d29922}.bar-bad>i{background:#f85149}
 .bars{display:flex;gap:2px;flex-wrap:wrap;margin-top:6px}
@@ -171,7 +172,8 @@ def esc(text) -> str:
 
 def bar_cell(age_h, budget_h):
     if age_h is None or not budget_h:
-        return '<span class="badge badge-warn">—</span>'
+        # 「无年龄可算」不是预警，用灰档；否则豁免行会挂一枚琥珀色「—」，被读成告警
+        return '<span class="badge badge-muted">—</span>'
     ratio = min(age_h / budget_h, 1.0)
     cls = "ok" if ratio < 0.7 else ("warn" if ratio < 1.0 else "bad")
     return (f'<div class="bar bar-{cls}" title="{age_h:.1f}h / 预算 {budget_h}h">'
@@ -247,13 +249,14 @@ def build_page(payload, history, gates, incidents) -> str:
         age = f"{a['age_h']:.1f}h" if a.get("age_h") is not None else "—"
         budget = budgets.get(a["id"])
         bc = f" / {budget}h" if budget else ""
+        budget_txt = f"{budget:g}h" if budget else "—"
         rows.append(
             "<tr>"
             f'<td data-l="产物" title="{esc(a.get("artifact") or a["id"])}"><code>{esc(a.get("artifact") or a["id"])}</code></td>'
             f'<td data-l="来源" title="{esc(a.get("producer") or "—")}">{esc(a.get("producer") or "—")}</td>'
             f'<td data-l="班次" title="{esc(a.get("trigger") or "—")}">{esc(a.get("trigger") or "—")}</td>'
             f'<td data-l="上次打戳" title="{esc(gen)}">{esc(_fmt_ts(gen))}</td>'
-            f'<td data-l="年龄/预算">{age}{bc} {bar_cell(a.get("age_h"), budget)}</td>'
+            f'<td data-l="年龄/预算" title="{esc(age)} / 预算 {esc(budget_txt)}">{age}{bc} {bar_cell(a.get("age_h"), budget)}</td>'
             f'<td data-l="状态" title="{esc(d.get("detail") or label)}"><span class="badge badge-{cls}">{label}</span></td>'
             "</tr>")
 
