@@ -138,13 +138,10 @@ def plan(manifest, only=None, include_upstream=False):
 
 
 def run_step(step):
-    env = None
-    if step.get("mode") == "emit-site":
-        # F-4′：上游 `SITE_REPO` 是硬编码常量，`DT_SITE_REPO` 只在 **DT_SANDBOX=1** 时才被采信。
-        # 因此这里的注入是**惰性的**（无沙箱标记就无效），不能当作隔离手段；
-        # 真正的护栏是 main() 里的 `--include-upstream` 生产检出校验。
-        env = {**os.environ, "DT_SITE_REPO": str(ROOT)}
-    proc = subprocess.run(step["cmd"], cwd=step.get("cwd") or ROOT, capture_output=True, text=True, env=env)
+    # B6：原来这里注入 `DT_SITE_REPO` 想“隔离上游写面”，但上游 `_seam()` 只在 `DT_SANDBOX=1`
+    # 时才采信它 ⇒ 该注入**恒定无效**（dt 回执亦确认）。空转的“安全措施”比没有更危险，
+    # 直接删掉；真正的护栏是 main() 里的生产检出判定 + `--force-upstream` 的沙箱四件套校验。
+    proc = subprocess.run(step["cmd"], cwd=step.get("cwd") or ROOT, capture_output=True, text=True)
     out = ((proc.stdout or "") + (proc.stderr or "")).strip()
     return proc.returncode, out
 

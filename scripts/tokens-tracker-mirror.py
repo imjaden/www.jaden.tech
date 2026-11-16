@@ -91,7 +91,22 @@ LOCAL_ANY = re.compile(r"/Users/[^/]+/|jadenli")
 # internal page map. Neutralise the block (brand kept, no links) and abort if ANY root-absolute
 # href/src survives into the published output (fail-closed; also catches upstream re-additions).
 WC_NAV_BLOCK = re.compile(r'<div class="wc-nav">.*?</div>', flags=re.S)
-WC_NAV_SAFE = '<div class="wc-nav"><span class="wc-brand">Hermes 控制台 · 公开镜像</span></div>'
+# 2026-11-16（用户决策 A1/B1）：不再整块删菜单，改为「保留菜单结构 + 非本页项禁用」。
+# 目的：公开面看得到控制台有这些页，但点不动，鼠标悬停给出原因；无 href ⇒ 不产生死链，
+# 也不违 JT-SEC-018（该守卫仍对任何 root-absolute href/src fail-closed）。
+NAV_ITEM_RE = re.compile(r"<a\b([^>]*)>([^<]*)</a>", re.S)
+NAV_DISABLED_TITLE = "仅本地服务可访问"
+NAV_ITEMS_EXPECTED = 10          # 上游 wc-nav 当前项数；变化即中止（不猜）
+NAV_CURRENT_MATCH = 'href="/1acl/index.html"'   # 本页（1ACL Task 板）对应项
+NAV_BRAND_OLD = '<span class="wc-brand">Hermes 控制台</span>'
+NAV_BRAND_NEW = '<span class="wc-brand">Hermes 控制台 · 公开镜像</span>'
+NAV_ITEM_CSS = (
+    ".wc-nav .wc-nav-item{padding:4px 10px;border-radius:6px;white-space:nowrap;}"
+    ".wc-nav .wc-nav-item.is-active{background:var(--cobalt-600,#4f46e5);color:#fff;}"
+    ".wc-nav .wc-nav-item.is-disabled{color:#9ca3af;opacity:.45;cursor:not-allowed;}"
+    ".wc-nav .wc-nav-item.is-disabled:hover{background:transparent;color:#9ca3af;}"
+)
+
 _SITE_ROOT = Path(__file__).resolve().parent.parent   # F-4：降级目标存在性校验用
 ROOT_ABS_REF = re.compile(r'(?:href|src)="(/[^"/][^"]*)"')
 
@@ -157,7 +172,7 @@ HOME_TAB_HTML = (
 )
 
 CHROME_CSS = """
-/* site chrome: github corner + home tab-bar (dark-theme variants) */
+/* site chrome: github corner（dark-theme）—— 旧双层导航已废弃，只保留 corner */
 .github-corner {
   position: fixed; top: 0; right: 0; z-index: 999; width: 72px; height: 72px;
 }
@@ -167,19 +182,6 @@ CHROME_CSS = """
 .github-corner:hover .octo-arm { animation: octocat-wave 560ms ease-in-out; }
 @keyframes octocat-wave { 0%,100%{transform:rotate(0)} 20%,60%{transform:rotate(-25deg)} 40%,80%{transform:rotate(10deg)} }
 @media (max-width: 500px) { .github-corner:hover .octo-arm { animation: none; } }
-.tab-bar.home-tab {
-  background: rgba(22,27,34,.92); border-bottom: 1px solid #30363d;
-  display: flex; gap: 0; position: sticky; top: 0; z-index: 100;
-  border-radius: 6px 6px 0 0;
-}
-.tab-bar.home-tab .tab-btn {
-  background: transparent; border: none; color: #8b949e; padding: 8px 16px;
-  font-size: 13px; cursor: pointer; text-decoration: none;
-}
-.tab-bar.home-tab .tab-btn.active {
-  color: #7ee787; border-bottom: 2px solid #7ee787; font-weight: 600;
-}
-.tab-bar.home-tab .tab-btn:hover { color: #e6edf3; background: #1c2333; text-decoration: none; }
 """
 
 
@@ -212,15 +214,9 @@ def inject_chrome(html: str) -> str:
     m = re.search(r"</head>", html)
     if not m:
         raise RuntimeError("no </head> — cannot inject chrome css (fail-closed)")
-    html = html[: m.start()] + "<style>" + CHROME_CSS + "</style>\n" + html[m.start():]
-    # 3) home tab bar before <header class="topbar"> (top of board-wrap)
-    m = re.search(r"(<header class=\"topbar\">)", html)
-    if not m:
-        # fallback: insert right after <div class="board-wrap">
-        m = re.search(r"(<div class=\"board-wrap\">)", html)
-        if not m:
-            raise RuntimeError("no topbar/board-wrap anchor — cannot inject tab-bar (fail-closed)")
-    html = html[: m.start()] + HOME_TAB_HTML + "\n" + html[m.start():]
+    html = html[: m.start()] + "<style>" + CHROME_CSS + NAV_ITEM_CSS + "</style>\n" + html[m.start():]
+    # 3) 2026-11-16（决策 B1）：旧 tab-bar 已废弃 —— 顶部导航统一由上游 wc-nav 承担，
+    #    双层导航会让公开页出现两条重复的栏（旧实现产物可见）。
     return html
 
 
@@ -242,6 +238,38 @@ def project_items(items: list) -> list:
             continue  # row-level guard: drop rows still carrying sensitive words
         kept.append(row)
     return kept
+
+
+def render_nav(nav_block: str) -> str:
+    """把上游 `wc-nav` 渲染成公开镜像版：本页项 active 纯文本，其余项禁用 + 悬浮提示。
+
+    确定性：同输入 ⇒ 同输出（顺序、缩进、属性顺序全固定）。
+    fail-closed：菜单项数 != NAV_ITEMS_EXPECTED 或找不到本页项 ⇒ 抛错中止（上游改结构时必须人工确认）。
+    """
+    hits = list(NAV_ITEM_RE.finditer(nav_block))
+    if len(hits) != NAV_ITEMS_EXPECTED:
+        raise RuntimeError(
+            f"wc-nav item count {len(hits)} != {NAV_ITEMS_EXPECTED} — upstream menu changed, aborting")
+    if not any(NAV_CURRENT_MATCH in h.group(1) for h in hits):
+        raise RuntimeError("wc-nav: current-page item (1acl) not found — aborting")
+
+    # 命中最严档敏感词（SENSITIVE_CONTENT，如「飞书」）的菜单项**整项不渲染** ——
+    # 这不是排版取舍：该词本身就在公开面禁列清单里（mirror 头 §3 / A1 边界）。
+    dropped = [h.group(2).strip() for h in hits if SENSITIVE_CONTENT.search(h.group(2))]
+    if dropped:
+        print(f"🔒 wc-nav: 公开面不列菜单项 {dropped}（命中最严档敏感词）")
+
+    def repl(m):
+        attrs, label = m.group(1), m.group(2).strip()
+        if SENSITIVE_CONTENT.search(m.group(2)):
+            return ""                      # 整项移除（不是禁用：连名字都不出现）
+        if NAV_CURRENT_MATCH in attrs:
+            return f'<span class="wc-nav-item is-active" aria-current="page">{label}</span>'
+        return (f'<span class="wc-nav-item is-disabled" aria-disabled="true" '
+                f'title="{NAV_DISABLED_TITLE}">{label}</span>')
+
+    out = NAV_ITEM_RE.sub(repl, nav_block)
+    return out.replace(NAV_BRAND_OLD, NAV_BRAND_NEW, 1)
 
 
 def transform_shell(html: str) -> str:
@@ -278,7 +306,11 @@ def transform_shell(html: str) -> str:
     html = re.sub(r"\s*<nav class=\"nav-tabs\">.*?</nav>", "\n", html, flags=re.S)
     # 2b) JT-SEC-018: neutralise the console global menu (root-absolute internal routes).
     #     Non-fatal here — main() fails closed if any root-absolute ref survives anyway.
-    html = WC_NAV_BLOCK.sub(WC_NAV_SAFE, html)
+    _nav = WC_NAV_BLOCK.search(html)
+    if _nav:
+        html = html[: _nav.start()] + render_nav(_nav.group(0)) + html[_nav.end():]
+    else:
+        print("⚠️ wc-nav 块不存在（上游可能改结构）—— 保持原样，交由 portal-check S22 判红")
     # 3) footer honesty marker (non-fatal if layout changed upstream)
     html = html.replace(FOOTER_OLD, FOOTER_NEW)
     return html
@@ -472,16 +504,21 @@ def main() -> int:
     DST_ASSETS.mkdir(exist_ok=True)
 
     changed = False
+    # B3：提交面由“本轮会写/已写的产物”生成，新增产物自动纳入（硬编码三路径会漏新文件）
+    outputs = []
     old_html = DST_INDEX.read_text(encoding="utf-8") if DST_INDEX.exists() else None
+    outputs.append(DST_INDEX)
     if old_html != new_html:
         DST_INDEX.write_text(new_html, encoding="utf-8")
         changed = True
 
     old_live = DST_LIVE.read_text(encoding="utf-8") if DST_LIVE.exists() else None
+    outputs.append(DST_LIVE)
     if old_live != new_live:
         DST_LIVE.write_text(new_live, encoding="utf-8")
         changed = True
 
+    outputs.extend([DST_ASSETS / "common.js", DST_ASSETS / "style.css"])
     old_js = (DST_ASSETS / "common.js").read_text(encoding="utf-8") if (DST_ASSETS / "common.js").exists() else None
     if old_js != new_js:
         (DST_ASSETS / "common.js").write_text(new_js, encoding="utf-8")
@@ -489,6 +526,7 @@ def main() -> int:
 
     if new_render is not None:
         dst_render = DST_ASSETS / "shell-render.js"
+        outputs.append(dst_render)
         old_render = dst_render.read_text(encoding="utf-8") if dst_render.exists() else None
         if old_render != new_render:
             dst_render.write_text(new_render, encoding="utf-8")
@@ -511,17 +549,20 @@ def main() -> int:
         if not (_dirty.stdout or "").strip():
             return 0  # silent (no_agent watchdog pattern)
 
-    subprocess.run(
-        ["git", "add", "--", "tokens-tracker/index.html", "tokens-tracker/data/live.js", "tokens-tracker/assets"],
-        cwd=WWW_REPO, check=False,
-    )
+    _rel = sorted({str(Path(p).relative_to(WWW_REPO)) for p in outputs})
+    _add = subprocess.run(["git", "add", "--"] + _rel, cwd=WWW_REPO, capture_output=True, text=True)
+    if _add.returncode:
+        print(f"⚠️ tokens-tracker mirror: git add 失败 {(_add.stderr or '').strip()[:160]}")
+        return 1
     # O-23：裸 `git commit` 会把索引里**他人已 staged** 的改动一起裹进 data@update（已实测复现）；
     # 一律 path-scoped，只提交本镜像的产物面。
     r = subprocess.run(
-        ["git", "commit", "-m", "data@update: tokens-tracker - auto sync", "--",
-         "tokens-tracker/index.html", "tokens-tracker/data/live.js", "tokens-tracker/assets"],
+        ["git", "commit", "-m", "data@update: tokens-tracker - auto sync", "--"] + _rel,
         capture_output=True, text=True, cwd=WWW_REPO,
     )
+    if r.returncode:
+        # B4：提交失败不得把索引留在“已暂存”态（脏索引会污染下一轮）
+        subprocess.run(["git", "reset", "-q", "--"] + _rel, cwd=WWW_REPO, capture_output=True)
     if r.returncode == 0:
         print("✅ tokens-tracker mirrored & committed (waiting review push)")
     else:

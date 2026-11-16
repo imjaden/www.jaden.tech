@@ -62,7 +62,7 @@ python3 -m http.server 8099   # 8080 长期被 http-server.cli 占用，浏览�
 
 - No build tools, no package manager; 回归钉子 = 三颗（前两颗 rc=0 才算绿，第三颗 rc≤1 即绿：0 全绿 / 1 过渡态）：
   `python3 scripts/perf-check.py`（体积预算 + 首次请求集 + `?t=` 一致）
-  `python3 scripts/portal-check.py`（S1–S20：页面结构 / 文案面 / 首帧进场 / 同步面契约 / 隐私面回归钉；`--mode post` 必须 **17/17**、`--selftest` 必须 **22/22**）
+  `python3 scripts/portal-check.py`（S1–S22：页面结构 / 文案面 / 首帧进场 / 同步面契约 / 隐私面回归钉；`--mode post` 必须 **18/18**、`--selftest` 必须 **24/24**）
   `python3 scripts/sync-check.py`（同步面：结构/内容/时间三类漂移，`rc=0` 全绿、`rc=1` 过渡态；`--selftest` **15/15**；`sync-run.py` 编排、`--apply` 才执行）
 - Static assets in `static/css/`, `static/js/`, `static/img/`
 - Python scripts are standalone dev tools (not deployed); `scripts/poetry-titles-gen.py` 从月包派生标题索引，新月包落地后须重跑（`--check` 可判同步）

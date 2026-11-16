@@ -38,6 +38,10 @@ BUDGETS = {
     "static/img/logo-260.webp": 15_000,
     "static/img/favicon-64.png": 15_000,
     "static/img/wechat-qr-400.png": 45_000,
+    # B5：部署面 lookahead —— tokens-tracker/ 是全站唯一多资产页面（壳 + 数据 + 3 个静态资产），
+    # 之前完全不在预算内 ⇒ 一次上游壳膨胀可以静默上线。按实测 +30% 余量定档。
+    "tokens-tracker/index.html": 11_500,
+    "tokens-tracker/data/live.js": 4_800,
 }
 
 

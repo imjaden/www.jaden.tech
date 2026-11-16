@@ -300,6 +300,8 @@ def run(mode, html=None, css=None):
     check_s17()
     # S20 隐私面回归钉（JT-SEC-032）
     check_s20()
+    # S22 镜像页导航契约（2026-11-16 决策 A1/B1）
+    check_s22()
 
 
 # S17（JT-CL005）：同步面契约齐备 —— 清单存在、公开面脱敏、校验器不红
@@ -348,7 +350,7 @@ REQUIRED_KEEP = {"static", "tokens-tracker"}
 
 def config_guard(config_path=None):
     """返回 (ok, detail)。缺文件 / 缺必填 exclude / keep_files 不足 ⇒ 红。"""
-    path = Path(config_path or SITE_CONFIG)
+    path = Path(config_path or SITE_CONFIG).resolve()      # B1'：入参统一归一
     if not path.exists():
         return False, "_config.yml missing（隐私面已静默失守）"
     # O-24：`.nojekyll` 一旦出现，GitHub Pages 跳过 Jekyll ⇒ 所有 exclude 静默失效，
@@ -375,6 +377,43 @@ def config_guard(config_path=None):
 def check_s20(config_path=None):
     ok, detail = config_guard(config_path)
     check("S20", "隐私面回归钉：_config.yml 存在、必填 exclude 齐、keep_files 保留 static/tokens-tracker", ok, detail)
+    return ok
+
+
+# S22（2026-11-16 决策 A1/B1）：镜像页顶部导航必须「结构保留 + 非本页项禁用」。
+# 只用静态属性（aria-disabled + title）表达不可达，不引入 JS；无 href ⇒ 不产生死链、
+# 也不违 JT-SEC-018。项数钉死：上游改菜单必须同步改这里（否则红）。
+BOARD_NAV = ROOT / "tokens-tracker" / "index.html"
+NAV_DISABLED_TITLE = "仅本地服务可访问"
+NAV_DISABLED_EXPECT = 8      # 10 项 - 本页 1 项 - 「飞书」1 项（命中敏感词，整项不列）
+NAV_ACTIVE_EXPECT = 1
+
+
+def nav_guard(board_path=None):
+    """返回 (ok, detail)。导航块缺失 / 项数不符 / 禁用项缺 title / 存在 href ⇒ 红。"""
+    path = Path(board_path or BOARD_NAV)
+    if not path.exists():
+        return False, "tokens-tracker/index.html missing"
+    html = path.read_text(encoding="utf-8", errors="replace")
+    m = re.search(r'<div class="wc-nav">.*?</div>', html, re.S)
+    if not m:
+        return False, "wc-nav block missing（导航区被删或改结构）"
+    nav = m.group(0)
+    dis = nav.count('class="wc-nav-item is-disabled"')
+    act = nav.count('class="wc-nav-item is-active"')
+    titled = nav.count(f'title="{NAV_DISABLED_TITLE}"')
+    if 'href=' in nav:
+        return False, "导航区出现 href（禁用项必须无链接）"
+    if dis != NAV_DISABLED_EXPECT or act != NAV_ACTIVE_EXPECT:
+        return False, f"disabled={dis}（期望 {NAV_DISABLED_EXPECT}）active={act}（期望 {NAV_ACTIVE_EXPECT}）"
+    if titled != dis:
+        return False, f"禁用项带 title 的只有 {titled}/{dis}"
+    return True, f"disabled={dis} active={act} title={titled} href=0"
+
+
+def check_s22(board_path=None):
+    ok, detail = nav_guard(board_path)
+    check("S22", "镜像页导航：非本页项禁用 + 悬浮提示「仅本地服务可访问」，且无 href", ok, detail)
     return ok
 
 
@@ -444,21 +483,44 @@ def main():
 
         # S20 判别力自证：配置里删掉 `documents/` ⇒ S20 必红（钉不是恒真）
         probe_ok = None
-        probe_path = None
+        probe_dir = None
         try:
+            import shutil as _shutil
             import yaml as _yaml
+            # B2：用专属目录而不是系统 temp 文件 —— 判据随 config_path 走（含 .nojekyll 探测），
+            # 落在共享 temp 根上会受外部残留影响。
+            probe_dir = Path(tempfile.mkdtemp(prefix="portal-s21-"))
             cfg = _yaml.safe_load(SITE_CONFIG.read_text(encoding="utf-8")) or {}
             cfg["exclude"] = [x for x in (cfg.get("exclude") or []) if str(x).strip() != "documents/"]
-            with tempfile.NamedTemporaryFile("w", suffix=".yml", delete=False, encoding="utf-8") as fh:
-                _yaml.safe_dump(cfg, fh, allow_unicode=True)
-                probe_path = fh.name
+            probe_path = probe_dir / "_config.yml"
+            probe_path.write_text(_yaml.safe_dump(cfg, allow_unicode=True), encoding="utf-8")
             probe_ok = config_guard(probe_path)[0]
         except Exception as exc:  # noqa: BLE001
             probe_ok = f"raised {type(exc).__name__}"
         finally:
-            if probe_path:
-                Path(probe_path).unlink(missing_ok=True)
+            if probe_dir:
+                _shutil.rmtree(probe_dir, ignore_errors=True)
         check("S21", "V15 判别力自证：_config.yml 删 documents/ ⇒ S20 必红", probe_ok is False, f"S20_ok={probe_ok}")
+
+        # S22 判别力自证（两个方向）：① 某个禁用项被改回 <a href> ② 某项丢了 title
+        _probe_dir = Path(tempfile.mkdtemp(prefix="portal-s22-"))
+        try:
+            _html = BOARD_NAV.read_text(encoding="utf-8")
+            _a = _html.replace('<span class="wc-nav-item is-disabled" aria-disabled="true" '
+                               'title="仅本地服务可访问">Session</span>',
+                               '<a class="wc-nav-item is-disabled" href="/session/">Session</a>', 1)
+            (_probe_dir / "a.html").write_text(_a, encoding="utf-8")
+            _ok_a = nav_guard(_probe_dir / "a.html")[0]
+            _b = _html.replace(' title="仅本地服务可访问">Memory</span>', '>Memory</span>', 1)
+            (_probe_dir / "b.html").write_text(_b, encoding="utf-8")
+            _ok_b = nav_guard(_probe_dir / "b.html")[0]
+        except Exception as exc:  # noqa: BLE001
+            _ok_a = _ok_b = f"raised {type(exc).__name__}"
+        finally:
+            import shutil as _shutil2
+            _shutil2.rmtree(_probe_dir, ignore_errors=True)
+        check("S23", "V16 判别力自证：禁用项带 href / 丢 title ⇒ S22 必红",
+              _ok_a is False and _ok_b is False, f"href={_ok_a} no_title={_ok_b}")
 
     fails = [r for r in results if not r[2]]
     for cid, desc, ok, detail in results:
