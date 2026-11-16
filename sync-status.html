@@ -4,35 +4,109 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>同步面状态 · jaden.tech</title>
+<meta name="description" content="www.jaden.tech 同步面健康状态：逐产物打戳年龄、预算余量、90 天可用率与事件记录。">
+<meta name="referrer" content="no-referrer">
+<link rel="shortcut icon" href="static/img/favicon-64.png?t=1794394182">
 <style>
-:root { color-scheme: dark; }
-body { margin:0; padding:32px 20px; background:#0d1117; color:#e6edf3;
-  font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif; }
-h1 { font-size:1.25rem; margin:0 0 4px; }
-.sub { color:#8b949e; font-size:.82rem; margin-bottom:24px; }
-table { border-collapse:collapse; width:100%; max-width:1080px; }
-th,td { text-align:left; padding:9px 12px; border-bottom:1px solid #21262d; font-size:.85rem; vertical-align:top; }
-th { color:#8b949e; font-weight:600; }
-code { color:#7ee787; font-size:.8rem; }
-.ok { color:#3fb950; } .warn { color:#d29922; } .bad { color:#f85149; }
-footer { margin-top:28px; color:#6e7681; font-size:.78rem; }
-a { color:#58a6ff; }
+:root{color-scheme:dark;--cobalt-400:#818cf8;--cobalt-500:#6366f1;--surface-900:#15151f;
+--surface-800:#1b1b2a;--fg:#e6edf3;--muted:#9ca3af;--line:#2a2a3e;--radius-full:9999px;--radius-md:10px}
+*{box-sizing:border-box}
+body{margin:0;padding:28px max(16px,calc((100% - 1200px)/2));background:#0d0d1a;color:var(--fg);
+font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif}
+h1{font-size:1.1rem;margin:0 0 6px;font-weight:700}
+a{color:var(--cobalt-400);text-decoration:none}
+a:hover{text-decoration:underline}
+.banner{background:var(--surface-800);border:1px solid var(--line);border-left:4px solid var(--banner,#818cf8);
+border-radius:var(--radius-md);padding:14px 16px;margin:14px 0 18px}
+.banner .big{font-size:1.02rem;font-weight:700}
+.banner .meta{color:var(--muted);font-size:.78rem;margin-top:6px}
+.banner.ok{--banner:#3fb950}.banner.warn{--banner:#d29922}.banner.bad{--banner:#f85149}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 22px}
+.card{background:var(--surface-900);border:1px solid var(--line);border-radius:var(--radius-md);padding:12px 14px}
+.card .k{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+.card .v{font-size:1.35rem;font-weight:700;margin-top:4px}
+.card .n{color:var(--muted);font-size:.74rem;margin-top:2px}
+h2{font-size:.86rem;font-weight:700;margin:26px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{position:sticky;top:0;z-index:10;background:var(--surface-900);border-bottom:1px solid var(--line);
+padding:8px 10px;text-align:left;font-size:.7rem;font-weight:600;color:var(--muted);
+text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.data-table td{padding:9px 10px;border-bottom:1px solid #1a1a2e;font-size:.8rem;vertical-align:middle}
+.data-table tbody tr:hover{background:rgba(79,70,229,.08)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;
+background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px;color:#c9d1d9}
+.badge{display:inline-block;padding:1px 8px;border-radius:var(--radius-full);font-size:.7rem;white-space:nowrap}
+.badge-ok{background:#12331f;color:#3fb950}
+.badge-warn{background:#3b351f;color:#fbbf24}
+.badge-bad{background:#3b1f1f;color:#f87171}
+.bar{height:6px;border-radius:3px;background:#232334;overflow:hidden;min-width:90px}
+.bar>i{display:block;height:100%;border-radius:3px}
+.bar-ok>i{background:#3fb950}.bar-warn>i{background:#d29922}.bar-bad>i{background:#f85149}
+.bars{display:flex;gap:2px;flex-wrap:wrap;margin-top:6px}
+.bars span{width:9px;height:22px;border-radius:2px;background:#232334;display:block}
+.bars span.ok{background:#3fb950}.bars span.warn{background:#d29922}.bars span.bad{background:#f85149}
+.bars span.none{background:#2f2f45;opacity:.9}
+.legend{color:var(--muted);font-size:.74rem;margin-top:8px}
+.empty{color:var(--muted);font-size:.82rem;padding:10px 0}
+.gates{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:.78rem}
+.gates b{color:var(--fg);font-weight:600}
+footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:#6e7681;font-size:.76rem}
+@media (max-width:720px){
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .data-table thead{display:none}
+  .data-table tr{display:block;border:1px solid var(--line);border-radius:var(--radius-md);margin-bottom:8px;padding:4px 6px}
+  .data-table td{display:flex;justify-content:space-between;gap:10px;border:0;padding:4px 6px;white-space:normal}
+  .data-table td::before{content:attr(data-l);color:var(--muted);font-size:.72rem;text-transform:uppercase}
+}
 </style>
 </head>
 <body>
-<h1>同步面状态 · SYNC-MANIFEST</h1>
-<div class="sub">校验时间 2026-11-16T01:40:36+00:00 · 清单版本 v1 · 结论 <strong class="warn">PASS（含过渡/陈旧项）</strong> · 由 <code>scripts/sync-check.py --emit-status</code> 生成，勿手改</div>
-<table>
-<thead><tr><th>产物</th><th>来源仓 / 入口</th><th>触发</th><th>生成时间</th><th>年龄</th><th>结论</th></tr></thead>
+<h1>同步面状态 · Sync Status</h1>
+<div class="banner warn">
+  <div class="big">有陈旧或过渡项</div>
+  <div class="meta">快照 2026-11-16T08:05:23+00:00（UTC）· 清单 v1 ·
+    下次生成 每日 21:50（ledger-sync 之后） · 由 scripts/sync-status-gen.py 生成，勿手改</div>
+</div>
+
+<div class="cards">
+  <div class="card"><div class="k">产物按时</div><div class="v">3/6</div><div class="n">打戳且在预算内 / 全部产物</div></div>
+  <div class="card"><div class="k">最旧产物</div><div class="v">1632h</div><div class="n">static/js/poetry-titles-*.js（5 个文件）</div></div>
+  <div class="card"><div class="k">平均年龄</div><div class="v">545.2h</div><div class="n">仅计已打戳产物</div></div>
+  <div class="card"><div class="k">结构违规</div><div class="v">0</div><div class="n">未注册产物文件数</div></div>
+</div>
+
+<h2>组件状态 · Components</h2>
+<table class="data-table">
+<thead><tr><th>产物</th><th>来源仓 / 入口</th><th>班次</th><th>上次打戳</th><th>年龄 / 预算</th><th>状态</th></tr></thead>
 <tbody>
-<tr><td><code>bmi-tracker.html</code></td><td>daily-tracker/scripts/daily-tracker-update.py</td><td>10:00,21:45</td><td>—</td><td>—</td><td class="warn">过渡（未打戳）</td></tr>
-<tr><td><code>daily-tracker-archive-202607-202610.html</code></td><td>daily-tracker/scripts/daily-tracker-update.py</td><td>10:00,21:45</td><td>—</td><td>—</td><td class="warn">过渡（未打戳）</td></tr>
-<tr><td><code>tokens-tracker/index.html</code></td><td>hermes-manager/scripts/tokens-tracker-mirror.py</td><td>20:45</td><td>2026-11-16T09:39:47+08:00</td><td>0.0h</td><td class="ok">正常</td></tr>
-<tr><td><code>daily-poetry.html</code></td><td>script-miner/daily-poetry/daily-poetry.py deploy --target</td><td>manual</td><td>—</td><td>—</td><td class="warn">过渡（未打戳）</td></tr>
-<tr><td><code>static/js/poetry-titles-*.js（5 个文件）</code></td><td>www.jaden.tech/scripts/poetry-titles-gen.py</td><td>on-pack-landing</td><td>2026-09-09T16:34:17+08:00</td><td>1625.1h</td><td class="ok">正常</td></tr>
-<tr><td><code>tokens-tracker/data/live.js</code></td><td>hermes-manager/scripts/tokens-tracker-mirror.py</td><td>20:45</td><td>2026-11-16T09:39:47+08:00</td><td>0.0h</td><td class="ok">正常</td></tr>
+<tr><td data-l="产物"><code>bmi-tracker.html</code></td><td data-l="来源">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次">10:00,21:45</td><td data-l="上次打戳">—</td><td data-l="年龄/预算">— / 36h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-warn">过渡（未打戳）</span></td></tr>
+<tr><td data-l="产物"><code>daily-tracker-archive-202607-202610.html</code></td><td data-l="来源">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次">10:00,21:45</td><td data-l="上次打戳">—</td><td data-l="年龄/预算">— / 36h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-warn">过渡（未打戳）</span></td></tr>
+<tr><td data-l="产物"><code>tokens-tracker/index.html</code></td><td data-l="来源">hermes-manager/scripts/tokens-tracker-mirror.py</td><td data-l="班次">20:45</td><td data-l="上次打戳">2026-11-16T13:59:47+08:00</td><td data-l="年龄/预算">2.1h / 26h <div class="bar bar-ok" title="2.1h / 预算 26h"><i style="width:8%"></i></div></td><td data-l="状态"><span class="badge badge-ok">正常</span></td></tr>
+<tr><td data-l="产物"><code>daily-poetry.html</code></td><td data-l="来源">script-miner/daily-poetry/daily-poetry.py deploy --target</td><td data-l="班次">manual</td><td data-l="上次打戳">—</td><td data-l="年龄/预算">— / 48h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-warn">过渡（未打戳）</span></td></tr>
+<tr><td data-l="产物"><code>static/js/poetry-titles-*.js（5 个文件）</code></td><td data-l="来源">www.jaden.tech/scripts/poetry-titles-gen.py</td><td data-l="班次">on-pack-landing</td><td data-l="上次打戳">2026-09-09T16:34:17+08:00</td><td data-l="年龄/预算">1631.5h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-ok">正常</span></td></tr>
+<tr><td data-l="产物"><code>tokens-tracker/data/live.js</code></td><td data-l="来源">hermes-manager/scripts/tokens-tracker-mirror.py</td><td data-l="班次">20:45</td><td data-l="上次打戳">2026-11-16T13:59:47+08:00</td><td data-l="年龄/预算">2.1h / 26h <div class="bar bar-ok" title="2.1h / 预算 26h"><i style="width:8%"></i></div></td><td data-l="状态"><span class="badge badge-ok">正常</span></td></tr>
 </tbody>
 </table>
-<footer>判据：结构漂移（缺失/未注册/缺戳/哈希不符）、内容漂移（正文哈希≠戳）、时间漂移（超 freshness_h）。<a href="./">← 返回首页</a></footer>
+
+<h2>近 90 天 · Uptime</h2>
+<div class="bars"><span class="none" title="2026-08-19 · 无记录"></span><span class="none" title="2026-08-20 · 无记录"></span><span class="none" title="2026-08-21 · 无记录"></span><span class="none" title="2026-08-22 · 无记录"></span><span class="none" title="2026-08-23 · 无记录"></span><span class="none" title="2026-08-24 · 无记录"></span><span class="none" title="2026-08-25 · 无记录"></span><span class="none" title="2026-08-26 · 无记录"></span><span class="none" title="2026-08-27 · 无记录"></span><span class="none" title="2026-08-28 · 无记录"></span><span class="none" title="2026-08-29 · 无记录"></span><span class="none" title="2026-08-30 · 无记录"></span><span class="none" title="2026-08-31 · 无记录"></span><span class="none" title="2026-09-01 · 无记录"></span><span class="none" title="2026-09-02 · 无记录"></span><span class="none" title="2026-09-03 · 无记录"></span><span class="none" title="2026-09-04 · 无记录"></span><span class="none" title="2026-09-05 · 无记录"></span><span class="none" title="2026-09-06 · 无记录"></span><span class="none" title="2026-09-07 · 无记录"></span><span class="none" title="2026-09-08 · 无记录"></span><span class="none" title="2026-09-09 · 无记录"></span><span class="none" title="2026-09-10 · 无记录"></span><span class="none" title="2026-09-11 · 无记录"></span><span class="none" title="2026-09-12 · 无记录"></span><span class="none" title="2026-09-13 · 无记录"></span><span class="none" title="2026-09-14 · 无记录"></span><span class="none" title="2026-09-15 · 无记录"></span><span class="none" title="2026-09-16 · 无记录"></span><span class="none" title="2026-09-17 · 无记录"></span><span class="none" title="2026-09-18 · 无记录"></span><span class="none" title="2026-09-19 · 无记录"></span><span class="none" title="2026-09-20 · 无记录"></span><span class="none" title="2026-09-21 · 无记录"></span><span class="none" title="2026-09-22 · 无记录"></span><span class="none" title="2026-09-23 · 无记录"></span><span class="none" title="2026-09-24 · 无记录"></span><span class="none" title="2026-09-25 · 无记录"></span><span class="none" title="2026-09-26 · 无记录"></span><span class="none" title="2026-09-27 · 无记录"></span><span class="none" title="2026-09-28 · 无记录"></span><span class="none" title="2026-09-29 · 无记录"></span><span class="none" title="2026-09-30 · 无记录"></span><span class="none" title="2026-10-01 · 无记录"></span><span class="none" title="2026-10-02 · 无记录"></span><span class="none" title="2026-10-03 · 无记录"></span><span class="none" title="2026-10-04 · 无记录"></span><span class="none" title="2026-10-05 · 无记录"></span><span class="none" title="2026-10-06 · 无记录"></span><span class="none" title="2026-10-07 · 无记录"></span><span class="none" title="2026-10-08 · 无记录"></span><span class="none" title="2026-10-09 · 无记录"></span><span class="none" title="2026-10-10 · 无记录"></span><span class="none" title="2026-10-11 · 无记录"></span><span class="none" title="2026-10-12 · 无记录"></span><span class="none" title="2026-10-13 · 无记录"></span><span class="none" title="2026-10-14 · 无记录"></span><span class="none" title="2026-10-15 · 无记录"></span><span class="none" title="2026-10-16 · 无记录"></span><span class="none" title="2026-10-17 · 无记录"></span><span class="none" title="2026-10-18 · 无记录"></span><span class="none" title="2026-10-19 · 无记录"></span><span class="none" title="2026-10-20 · 无记录"></span><span class="none" title="2026-10-21 · 无记录"></span><span class="none" title="2026-10-22 · 无记录"></span><span class="none" title="2026-10-23 · 无记录"></span><span class="none" title="2026-10-24 · 无记录"></span><span class="none" title="2026-10-25 · 无记录"></span><span class="none" title="2026-10-26 · 无记录"></span><span class="none" title="2026-10-27 · 无记录"></span><span class="none" title="2026-10-28 · 无记录"></span><span class="none" title="2026-10-29 · 无记录"></span><span class="none" title="2026-10-30 · 无记录"></span><span class="none" title="2026-10-31 · 无记录"></span><span class="none" title="2026-11-01 · 无记录"></span><span class="none" title="2026-11-02 · 无记录"></span><span class="none" title="2026-11-03 · 无记录"></span><span class="none" title="2026-11-04 · 无记录"></span><span class="none" title="2026-11-05 · 无记录"></span><span class="none" title="2026-11-06 · 无记录"></span><span class="none" title="2026-11-07 · 无记录"></span><span class="none" title="2026-11-08 · 无记录"></span><span class="none" title="2026-11-09 · 无记录"></span><span class="none" title="2026-11-10 · 无记录"></span><span class="none" title="2026-11-11 · 无记录"></span><span class="none" title="2026-11-12 · 无记录"></span><span class="none" title="2026-11-13 · 无记录"></span><span class="none" title="2026-11-14 · 无记录"></span><span class="none" title="2026-11-15 · 无记录"></span><span class="warn" title="2026-11-16 · PASS（含过渡/陈旧项） · 按时 0.5"></span></div>
+<div class="legend">自 2026-11-16 起记录（每日一行，同日重复校验覆盖当天）；灰 = 无记录，绿 = 全部在预算内，
+黄 = 存在陈旧/过渡项，红 = 结构违规。</div>
+
+<h2>事件 · Incidents</h2>
+<div class="empty">暂无事件记录（页面自 2026-11-16 起记录日聚合）。</div>
+
+<h2>门禁 · Gates</h2>
+<div class="gates">
+  <span>portal-check <b>19/19</b></span>
+  <span>perf-check <b>PASS</b></span>
+  <span>sync-check selftest <b>15/15</b></span>
+</div>
+
+<footer>
+判据：结构漂移（缺失 / 未注册 / 缺戳 / 哈希不符）、内容漂移（正文哈希 ≠ 戳）、时间漂移（超 freshness_h 预算）。<br>
+机器入口 <a href="./data/sync-status.json">data/sync-status.json</a> ·
+<a href="./tokens-tracker/">公开镜像看板</a> · <a href="./">← 返回首页</a>
+</footer>
 </body>
 </html>

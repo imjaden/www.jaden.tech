@@ -258,6 +258,39 @@ body {
     gap: 12px;
     flex-wrap: wrap;
 }
+/* 同步面状态小球（生成期内联于 index.html 的 sync-badge 块；数据来自 scripts/sync-status-gen.py） */
+.now-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.sync-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    flex: 0 0 auto;
+    transition: transform .15s ease;
+}
+.sync-dot:hover { transform: scale(1.35); }
+.sync-dot.is-ok { background: #3fb950; animation: syncPulse 2.4s ease-out infinite; }
+.sync-dot.is-warn { background: #d29922; }
+.sync-dot.is-bad { background: #f85149; animation: syncPulseBad 2.4s ease-out infinite; }
+@keyframes syncPulse {
+    0% { box-shadow: 0 0 0 0 rgba(63, 185, 80, .55); }
+    70% { box-shadow: 0 0 0 7px rgba(63, 185, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
+}
+@keyframes syncPulseBad {
+    0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, .55); }
+    70% { box-shadow: 0 0 0 7px rgba(248, 81, 73, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sync-dot.is-ok, .sync-dot.is-bad { animation: none; }
+}
 .now-card {
     display: flex;
     align-items: center;

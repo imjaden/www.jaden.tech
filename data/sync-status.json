@@ -1,0 +1,85 @@
+{
+ "rc": 1,
+ "verdict": "有陈旧或过渡项",
+ "checked_at": "2026-11-16T08:05:23+00:00",
+ "artifacts": [
+  {
+   "id": "bmi-tracker",
+   "artifact": "bmi-tracker.html",
+   "producer": "daily-tracker/scripts/daily-tracker-update.py",
+   "trigger": "10:00,21:45",
+   "stamp": null,
+   "generated": null,
+   "age_h": null
+  },
+  {
+   "id": "dt-archive",
+   "artifact": "daily-tracker-archive-202607-202610.html",
+   "producer": "daily-tracker/scripts/daily-tracker-update.py",
+   "trigger": "10:00,21:45",
+   "stamp": null,
+   "generated": null,
+   "age_h": null
+  },
+  {
+   "id": "tokens-board",
+   "artifact": "tokens-tracker/index.html",
+   "producer": "hermes-manager/scripts/tokens-tracker-mirror.py",
+   "trigger": "20:45",
+   "stamp": {
+    "id": "tokens-board",
+    "producer": "hermes-manager/1acl-board-gen",
+    "v": "1",
+    "generated": "2026-11-16T13:59:47+08:00",
+    "sha256": "4a7610523f2947e3"
+   },
+   "generated": "2026-11-16T13:59:47+08:00",
+   "age_h": 2.1
+  },
+  {
+   "id": "daily-poetry",
+   "artifact": "daily-poetry.html",
+   "producer": "script-miner/daily-poetry/daily-poetry.py deploy --target",
+   "trigger": "manual",
+   "stamp": null,
+   "generated": null,
+   "age_h": null
+  },
+  {
+   "id": "poetry-titles",
+   "artifact": "static/js/poetry-titles-*.js（5 个文件）",
+   "producer": "www.jaden.tech/scripts/poetry-titles-gen.py",
+   "trigger": "on-pack-landing",
+   "stamp": {
+    "id": "poetry-titles",
+    "producer": "www.jaden.tech/scripts/poetry-titles-gen.py",
+    "v": "1",
+    "generated": "2026-09-09T16:34:17+08:00",
+    "sha256": "ef1cb98e57028a6c"
+   },
+   "generated": "2026-09-09T16:34:17+08:00",
+   "age_h": 1631.5
+  },
+  {
+   "id": "tokens-live",
+   "artifact": "tokens-tracker/data/live.js",
+   "producer": "hermes-manager/scripts/tokens-tracker-mirror.py",
+   "trigger": "20:45",
+   "stamp": {
+    "id": "tokens-live",
+    "producer": "hermes-manager/1acl-board-gen",
+    "v": "1",
+    "generated": "2026-11-16T13:59:47+08:00",
+    "sha256": "1cc536d8a6684f8c"
+   },
+   "generated": "2026-11-16T13:59:47+08:00",
+   "age_h": 2.1
+  }
+ ],
+ "gates": {
+  "portal": "19/19",
+  "perf": "PASS",
+  "sync": "15/15"
+ },
+ "days_recorded": 1
+}
