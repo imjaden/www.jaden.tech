@@ -392,6 +392,7 @@ BOARD_NAV = ROOT / "tokens-tracker" / "index.html"
 NAV_DISABLED_TITLE = "仅本地服务可访问"
 NAV_DISABLED_EXPECT = 8      # 10 项 - 本页 1 项 - 「飞书」1 项（命中敏感词，整项不列）
 NAV_ACTIVE_EXPECT = 1
+NAV_ACTIVE_LABEL = "Dashboard"   # 2026-11-16 A 方案：镜像源 = Dashboard 页
 
 
 def nav_guard(board_path=None):
@@ -415,7 +416,13 @@ def nav_guard(board_path=None):
         return False, f"disabled={dis}（期望 {NAV_DISABLED_EXPECT}）active={act}（期望 {NAV_ACTIVE_EXPECT}）"
     if titled != dis:
         return False, f"禁用项带 title 的只有 {titled}/{dis}"
-    return True, f"disabled={dis} active={act} title={titled} href=0"
+    # 2026-11-16（A 方案）：本页从 1ACL Task 板切到 Dashboard ⇒ active 项必须是 Dashboard，
+    # 否则「镜像的还是 Task 板」这类回退会静默通过（S22 只看计数的话两种页都合规）。
+    m_act = re.search(r'class="wc-nav-item is-active"[^>]*>([^<]+)<', nav)
+    if not m_act or m_act.group(1).strip() != NAV_ACTIVE_LABEL:
+        got = m_act.group(1).strip() if m_act else "—"
+        return False, f"active 项是 {got!r}（期望 {NAV_ACTIVE_LABEL!r}）"
+    return True, f"disabled={dis} active={act}({m_act.group(1).strip()}) title={titled} href=0"
 
 
 # S24（2026-11-16 JT-SEC-044）：台账面已外置私有仓 —— 公开仓不得再跟踪台账。
@@ -664,14 +671,19 @@ def main():
                                '<div class="tab-bar home-tab"><span class="tab-btn">首页</span></div>\n<div class="wc-nav">', 1)
             (_probe_dir / "c.html").write_text(_c, encoding="utf-8")
             _ok_c = nav_guard(_probe_dir / "c.html")[0]
+            # 第 4 个方向：本页项回退成 Task（计数不变，只有 active 标签变了）⇒ 也必须红
+            _d = _html.replace('class="wc-nav-item is-active" aria-current="page">Dashboard<',
+                               'class="wc-nav-item is-active" aria-current="page">Task<', 1)
+            (_probe_dir / "d.html").write_text(_d, encoding="utf-8")
+            _ok_d = nav_guard(_probe_dir / "d.html")[0]
         except Exception as exc:  # noqa: BLE001
-            _ok_a = _ok_b = _ok_c = f"raised {type(exc).__name__}"
+            _ok_a = _ok_b = _ok_c = _ok_d = f"raised {type(exc).__name__}"
         finally:
             import shutil as _shutil2
             _shutil2.rmtree(_probe_dir, ignore_errors=True)
-        check("S23", "V16 判别力自证：禁用项带 href / 丢 title / tab-bar 回流 ⇒ S22 必红",
-              _ok_a is False and _ok_b is False and _ok_c is False,
-              f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c}")
+        check("S23", "V16 判别力自证：禁用项带 href / 丢 title / tab-bar 回流 / 本页项回退 Task ⇒ S22 必红",
+              _ok_a is False and _ok_b is False and _ok_c is False and _ok_d is False,
+              f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c} active={_ok_d}")
 
         # S25 判别力自证：四种破坏（球色/ favicon / 根绝对 / 少一行）⇒ 判据必红
         check("S26", "V17 判别力自证：球色不同源 / 删 favicon / 根绝对回流 / 少一行 ⇒ S25 必红",
