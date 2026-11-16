@@ -89,17 +89,21 @@ def check_artifact(art):
     recs = []
     for rel in files:
         path = ROOT / rel
+        # F-1：record 先建好（含 producer），任何分支都能安全渲染 —— 否则不可读产物会让
+        # print_human 取不到 producer 而 KeyError（验证工具在最该报错的输入上崩掉）。
+        base = {"id": art["id"], "artifact": rel,
+                "producer": f"{art['producer']['repo']}/{art['producer']['entry']}",
+                "trigger": art["trigger"].get("cron", "?"), "stamp": None,
+                "generated": None, "age_h": None}
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as exc:
             worst = ("unknown", f"{rel}: unreadable ({exc})")
+            recs.append(base)
             continue
         stamp = sync_stamp.parse(text)
         contract = art.get("contract", {})
-        rec = {"id": art["id"], "artifact": rel,
-               "producer": f"{art['producer']['repo']}/{art['producer']['entry']}",
-               "trigger": art["trigger"].get("cron", "?"), "stamp": stamp,
-               "generated": None, "age_h": None}
+        rec = dict(base, stamp=stamp)
         if stamp is None:
             # Q-3：verify.hash 决定「无戳」的严重度 —— required ⇒ 结构违规；optional ⇒ 过渡态告警
             if contract.get("stamp") == "pending" and art.get("verify", {}).get("hash") != "required":
@@ -203,10 +207,11 @@ def run():
 def print_human(payload):
     print(f"sync-check · {payload['checked_at']} · manifest v{payload['manifest_version']}")
     width = max([len(r.get("artifact", "")) for r in payload["artifacts"]] + [8])
+    width = min(width, 48)
     for row in payload["artifacts"]:
         gen = row.get("generated") or "—"
         age = f"{row['age_h']}h" if row.get("age_h") is not None else "—"
-        print(f"  {row.get('artifact', ''):<{width}}  {gen:<25}  {age:>7}  {row['producer']}")
+        print(f"  {row.get('artifact', ''):<{width}}  {gen:<25}  {age:>7}  {row.get('producer', '—')}")
     for item in payload["details"]:
         mark = {"ok": "✅", "stale": "⚠️", "unstamped": "⚠️",
                 "mismatch": "❌", "missing": "❌", "unknown": "❓"}[item["status"]]
@@ -325,6 +330,22 @@ def selftest():
         ok("戳 v 非数字可解析（不抛）", (bad_v or {}).get("v") == "abc")
     except Exception as exc:  # noqa: BLE001
         ok("戳 v 非数字可解析（不抛）", False, str(exc))
+
+    # F-1 回归：不可读产物必须走 unknown 且 record 含 producer（不抛 KeyError）
+    import tempfile as _tf
+    _tmp = ROOT / "cache" / "scratch" / "_unreadable_probe.html"
+    _tmp.parent.mkdir(parents=True, exist_ok=True)
+    _tmp.write_bytes(b"\xff\xfe\x00bad")
+    try:
+        _st, _detail, _rec = check_artifact({"id": "probe", "artifact": "cache/scratch/_unreadable_probe.html",
+                                             "producer": {"repo": "r", "entry": "e"},
+                                             "trigger": {"cron": "?"}, "contract": {"version": 1},
+                                             "publish": {}, "verify": {}})
+        ok("不可读产物 ⇒ unknown 且 record 带 producer", _st == "unknown" and bool(_rec.get("producer")))
+    except Exception as exc:  # noqa: BLE001
+        ok("不可读产物 ⇒ unknown 且 record 带 producer", False, str(exc))
+    finally:
+        _tmp.unlink(missing_ok=True)
 
     passed = sum(1 for _, cond, _ in checks if cond)
     for name, cond, note in checks:

@@ -92,6 +92,7 @@ LOCAL_ANY = re.compile(r"/Users/[^/]+/|jadenli")
 # href/src survives into the published output (fail-closed; also catches upstream re-additions).
 WC_NAV_BLOCK = re.compile(r'<div class="wc-nav">.*?</div>', flags=re.S)
 WC_NAV_SAFE = '<div class="wc-nav"><span class="wc-brand">Hermes 控制台 · 公开镜像</span></div>'
+_SITE_ROOT = Path(__file__).resolve().parent.parent   # F-4：降级目标存在性校验用
 ROOT_ABS_REF = re.compile(r'(?:href|src)="(/[^"/][^"]*)"')
 
 # JT-SEC-015 (2026-10-09): every other public page on the site carries a referrer policy;
@@ -251,7 +252,16 @@ def transform_shell(html: str) -> str:
     统一降级为相对路径 `../static/...`（站点根确有该资源），下略保持守卫 fail-closed 不变。
     """
     # 0) root-absolute 站点资源降级为相对（镜像面在 /tokens-tracker/，上一级即站点根）
-    html = re.sub(r'(?P<attr>href|src)="/static/', r'\g<attr>="../static/', html)
+    #    F-4：只降级**目标真实存在**的引用；不存在就保持原样，让 ROOT_ABS_REF 守卫照旧 rc=2，
+    #    避免「把坏链静默改成坏相对链」。
+    def _rel_static(m):
+        target = m.group("path").lstrip("/")
+        if not (_SITE_ROOT / target).exists():
+            print(f"⚠️ 站点资源不存在，保留原样交守卫拦截: {m.group(0)}")
+            return m.group(0)
+        return f'{m.group("attr")}="../{target}"'
+
+    html = re.sub(r'(?P<attr>href|src)="(?P<path>/static/[^"]*)"', _rel_static, html)
     # 1) path desensitization (E1/B1): /Users/<user>/CodeSpace/xxx -> xxx (project-relative)
     html = LOCAL_PREFIX.sub("", html)
     # 2) drop nav to non-mirrored pages (history/projects/guide → 404 otherwise)

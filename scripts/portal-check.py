@@ -309,9 +309,16 @@ def sync_gate(manifest_path=None):
     path = Path(manifest_path or MANIFEST)
     if not path.exists():
         return False, "manifest missing"
-    raw = path.read_text(encoding="utf-8")
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return False, f"manifest unreadable: {exc}"
     if "/Users/" in raw or "jadenli" in raw:
         return False, "absolute path / username in manifest (公开面脱敏违规)"
+    try:
+        version = json.loads(raw).get("version")
+    except (json.JSONDecodeError, AttributeError, TypeError):
+        return False, "manifest unparsable (non-JSON or non-object)"
     import subprocess as _sp
     proc = _sp.run([sys.executable, "scripts/sync-check.py", "--json"], cwd=str(ROOT),
                    capture_output=True, text=True)
@@ -321,7 +328,7 @@ def sync_gate(manifest_path=None):
         arts = len(payload.get("artifacts", []))
     except json.JSONDecodeError:
         return False, f"sync-check json unparsable (rc={proc.returncode})"
-    return rc <= 1, f"manifest v{json.loads(raw).get('version')} / artifacts={arts} / rc={rc}"
+    return rc <= 1, f"manifest v{version} / artifacts={arts} / rc={rc}"
 
 
 def check_s17(manifest_path=None):
@@ -379,6 +386,20 @@ def main():
         finally:
             Path(probe_path).unlink(missing_ok=True)
         check("S18", "V14 判别力自证：清单含绝对路径后 S17 必红", ok_probe is False, f"S17_ok={ok_probe}")
+
+        # F-2 回归：畸形 JSON 清单不得让 S17 崩溃（应判红并给出 unparsable）
+        bad_path = None
+        try:
+            with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as fh:
+                fh.write("{not valid json")
+                bad_path = fh.name
+            bad_ok, bad_detail = sync_gate(bad_path)
+        except Exception as exc:  # noqa: BLE001
+            bad_ok, bad_detail = None, f"raised {type(exc).__name__}: {exc}"
+        finally:
+            if bad_path:
+                Path(bad_path).unlink(missing_ok=True)
+        check("S19", "F-2 回归：畸形清单 ⇒ S17 判红不崩", bad_ok is False, str(bad_detail))
 
     fails = [r for r in results if not r[2]]
     for cid, desc, ok, detail in results:

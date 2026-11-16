@@ -154,6 +154,8 @@ def main():
         if not args.apply:
             print("\n（dry-run：加 --apply 才执行）")
 
+    if isinstance(check, dict) and check.get("rc", 0) >= 2:
+        failures += 1           # F-3：结构违规也要非零退出（否则「跑了但红了」被当成功）
     if failures:
         return 1
     if steps and all(s["action"] == "skip" for s in steps):
