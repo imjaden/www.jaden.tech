@@ -54,6 +54,7 @@ V_TEXT_EN = {0: "All systems operational", 1: "Degraded (stale / transitional)",
 S_MARK = {
     "ok": ("ok", "正常"), "stale": ("warn", "陈旧"), "unstamped": ("warn", "过渡（未打戳）"),
     "mismatch": ("bad", "结构违规"), "missing": ("bad", "缺失"), "unknown": ("warn", "无法判定"),
+    "exempt": ("muted", "过渡·豁免"),
 }
 
 CSS = """
@@ -92,6 +93,7 @@ background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px;color:#c9d1d9
 .badge-ok{background:#12331f;color:#3fb950}
 .badge-warn{background:#3b351f;color:#fbbf24}
 .badge-bad{background:#3b1f1f;color:#f87171}
+.badge-muted{background:#262633;color:#9aa4b2;border:1px solid #33334a}
 .bar{height:6px;border-radius:3px;background:#232334;overflow:hidden;min-width:90px}
 .bar>i{display:block;height:100%;border-radius:3px}
 .bar-ok>i{background:#3fb950}.bar-warn>i{background:#d29922}.bar-bad>i{background:#f85149}
@@ -247,7 +249,7 @@ def build_page(payload, history, gates, incidents) -> str:
             f'<td data-l="班次" title="{esc(a.get("trigger") or "—")}">{esc(a.get("trigger") or "—")}</td>'
             f'<td data-l="上次打戳" title="{esc(gen)}">{esc(_fmt_ts(gen))}</td>'
             f'<td data-l="年龄/预算">{age}{bc} {bar_cell(a.get("age_h"), budget)}</td>'
-            f'<td data-l="状态"><span class="badge badge-{cls}">{label}</span></td>'
+            f'<td data-l="状态" title="{esc(d.get("detail") or label)}"><span class="badge badge-{cls}">{label}</span></td>'
             "</tr>")
 
     # 90 天条（自首个记录日起；无记录 = 灰）

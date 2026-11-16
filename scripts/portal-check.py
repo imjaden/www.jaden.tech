@@ -487,6 +487,10 @@ def status_page_guard(root=None):
         problems.append("快照时间标注缺值（须形如「快照 2026-11-16T08:12（UTC）」）")
     if "下次生成" not in html:
         problems.append("缺「下次生成」说明")
+    # 状态列徽章类必须取自四档枚举（新增档位若忘记加样式会渲染成无底色）
+    _badges = set(re.findall(r'<td data-l="状态"[^>]*><span class="badge badge-([a-z]+)"', html))
+    if not _badges <= {"ok", "warn", "bad", "muted"}:
+        problems.append(f"状态徽章类越界 {sorted(_badges)}")
     bars = len(re.findall(r'<span class="(?:ok|warn|bad|none)" title=', html))
     colored = len(re.findall(r'<span class="(?:ok|warn|bad)" title=', html))
     try:
