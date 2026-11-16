@@ -2518,6 +2518,50 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — S20 隐私面回归钉 + O-9/13/14/17/18/22 六项实施审计（2 笔已推）：钉可反证、F-4′ 未削弱、六项按推荐修法兑现；2 🟡 非阻断 → PASS 96
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/portal-check.py`（S20 `config_guard` `:342-372`、S21 判别力自证 `:440-457`）· `scripts/sync-run.py`（`CANONICAL_REMOTE_RE` `:79-82`、`_why` 收窄 `:268-272`、O-13 守卫 `:279-287`、`commit_artifacts` 三元组 `:217-243`、`commit.paths` `:335`）· `scripts/tokens-tracker-mirror.py`（O-22 脏面收编 `:504-512`）· `AGENTS.md` 计数 · 台账 2 文件
+- **Tracking**: JT-SEC-039 S20/S21 + O-9/O-13/O-14/O-17/O-18/O-22
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成（实现审计，0 🔴；2 🟡 为既有面/设计边界，非本批派工）
+
+### 一、验收（隔离 clone `…/scratch/wjt{,base,o14}` @ `635c51c`；生产侧只读 + 线上只读探针）
+
+1. **S20 不是恒真（S21 反证成立）**：`--selftest` **22/22**，S21 报 `S20_ok=False`；独立复跑 `config_guard` 10 例 —— 真实配置 `ok=True exclude=6 keep=2`；删 `documents/` ⇒ False（`missing=['documents/']`）、删 `cache/` ⇒ False、`exclude: []` ⇒ False、`exclude` 写成字符串 ⇒ False（按字符切分，非放行）、顶层为 list ⇒ False、坏 YAML ⇒ False（`ParserError`）、文件缺失 ⇒ False（专用文案）。
+2. **`_config.yml` 现有值不被钉误杀**：subset 判据（`REQUIRED - got`）容许多余项；真文件 6 个 exclude 与 2 个 keep_files 逐字命中，`--mode post` **17/17** rc=0；`--mode pre` **7/8**，唯一红为 S1「修前」变体（基线 clone @ `1c5c76c` 为 **6/7** 同一红）⇒ 增 S20 后 pre 面无回归。
+3. **线上隐私面与钉一致（只读 curl）**：`/review-log`、`/review-log.md`、`/AGENTS.md`、`/scripts/sync-run.py`、`/_config.yml`、`/documents/` 均 **404**；`/static/js/poetry-titles-202611.js`、`/tokens-tracker/`、`/bmi-tracker.html` 均 **200**；`/.hermes-project.yaml`、`/.gitignore` 404（Jekyll 默认排除点文件）。
+4. **O-17 改序未削弱 F-4′**：clone 内 `--only poetry-titles --include-upstream --apply` ⇒ **rc=0**（写 5 个 titles 文件）；`--only daily-poetry` ⇒ **rc=2**、`--only bmi-tracker` ⇒ **rc=2**、无 `--only`（全量含 emit-site）⇒ **rc=2**。即「含 emit-site 腿则仍整笔拒」，只有纯本仓批次放开。
+5. **O-13 绑定成立**：无 `DT_SANDBOX` ⇒ rc=2（回显两变量实测值）；`DT_SANDBOX=1 + DT_SITE_REPO=<clone>` ⇒ rc=0；同沙箱但 `DT_SITE_REPO=<生产根>` ⇒ rc=2。纵深证据：上游 `daily-tracker-update.py:129-135/152-318` 对 `DT_SANDBOX` 字面量 `"1"` 硬校验并要求 `DT_BASE`/`DT_HEALTH_DATA`/`DT_SITE_REPO` 三 seam 齐、非生产路径族、独立 toplevel、非生产 remote，否则 **rc=3 零写** ⇒ 本仓只看 2 条不构成缺口。
+6. **O-9 语义改为真值**：`--apply --commit --json --only poetry-titles` ⇒ `commit={"rc":0,"paths":5}`，`git show --stat` **5 文件**逐一对账；无改动 ⇒ `{"rc":0,"detail":"no-changes","paths":0}`；hook 拒绝 ⇒ `paths:0` 且 `git reset` 后无 staged 残留（F-1′ 保持）。
+7. **O-18 正则**：9 个正例（scp/https/ssh:///`.git`/尾斜杠/大小写/`user@`）全 True；8 个反例（`-fork`、`.bak`、代理前缀、`github.com.evil`、`gist.`、`.tech.evil/x`、`evil.com/@github.com`）全 False；生产 `origin=git@github.com:imjaden/www.jaden.tech.git` 判为规范（`production_checkout_reason() -> None`）。
+8. **O-22 遗留脏面收编**：`git reset --soft HEAD~1` 造「写盘成功未提交」⇒ 再跑 mirror ⇒ 新提交 `e29e048`、`porcelain -- tokens-tracker` **0** 行；干净且无内容变化时仍 **rc=0 静默不提交**（watchdog 契约保持）。
+9. **门禁逐值**：`perf-check` rc=0 · `portal --mode post` **17/17** · `--selftest` **22/22** · `sync-check --selftest` **15/15** · `sync-check` **rc=1**（过渡态 `artifacts 6`）· `sync-run` 预览 **rc=0** · `py_compile` rc=0；`.review-level.yaml` `safe_load` 74 条、末条 8 字段齐。
+
+### 二、发现（🔴 0 / 🟡 2 / 🟢 5，全部非阻断）
+
+- **🟡 1（O-22 邻接面，既有代码）**：mirror 提交腿是裸 `git commit -m`（`:516-520`，无 path-scope）。实测：tokens-tracker 有遗留脏面 **且** 索引里另有他人 staged 的 `README.md` ⇒ 提交 `75b40c3` 把 `README.md` 一并裹入 `data@update: tokens-tracker - auto sync`。O-22 把「无内容变化」也接入该腿，触发面变宽。后果=审计轨迹污染（不 push，故非提权）。修法：`git commit -m <msg> -- tokens-tracker/index.html tokens-tracker/data/live.js tokens-tracker/assets`（与本仓 N-1「path-scoped」教义一致）。
+- **🟡 2（S20 钉的机制盲区）**：钉住 `_config.yml` 内容，但钉不住「Pages 走 Jekyll」这一前提。若有人补 `.nojekyll`（Pages 常见手法），全部 `exclude` 静默失效、`.md`/`scripts/` 以原文 **200** 直出，而 S20 仍绿。现仓无 `.nojekyll`（已验）。修法：`config_guard` 追加 `not (ROOT / ".nojekyll").exists()` 一条断言，与 S20 同钉子。
+- **🟢 1（O-14 声明过度）**：实测 hook 同时写两路（stdout 一行 + stderr `FATAL: real cause`）⇒ `detail='hook-stdout-note'`；`git commit` 原始合并输出为 `␤␤hook-stdout-note␤␤FATAL…`，旧式 `strip().splitlines()[0]` 取值**完全相同** ⇒ 本笔对该场景是行为等价重构，未兑现「不再丢真因」。建议改取「stderr 首行优先，退化再取 stdout」。
+- **🟢 2（O-13 过严面）**：`--force-upstream` 无 `--apply` 时也被 rc=2 拒（clone 实测）。因全仓 `--force-upstream` 引用仅 help 与 stderr 文案（`grep` 0 处调用方），无操作面损失；预览改走不带 force 的 `--include-upstream` 仍 rc=0。
+- **🟢 3（O-18 缩窄面）**：`ssh://git@github.com:22/imjaden/...` 判 False（`[:/]+` 不吞端口）。方向是 fail-closed，记备查。
+- **🟢 4（O-9 口径）**：`commit.paths` 是 **pathspec 数**（改名两侧计 2），不等于 `git show` 的文件数；当前清单无改名面，无消费者（`grep _paths_guess/commit.paths` 0 处）。
+- **🟢 5（依赖与台账）**：`portal-check` 新增 PyYAML 硬依赖（惰性 `import yaml`，无 requirements）—— 本机三解释器均 6.0.3；缺库时 S20 会以 `_config.yml unparsable: ModuleNotFoundError` 误将环境问题归因给站点配置（fail-closed 但误导）。另 `.review-level.yaml` 第 1 条（2026-07-11）无 `tracking` 字段，为既有欠账。
+- **结转未动**：无（O-9/O-13/O-14/O-17/O-18/O-22 本批全数落地）。
+
+### 三、计分与推送
+
+**100 − 2×2 = 96 → PASS**（0 🔴；2 🟡 均非本笔引入或属已批设计边界，不阻断推送；六项修法逐条按推荐实现，门禁 6 项零漂移，生产面零写）。
+
+- **推送**：前 `HEAD=635c51c` / `origin/main=1c5c76c` / ahead **2** / behind 0 / 树空 ⇒ `git push origin HEAD:main` = `1c5c76c..635c51c`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`635c51c5ff07682ad5e86c59134dd4746484044e`**，ahead **0** / behind **0**
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带；推送笔未追加提交
+- **建议修序**（批次）：**🟡1 mirror path-scoped commit → 🟡2 `.nojekyll` 钉 → 🟢1 O-14 取 stderr 首行 → 🟢5 S20 ImportError 分档**
+
+**待决 2 项**：① 🟡1 提交腿改 path-scoped（推荐，零风险）还是保留裸 commit 以便顺带收编工具链产物；② 🟡2 `.nojekyll` 断言并入 S20（推荐）还是单列 S22。
+
+---
+
 ## 条目格式说明
 
 ```

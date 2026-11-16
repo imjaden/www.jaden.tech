@@ -515,8 +515,11 @@ def main() -> int:
         ["git", "add", "--", "tokens-tracker/index.html", "tokens-tracker/data/live.js", "tokens-tracker/assets"],
         cwd=WWW_REPO, check=False,
     )
+    # O-23：裸 `git commit` 会把索引里**他人已 staged** 的改动一起裹进 data@update（已实测复现）；
+    # 一律 path-scoped，只提交本镜像的产物面。
     r = subprocess.run(
-        ["git", "commit", "-m", "data@update: tokens-tracker - auto sync"],
+        ["git", "commit", "-m", "data@update: tokens-tracker - auto sync", "--",
+         "tokens-tracker/index.html", "tokens-tracker/data/live.js", "tokens-tracker/assets"],
         capture_output=True, text=True, cwd=WWW_REPO,
     )
     if r.returncode == 0:

@@ -351,6 +351,10 @@ def config_guard(config_path=None):
     path = Path(config_path or SITE_CONFIG)
     if not path.exists():
         return False, "_config.yml missing（隐私面已静默失守）"
+    # O-24：`.nojekyll` 一旦出现，GitHub Pages 跳过 Jekyll ⇒ 所有 exclude 静默失效，
+    # 而配置本身仍然「正确」——必须单独钉死这个前提。
+    if (ROOT / ".nojekyll").exists():
+        return False, ".nojekyll 存在 ⇒ Pages 不走 Jekyll，exclude 全部失效（隐私面回退）"
     try:
         import yaml
         cfg = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
