@@ -823,6 +823,18 @@ def _dash_selftest():
     except RuntimeError:
         cases.append(("counts 未知键 ⇒ raise", True))
 
+    # 掩码正则档的判别力（2026-11-16 review ⑤）：删 `[0-9]*` 或把边界改回 `\b` 必须红
+    for raw, want_contains, want_absent, label in (
+        ("~/.hermes/state.db", ("本地会话库",), (".hermes",), "组合路径"),
+        ("~/.hermes2/x", (), (".hermes2",), "数字后缀 .hermes2"),
+        ("~/CodeSpace2/x", (), ("CodeSpace2",), "数字后缀 CodeSpace2"),
+        ("~/.hermes状态", (), (".hermes",), "CJK 紧邻"),
+        ("~/.hermesx", (".hermesx",), (), "非数字后缀不误掩"),
+        (".hermes/y", (), (".hermes",), "裸相对路径"),
+    ):
+        got = mask_text(raw, set())
+        hit = all(w in got for w in want_contains) and not any(w in got for w in want_absent)
+        cases.append((f"掩码/{label}", hit))
     passed = sum(1 for _, c in cases if c)
     for name, cond in cases:
         print(f"{'PASS ' if cond else 'FAIL '} dash: {name}")
