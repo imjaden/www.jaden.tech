@@ -27,11 +27,15 @@ border-radius:var(--radius-md);padding:14px 16px;margin:14px 0 18px}
 .card .v{font-size:1.35rem;font-weight:700;margin-top:4px}
 .card .n{color:var(--muted);font-size:.74rem;margin-top:2px}
 h2{font-size:.86rem;font-weight:700;margin:26px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.data-table{width:100%;border-collapse:collapse}
+.data-table{width:100%;border-collapse:collapse;table-layout:fixed}
 .data-table th{position:sticky;top:0;z-index:10;background:var(--surface-900);border-bottom:1px solid var(--line);
 padding:8px 10px;text-align:left;font-size:.7rem;font-weight:600;color:var(--muted);
 text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
-.data-table td{padding:9px 10px;border-bottom:1px solid #1a1a2e;font-size:.8rem;vertical-align:middle}
+.data-table td{padding:9px 10px;border-bottom:1px solid #1a1a2e;font-size:.8rem;vertical-align:middle;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.data-table td>code{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+white-space:nowrap;vertical-align:bottom}
+.data-table td[data-l="状态"],.data-table td[data-l="年龄/预算"]{overflow:visible;text-overflow:clip}
 .data-table tbody tr:hover{background:rgba(79,70,229,.08)}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;
 background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px;color:#c9d1d9}
@@ -50,12 +54,17 @@ background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px;color:#c9d1d9
 .empty{color:var(--muted);font-size:.82rem;padding:10px 0}
 .gates{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:.78rem}
 .gates b{color:var(--fg);font-weight:600}
-footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:#6e7681;font-size:.76rem}
+footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:#6e7681;
+font-size:.76rem;text-align:center}
 @media (max-width:720px){
   .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   .data-table thead{display:none}
+  .data-table{table-layout:auto}
+  .data-table colgroup{display:none}
   .data-table tr{display:block;border:1px solid var(--line);border-radius:var(--radius-md);margin-bottom:8px;padding:4px 6px}
-  .data-table td{display:flex;justify-content:space-between;gap:10px;border:0;padding:4px 6px;white-space:normal}
+  .data-table td{display:flex;justify-content:space-between;gap:10px;border:0;padding:4px 6px;
+    white-space:normal;overflow:visible;text-overflow:clip}
+  .data-table td[data-l="状态"],.data-table td[data-l="年龄/预算"]{overflow:visible;text-overflow:clip}
   .data-table td::before{content:attr(data-l);color:var(--muted);font-size:.72rem;text-transform:uppercase}
 }
 </style>
@@ -64,27 +73,28 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:#
 <h1>同步面状态 · Sync Status</h1>
 <div class="banner warn">
   <div class="big">有陈旧或过渡项</div>
-  <div class="meta">快照 2026-11-16T09:01:52+00:00（UTC）· 清单 v1 ·
+  <div class="meta">快照 2026-11-16T09:55:49+00:00（UTC）· 清单 v1 ·
     下次生成 每日 21:55 由 ops cron 重出（手动：scripts/sync-status-gen.py） · 由 scripts/sync-status-gen.py 生成，勿手改</div>
 </div>
 
 <div class="cards">
   <div class="card"><div class="k">产物按时</div><div class="v">3/6</div><div class="n">打戳且在预算内 / 全部产物</div></div>
-  <div class="card"><div class="k">最旧产物</div><div class="v">1632h</div><div class="n">static/js/poetry-titles-*.js（5 个文件）</div></div>
-  <div class="card"><div class="k">平均年龄</div><div class="v">544.4h</div><div class="n">仅计已打戳产物</div></div>
+  <div class="card"><div class="k">最旧产物</div><div class="v">1633h</div><div class="n">static/js/poetry-titles-*.js（5 个文件）</div></div>
+  <div class="card"><div class="k">平均年龄</div><div class="v">545.3h</div><div class="n">仅计已打戳产物</div></div>
   <div class="card"><div class="k">结构违规</div><div class="v">0</div><div class="n">未注册产物文件数</div></div>
 </div>
 
 <h2>组件状态 · Components</h2>
 <table class="data-table">
+<colgroup><col style="width:22%"><col style="width:24%"><col style="width:10%"><col style="width:15%"><col style="width:14%"><col style="width:15%"></colgroup>
 <thead><tr><th>产物</th><th>来源仓 / 入口</th><th>班次</th><th>上次打戳</th><th>年龄 / 预算</th><th>状态</th></tr></thead>
 <tbody>
-<tr><td data-l="产物"><code>bmi-tracker.html</code></td><td data-l="来源">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次">10:00,21:45</td><td data-l="上次打戳">—</td><td data-l="年龄/预算">— / 36h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-warn">过渡（未打戳）</span></td></tr>
-<tr><td data-l="产物"><code>daily-tracker-archive-202607-202610.html</code></td><td data-l="来源">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次">10:00,21:45</td><td data-l="上次打戳">—</td><td data-l="年龄/预算">— / 36h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-warn">过渡（未打戳）</span></td></tr>
-<tr><td data-l="产物"><code>tokens-tracker/index.html</code></td><td data-l="来源">www.jaden.tech/scripts/tokens-tracker-mirror.py</td><td data-l="班次">20:45</td><td data-l="上次打戳">2026-11-16T16:39:55</td><td data-l="年龄/预算">0.4h / 26h <div class="bar bar-ok" title="0.4h / 预算 26h"><i style="width:2%"></i></div></td><td data-l="状态"><span class="badge badge-ok">正常</span></td></tr>
-<tr><td data-l="产物"><code>daily-poetry.html</code></td><td data-l="来源">script-miner/daily-poetry/daily-poetry.py deploy --target</td><td data-l="班次">manual</td><td data-l="上次打戳">—</td><td data-l="年龄/预算">— / 48h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-warn">过渡（未打戳）</span></td></tr>
-<tr><td data-l="产物"><code>static/js/poetry-titles-*.js（5 个文件）</code></td><td data-l="来源">www.jaden.tech/scripts/poetry-titles-gen.py</td><td data-l="班次">on-pack-landing</td><td data-l="上次打戳">2026-09-09T16:34:17+08:00</td><td data-l="年龄/预算">1632.5h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-ok">正常</span></td></tr>
-<tr><td data-l="产物"><code>tokens-tracker/data/dashboard.js</code></td><td data-l="来源">www.jaden.tech/scripts/tokens-tracker-mirror.py</td><td data-l="班次">20:45</td><td data-l="上次打戳">2026-11-16T16:39:55</td><td data-l="年龄/预算">0.4h / 26h <div class="bar bar-ok" title="0.4h / 预算 26h"><i style="width:2%"></i></div></td><td data-l="状态"><span class="badge badge-ok">正常</span></td></tr>
+<tr><td data-l="产物" title="bmi-tracker.html"><code>bmi-tracker.html</code></td><td data-l="来源" title="daily-tracker/scripts/daily-tracker-update.py">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次" title="10:00,21:45">10:00,21:45</td><td data-l="上次打戳" title="—">—</td><td data-l="年龄/预算">— / 36h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-warn">过渡（未打戳）</span></td></tr>
+<tr><td data-l="产物" title="daily-tracker-archive-202607-202610.html"><code>daily-tracker-archive-202607-202610.html</code></td><td data-l="来源" title="daily-tracker/scripts/daily-tracker-update.py">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次" title="10:00,21:45">10:00,21:45</td><td data-l="上次打戳" title="—">—</td><td data-l="年龄/预算">— / 36h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-warn">过渡（未打戳）</span></td></tr>
+<tr><td data-l="产物" title="tokens-tracker/index.html"><code>tokens-tracker/index.html</code></td><td data-l="来源" title="www.jaden.tech/scripts/tokens-tracker-mirror.py">www.jaden.tech/scripts/tokens-tracker-mirror.py</td><td data-l="班次" title="20:45">20:45</td><td data-l="上次打戳" title="2026-11-16T16:39:55">2026-11-16 16:39:55</td><td data-l="年龄/预算">1.3h / 26h <div class="bar bar-ok" title="1.3h / 预算 26h"><i style="width:5%"></i></div></td><td data-l="状态"><span class="badge badge-ok">正常</span></td></tr>
+<tr><td data-l="产物" title="daily-poetry.html"><code>daily-poetry.html</code></td><td data-l="来源" title="script-miner/daily-poetry/daily-poetry.py deploy --target">script-miner/daily-poetry/daily-poetry.py deploy --target</td><td data-l="班次" title="manual">manual</td><td data-l="上次打戳" title="—">—</td><td data-l="年龄/预算">— / 48h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-warn">过渡（未打戳）</span></td></tr>
+<tr><td data-l="产物" title="static/js/poetry-titles-*.js（5 个文件）"><code>static/js/poetry-titles-*.js（5 个文件）</code></td><td data-l="来源" title="www.jaden.tech/scripts/poetry-titles-gen.py">www.jaden.tech/scripts/poetry-titles-gen.py</td><td data-l="班次" title="on-pack-landing">on-pack-landing</td><td data-l="上次打戳" title="2026-09-09T16:34:17+08:00">2026-09-09 08:34:17</td><td data-l="年龄/预算">1633.4h <span class="badge badge-warn">—</span></td><td data-l="状态"><span class="badge badge-ok">正常</span></td></tr>
+<tr><td data-l="产物" title="tokens-tracker/data/dashboard.js"><code>tokens-tracker/data/dashboard.js</code></td><td data-l="来源" title="www.jaden.tech/scripts/tokens-tracker-mirror.py">www.jaden.tech/scripts/tokens-tracker-mirror.py</td><td data-l="班次" title="20:45">20:45</td><td data-l="上次打戳" title="2026-11-16T16:39:55">2026-11-16 16:39:55</td><td data-l="年龄/预算">1.3h / 26h <div class="bar bar-ok" title="1.3h / 预算 26h"><i style="width:5%"></i></div></td><td data-l="状态"><span class="badge badge-ok">正常</span></td></tr>
 </tbody>
 </table>
 
@@ -105,6 +115,7 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:#
 
 <footer>
 判据：结构漂移（缺失 / 未注册 / 缺戳 / 哈希不符）、内容漂移（正文哈希 ≠ 戳）、时间漂移（超 freshness_h 预算）。<br>
+时间基准：快照与「上次打戳」均按 UTC 显示（<code>yyyy-mm-dd HH:MM:SS</code>）。<br>
 机器入口 <a href="./data/sync-status.json">data/sync-status.json</a> ·
 <a href="./tokens-tracker/">公开镜像看板</a> · <a href="./">← 返回首页</a>
 </footer>
