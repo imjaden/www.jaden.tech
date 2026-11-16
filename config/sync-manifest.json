@@ -106,7 +106,10 @@
         "freshness_h": 26,
         "hash": "required",
         "guard": "fail-closed rc=2"
-      }
+      },
+      "commit_paths": [
+        "tokens-tracker/"
+      ]
     },
     {
       "id": "daily-poetry",
@@ -201,7 +204,10 @@
         "freshness_h": 26,
         "hash": "required",
         "guard": "fail-closed rc=2"
-      }
+      },
+      "commit_paths": [
+        "tokens-tracker/"
+      ]
     }
   ]
 }

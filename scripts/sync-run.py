@@ -35,7 +35,9 @@ MANIFEST = ROOT / "config" / "sync-manifest.json"
 # 本仓可执行的入口（mode -> 命令模板）
 LOCAL_ENTRIES = {
     "local": ["python3", "scripts/poetry-titles-gen.py"],
-    "mirror": ["python3", "scripts/tokens-tracker-mirror.py"],
+    # F-3：mirror 的 commit 面（硬编码 WWW_REPO、无 --only）交回本工具的提交腿统一处理；
+    # `--write-only` = 只变换+写盘，不做 git 操作（夜里 cron 仍直接跑 mirror 自带提交，互不影响）。
+    "mirror": ["python3", "scripts/tokens-tracker-mirror.py", "--write-only"],
 }
 
 # 跨仓路径解析：**不得**写进 config/sync-manifest.json（那是公开面）。
@@ -120,6 +122,14 @@ def artifact_paths(manifest, only=None):
         for h in hits:
             if h.is_file() and ROOT in h.resolve().parents:
                 out.append(str(h.resolve().relative_to(ROOT)))
+        # F-1：删除 / 改名面不进 glob 枚举 ⇒ 会漏掉「已从磁盘消失但仍被跟踪」的路径，
+        # 导致提交后 HEAD 里新旧两文件并存。用索引侧匹配补齐。
+        ls = subprocess.run(["git", "ls-files", "--", raw], cwd=ROOT, capture_output=True, text=True)
+        for rel in (ls.stdout or "").splitlines():
+            if rel.strip():
+                out.append(rel.strip())
+        for extra in art.get("commit_paths") or []:
+            out.append(extra)
     return sorted(set(out))
 
 
@@ -206,13 +216,19 @@ def main():
 
     commit_info = None
     if args.apply and args.commit:
-        try:
+        # F-2：提交腿必须绑本次运行结果 —— 半截写 / 结构违规时不得留下截断产物
+        _check_rc = check.get("rc", 0) if isinstance(check, dict) else 0
+        if failures or _check_rc >= 2:
+            commit_info = {"skipped": True,
+                           "reason": f"运行失败(failures={failures}) 或结构违规(sync-check rc={_check_rc}) ⇒ 不提交"}
+        else:
+          try:
             _paths = artifact_paths(manifest, args.only)
             _rc, _msg = commit_artifacts(_paths, args.message)
             commit_info = {"rc": _rc, "detail": _msg, "paths": len(_paths)}
             if _rc:
                 failures += 1
-        except Exception as exc:                      # 提交腿失败不得吞掉执行结果
+          except Exception as exc:                    # 提交腿失败不得吞掉执行结果
             commit_info = {"rc": 1, "error": str(exc)[:200]}
             failures += 1
 
@@ -231,8 +247,12 @@ def main():
             print(f"\nsync-check rc={check.get('rc')} "
                   f"（0 全绿 / 1 过渡·陈旧 / 2 结构违规 / 3 无法判定）")
         if commit_info:
-            print(f"COMMIT rc={commit_info.get('rc')}  {commit_info.get('detail') or commit_info.get('error')}"
-                  f"（清单产物 {commit_info.get('paths')} 个）")
+            if commit_info.get("skipped"):
+                print(f"COMMIT SKIP  {commit_info.get('reason')}")
+            else:
+                print(f"COMMIT rc={commit_info.get('rc')}  "
+                      f"{commit_info.get('detail') or commit_info.get('error')}"
+                      f"（清单产物 {commit_info.get('paths')} 个）")
         if not args.apply:
             print("\n（dry-run：加 --apply 才执行；加 --commit 才提交产物）")
 

@@ -2156,6 +2156,56 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — N-1 提交腿（`sync-run --commit`）+ 文案对齐审计（1 笔已推）：3 🟡 非阻断（提交腿未绑运行结果 / 删除面不可见 / mirror 腿归属未收口）→ PASS 87
+
+- **review者**: review/cli（Security Reviewer · L2）
+- **范围**: `origin/main` `01b303e` → `HEAD` `6d42ab2`，1 笔（`scripts/sync-run.py` +81/−4、`config/sync-manifest.json` +1/−1、`review-log.md` +47、`.review-level.yaml` +8），工作树空，ahead 1
+- **Tracking**: JT-SEC-031（N-1 提交腿 / 提交归属）；承接 JT-SEC-019/020/022/023 结转
+- **状态**: ✅ PASS（3 🟡 非阻断，建议下笔修）
+- **报告**: 本 entry（单日志口径，不新建 `documents/reviews` 件）
+- **实现 prompt**: ⬜ 无需生成（实现审计）
+
+### 一、验收（逐条实跑：隔离 clone `scratch/n1-clone`、`scratch/n1-b` + 生产仓门禁）
+
+1. **提交腿不吃非产物改动**（T1/T3/T5）：
+   - T1 四脏（`README.md` / `index.html` / `bmi-tracker.html` / `static/js/poetry-titles-202611.js`）→ `changed(artifact_paths(manifest,['poetry-titles']))` 只返回 `poetry-titles-202611.js`；提交 `1 file changed`，另三个仍留工作树。
+   - T5 **预暂存**（`git add README.md` 后 `M  README.md`）+ 产物脏 → 只提交产物，`README.md` 仍为预暂存态 ⇒ `--only` 同时挡住「已暂存」的非产物改动。
+   - T3 未跟踪目录 `probe-dir/{probe.js,other.txt}`：pathspec 命名单文件时 git **不塌缩**目录（`?? probe-dir/probe.js`），只提交 `probe.js`，`other.txt` 留未跟踪 ⇒ 无目录级扩张。
+2. **`--only` / `--commit` 交互**：`--only poetry-titles` ⇒ pathspec 5 个（`static/js/poetry-titles-*.js` 全展开）；`--commit` 不带 `--apply`（T7）⇒ JSON `commit=None`、无新提交、索引未污染（仅 `--apply and --commit` 触发，`sync-run.py:208`）；`--apply --commit` 集成（T8）⇒ 总 `rc=0`、`check rc=1`（过渡态放行）、`commit rc=0`、实提交 5 文件，脏的非产物 `index.html` 未被带走。
+3. **门禁 6 项与期望逐值吻合**：`sync-check --selftest` **15/15 rc=0** · `sync-check` **rc=1**（3 过渡态 + 3 ok，`artifacts 6`）· `portal-check --mode post` **16/16 rc=0**（S17 `artifacts=6` rc=1）· `--selftest` **20/20 rc=0** · `perf-check` **rc=0**（`?t=` parity `1794394182`）· `sync-run` dry-run **rc=0**（2 DRY / 3 SKIP / 1 DUP）。副作用笔复位后复跑 `sync rc=1` / `perf rc=0`，零漂移。
+4. **`config/sync-manifest.json` 仅 `_note` 一行**：`grep -v '"_note"'` 与 `HEAD^` 版本 **逐字节相同**（无序列化重排/缩进漂移）；`json` / `yaml.safe_load` 均可解析；新 `_note` **无** `/Users`·`CodeSpace`·`jadenli`·`@` 命中；所述「`_config.yml` 已排除 `scripts/` 与 `documents/`」经读 `_config.yml` 属实（exclude 6 条含这两条）。
+5. **文案对齐与上游事实核对**（不只信自述）：`daily-tracker/scripts/daily-tracker-update.py:102` `--emit-site ⇒ DT_SITE_FORCE=1 + DT_SITE_NO_COMMIT=1`，`:3291` 命中即 `return`「改动留给调用方提交」⇒「上游只写不提交」**成立**。同时发现上游 `:3296–3313` 自身仍留有 commit 分支，且用的是 **glob pathspec**、写盘/渲染失败即跳过 commit（`:3300` 附近 `res["site"]=="⚠️"`）——这两点恰是本笔缺的（见 F-1 / F-2）。
+
+### 二、发现（🔴 0 / 🟡 3）
+
+- **F-1 🟡 删除/改名面不进 pathspec** —— `artifact_paths` 只枚举「仓内已存在文件」（`sync-run.py:119–123` `h.is_file()`），被删/改名掉的旧产物路径根本不进 pathspec ⇒ `git status -- <paths>` 只见新侧。实测 T4（`git mv poetry-titles-202609.js → -202999.js`）：`changed()` = 仅新名，提交后 **HEAD 同时保留旧 `202609.js`**，索引留 `D  static/js/poetry-titles-202609.js`。真触发面就是 manifest 自己声明的月份滚动 glob（`dt-archive` `daily-tracker-archive-*.html`、`poetry-titles-*.js`）：旧页滞留在站点，且 `sync-check` 认不出（旧文件仍被 artifact glob 认领、`hash=optional` ⇒ 判过渡态不红）。**修法**：pathspec 改用 git 原生 glob（`:(glob)static/js/poetry-titles-*.js`，上游 `:3296` 已是这写法）并配 `git status -z`，或并集 `git ls-files --deleted -- <glob>`；失败分支补 `git reset -- <todo>`。
+- **F-2 🟡 提交腿不绑定本次运行结果** —— commit 块（`sync-run.py:207–217`）既不检查 `failures`，也**早于** `check["rc"]>=2` 的闸（`:239`）⇒ 上游步失败并留半截产物时仍 `commit rc=0`，check 只在其后判 2。实测 T9（假上游写半截 + `exit 2`）：`step rc=2` / `check rc=2` / **`commit rc=0`**，HEAD 里落下 `/* TRUNCATED-BY-FAILED-PRODUCER */` + 未闭合的 `window.__PT = [`。因本工具**不 push**，爆炸半径限于本地（上线仍需人工 push）⇒ 🟡 而非 🔴。**修法**：先跑 check 再提交，闸口 `failures==0 and (check is None or check["rc"]<2)`，留 `--force-commit` 兜底；可直接照搬上游 `:3300` 的「写盘/渲染失败即跳过 commit」。
+- **F-3 🟡（pre-existing，N-1 未收口）提交归属仍分裂** —— `scripts/tokens-tracker-mirror.py:52` 硬编码 `WWW_REPO = /Users/…/www.jaden.tech`；`:476` `git add -- tokens-tracker/{index.html,data/live.js,assets}` 后 `:481` `git commit -m …` **无 `--only`、无 pathspec**。后果三条：① 在任何副本/备用检出里跑 `sync-run --apply`（mode=mirror），**写盘与提交都打到生产检出**（本轮实测即因此产生 `020f91d`，见 O-6）；② 该 commit 提交**整个索引**，会顺带带走别处预暂存的改动，与「禁 `-A`、禁 `.`」的纪律相反；③ docstring 声称「由本工具按清单 `path` 提交」对 mode=mirror 不成立。**修法**：mirror 已支持 `args.write_only`（`:473`）⇒ `sync-run` 对 mode=mirror 传 `--write-only`，提交统一走 `--commit`；`cwd=WWW_REPO` 改由调用方传入。
+
+### 三、🟢 观察项（不计发现、不扣分）
+
+| # | 观察 | 处置建议 |
+|:-:|:--|:--|
+| O-1 | `changed()` 用非 `-z` porcelain（`:130–135`）：默认 `core.quotePath=true` 时非 ASCII 文件名被 C-quote，`.strip('"')` 不还原八进制转义 ⇒ `git add` **rc=128 fail-closed**（实测 `static/js/诗-titles.js` → `'static/js/\350\257\227-titles.js'`）；本机 `core.quotePath=false`，含**引号**的文件名反而正常（git pathspec 会解 `\"`，T11 提交正确落名） | 当前 manifest 全 ASCII，无现网影响；改 `-z` + NUL 解析（顺带解决 `R old -> new` 单行解析） |
+| O-2 | 输出只打印「清单产物 N 个」（`:234–235`，N = **声明**数 10，非实际提交数），不打印真被 swept 的路径 | 打印 `changed()` 列表；对不落在 `watch` 面的路径告警 |
+| O-3 | `artifact` 路径无白名单：可指向仓内任意文件（`review-log.md`、`.review-level.yaml` 等）；`sync-check.py:157` `unregistered` 只做 watch→artifact **单向**认领，不校验 artifact ⊆ watch | `sync-check` 补反向断言 |
+| O-4 | 提交失败分支不 `git reset`，索引留脏（T4 的 dangling staged 删除即此类形态），后续 `git commit -a` 会带走 | 失败分支 `git reset -- <todo>` |
+| O-5 | `--commit` 不带 `--apply` 静默忽略（仅 dry-run 行间接提示） | 显式 warn 一行 |
+| O-6 | **审计副作用事件（已自证并复位）**：T8 集成测试因 mirror 硬编码路径打到生产检出，真仓多出 `020f91d data@update: tokens-tracker - auto sync`（10:45:26，与 clone 内 `c8b3578` 同秒）。该笔**未审计、未推送**，已 `git reset --hard 6d42ab2` 复位（可 `git reset --hard 020f91d` 复现），复位后门禁复绿 | 事件本身即 F-3 的现场证据；后续克隆内测试须先改 mirror 的 `WWW_REPO` |
+| O-7 | 承接台账口径待写明：本笔携带的上轮 entry `findings_open=4`，其前一条为 5，正文只说 F-1/F-2 折入既有 SEC-022，未说明 5→4 的减项来源 | 下轮台账补一句口径 |
+
+### 四、计分与推送
+
+**100 − 5(F-1) − 5(F-2) − 3(F-3 pre-existing) = 87 → PASS**（0 🔴；门禁零漂移；prompt 四项验收全过；三个 🟡 均有实测复现路径与明确修法，不阻断本轮）。
+
+- **推送**：前 `HEAD=6d42ab2` / `origin/main=01b303e` / ahead **1** / ff-only 成立 / 树空 ⇒ `git push origin HEAD:main` 输出 `01b303e..6d42ab2  HEAD -> main`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`6d42ab26b06bb0041ab455dd202d00ff57c283bf`**，ahead **0** / behind **0** / 树空
+- **边界**：本 entry 与 `.review-level.yaml` 更新留工作树，由 ops 下一笔携带；未在推送后追加提交
+- **建议修序**（下笔）：**F-2 → F-3 → F-1**（F-2 决定「坏产物会不会被提交」，改动最小；F-1 与 F-2 同文件可一并）
+
+**待决 0 项**（3 🟡 已给修法，未阻断推送）。
+
+---
+
 ## 条目格式说明
 
 ```
