@@ -516,13 +516,19 @@ def main():
             _b = _html.replace(' title="仅本地服务可访问">Memory</span>', '>Memory</span>', 1)
             (_probe_dir / "b.html").write_text(_b, encoding="utf-8")
             _ok_b = nav_guard(_probe_dir / "b.html")[0]
+            # 🟢1：tab-bar 回流的判别力也要有人守（只看代码不看探针 ⇒ 下次可能被顺手改坏）
+            _c = _html.replace('<div class="wc-nav">',
+                               '<div class="tab-bar home-tab"><span class="tab-btn">首页</span></div>\n<div class="wc-nav">', 1)
+            (_probe_dir / "c.html").write_text(_c, encoding="utf-8")
+            _ok_c = nav_guard(_probe_dir / "c.html")[0]
         except Exception as exc:  # noqa: BLE001
-            _ok_a = _ok_b = f"raised {type(exc).__name__}"
+            _ok_a = _ok_b = _ok_c = f"raised {type(exc).__name__}"
         finally:
             import shutil as _shutil2
             _shutil2.rmtree(_probe_dir, ignore_errors=True)
-        check("S23", "V16 判别力自证：禁用项带 href / 丢 title ⇒ S22 必红",
-              _ok_a is False and _ok_b is False, f"href={_ok_a} no_title={_ok_b}")
+        check("S23", "V16 判别力自证：禁用项带 href / 丢 title / tab-bar 回流 ⇒ S22 必红",
+              _ok_a is False and _ok_b is False and _ok_c is False,
+              f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c}")
 
     fails = [r for r in results if not r[2]]
     for cid, desc, ok, detail in results:

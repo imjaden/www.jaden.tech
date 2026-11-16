@@ -110,7 +110,8 @@ NAV_ITEM_CSS = (
     ".wc-nav .wc-pub{margin-right:80px;}"
     # 🟡2：≤600px 左组换行项仍压在 corner 下（600→Cron Job / 480→Memory / 420→Session / 375→Task / 320→两项）。
     # `body .wc-nav` 特异性 (0,1,1) 胜上游 (0,1,0)，同样绕开「注入块在前、被后置简写覆盖」的坑；
-    # 代价：480/375 各多一行（实测 8 档 320–768 残留全清零，无横向溢出）。
+    # 代价：480/375/320 各多一行。实测 nav 在 8 档（320–768）无重叠、无横向溢出；
+    # 320 档仍有 17px 横向溢出，来源是 `button.chip.chip-more`（非 nav，before 同值）。
     "body .wc-nav{padding-right:96px;}"
 )
 
@@ -351,7 +352,8 @@ def transform_live(js: str) -> str:
     tail = empty_hist_tasks(tail)
     # 🟡1：deny = 上游全部项目名 − 白名单（补集口径，白名单新增项目无需改这里）
     _raw_items = json.loads(m_items.group(1))
-    _deny = {str(it.get("project")) for it in _raw_items if it.get("project")} - PROJECT_WHITELIST
+    _deny = ({str(it.get("project")) for it in _raw_items if it.get("project")}
+             | INTERNAL_PROJECTS_STATIC) - PROJECT_WHITELIST
     tail = sanitize_anomaly(tail, _deny)
 
     meta = json.loads(m_meta.group(1))
@@ -374,13 +376,21 @@ def transform_live(js: str) -> str:
 
 # 赋值形态全收：`window.LIVE_ANOMALY =` / `var LIVE_ANOMALY =` / `window["LIVE_ANOMALY"] =`
 # （🟡1(a)：只认一种形态 ⇒ 换写法即整段透传，三条实测全部 NO ERROR）
+# 🟡3：`(?<![A-Za-z0-9_$.])` 左边界 —— 否则 `var X_LIVE_ANOMALY = 1` 也会误 raise（可用性风险）
 ANOMALY_ASSIGN = re.compile(
-    r"""(?:window\.|var\s+|let\s+|const\s+)?"""
+    r"""(?<![A-Za-z0-9_$.])(?:window\.|var\s+|let\s+|const\s+)?"""
     r"""LIVE_ANOMALY(?:\.[A-Za-z_$][\w$]*|\[["'][^"']*["']\])?\s*=""")
 ANOMALY_BLOCK = re.compile(r"""(?:(?:window\.|var\s+|let\s+|const\s+)LIVE_ANOMALY|window\[["']LIVE_ANOMALY["']\])\s*=\s*""")
 # 🟡1(b)：头正则放宽到非 ASCII / 含 `/` 的项目名，并把「块内含【任务】但解析不出项目」计为 dropped
 ANOMALY_TASK_HEAD = re.compile(r"【任务】\s*(.+?)\s*·")
 # 🟡1(d)：键面白名单 —— 新增任何携带明细的键都会因未知而被拦下
+# 🟡2：`deny` 若只从 LIVE_ITEMS 派生，则「整行被过滤 / 已归档 / 只在 prompt 正文里被提到」的仓
+# 不在表里 ⇒ 正文命中既不丢块也不响。这里补一份静态内部项目表与之取并集。
+INTERNAL_PROJECTS_STATIC = frozenset({
+    "script-miner", "html-gen", "http-server", "daily-tracker", "personal-cinema",
+    "12306-mcp", "imjaden", "train-timetabler", "image-manager", "favorite-manager",
+    "memory-hub", "jaden-tech", "zzz-unregistered-project",
+})
 ALLOWED_ANOMALY_KEYS = frozenset({
     "anomaly_total", "doc_missing", "idle", "ledger_total", "prompt", "prompt_count",
     "skipped", "timeout", "total", "unknown",
@@ -395,30 +405,15 @@ def _deny_hit(text: str, deny: set):
     return None
 
 
-def sanitize_anomaly(tail: str, deny: set) -> str:
-    """把 `LIVE_ANOMALY.prompt` 里的任务块按项目白名单过滤（🟡 2026-11-16）。
-
-    上游把整段异常 Prompt 塞进数据面：里面带**非白名单项目名**、内部 CLI（`hm loop list`）、
-    台账编号与 `~/CodeSpace/...` 路径。计数类字段（anomaly_total/doc_missing/...）保留，
-    只过滤 prompt 正文；保留白名单项目的块，其余整块丢弃并标注条数。
-    fail-closed：过滤后若仍有非白名单项目名出现，抛错中止。
-    """
-    m = ANOMALY_BLOCK.search(tail)
-    if not m:
-        # 🟡1(a)：尾部提到 LIVE_ANOMALY 却解析不出被赋值的对象 ⇒ 中止（不许整段透传）
-        if ANOMALY_ASSIGN.search(tail):
-            raise RuntimeError("LIVE_ANOMALY 出现但赋值形态不认识 — fail-closed")
-        return tail                      # 上游确实没有该块 ⇒ 无需处理
-    try:
-        obj, end = json.JSONDecoder().raw_decode(tail[m.end():])
-    except (json.JSONDecodeError, ValueError):
-        raise RuntimeError("LIVE_ANOMALY 不是合法 JSON — fail-closed")
-    if not isinstance(obj, dict):
-        raise RuntimeError("LIVE_ANOMALY 顶层不是对象 — fail-closed")
+def _filter_anomaly_obj(obj: dict, deny: set) -> dict:
+    """按 deny 过滤 `prompt` 的任务块，并做键面/内容面不变式。返回同一对象（原地修改）。"""
     unknown = set(obj) - ALLOWED_ANOMALY_KEYS
     if unknown:
         raise RuntimeError(f"LIVE_ANOMALY 出现未知键 {sorted(unknown)} — fail-closed（先加进白名单再加过滤规则）")
     prompt = obj.get("prompt")
+    # 🟡4：非字符串形态（块数组 / 对象）过去被静默跳过 —— 既不过滤也不 raise
+    if prompt is not None and not isinstance(prompt, str):
+        raise RuntimeError(f"LIVE_ANOMALY.prompt 类型 {type(prompt).__name__} 未支持 — fail-closed")
     if isinstance(prompt, str) and prompt.strip():
         blocks = [b for b in re.split(r"(?=【任务】)", prompt) if b.strip()]
         kept, dropped = [], 0
@@ -426,15 +421,10 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
             head = ANOMALY_TASK_HEAD.search(block)
             if head and head.group(1).strip() in PROJECT_WHITELIST:
                 kept.append(block.strip())
-            elif head:
-                dropped += 1
-            elif "【任务】" in block:
-                # 带任务头但解析不出项目名 ⇒ 一律按 dropped（🟡1(b) 的 else 分支漏洞）
+            elif head or "【任务】" in block:
                 dropped += 1
             else:
-                kept.append(block.strip())     # 无项目名的说明性文字保留
-        # 🟡1(c)：块内**正文**再扫一遍 —— 命中非白名单项目名的块整块丢弃（不是整段中止：
-        # 白名单项目的 prompt 正文里提到别仓是常态，整段中止会让夜间镜像静默停更，风险更大）。
+                kept.append(block.strip())
         clean = []
         for block in kept:
             hit = _deny_hit(block, deny)
@@ -443,19 +433,48 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
                 print(f"🔒 LIVE_ANOMALY: 丢弃含非白名单项目 {hit!r} 的块（正文提及）")
             else:
                 clean.append(block)
-        kept = clean
         if dropped:
-            kept.insert(0, f"【已过滤】{dropped} 条非白名单项目的异常明细（公开面不列）")
-        obj["prompt"] = "\n\n".join(kept).replace("~/CodeSpace/", "")
-    # 不变式：① prompt 全文不得再有 deny 命中 ② prompt 之外的任何键也不得命中（硬中止）
-    _rest = {k: v for k, v in obj.items() if k != "prompt"}
+            clean.insert(0, f"【已过滤】{dropped} 条非白名单项目的异常明细（公开面不列）")
+        obj["prompt"] = "\n\n".join(clean).replace("~/CodeSpace/", "")
+    rest = {k: v for k, v in obj.items() if k != "prompt"}
     for name in sorted(deny):
-        if _deny_hit(json.dumps(_rest, ensure_ascii=False), {name}):
+        if _deny_hit(json.dumps(rest, ensure_ascii=False), {name}):
             raise RuntimeError(f"LIVE_ANOMALY 非 prompt 键仍含非白名单项目 {name!r} — fail-closed")
     for name in sorted(deny):
         if _deny_hit(str(obj.get("prompt") or ""), {name}):
             raise RuntimeError(f"LIVE_ANOMALY 过滤后仍含非白名单项目 {name!r} — fail-closed")
-    return tail[: m.end()] + json.dumps(obj, ensure_ascii=False, indent=2) + tail[m.end() + end:]
+    return obj
+
+
+def sanitize_anomaly(tail: str, deny: set) -> str:
+    """把 `LIVE_ANOMALY` 的明细按项目白名单过滤（公开面不列非白名单项目）。
+
+    🟡1：尾部可能**多次**出现 `LIVE_ANOMALY`（追加赋值），必须逐个处理；
+    回扫不变式：处理完后「赋值语句数 == 已处理块数」，否则说明还有没被识别/过滤的赋值 ⇒ raise。
+    """
+    pieces, pos, handled = [], 0, 0
+    for m in ANOMALY_BLOCK.finditer(tail):
+        try:
+            obj, end = json.JSONDecoder().raw_decode(tail[m.end():])
+        except (json.JSONDecodeError, ValueError):
+            raise RuntimeError("LIVE_ANOMALY 不是合法 JSON — fail-closed")
+        if not isinstance(obj, dict):
+            raise RuntimeError("LIVE_ANOMALY 顶层不是对象 — fail-closed")
+        obj = _filter_anomaly_obj(obj, deny)
+        pieces.append(tail[pos:m.end()])
+        pieces.append(" " + json.dumps(obj, ensure_ascii=False, indent=2) + " ")
+        pos = m.end() + end
+        handled += 1
+    if not handled:
+        # 🟡1(a)：尾部提到 LIVE_ANOMALY 却解析不出被赋值的对象 ⇒ 中止（不许整段透传）
+        if ANOMALY_ASSIGN.search(tail):
+            raise RuntimeError("LIVE_ANOMALY 出现但赋值形态不认识 — fail-closed")
+        return tail
+    pieces.append(tail[pos:])
+    result = "".join(pieces)
+    if len(ANOMALY_ASSIGN.findall(result)) != handled:
+        raise RuntimeError("LIVE_ANOMALY 存在未处理的赋值语句 — fail-closed")
+    return result
 
 
 def transform_js(js: str) -> str:
