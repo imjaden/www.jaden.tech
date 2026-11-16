@@ -1,5 +1,5 @@
 {
-  "_note": "门户同步面唯一真值（JT-CL005）。禁绝对路径 / 用户名 / 内部项目代号；仓别名可用。检出后由 scripts/sync-check.py 校验。",
+  "_note": "门户同步面唯一真值（JT-CL005）。禁绝对路径 / 用户名 / 内部项目代号；仓别名可用。检出后由 scripts/sync-check.py 校验。 脚本路径（producer.entry 等）指仓库检出路径，不在站点发布面：_config.yml 已把 scripts/ 与 documents/ 排除出 Pages 构建。",
   "version": 1,
   "watch": [
     "bmi-tracker.html",

@@ -2108,6 +2108,54 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — SEC F-1/F-2 收口审计（1 笔已推）：`scripts/` 与 `documents/` 目录级排除落地、六颗钉子零漂移 → PASS 100
+
+- **review者**: review/cli（Security Reviewer · L2）
+- **范围**: `origin/main` `3c0c154` → `HEAD` `01b303e`，1 笔（`_config.yml` +2/-1、`review-log.md` +47、`.review-level.yaml` +8），工作树空，ahead 1
+- **Tracking**: JT-SEC-022（站点面收窄，F-1/F-2 同号关闭）；承接上轮 F-1/F-2 待决
+- **状态**: ✅ PASS
+- **报告**: 本 entry（单日志口径，不新建 `documents/reviews` 件）
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计）
+
+### 一、验收（逐条实跑）
+
+1. **`_config.yml` 可解析、`keep_files` 未动**：`yaml.safe_load` → keys `['exclude','keep_files']`，exclude 6 条（`*.md` / `documents/` / `scripts/` / `cache/` / `.review-level.yaml` / `AGENTS.md`），keep_files 仍为 `['static','tokens-tracker']`（diff 零触碰）。
+2. **排除规则不吞站点资产（同构探针复跑，升级为读活配置）**：`cache/scratch/jek_filter_sim_v2.rb` 不再硬编码清单，直接 `YAML.load_file('_config.yml')` 取 exclude，按 jekyll/jekyll@v3.9.5 `lib/jekyll/entry_filter.rb` 的 `glob_include?`（`File.fnmatch?` 默认 flags + `entry_path.start_with?(item)` 前缀分支）逐条判定，喂 `git ls-files` 全 **93** 文件 ⇒ **kept 39 / dropped 54**，`RESULT: PASS`：
+   - `mustkeep_in_dropped=0`：`static/**` 26 + `tokens-tracker/**` 5 + 5 个根级 HTML（index / wechat / bmi-tracker / daily-poetry / archive）+ `sync-status.html` + `config/sync-manifest.json` + **`CNAME`** 全在 kept（自定义域不丢）
+   - `scripts_docs_leak=0`：`scripts/` 全 10 文件（9 py + `ssl-manager.md`）与 `documents/` 全 33 文件（含 `plan-omad-v1.0.html`）全部落 dropped
+   - `kept_md_leak=0`：`.md` 面零残留
+   - **交叉校验**：上轮 kept 49 − 本笔 kept 39 = **10** = 9 `scripts/*.py` + 1 `documents/plan-omad-v1.0.html`，两行改动删除面与预期逐文件吻合（`glob_include?` 对目录项走前缀分支，`documents/` 一条规则同时覆盖 md + html 成立）
+3. **站内引用面实测**：`(href|src)="…(scripts/|documents/)"` 对 `*.html`/`static/**`/`tokens-tracker/**` ⇒ **rc=1 零命中**；放宽到裸串命中 7 文件全为**文本面**（`bmi-tracker.html:468` 说明文字、`config/sync-manifest.json` 的 `entry` 字段、`sync-status.html` 的 `<code>` 生产者标注、`static/js/poetry-titles-*.js` 生成头注释、`tokens-tracker/assets/*` 设计注释）⇒ 无一处 `fetch`/`<script src>`/`<a href>` 依赖，排除不产生站内 404。
+4. **门禁 6 项实跑与期望逐值吻合**：`portal-check --mode post` **16/16 rc=0**（S17 `artifacts=6` rc=1）· `--selftest` **20/20 rc=0** · `perf-check` **rc=0**（全 PASS，`?t=` parity `1794394182`）· `sync-check --selftest` **15/15 rc=0** · `sync-check` **rc=1**（3 过渡态 + 3 ok，`artifacts 6`）；未跑 `--apply` / `--include-upstream`。
+5. **台账自洽性抽查**：上轮 entry 的「kept 49 / dropped 44」与本轮「39 / 54」差值 10 与 F-1/F-2 目标面精确对齐；`findings_total=2` 为当轮发现数、`findings_open=5` 与前一 entry 持平（F-1/F-2 折入既有 SEC-022 未关口径，非新增独立项）⇒ 记法一致。
+6. **推送三验**：ff-only（`merge-base --is-ancestor origin/main HEAD` 成立）—— 前 `HEAD=01b303e` / `origin/main=3c0c154` / `rev-list --count origin/main..HEAD`=**1** / 树空；输出 `3c0c154..01b303e  HEAD -> main`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`01b303ec7f6cccccffbe5f3686cd644706f4d27e`**，ahead **0** / behind **0** / 树空。
+
+### 二、发现
+
+- **🔴 0 项**
+- **🟡 0 项** —— F-1（`scripts/*.py` 披露本机绝对路径）与 F-2（`documents/plan-omad-v1.0.html` 未收）**双双关闭**，无新发现。
+
+### 三、🟢 观察项（不计发现、不扣分）
+
+| # | 观察 | 处置建议 |
+|:-:|:--|:--|
+| O-1 | `opencode.jsonc`（320 B）不在 exclude ⇒ 随 Pages 发布（`/opencode.jsonc`）；内容仅两条 `command` 描述，无密钥 / 绝对路径 / 项目代号 | 零敏感可留；若视作内部工具配置，可加一条 exclude（可选） |
+| O-2 | `bmi-tracker.html:468` 纯文本「完整版：`documents/references/faq-comprehensive-v2.1-20261025.md` §八 #017」，无 `href`；且 `documents/references/` 本就未入仓 | 文本悬空，pre-existing，不构成新 404 面；文案收口另行处理 |
+| O-3 | `config/sync-manifest.json` 设计上公开（本笔未排除），其 `entry` 值形如 `scripts/*.py`、`_note` 写「检出后由 `scripts/sync-check.py` 校验」；本笔排除后站内该路径必然 404 | 契约语义为「本地检出后」，建议 `_note` 或 `sync-status.html` 页脚补一句「脚本路径指仓库检出路径，不在站点发布面」 |
+| O-4 | 本笔台账（`review-log.md` / `.review-level.yaml`）续写多处 `/Users/jadenli/...` 绝对路径，仓 `visibility=public` ⇒ raw 可取 | 与既有 sec-030-handoff-public 待决同族，**无新增暴露类别**，随该裁定一并处理 |
+
+### 四、计分与推送
+
+**100 − 0 = 100 / 100 → PASS**（上轮 -5 的 F-1 已关闭；无新增发现、门禁零漂移、排除面经同构探针证不吞资产、CNAME 保留）。
+
+- **推送**：ff-only `git push origin HEAD:main`，输出 `3c0c154..01b303e  HEAD -> main`；三验同值 `01b303ec7f6ccc…`，ahead/behind **0/0**，树空
+- **未 curl 线上**（按 prompt）：Pages `built` 后由 ops 复核 —— `/scripts/sync-check.py`、`/documents/plan-omad-v1.0.html` **应 404**；`/`、`/sync-status.html`、`/tokens-tracker/`、`/bmi-tracker.html`、`/wechat.html` **仍 200**；`/config/sync-manifest.json` **仍 200**
+- **边界**：本 entry 与 `.review-level.yaml` 更新留工作树，由 ops 下一笔携带；未在推送后追加提交
+
+**待决 0 项**（F-1/F-2 已关；O-1~O-4 均不计发现，无需本轮裁定）。
+
+---
+
 ## 条目格式说明
 
 ```
