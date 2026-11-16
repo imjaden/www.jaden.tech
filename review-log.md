@@ -2645,6 +2645,54 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — 导航回归 + 异常面白名单不变式（3 笔已推）：产物层零泄漏已实测，但「fail-closed 不变式」只认一种形态（4 处 fail-open）；nav 右让位只覆盖 `.wc-pub`，≤600px 仍残留 1 项压在 corner 下 → PASS 96
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/tokens-tracker-mirror.py`（`sanitize_anomaly()` `:368-409`、`NAV_ITEM_CSS` `:110`、删 `HOME_TAB_HTML`）· 产物 `tokens-tracker/{index.html,data/live.js}` · `TODO-handoff.md:35`
+- **Tracking**: JT-SEC-042 公开面 `LIVE_ANOMALY` 白名单 + 导航右让位
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成（实现/整合验证审计）
+
+### 一、验收（生产侧只读 + 本机 `http.server:8099` 实测量测）
+
+1. **改动面**：`git diff --numstat origin/main..HEAD` = 4 文件（`TODO-handoff.md` +1/−1、`scripts/tokens-tracker-mirror.py` +49/−8、`tokens-tracker/data/live.js` +2/−2、`tokens-tracker/index.html` +2/−2），三笔各自单面（产物 / 代码 / 文档），无夹带；`py_compile` 通过。
+2. **产物层泄漏面（实测，非自述）**：`data/live.js` 与 `index.html` 对 `personal-cinema` / `/Users/` / `~/CodeSpace` / `jadenli` 四类**全 0 命中**；`LIVE_ANOMALY.prompt` 只剩 2 个 `hermes-manager` 块 + 首行「【已过滤】9 条…」，与自述一致。
+3. **过滤在新数据上仍成立（非空转）**：以当前上游源（`generated_at=13:19:46`，比产物新一档）重跑 `transform_live` ⇒ 非白名单项目名 `script-miner`/`jaden-tech`/`http-server` 全 0、`~/CodeSpace` 0、`/Users/` 0、`【已过滤】10`、保留头仍 2×`hermes-manager`。产物与重跑体的差异仅在计数（`anomaly_total 12→13` / `ledger_total 38→39` / `prompt_count 11→12`、`filtered 14→11`）—— 属上游数据右移，非代码差异。
+4. **nav 右让位（before/after 实量，8 档宽度）**：把注入的 `.wc-pub` `margin-right` 归零模拟注入前 —— 修复前 `1280/1024/900/768` 命中「待办/文档」**2 项**、`600/480/420` 命中 **3 项**（与提交说明的表一致，修复非空转）；修复后 `.wc-pub` 组 8 档**全 0 重叠**，右边距恒 **24px**（= nav `padding-right:16` + `margin-right:80` − 刻度），`scrollWidth` 无横向溢出。
+5. **判据存活性**：`.wc-pub` 类真实存在于上游 nav（`margin-left:auto;display:flex;gap:2px`），选择器特异性 `(0,2,0)` 高于上游 `.wc-nav` `(0,1,0)`，规避了「注入块在 head 更靠前、被上游后置简写覆盖」的坑 —— 与提交说明的解释一致。
+6. **门禁逐值**：`perf-check` rc=0 · `portal --mode post` **18/18** rc=0（S22 `disabled=8 active=1 title=8 href=0`）· `--selftest` **24/24** · `sync-check --selftest` **15/15** · `sync-check` rc=1（过渡态，`artifacts 6`）· `hm check handoff .` errors=0 warns=0。
+7. **凭据面**：三笔 diff 对 `sk-`/`ghp_`/`github_pat_`/`AKIA`/`PRIVATE KEY` **0 命中**。
+8. **推送三验**：前 `HEAD=ab86a83` / `origin/main=10f883a` / ahead 3 / 树空 ⇒ `10f883a..ab86a83`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`ab86a830bbbceaea6bb8bd8361b368afd2e921bb`**，ahead 0 / behind 0 / 树空。
+
+### 二、发现（🔴 0 / 🟡 3 / 🟢 5）
+
+- **🟡 1（`sanitize_anomaly` 的「fail-closed 不变式」四处 fail-open，同一根因：判据只认一种形态）**
+  - (a) `:380-382` `if not m: return tail` —— 赋值形态一变（`var LIVE_ANOMALY =`、`window["LIVE_ANOMALY"] =`、`window.LIVE_ANOMALY.prompt =`）⇒ 整段原样透传，**三条实测全部 NO ERROR** 且 `script-miner` 明文进输出。
+  - (b) `:369` 头正则 `【任务】\s*([A-Za-z0-9_.-]+)\s*·` 只认 ASCII、且不容 `/`；`【任务】某内部项目 · X`、`【任务】script-miner/hotfix · X` 落入 `:399-400` 的 `else: kept.append(...)` ⇒ 非白名单块**整块保留**，而 `:405` 的不变式用同一正则 ⇒ 同样看不见（实测 A/B 两形态均 NO ERROR、明文入输出）。
+  - (c) `:404-406` 不变式只扫 `【任务】` 头，不看正文：白名单块里的 `cd ~/CodeSpace/script-miner` 降级成 `cd script-miner` 后原样留在公开面（实测 H）—— 与注释「prompt 里不得再出现非白名单项目名」的表述不符。
+  - (d) `LIVE_ANOMALY` **键面未白名单**：新增任何携带明细的键（如 `extra_prompts`）都不经过滤，且 `guard_ok(SENSITIVE_LEAK)` 兜不住（`script-miner` 不在 `_SENSITIVE_WORDS`）⇒ 实测 F 明文入输出、守卫仍 True。
+  - **修法（一条收四处）**：在 `transform_live` 解析 `LIVE_ITEMS` 处取**上游全部项目名**算非白名单补集 `deny` 传进 `sanitize_anomaly`；增两条 fail-closed —— (i) `if "LIVE_ANOMALY" in tail and not m: raise`；(ii) 过滤后对 `json.dumps(obj, ensure_ascii=False)` **全文**做 `deny` 词边界扫描（覆盖正文与所有键），命中即 raise；头解析改宽为 `【任务】\s*(.+?)\s*·`，并把「块内含 `【任务】` 但解析不出项目名」按 **dropped** 计数而非保留；再给 `ALLOWED_ANOMALY_KEYS`（现 9 键：`anomaly_total/doc_missing/idle/ledger_total/prompt/prompt_count/skipped/timeout/total/unknown`）未知键即 raise。
+- **🟡 2（nav 右让位只覆盖 `.wc-pub`，≤600px 左组换行项仍压在 corner 下）**：修复后残留 —— `600→Cron Job`、`480→Memory`、`420→Session`、`375→Task`、`320→Dashboard`+`Cron Job`（各 1 项，320 为 2 项）。均**非本笔引入**（修复前同档更差：600/480/420 各 3 项），但「给右端留 80px 安全区」只对 pub 组成立。已验证修法：`body .wc-nav{padding-right:96px;}`（`(0,1,1)` 胜过上游 `(0,1,0)`，同样绕开顺序问题）—— 实测 8 档（320–768）残留**全清零**、无横向溢出，代价 `480` 与 `375` 各多一行（`navH 78→110` / `110→143`）。
+- **🟡 3（handoff 声明与实际不符，低）**：`TODO-handoff.md:35` 改后写「本轮为台账两本（`review-log.md`/`.review-level.yaml`）+ 本文件，随本笔提交」，但本批三笔**不含台账**（`git diff --stat origin/main..HEAD` 仅 4 文件；台账实际由上一批 `10f883a` 携带）。同段 `:41`「无待审计笔（`origin/main..HEAD` 现取为 0）」在提交时刻为假（当时 ahead=2），推送后才自洽。建议改成「台账两本留工作树，由 ops 下一笔携带」并把 §三 那句话改为引用 §二 的现取口径。
+- **🟢 1**：`hm check handoff` 不校验 `工作树` 声明（本轮 0 error 0 warn 仍放过 🟡3 那句）⇒ 声明面靠人眼。
+- **🟢 2**：`hm loop list --done` **无需为本处单独改** —— 公开面早有同族明文：`tokens-tracker/index.html` 的 `.table-desc` 写着「数据源 `hm loop list --global --json` + `lib_loop.py history --days 30`」（本笔之前就在线上）。要收就整族收（含 `.table-desc`），单收 prompt 属一处收一处不收。
+- **🟢 3**：白名单行 `desc` 里仍有非白名单**项目名** 2 处（`DAILY-CHECKER-CL189 … daily-tracker`、`DAILY-CHECKER-CL259 向 html-gen …`，均按 `DESC_MAX=40` 截断）。A1 白名单管的是「行」不是「词」，按现行口径合规，记录在案。
+- **🟢 4**：`anomaly_total=12 / doc_missing=10 / prompt_count=11` 等计数按既定取舍原样保留 ⇒ 公开面仍披露非白名单项目的**异常条数**（本轮只记不改）。
+- **🟢 5**：`HOME_TAB_HTML` 删除成立（全仓 0 处引用，仅 `cache/review-prep/` 的 prompt 文本提及），但 `portal-check` **无 `tab-bar` 断言** ⇒ 若上游/本脚本再注入 home tab-bar，S22 只数 `wc-nav` 不会红。建议补一条 `assert 'class="tab-bar' not in html`。同附：`render_nav` 无 active ⇒ `RuntimeError` 的 fail-closed 路径成立，但走 cron 是**静默 rc=2**（与 2026-09-23 数据冻结同族），上游 `1acl` href 一旦改名站点会静默停更，建议把镜像 rc≠0 接进通知面。
+
+### 三、计分与推送
+
+**96 → PASS**（0 🔴；3 🟡 非阻断 —— 产物层本轮实测零泄漏，三处 🟡 均为「下一版形态」的收敛/排版残留；门禁 6 项零漂移，凭据面 0 命中，生产面零写）。
+
+- **推送**：`10f883a..ab86a83`（3 笔 4 文件 / +54 −13）；后三验同值 `ab86a83`，ahead 0 / behind 0
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带
+- **建议修序**（批次）：🟡1 一条修法收 (a)–(d) → 🟡2 `body .wc-nav{padding-right:96px}` → 🟡3 文档口径改引用 → 🟢5 tab-bar 钉 → 🟢2/🟢3/🟢4 记录
+
+**待决 0 项**（本轮无阻断项，余下 🟡/🟢 归批次）。
+
+---
+
 ## 条目格式说明
 
 ```
