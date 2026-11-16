@@ -500,6 +500,10 @@ def status_page_guard(root=None):
                  else datetime.now(timezone.utc).date())
         _cut = (_base - timedelta(days=89)).isoformat()
         _top = _base.isoformat()
+        # 历史不得含「晚于快照日」的键：那条通道曾能塞未来日骗过窗口计数（review r6 🟢）
+        _future = [d for d in _days if d > _top]
+        if _future:
+            problems.append(f"历史含晚于快照日的键 {_future[:2]}（快照 {_top}）")
         days_recorded = sum(1 for d in _days if _cut <= d <= _top)
         if colored != days_recorded:
             problems.append(f"彩色格数 {colored} != 历史记录天数 {days_recorded}")
@@ -528,7 +532,12 @@ def status_page_guard(root=None):
     status_json = root / "data" / "sync-status.json"     # 走 root，副本/负控才有判别力
     if status_json.exists():
         try:
-            rc = json.loads(status_json.read_text(encoding="utf-8")).get("rc")
+            _j = json.loads(status_json.read_text(encoding="utf-8"))
+            rc = _j.get("rc")
+            # 机器 JSON 的 days_recorded 必须与页面彩色格同口径（r6 🟢：此前无任何门禁读它）
+            _jr = _j.get("days_recorded")
+            if isinstance(_jr, int) and colored != _jr:
+                problems.append(f"JSON days_recorded {_jr} != 彩色格数 {colored}")
             want_cls = {0: "ok", 1: "warn", 2: "bad", 3: "warn"}.get(rc)
             if m_banner and want_cls and m_banner.group(1) != want_cls:
                 problems.append(f"横幅类与机器 JSON rc={rc} 不一致")
@@ -590,8 +599,28 @@ def _add_hist_day(root):
     p.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
+def _add_future_day(root):
+    """历史里塞一个晚于快照日的键：窗口计数会忽略它，必须由「未来日」判据单独抓。"""
+    page = (Path(root) / "sync-status.html").read_text(encoding="utf-8", errors="replace")
+    m = re.search(r"快照 (\d{4}-\d{2}-\d{2})T", page)
+    base = datetime.fromisoformat(m.group(1)).date() if m else datetime.now(timezone.utc).date()
+    p = Path(root) / "data/sync-history.json"
+    data = json.loads(p.read_text(encoding="utf-8"))
+    data.setdefault("days", {})[(base + timedelta(days=1)).isoformat()] = {
+        "rc": 0, "verdict": "PASS", "artifacts": {}, "ok_ratio": 1.0}
+    p.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def _bump_days_recorded(root):
+    """机器 JSON 的 days_recorded 与页面彩格不同口径：只该由 JSON 门禁抓到。"""
+    p = Path(root) / "data/sync-status.json"
+    data = json.loads(p.read_text(encoding="utf-8"))
+    data["days_recorded"] = int(data.get("days_recorded") or 0) + 1
+    p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+
+
 def status_selftest():
-    """S25 判别力自证：副本基线必绿 + 10 种破坏各自必红（共 12 条断言）。"""
+    """S25 判别力自证：副本基线必绿 + 12 种破坏各自必红（共 14 条断言）。"""
     import tempfile
     import shutil
 
@@ -609,6 +638,8 @@ def status_selftest():
         shutil.rmtree(tmp, ignore_errors=True)
     for name, breaker in (
         ("历史多一天而页面未重出", _add_hist_day),
+        ("历史塞未来日", _add_future_day),
+        ("JSON days_recorded 与彩格不符", _bump_days_recorded),
         ("球色与横幅不同源", lambda d: _mutate(d, "index.html", _flip_dot)),
         ("删 favicon 戳", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace(FAVICON_STAMP, "static/img/nope.png?t="))),
@@ -791,7 +822,7 @@ def main():
               f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c} active={_ok_d}")
 
         # S25 判别力自证：四种破坏（球色/ favicon / 根绝对 / 少一行）⇒ 判据必红
-        check("S26", "V17 判别力自证：9 个变异（球色/favicon/根绝对/快照/下次生成/href/少一格/横幅↔JSON/少一行）⇒ S25 必红",
+        check("S26", "V17 判别力自证：11 个变异（球色/favicon/根绝对/快照/下次生成/href/少一格/横幅↔JSON/少一行/未来日/JSON 天数）⇒ S25 必红",
               status_selftest(), "")
 
     fails = [r for r in results if not r[2]]
