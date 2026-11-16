@@ -171,9 +171,13 @@ def _snapshot_date(payload):
     """窗口基准 = 本次快照时刻（UTC 日期）；解析失败退回当前时刻。"""
     _ck = str(payload.get("checked_at") or "")
     try:
-        return datetime.fromisoformat(_ck.replace("Z", "+00:00")).astimezone(timezone.utc).date()
+        dt = datetime.fromisoformat(_ck.replace("Z", "+00:00"))
     except ValueError:
         return datetime.now(timezone.utc).date()
+    # naive 串按 UTC 解释：否则 .astimezone() 会按本机时区换算，跨日就少一天（review 🟢）
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).date()
 
 
 def _window_keys(payload, history):
