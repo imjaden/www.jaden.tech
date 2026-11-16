@@ -65,14 +65,14 @@
 | 同步面提交腿 + 镜像与守卫收口（N-1 / F-1…F-4‴ / O-9…O-24） | `6d42ab2` `666465f` `f68031a` `a919756` `c0892bb` `f053c61` `d2622b2` `1c5c76c` |
 | 全采推荐批次（S20 隐私钉 + O-9…O-24 + S20 判据随 config_path） | `b2a79b0` `635c51c` `56449a2` `0cbff2a` |
 | tokens-tracker 导航改造（S22/S23 + manifest 白名单 + perf 预算） | 本笔 |
-| tokens-tracker 镜像源切 Dashboard（A 方案全量投影 + 掩码正则档 + fail-closed 后置禁令） | `8bfdd7d` `40322a1` `6b05687` `b04a2a0` |
+| tokens-tracker 镜像源切 Dashboard（A 方案全量投影 + 掩码正则档 + fail-closed 后置禁令；S26 12 变异） | `8bfdd7d` `40322a1` `6b05687` `af9e085` |
 | sync-status 页重构（页面/JSON/小球三处同源 + S25/S26 契约钉） | `196c59c` `bb8f1e6` `fe8c0dc` `4c445ba` `d27ea42` |
 | 收口加固（naive 时间戳按本地/快照解释、--emit-status 退役、S25 判据 root 化与窗口基准、S26 11 变异） | `1db6cee` `b4c090f` `99e5729` `1ea6062` `fe3adf7` `624e806` `cae4694` `886e7e7` |
 
 - 今日串行序（下一轮）
   ① ✅ 已落（`2fd0f92`）：`D-2` 文档一处（`§十三 时点基线` 去 `09:50`）
   ② 跨仓待办（需点名授权）：`DT-EMIT-WRITE-ONLY`（上游 emit-site 只写不提交）、`DT-SEC-417`（`site_commit` 字段）、`DT-SEC-425/426`（断言鉴别力/命名）—— 均需点名授权
-- 明早首跑（现行基线，2026-11-16 收口后）：`portal-check --mode post`（**20/20**）+ `--selftest`（**27/27**，内嵌 S25 判别力 14/14）+ `perf-check`（rc=0）+ `sync-check --selftest`（**20/20**）+ `tokens-tracker-mirror --selftest`（**33/33**）+ `sync-check`（**rc=1** 过渡态）+ `raw-pii-probe.py`（rc=0）
+- 明早首跑（现行基线，2026-11-16 收口后）：`portal-check --mode post`（**20/20**）+ `--selftest`（**27/27**，内嵌 S25 判别力 14/14）+ `perf-check`（rc=0）+ `sync-check --selftest`（**25/25**）+ `tokens-tracker-mirror --selftest`（**33/33**）+ `sync-check`（**rc=0**，3 条过渡豁免）+ `raw-pii-probe.py`（rc=0）
 - 放行口径：review PASS 后 `git push origin HEAD:main`（ff-only）；routine 不得跑 `sync-run --include-upstream`
 
 ### 其他
@@ -90,4 +90,3 @@
 
 - ✅ **`_add_hist_day` 窗口全满兜底**（review r8/r9 判，deadline 2027-02-12）——**已修 `3075860`**：无空缺日时改为**删除**一条入窗记录（禁写伪造 PASS 行）+ 后置断言「键数确实变了」，满窗 90 天实测 90→89 且判据红。同批把 JSON `days_recorded` 判据改成 fail-closed（缺失/非整数也报），S26 标签补全 12 名。
 - 🟡 **台账门禁缺位**（review r9 判）：`origin/main` 前进而 `review-log.md`/`.review-level.yaml` 无对应条目时无人发现（今日实测 r7 推 3 笔留白，靠人工发现后由 r8 补写 `JT-SYNC-STATUS-007`）。候选判据：`git log origin/main -1 --format=%h` 与台账末条的 sha 集合比对，或 `hm check handoff` 增一条。
-- 🟢 `AGENTS.md:64/65/87/88` 门禁数字仍写 21/21·15/15·19/19·25/25·S1–S24（实为 33/33·20/20·20/20·27/27·S1–S26）；受保护文件，等一次批准后一次 patch 改完。

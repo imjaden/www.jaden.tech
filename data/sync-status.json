@@ -1,7 +1,7 @@
 {
  "rc": 0,
  "verdict": "全部正常",
- "checked_at": "2026-11-16T10:02:01+00:00",
+ "checked_at": "2026-11-16T10:19:35+00:00",
  "artifacts": [
   {
    "id": "bmi-tracker",
@@ -34,7 +34,7 @@
     "sha256": "feb48256183d0be8"
    },
    "generated": "2026-11-16T16:39:55",
-   "age_h": 1.4
+   "age_h": 1.7
   },
   {
    "id": "daily-poetry",
@@ -58,7 +58,7 @@
     "sha256": "ef1cb98e57028a6c"
    },
    "generated": "2026-09-09T16:34:17+08:00",
-   "age_h": 1633.5
+   "age_h": 1633.8
   },
   {
    "id": "tokens-live",
@@ -73,7 +73,7 @@
     "sha256": "25f61f1d27f499af"
    },
    "generated": "2026-11-16T16:39:55",
-   "age_h": 1.4
+   "age_h": 1.7
   }
  ],
  "gates": {
