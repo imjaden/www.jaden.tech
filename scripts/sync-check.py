@@ -19,6 +19,7 @@
 import argparse
 import fnmatch
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -93,9 +94,12 @@ def exempt_state(art, today_iso):
 
     期内 ⇒ exempt（不计 rc=1）；到期 ⇒ unstamped（自动转黄）。
     """
-    ex = str((art or {}).get("_transition_exempt_until") or "")
+    ex = str((art or {}).get("_transition_exempt_until") or "").strip()
     if not ex:
         return None
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", ex):
+        # 手写日期写错时不要静默按字符串比出个「豁免」，直接判红交给门禁
+        return ("unstamped", f"过渡态（清单豁免日期格式非法: {ex!r}，应为 yyyy-mm-dd）")
     if today_iso <= ex:
         return ("exempt", f"过渡豁免（上游未打戳，豁免至 {ex}）")
     return ("unstamped", f"过渡态（上游未打戳，豁免已于 {ex} 到期）")
@@ -174,7 +178,8 @@ def check_artifact(art):
                     else:
                         status, detail = "ok", f"{rel}: {age:.1f}h ≤ {limit:g}h"
         recs.append(rec)
-        rank = {"ok": 0, "unstamped": 1, "stale": 1, "unknown": 2, "mismatch": 3, "missing": 3}
+        rank = {"ok": 0, "exempt": 0, "unstamped": 1, "stale": 1, "unknown": 2,
+                "mismatch": 3, "missing": 3}
         if worst[0] == "none" or rank[status] > rank[worst[0]]:
             worst = (status, detail)
     if len(recs) > 1:  # glob 条目：用一条汇总记录（展示层不刷屏）
@@ -335,6 +340,27 @@ def selftest():
     _out = exempt_state({"_transition_exempt_until": "2026-12-31"}, "2027-01-01")
     ok("豁免：到期判 unstamped", _out[0] == "unstamped" and "到期" in _out[1], str(_out))
     ok("豁免：未登记者不受影响", exempt_state({}, "2026-12-31") is None)
+    _bad = exempt_state({"_transition_exempt_until": "12/31/2026"}, "2026-11-16")
+    ok("豁免：日期格式非法判红", _bad[0] == "unstamped" and "非法" in _bad[1], str(_bad))
+
+    # glob 条目命中 2 个无戳文件时必须不崩（rank 表缺 exempt 曾必 KeyError）
+    import shutil as _sh, tempfile as _tf
+    _d = ROOT / ".selftest-glob"
+    _sh.rmtree(_d, ignore_errors=True); _d.mkdir()
+    try:
+        for _n in ("a.html", "b.html"):
+            (_d / _n).write_text("<html>no sync stamp</html>", encoding="utf-8")
+        _art = {"id": "t-glob", "artifact": ".selftest-glob/*.html",
+                "producer": {"repo": "x", "entry": "y"}, "trigger": {"cron": "?"},
+                "contract": {"stamp": "pending"}, "verify": {"hash": "optional"},
+                "_transition_exempt_until": "2099-01-01"}
+        _st, _detail, _rec = check_artifact(_art)
+        ok("豁免：glob 多文件不崩且判 exempt", _st == "exempt" and "2 个文件" in _rec["artifact"],
+           f"{_st} / {_rec.get('artifact')}")
+    except KeyError as _e:
+        ok("豁免：glob 多文件不崩且判 exempt", False, f"KeyError {_e}")
+    finally:
+        _sh.rmtree(_d, ignore_errors=True)
 
     # emit_history 往返：同一 payload 连写两次，天数不增（同日幂等），且 rc/verdict 落盘
     _hp = ROOT / "cache" / "scratch" / "_history_probe.json"
