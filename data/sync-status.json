@@ -1,7 +1,7 @@
 {
  "rc": 1,
  "verdict": "有陈旧或过渡项",
- "checked_at": "2026-11-16T08:26:32+00:00",
+ "checked_at": "2026-11-16T08:43:05+00:00",
  "artifacts": [
   {
    "id": "bmi-tracker",
@@ -30,11 +30,11 @@
     "id": "tokens-board",
     "producer": "hermes-manager/dashboard-gen",
     "v": "1",
-    "generated": "2026-11-16T16:09:54",
+    "generated": "2026-11-16T16:39:55",
     "sha256": "feb48256183d0be8"
    },
-   "generated": "2026-11-16T16:09:54",
-   "age_h": 0.3
+   "generated": "2026-11-16T16:39:55",
+   "age_h": 0.1
   },
   {
    "id": "daily-poetry",
@@ -58,7 +58,7 @@
     "sha256": "ef1cb98e57028a6c"
    },
    "generated": "2026-09-09T16:34:17+08:00",
-   "age_h": 1631.9
+   "age_h": 1632.1
   },
   {
    "id": "tokens-live",
@@ -69,17 +69,17 @@
     "id": "tokens-live",
     "producer": "hermes-manager/dashboard-gen",
     "v": "1",
-    "generated": "2026-11-16T16:09:54",
-    "sha256": "b66b66538059e529"
+    "generated": "2026-11-16T16:39:55",
+    "sha256": "25f61f1d27f499af"
    },
-   "generated": "2026-11-16T16:09:54",
-   "age_h": 0.3
+   "generated": "2026-11-16T16:39:55",
+   "age_h": 0.1
   }
  ],
  "gates": {
   "portal": "20/20",
   "perf": "PASS",
-  "sync": "15/15"
+  "sync": "18/18"
  },
  "days_recorded": 1
 }
