@@ -1,4 +1,4 @@
-/* SYNC id=tokens-live producer=hermes-manager/1acl-board-gen v=1 generated=2026-11-16T13:29:47+08:00 sha256=203ade1dc15647ce */
+/* SYNC id=tokens-live producer=hermes-manager/1acl-board-gen v=1 generated=2026-11-16T13:29:47+08:00 sha256=535721e18370416c */
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
   "filtered": 11,
@@ -196,7 +196,7 @@ window.BOARD_STATS = {
     }
   ]
 };
-window.LIVE_ANOMALY =  {
+window.LIVE_ANOMALY = {
   "anomaly_total": 13,
   "doc_missing": 11,
   "idle": 0,
@@ -207,7 +207,7 @@ window.LIVE_ANOMALY =  {
   "timeout": 2,
   "total": 38,
   "unknown": 0
-} ;
+};
 window.HIST_TASKS = [];
 window.HIST_SESSION_CAP = {
   "at_cap_sessions": [
