@@ -380,17 +380,23 @@ def transform_live(js: str) -> str:
 ANOMALY_ASSIGN = re.compile(
     r"""(?<![A-Za-z0-9_$.])(?:window\.|var\s+|let\s+|const\s+)?"""
     r"""LIVE_ANOMALY(?:\.[A-Za-z_$][\w$]*|\[["'][^"']*["']\])?\s*=""")
-ANOMALY_BLOCK = re.compile(r"""(?:(?:window\.|var\s+|let\s+|const\s+)LIVE_ANOMALY|window\[["']LIVE_ANOMALY["']\])\s*=\s*""")
+ANOMALY_BLOCK = re.compile(
+    r"""(?<![A-Za-z0-9_$.])(?:(?:window\.|var\s+|let\s+|const\s+)?"""
+    r"""LIVE_ANOMALY|window\[["']LIVE_ANOMALY["']\]|LIVE_ANOMALY\[["'][^"']*["']\])\s*=\s*""")
 # 🟡1(b)：头正则放宽到非 ASCII / 含 `/` 的项目名，并把「块内含【任务】但解析不出项目」计为 dropped
 ANOMALY_TASK_HEAD = re.compile(r"【任务】\s*(.+?)\s*·")
 # 🟡1(d)：键面白名单 —— 新增任何携带明细的键都会因未知而被拦下
 # 🟡2：`deny` 若只从 LIVE_ITEMS 派生，则「整行被过滤 / 已归档 / 只在 prompt 正文里被提到」的仓
 # 不在表里 ⇒ 正文命中既不丢块也不响。这里补一份静态内部项目表与之取并集。
+# 🟡3（第 9 轮）：按 `~/CodeSpace` 现有 28 个仓的规范名维护（去掉 .cli/.lab/.archived 后缀），
+# 词边界放宽后 `html-gen.cli` 这类带后缀的写法也会命中。新增仓请同步这里（或靠 deny 的 items 派生兜底）。
 INTERNAL_PROJECTS_STATIC = frozenset({
-    "script-miner", "html-gen", "http-server", "daily-tracker", "personal-cinema",
-    "12306-mcp", "imjaden", "train-timetabler", "image-manager", "favorite-manager",
-    "memory-hub", "jaden-tech", "zzz-unregistered-project",
-})
+    "12306-mcp", "Horizon", "JadenVault", "agent-loop", "andrej-karpathy-skills",
+    "bash-scripts", "cloudwise", "daily-tracker", "delete-browsing-history", "git-cloner",
+    "html-gen", "http-server", "imjaden", "intfocus", "jaden-tech-ledger",
+    "models.dev", "personal-cinema", "python-scripts", "ruby-scripts", "script-miner",
+    "test-hello-world", "www.jaden.tech-gitee",
+}) - PROJECT_WHITELIST
 ALLOWED_ANOMALY_KEYS = frozenset({
     "anomaly_total", "doc_missing", "idle", "ledger_total", "prompt", "prompt_count",
     "skipped", "timeout", "total", "unknown",
@@ -400,7 +406,7 @@ ALLOWED_ANOMALY_KEYS = frozenset({
 def _deny_hit(text: str, deny: set):
     """返回第一个命中的项目名（词边界，避免 `jaden-tech` 命中 `jaden.tech` 之类误判），无命中返回 None。"""
     for name in sorted(deny):
-        if re.search(r"(?<![A-Za-z0-9_.-])" + re.escape(name) + r"(?![A-Za-z0-9_.-])", text):
+        if re.search(r"(?<![A-Za-z0-9_-])" + re.escape(name) + r"(?![A-Za-z0-9_-])", text):
             return name
     return None
 
@@ -462,7 +468,7 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
             raise RuntimeError("LIVE_ANOMALY 顶层不是对象 — fail-closed")
         obj = _filter_anomaly_obj(obj, deny)
         pieces.append(tail[pos:m.end()])
-        pieces.append(" " + json.dumps(obj, ensure_ascii=False, indent=2) + " ")
+        pieces.append(json.dumps(obj, ensure_ascii=False, indent=2))
         pos = m.end() + end
         handled += 1
     if not handled:
@@ -472,8 +478,13 @@ def sanitize_anomaly(tail: str, deny: set) -> str:
         return tail
     pieces.append(tail[pos:])
     result = "".join(pieces)
-    if len(ANOMALY_ASSIGN.findall(result)) != handled:
-        raise RuntimeError("LIVE_ANOMALY 存在未处理的赋值语句 — fail-closed")
+    # 🟡1（第 9 轮）：改用**守恒断言** —— 每个被处理的块其前缀恰含 1 次 `LIVE_ANOMALY` 字样，
+    # 任何未识别的追加 / 改写 / `Object.assign(...)` 都必然让它多出一次 ⇒ 比「数赋值语句」更严密。
+    if result.count("LIVE_ANOMALY") != handled:
+        raise RuntimeError(
+            f"LIVE_ANOMALY 守恒失败：出现 {result.count('LIVE_ANOMALY')} 次、已处理 {handled} 块 — fail-closed")
+    if ANOMALY_ASSIGN.search(tail[pos:]):
+        raise RuntimeError("LIVE_ANOMALY 尾部仍有未处理的赋值 — fail-closed")
     return result
 
 
@@ -493,13 +504,52 @@ def guard_ok(text: str, what: str, pattern=SENSITIVE_LEAK) -> bool:
     return True
 
 
+ANOMALY_SELFTEST = (
+    ("a1 var 形态", 'var LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】script-miner · X"};\n', "pass"),
+    ("a2 window[] 形态", 'window["LIVE_ANOMALY"] = {"anomaly_total":1,"prompt":"【任务】llm-radar · R"};\n', "pass"),
+    ("a3 末端追加改写", 'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H"};\n'
+                        'window.LIVE_ANOMALY.prompt = "【任务】script-miner · SM";\n', "raise"),
+    ("a4 Object.assign 追加", 'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H"};\n'
+                              'Object.assign(LIVE_ANOMALY, {prompt:"x"});\n', "raise"),
+    ("b 后缀形态 html-gen.cli", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H\ncd html-gen.cli"};\n', "pass"),
+    ("c 未知键", 'window.LIVE_ANOMALY = {"anomaly_total":1,"extra_prompts":[]};\n', "raise"),
+    ("d 非字符串 prompt", 'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":["x"]};\n', "raise"),
+    ("ok 单块正常", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】daily-checker · D\n正文"};\n', "pass"),
+    ("ok 无该块", 'window.WEB_DATA_READY = true;\n', "pass"),
+)
+
+
+def _selftest() -> int:
+    """异常面形态负控（JT-SEC-042/043 固化）。返回 rc：0 全过，1 有红。"""
+    deny = INTERNAL_PROJECTS_STATIC | {"internal-infra"}
+    fails = 0
+    for name, tail, want in ANOMALY_SELFTEST:
+        try:
+            out = sanitize_anomaly(tail, deny)
+            got, detail = "pass", ""
+            if _deny_hit(out, deny):
+                got, detail = "leak", f"残留 {_deny_hit(out, deny)!r}"
+            if "=  {" in out or "} ;" in out:
+                got, detail = "format", "双空格"
+        except RuntimeError as exc:
+            got, detail = "raise", str(exc)[:40]
+        ok = got == want
+        fails += 0 if ok else 1
+        print(f"{'PASS ' if ok else 'FAIL '} {name}: {got}" + (f"（{detail}）" if detail else ""))
+    print(f"\n{len(ANOMALY_SELFTEST) - fails}/{len(ANOMALY_SELFTEST)} 通过（LIVE_ANOMALY 形态负控）")
+    return 0 if fails == 0 else 1
+
+
 def main() -> int:
     global WWW_REPO, DST_DIR, DST_INDEX, DST_LIVE, DST_ASSETS
     ap = argparse.ArgumentParser()
     ap.add_argument("--write-only", action="store_true", help="transform + write files, no git ops")
     # F-3′：允许把目标仓指到别处（隔离克隆 / 预览），默认仍是生产检出 ⇒ cron 行为不变
     ap.add_argument("--site", default=str(WWW_REPO), help="目标站点仓根（默认生产检出）")
+    ap.add_argument("--selftest", action="store_true", help="只跑 LIVE_ANOMALY 形态负控，不写盘")
     args = ap.parse_args()
+    if getattr(args, "selftest", False):
+        return _selftest()
     _site = Path(args.site).expanduser()
     if not _site.is_dir():
         print(f"⚠️ tokens-tracker mirror: --site 不是目录 {_site}", file=sys.stderr)   # O-16：错误走 stderr
