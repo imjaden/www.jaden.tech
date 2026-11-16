@@ -68,11 +68,12 @@
 | tokens-tracker 镜像源切 Dashboard（A 方案全量投影 + 掩码正则档 + fail-closed 后置禁令；S26 12 变异） | `8bfdd7d` `40322a1` `6b05687` `af9e085` |
 | sync-status 页重构（页面/JSON/小球三处同源 + S25/S26 契约钉） | `196c59c` `bb8f1e6` `fe8c0dc` `4c445ba` `d27ea42` |
 | 收口加固（naive 时间戳按本地/快照解释、--emit-status 退役、S25 判据 root 化与窗口基准、S26 11 变异） | `1db6cee` `b4c090f` `99e5729` `1ea6062` `fe3adf7` `624e806` `cae4694` `886e7e7` |
+| 状态页 C 方案（过渡豁免到期）+ 表格单行收口 + 文档订正 + 第 9 轮 forward-fix | `a36cb29` `3075860` `14a41b4` `b0e2595` `14d4c4d` `01bb14c` `67f2d00` `ffa03ad` `ae9c5f5` `ac5415a` `dcd2f74`（第 9 轮 PASS 88 后由 review 推送）；forward-fix `a8d95ff` `df1856b` `81edfeb` `fd266ef`（ops 自推） |
 
 - 今日串行序（下一轮）
   ① ✅ 已落（`2fd0f92`）：`D-2` 文档一处（`§十三 时点基线` 去 `09:50`）
   ② 跨仓待办（需点名授权）：`DT-EMIT-WRITE-ONLY`（上游 emit-site 只写不提交）、`DT-SEC-417`（`site_commit` 字段）、`DT-SEC-425/426`（断言鉴别力/命名）—— 均需点名授权
-- 明早首跑（现行基线，2026-11-16 收口后）：`portal-check --mode post`（**20/20**）+ `--selftest`（**27/27**，内嵌 S25 判别力 14/14）+ `perf-check`（rc=0）+ `sync-check --selftest`（**25/25**）+ `tokens-tracker-mirror --selftest`（**33/33**）+ `sync-check`（**rc=0**，3 条过渡豁免）+ `raw-pii-probe.py`（rc=0）
+- 明早首跑（现行基线，2026-11-16 18:20 收口后）：`portal-check --mode post`（**20/20**）+ `--selftest`（**27/27**，内嵌 S25 判别力 14/14）+ `perf-check`（rc=0）+ `sync-check --selftest`（**25/25**）+ `tokens-tracker-mirror --selftest`（**33/33**）+ `sync-check`（**rc=0**，3 条过渡豁免）+ `raw-pii-probe.py`（rc=0）
 - 放行口径：review PASS 后 `git push origin HEAD:main`（ff-only）；routine 不得跑 `sync-run --include-upstream`
 
 ### 其他
