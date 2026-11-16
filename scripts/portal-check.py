@@ -488,9 +488,15 @@ def status_page_guard(root=None):
     if "下次生成" not in html:
         problems.append("缺「下次生成」说明")
     # 状态列徽章类必须取自四档枚举（新增档位若忘记加样式会渲染成无底色）
-    _badges = set(re.findall(r'<td data-l="状态"[^>]*><span class="badge badge-([a-z]+)"', html))
-    if not _badges <= {"ok", "warn", "bad", "muted"}:
-        problems.append(f"状态徽章类越界 {sorted(_badges)}")
+    _badge_hits = re.findall(r'<td data-l="状态"[^>]*><span class="badge badge-([a-z]+)"', html)
+    _rows_now = html.count(ROWS_CELL)
+    if not _badge_hits:
+        # 正则一条都没命中时 `set() <= enum` 恒真 ⇒ 标记法一漂移（引号换单引号/整块 td 被删）就真空放行
+        problems.append(f"状态徽章解析 0 命中（行数 {_rows_now}，疑标记法漂移）")
+    elif len(_badge_hits) != _rows_now:
+        problems.append(f"状态徽章数 {len(_badge_hits)} != 组件表行数 {_rows_now}")
+    if not set(_badge_hits) <= {"ok", "warn", "bad", "muted"}:
+        problems.append(f"状态徽章类越界 {sorted(set(_badge_hits))}")
     bars = len(re.findall(r'<span class="(?:ok|warn|bad|none)" title=', html))
     colored = len(re.findall(r'<span class="(?:ok|warn|bad)" title=', html))
     try:
@@ -602,7 +608,10 @@ def _add_hist_day(root):
         _victim = next((d for d in sorted(days) if d >= (base - timedelta(days=89)).isoformat()), None)
         if _victim is None:
             raise RuntimeError("S25 负控无法构造：窗口内既无空缺日也无入窗记录")
+        _n1 = len(days)
         days.pop(_victim)
+        if len(days) != _n1 - 1:
+            raise RuntimeError(f"S25 负控未生效：期望删 1 天，实得 {_n1} → {len(days)}")
         p.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
         return
     _before = len(days)
