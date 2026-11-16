@@ -392,7 +392,7 @@ _ANOMALY_ESC = re.compile(
     r"|\\([0-7]{1,3})"                     # 八进制 \137
     r"|\\\r?\n"                          # 行续行
 )
-_ANOMALY_NOISE = re.compile(r"""[\s"'`+$]|\$\{""")
+_ANOMALY_NOISE = re.compile(r"""[\s"'`+${}]""")
 _ANOMALY_LINE_COMMENT = re.compile(r"//[^\n]*")
 _ANOMALY_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.S)
 
@@ -522,12 +522,12 @@ def sanitize_anomaly(tail: str, deny) -> str:
     # 而未识别的接收者（`self.LIVE_ANOMALY =` / `globalThis["LIVE_ANOMALY"] =` / 动态拼接）
     # 必然落在未消费区 ⇒ 计数不符 ⇒ 中止。
     residual = "".join(prefixes) + tail[pos:]
-    for _label, _proj in (("归一化", _normalize_anomaly(residual)),
-                          ("抹注释+归一化", _normalize_anomaly(_strip_anomaly_comments(residual)))):
-        _n = _proj.count("LIVE_ANOMALY")
-        if _n != handled:
-            raise RuntimeError(
-                f"LIVE_ANOMALY 守恒失败：未消费区（{_label}）出现 {_n} 次、已处理 {handled} 块 — fail-closed")
+    # 守恒位**只用 P1**：P2（抹注释）在检测位必需（`"LIVE_"/*x*/+"ANOMALY"`、行注释切分只有它抓得住），
+    # 但在守恒位零安全增益、还会因抹掉 `//` 后把多行粘起来而制造误报（JT-SEC-046 🟢1）。
+    _n = _normalize_anomaly(residual).count("LIVE_ANOMALY")
+    if _n != handled:
+        raise RuntimeError(
+            f"LIVE_ANOMALY 守恒失败：未消费区出现 {_n} 次、已处理 {handled} 块 — fail-closed")
     return result
 
 
@@ -565,12 +565,27 @@ ANOMALY_SELFTEST = (
     ("a12 码点转义键名", r'window["LIVE\u{5f}ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
     ("a13 八进制转义键名", r'window["LIVE\137ANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
     ("a14 行续行键名", 'window["LIVE_\\\nANOMALY"] = {"prompt":"【任务】script-miner · X"};', "raise"),
+    ("a15 模板插值键名", 'window[`LIVE_${""}ANOMALY`] = {"prompt":"【任务】script-miner · X"};', "raise"),
     ("b 后缀形态 html-gen.cli", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】hermes-manager · H\ncd html-gen.cli"};', "pass_dropped"),
     ("c 未知键", r'window.LIVE_ANOMALY = {"anomaly_total":1,"extra_prompts":[]};', "raise"),
     ("d 非字符串 prompt", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":["x"]};', "raise"),
     ("ok 单块正常", r'window.LIVE_ANOMALY = {"anomaly_total":1,"prompt":"【任务】daily-checker · D\n正文"};', "pass"),
     ("ok 无该块", r'window.WEB_DATA_READY = true;', "pass"),
 )
+
+
+def _structure_ok() -> list:
+    """结构钉（JT-SEC-046 记）：两次 `index()` 区间切割都把静态表切哑过 —— 用存在性 + 计数守住。"""
+    problems = []
+    if len(INTERNAL_PROJECTS_STATIC) != 22:
+        problems.append(f"INTERNAL_PROJECTS_STATIC={len(INTERNAL_PROJECTS_STATIC)}（期望 22）")
+    if len(ALLOWED_ANOMALY_KEYS) != 10:
+        problems.append(f"ALLOWED_ANOMALY_KEYS={len(ALLOWED_ANOMALY_KEYS)}（期望 10）")
+    for sym in (ANOMALY_BLOCK, ANOMALY_TASK_HEAD, _deny_hit, _normalize_anomaly,
+                _strip_anomaly_comments, _decode_anomaly_escapes, _filter_anomaly_obj):
+        if sym is None:
+            problems.append(f"符号缺失 {sym}")
+    return problems
 
 
 def _selftest() -> int:
@@ -595,7 +610,13 @@ def _selftest() -> int:
         ok = got == want
         fails += 0 if ok else 1
         print(f"{'PASS ' if ok else 'FAIL '} {name}: {got}" + (f"（{detail}）" if detail else ""))
-    print(f"\n{len(ANOMALY_SELFTEST) - fails}/{len(ANOMALY_SELFTEST)} 通过（LIVE_ANOMALY 形态负控）")
+    for prob in _structure_ok():
+        fails += 1
+        print(f"FAIL  结构钉: {prob}")
+    if not _structure_ok():
+        print("PASS  结构钉: 静态表 22 / 键白名单 10 / 7 个关键符号齐")
+    total = len(ANOMALY_SELFTEST) + 1
+    print(f"\n{total - fails}/{total} 通过（LIVE_ANOMALY 形态负控 + 结构钉）")
     return 0 if fails == 0 else 1
 
 
