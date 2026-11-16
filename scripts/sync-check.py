@@ -29,6 +29,7 @@ import sync_stamp  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "config" / "sync-manifest.json"
+HISTORY = ROOT / "data" / "sync-history.json"      # 状态页的日聚合（单日一行，幂等覆盖）
 REQUIRED = ("id", "artifact", "producer", "trigger", "contract", "publish", "verify")
 
 
@@ -286,6 +287,43 @@ def emit_status(payload, dest):
     return len(html)
 
 
+VERDICT = {0: "PASS", 1: "PASS（含过渡/陈旧项）", 2: "FAIL（结构违规）", 3: "UNKNOWN"}
+
+
+def emit_history(payload, dest=None):
+    """把本次校验压缩成「一天一行」写进历史（幂等：同一天重复跑 = 覆盖当天行）。
+
+    形状：{"schema": 1, "days": {"YYYY-MM-DD": {"rc": 1, "verdict": "...", "artifacts": {"id": "status"},
+            "ok_ratio": 0.5}}}
+    用途：状态页的 90 天条；不记时间序列细节，避免文件随时间膨胀（约 100 B/天）。
+    """
+    dest = Path(dest or HISTORY)
+    data = {"schema": 1, "days": {}}
+    if dest.exists():
+        try:
+            loaded = json.loads(dest.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict) and isinstance(loaded.get("days"), dict):
+                data = loaded
+        except (OSError, json.JSONDecodeError):
+            pass                       # 损坏则重来（历史可重建，不 fail-closed）
+    status_by_id = {}
+    for item in payload["details"]:
+        status_by_id.setdefault(item["id"], item["status"])
+    day = payload["checked_at"][:10]   # UTC 日期；状态页按 UTC 展示并标注
+    arts = {row["id"]: status_by_id.get(row["id"], "unknown") for row in payload["artifacts"]}
+    ok = sum(1 for v in arts.values() if v == "ok")
+    data["schema"] = 1
+    data.setdefault("days", {})[day] = {
+        "rc": payload["rc"], "verdict": VERDICT[payload["rc"]], "artifacts": arts,
+        "ok_ratio": round(ok / len(arts), 3) if arts else 0.0,
+    }
+    data["days"] = dict(sorted(data["days"].items()))
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return len(data["days"])
+
+
+
 def selftest():
     checks = []
 
@@ -362,6 +400,8 @@ def main():
     ap.add_argument("--strict", action="store_true")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--emit-status", metavar="PATH")
+    ap.add_argument("--emit-history", metavar="PATH", nargs="?", const=str(HISTORY),
+                    help="追加/覆盖当天日聚合（默认 data/sync-history.json）")
     args = ap.parse_args()
 
     if args.selftest:
@@ -371,6 +411,9 @@ def main():
     if args.emit_status:
         size = emit_status(payload, args.emit_status)
         print(f"status page written: {args.emit_status} ({size} B)", file=sys.stderr)
+    if args.emit_history:
+        days = emit_history(payload, args.emit_history)
+        print(f"history written: {args.emit_history} ({days} 天)", file=sys.stderr)
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
