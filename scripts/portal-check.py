@@ -404,6 +404,8 @@ def nav_guard(board_path=None):
     titled = nav.count(f'title="{NAV_DISABLED_TITLE}"')
     if 'href=' in nav:
         return False, "导航区出现 href（禁用项必须无链接）"
+    if 'class="tab-bar' in html:
+        return False, "产物出现 tab-bar（B1 已废弃旧双层导航）"
     if dis != NAV_DISABLED_EXPECT or act != NAV_ACTIVE_EXPECT:
         return False, f"disabled={dis}（期望 {NAV_DISABLED_EXPECT}）active={act}（期望 {NAV_ACTIVE_EXPECT}）"
     if titled != dis:
