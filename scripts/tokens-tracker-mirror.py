@@ -628,6 +628,8 @@ def _selftest() -> int:
     return 0 if fails == 0 else 1
 
 
+LAST_DENY: set = set()      # transform_dashboard 填；main 用它做产物级 deny 并集
+
 PUBLIC_CALIBER = ("口径：四域指标由本机 Dashboard 生成器按 C1 新口径聚合（独占会话归因 + 共享池单列 + 上限 + "
                   "model 分布）。公开镜像只列白名单项目的任务行与聚合数字，不列项目明细与本地命令。")
 MASK_TERM = "其他项目"
@@ -635,10 +637,17 @@ LOCAL_CMD = "（本地命令）"
 # 词表档（公开面禁列的具体词）：项目名走 deny 集合，另外这两个词按内容档替换
 MASK_TERMS = (("飞书", "消息通道"), ("阿里云", "云服务商"),
               ("~/.hermes/state.db", "本地会话库"), ("state.db", "本地会话库"),
-              ("~/.hermes/", ""), ("1ACL 台账", "台账"),
               ("web/data/dashboard.js", "数据层"), ("web/index.html", "页面壳"))
+# 正则档：大小写/拼音/路径形态 —— 字面表盖不住「同一物的另一种写法」（review SEC-1/SEC-2 实证）
+MASK_REGEXES = (
+    (re.compile(r"(?i)1acl"), "控制台"),
+    (re.compile(r"(?i)feishu"), "消息通道"),
+    (re.compile(r"~/?\.hermes/?|\.hermes/"), ""),
+    (re.compile(r"~/CodeSpace/?"), ""),
+)
 # 掩码后仍出现在产物里即中止（比逐字段断言更可信；也是「新字段带新专名」的兜底）
-POST_MASK_FORBIDDEN = re.compile(r"state\.db|~/\.hermes|/Users/|lib_hist_caliber|(?<![A-Za-z0-9_])hm ")
+POST_MASK_FORBIDDEN = re.compile(
+    r"state\.db|/Users/|\.hermes|~/CodeSpace|lib_hist_caliber|(?i)\b1acl\b|(?i)feishu|(?<![A-Za-z0-9_])hm ")
 CLI_CMD_RE = re.compile(r"(?<![A-Za-z0-9_])hm [a-z][a-z0-9 .\-/]{0,60}")
 WHERE_LINE_RE = re.compile(r"^\s*(Where|Where：)\s*[:：]", re.M)
 
@@ -652,6 +661,8 @@ def mask_text(text: str, deny) -> str:
         out = re.sub(r"(?<![A-Za-z0-9_-])" + re.escape(name) + r"(?![A-Za-z0-9_-])", MASK_TERM, out)
     for raw, neutral in MASK_TERMS:
         out = out.replace(raw, neutral)
+    for pattern, neutral in MASK_REGEXES:
+        out = pattern.sub(neutral, out)
     out = CLI_CMD_RE.sub(LOCAL_CMD, out)
     out = out.replace("~/CodeSpace/", "").replace("/Users/jadenli", "")
     return out
@@ -675,7 +686,9 @@ def project_board_rows(rows, deny) -> list:
 
 
 def project_card(card, deny) -> dict:
-    out = {k: card.get(k) for k in ("key", "label", "level", "value", "action_label")}
+    out = {k: card.get(k) for k in ("key", "label", "level", "action_label")}
+    out["label"] = mask_text(out.get("label") or "", deny)
+    out["value"] = mask_text(card.get("value"), deny)   # 卡值是字符串（如「最高 99.0%（ops MEMORY）」）
     out["note"] = mask_text(card.get("note") or "", deny)
     out["copy_cmd"] = LOCAL_CMD
     prompt = WHERE_LINE_RE.sub("", mask_text(card.get("prompt") or "", deny))
@@ -696,17 +709,18 @@ def project_range(rng, deny) -> dict:
             "headline": mask_text(d.get("headline") or "", deny),
             "href": "",                                  # 内部路由不公开（防死链 + 防页面地图泄漏）
             "unavailable": d.get("unavailable"),
-            "stats": [{"label": mask_text(s.get("label") or "", deny), "value": s.get("value"),
+            "stats": [{"label": mask_text(s.get("label") or "", deny),
+                       "value": mask_text(s.get("value"), deny),
                        "raw": s.get("raw"), "note": mask_text(s.get("note") or "", deny)}
                       for s in (d.get("stats") or [])],
             "analysis": [{"title": mask_text(a.get("title") or "", deny),
                           "note": mask_text(a.get("note") or "", deny),
                           "rows": [{"label": mask_text(x.get("label") or "", deny),
-                                    "value": x.get("value"), "raw": x.get("raw")}
+                                    "value": mask_text(x.get("value"), deny), "raw": x.get("raw")}
                                    for x in (a.get("rows") or [])]}
                          for a in (d.get("analysis") or [])],
         })
-    return {"days": rng.get("days"), "label": rng.get("label"), "domains": domains}
+    return {"days": rng.get("days"), "label": mask_text(rng.get("label") or "", deny), "domains": domains}
 
 
 def transform_dashboard(js: str) -> str:
@@ -734,6 +748,8 @@ def transform_dashboard(js: str) -> str:
     rows_raw = board.get("rows") or []
     deny = ({str(r.get("project")) for r in rows_raw if isinstance(r, dict) and r.get("project")}
             | INTERNAL_PROJECTS_STATIC) - PROJECT_WHITELIST
+    global LAST_DENY
+    LAST_DENY = set(deny)
     counts = dict(board.get("counts") or {})
     counts = _filter_anomaly_obj(counts, deny)      # 键面/正文面与 LIVE_ANOMALY 同一套判据
     if isinstance(counts.get("prompt"), str):
@@ -882,7 +898,7 @@ def main() -> int:
     new_html = sync_stamp.html_stamp(
         new_html,
         id="tokens-board",
-        producer="hermes-manager/1acl-board-gen",
+        producer="hermes-manager/dashboard-gen",
         v="1",
         generated=_generated,
         sha256=sync_stamp.digest(new_html),
@@ -892,7 +908,7 @@ def main() -> int:
     if not guard_ok(new_data, "data/dashboard.js"):
         return 2
     # 公开面专名断言：掩码后产物里不得再出现任何内仓名 / 本地路径（fail-closed，比逐字段可信）
-    _deny_all = INTERNAL_PROJECTS_STATIC
+    _deny_all = INTERNAL_PROJECTS_STATIC | LAST_DENY
     _hit = _deny_hit(new_data, _deny_all)
     if _hit:
         print(f"⚠️ tokens-tracker mirror: 产物仍含内仓名 {_hit!r}（掩码遗漏），aborting")
@@ -906,7 +922,7 @@ def main() -> int:
     new_data = sync_stamp.js_stamp(
         new_data,
         id="tokens-live",
-        producer="hermes-manager/1acl-board-gen",
+        producer="hermes-manager/dashboard-gen",
         v="1",
         generated=_generated,
         sha256=sync_stamp.digest(new_data),
