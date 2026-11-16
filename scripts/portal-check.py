@@ -460,7 +460,6 @@ def check_s22(board_path=None):
 
 # S25（2026-11-16）：状态页 + 首页小球契约 —— 三处同源（页面横幅 / 小球 / 机器 JSON）。
 STATUS_PAGE = ROOT / "sync-status.html"
-STATUS_JSON = ROOT / "data" / "sync-status.json"
 FAVICON_STAMP = "static/img/favicon-64.png?t="
 ROWS_CELL = '<td data-l="产物">'
 DOT_OF_BANNER = {"ok": "is-ok", "warn": "is-warn", "bad": "is-bad"}
@@ -488,6 +487,14 @@ def status_page_guard(root=None):
     if "下次生成" not in html:
         problems.append("缺「下次生成」说明")
     bars = len(re.findall(r'<span class="(?:ok|warn|bad|none)" title=', html))
+    colored = len(re.findall(r'<span class="(?:ok|warn|bad)" title=', html))
+    try:
+        hist = json.loads((root / "data/sync-history.json").read_text(encoding="utf-8"))
+        days_recorded = len(hist.get("days") or {})
+        if colored != days_recorded:
+            problems.append(f"彩色格数 {colored} != 历史记录天数 {days_recorded}")
+    except (OSError, json.JSONDecodeError, AttributeError):
+        problems.append("data/sync-history.json 不可读，无法核对彩色格数")
     if bars != 90:
         problems.append(f"90 天条格数 {bars} != 90")
     try:
