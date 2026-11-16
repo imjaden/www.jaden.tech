@@ -642,13 +642,13 @@ MASK_TERMS = (("飞书", "消息通道"), ("阿里云", "云服务商"),
 MASK_REGEXES = (
     (re.compile(r"(?i)1acl"), "控制台"),
     (re.compile(r"(?i)feishu"), "消息通道"),
-    (re.compile(r"~/?\.hermes\b/?"), ""),
-    (re.compile(r"~/CodeSpace\b/?"), ""),
+    (re.compile(r"(?:~/?)?\.hermes(?![A-Za-z0-9_])/?"), ""),
+    (re.compile(r"~/CodeSpace(?![A-Za-z0-9_])/?"), ""),
 )
 # 掩码后仍出现在产物里即中止（比逐字段断言更可信；也是「新字段带新专名」的兜底）
 # 注意：`(?i)` 只能出现在模式开头（Python 3.12+ 中段会抛 re.error）⇒ 用编译期 flags。
 POST_MASK_FORBIDDEN = re.compile(
-    r"state\.db|/Users/|\.hermes|~/CodeSpace|lib_hist_caliber|\b1acl\b|feishu|(?<![A-Za-z0-9_])hm ",
+    r"state\.db|/Users/|\.hermes(?![A-Za-z0-9_])|~/CodeSpace(?![A-Za-z0-9_])|lib_hist_caliber|\b1acl\b|feishu|(?<![A-Za-z0-9_])hm ",
     re.IGNORECASE)
 CLI_CMD_RE = re.compile(r"(?<![A-Za-z0-9_])hm [a-z][a-z0-9 .\-/]{0,60}")
 WHERE_LINE_RE = re.compile(r"^\s*(Where|Where：)\s*[:：]", re.M)
