@@ -198,7 +198,16 @@ def _stamp_generated(live_text: str) -> str:
     from datetime import datetime as _dt
     m = _re.search(r'"generated_at"\s*:\s*"([^"]+)"', live_text)
     if m:
-        return m.group(1)
+        # 上游 META.generated_at 是 naive（无偏移）⇒ 显式按本地时区补齐偏移后输出，
+        # 否则站点侧只能猜时区（页面会标「上游戳无时区偏移」），且与 age 计算口径容易打架。
+        _raw = m.group(1)
+        try:
+            _d = _dt.fromisoformat(_raw)
+        except ValueError:
+            return _raw
+        if _d.tzinfo is None:
+            _d = _d.astimezone()
+        return _d.isoformat(timespec="seconds")
     return _dt.fromtimestamp(SRC_DATA.stat().st_mtime).astimezone().isoformat(timespec="seconds")
 
 
