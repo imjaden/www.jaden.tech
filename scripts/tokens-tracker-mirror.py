@@ -363,23 +363,25 @@ def main() -> int:
     if not _site.is_dir():
         print(f"⚠️ tokens-tracker mirror: --site 不是目录 {_site}", file=sys.stderr)   # O-16：错误走 stderr
         return 2
-    # O-15：非仓目录必须在**任何写盘之前**拒绝（原位置在 mkdir+五次写之后，只拦住了 commit）
-    if not args.write_only:
-        # O-19：不要用 `<site>/.git` 存在性判仓（仓内子目录会被误拒）；交给 git 自己判定，
-        # 并**归一到仓根**，否则 `--site <clone>/scripts` 会写出 `<clone>/scripts/tokens-tracker`（O-20）。
-        try:
-            probe = subprocess.run(["git", "-C", str(_site), "rev-parse", "--show-toplevel"],
-                                   capture_output=True, text=True, timeout=15)
-        except (OSError, subprocess.SubprocessError) as exc:      # O-21：git 缺失/超时不吃裸栈
-            print(f"⚠️ tokens-tracker mirror: 无法调用 git（{exc}）", file=sys.stderr)
-            return 2
-        if probe.returncode != 0:
-            print(f"⚠️ tokens-tracker mirror: --site 不是 git 工作树 {_site}"
-                  f"（{(probe.stderr or '').strip().splitlines()[:1]}）", file=sys.stderr)
-            return 2
-        _top = Path(probe.stdout.strip())
-        if _top.is_dir():
-            _site = _top
+    # O-15：非仓目录必须在**任何写盘之前**拒绝；O-19/O-20：两种模式都做仓根归一。
+    # 失败语义按模式分档 —— 提交模式 fail-closed（rc=2 单行 stderr），
+    # `--write-only` 静默保持原样（「无 git 也能预览」契约，O-15 已兑现）。
+    try:
+        probe = subprocess.run(["git", "-C", str(_site), "rev-parse", "--show-toplevel"],
+                               capture_output=True, text=True, timeout=15)
+        _out = (probe.stdout or "").strip()
+        _err1 = ((probe.stderr or "").strip().splitlines() or [""])[0]      # O-21′：单行字符串，不是 list repr
+        _top_ok = probe.returncode == 0 and bool(_out) and Path(_out).is_dir()
+        # 空 stdout 曾经让 `Path("") == Path(".")` ⇒ 把 cwd 当成仓根写盘，必须判死
+        _why = "" if _top_ok else (f"rc={probe.returncode} out={_out[:80]!r}".strip() + (f" err={_err1}" if _err1 else ""))
+    except (OSError, subprocess.SubprocessError) as exc:                     # git 缺失/超时不吃裸栈
+        _top_ok, _why = False, f"无法调用 git（{exc}）"
+    if _top_ok:
+        _site = Path(_out)
+    elif not args.write_only:
+        print(f"⚠️ tokens-tracker mirror: --site 不是 git 工作树 {_site}（{_why}）", file=sys.stderr)
+        return 2
+
     if _site.resolve() != WWW_REPO.resolve():
         WWW_REPO = _site.resolve()
         DST_DIR = WWW_REPO / "tokens-tracker"

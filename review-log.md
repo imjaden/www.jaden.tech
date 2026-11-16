@@ -2438,6 +2438,45 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — O-19/O-20/O-21 收口审计（1 笔已推）：git 模式子目录归一成立、write-only 路径未归一 → PASS 96
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/tokens-tracker-mirror.py`（删 `.git` 存在性门 → `git -C … rev-parse --show-toplevel` 判工作树并归一到仓根 + `timeout=15` / `except (OSError, SubprocessError)`）· 台账 2 文件
+- **Tracking**: JT-SEC-037 O-19/O-20/O-21
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ✅ 已生成（`cache/review-prep/www-o20-o21-impl-prompt.md`，交 dev：2 🟡 + 1 🟢）
+
+### 一、验收（隔离 clone `…/scratch/o1921/clone` @ `d2622b2`；生产面只读指纹）
+
+1. **O-19 CLOSED**：裸跑 `--site <clone>/scripts` ⇒ **rc=0**，写出 `<clone>/tokens-tracker/{index.html,data,assets}` 五文件，`<clone>/scripts/tokens-tracker` **不存在**，clone 内新增一笔 `data@update`、工作树空。
+2. **O-20（git 模式）CLOSED**：同一笔的写入目标 = 仓根（`rev-parse --show-toplevel` 归一后），不再是传入的子目录。
+3. **非 git 目录**：`--site <空目录>`（不带 `--write-only`）⇒ **rc=2**、stderr 单行、目录内**文件数 0**（O-15 守卫未回退）。
+4. **bare repo / 目录内空 `.git` 文件** ⇒ `rc=2「不是 git 工作树」`（`fatal: this operation must be run in a work tree` / `invalid gitfile format`），零写盘。
+5. **O-21 CLOSED**：`PATH=/nonexistent` ⇒ **rc=2**「无法调用 git（[Errno 2]…）」**无裸栈**、零写盘；`timeout=15` 的 `TimeoutExpired` 属 `SubprocessError` 子类，已覆盖。
+6. **门禁逐值**：`perf-check` rc=0 · `portal-check --mode post` **16/16** rc=0（S17 rc=1 `artifacts=6`）· `--selftest` **20/20** · `sync-check --selftest` **15/15** · `sync-check` **rc=1**（过渡态 `artifacts 6`）· `py_compile` rc=0。
+7. **生产指纹零变**：`tokens-tracker/index.html` sha256 `2f927abb…` / `data/live.js` sha256 `e37dd242…` 审计前后逐字相同，`porcelain` 线数 0。
+
+### 二、发现（🔴 0 / 🟡 2，非阻断）
+
+- **🟡 1. O-20 只半闭合：`--write-only` 路径未归一**。归一语句在 `if not args.write_only:` 块内（`scripts/tokens-tracker-mirror.py:367-382`），实测 `--write-only --site <clone>/scripts` ⇒ rc=0 并写出 `<clone>/scripts/tokens-tracker`（五文件）；深层子目录 `<clone>/tokens-tracker/data` 同理。**生产路径不可达**（`sync-run.py:43` 传 `--write-only`，`:66` 把 `{site}` 展开成 `ROOT`＝仓根），风险面 = 手工预览在生产子目录落盘（污染工作树）。修法：探针提到 `if` 之外，`--write-only` 下「probe 成功才归一、失败静默保持原样」，保住 O-15 的「无 git 也能预览」契约。
+- **🟡 2. 空 stdout 未判空 ⇒ 目标落到 cwd**：`_top = Path(probe.stdout.strip())`（`:380`）在 `rev-parse` 返回 rc=0 且 stdout 为空时得 `Path("")` = `.`，`is_dir()` 为真 ⇒ `_site` 被 `resolve()` 成**当前工作目录**并按新目标写盘+提交。实测：PATH 前置「rc=0 且零输出」的 git 桩 ⇒ rc=0、五文件落在 `cwd/tokens-tracker`。真实 git 到不了该态（属防御缺口），但后果是「写到错误仓」——正是本轮要收的类。修法：`out=(probe.stdout or '').strip()`；`out` 空或非目录 ⇒ `rc=2`（fail-closed，不吞）。
+- **🟢 3. stderr 回显把 list repr 打进操作员消息**（`:377-379`）：`splitlines()[:1]` 在 f-string 里 ⇒ 看到 `['fatal: …']`；取 `[0]`。
+- **🟢 4. 输入面放宽记录**：`--site <生产>/scripts` 现等价默认（提交到生产检出）。mirror 自身无 origin/生产身份守卫（守卫在 `sync-run` 的 `production_checkout_reason`），故方向由「误拒」变为「等权」；默认本就指向生产且**不 push**，无提权，记录备查。
+- **结转未动**：O-13、O-14、O-17、O-18、O-9。
+
+### 三、计分与推送
+
+**100 − 2（🟡 1 O-20 半闭合）×2 = 96 → PASS**（0 🔴；O-19 / O-20(git 模式) / O-21 CLOSED；门禁 5 项零漂移；生产面零写）。
+
+- **推送**：前 `HEAD=d2622b2` / `origin/main=f053c61` / ahead **1** / behind 0 / 树空 ⇒ `git push origin HEAD:main` = `f053c61..d2622b2  HEAD -> main`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`d2622b2d7cf0d4485ada1106e0754250d53aa9ba`**，ahead **0** / behind **0** / 树空
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带；推送后未追加提交
+- **建议修序**（批次）：**O-20 全闭合（write-only 归一）→ 空 stdout fail-closed → stderr 回显整形 → O-13 → O-17 → O-14/O-18/O-9**
+
+**待决 1 项**：`--write-only` 下探针失败语义取「静默保持原样」（推荐，保住无 git 预览契约）还是「rc=2 硬拒」（会破坏 O-15 已兑现的预览能力）。
+
+---
+
 ## 条目格式说明
 
 ```
