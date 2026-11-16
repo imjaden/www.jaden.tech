@@ -75,16 +75,28 @@ def resolve_cmd(art):
     return _expand(LOCAL_ENTRIES.get(producer.get("mode")))
 
 
-CANONICAL_REMOTE_RE = r"github\.com[:/]+imjaden/www\.jaden\.tech"   # 兼容 ssh(git@host:owner/repo) 与 https
+# F-4‴：必须锚定结尾（否则 `www.jaden.tech-fork` / `.bak` / 代理路径都能混过），大小写不敏感
+CANONICAL_REMOTE_RE = r"github\.com[:/]+imjaden/www\.jaden\.tech(?:\.git)?/?$"
 
 
-def is_production_checkout():
-    """本仓是否就是生产检出（F-4′：只有这里跑 --include-upstream 才是安全的）。
+# F-4″：路径身份默认取 `~/CodeSpace/www.jaden.tech`（不写用户名、只用 HOME 相对路径）；
+# 换机器/换目录时用 env 覆写，仍与 origin 身份取「与」。
+PROD_ROOT = Path(os.environ.get("SYNC_PROD_ROOT") or (Path.home() / "CodeSpace" / "www.jaden.tech")).expanduser()
 
-    判据 = `git remote get-url origin` 指向本仓规范远端；克隆/临时副本 origin 不同 ⇒ 判否。
+
+def production_checkout_reason():
+    """生产检出判据 = **路径身份 ∧ origin 身份**。返回 None 表示通过，否则返回拒绝原因。
+
+    F-4″：只看 origin 不够 —— 第二份 clone 设好规范 origin 也会被当生产检出，
+    而 emit-site 写的仍是上游硬编码路径（跨仓污染真发生过一次）。
     """
+    if ROOT.resolve() != PROD_ROOT.resolve():
+        return f"ROOT={ROOT} ≠ 生产检出 {PROD_ROOT}"
     r = subprocess.run(["git", "remote", "get-url", "origin"], cwd=ROOT, capture_output=True, text=True)
-    return bool(re.search(CANONICAL_REMOTE_RE, (r.stdout or "").strip()))
+    _url = (r.stdout or "").strip()
+    if not re.search(CANONICAL_REMOTE_RE, _url, re.I):
+        return f"origin={_url or '(none)'} 不是本仓规范远端"
+    return None
 
 
 def load():
@@ -248,14 +260,18 @@ def main():
         print(f"manifest unreadable: {exc}", file=sys.stderr)
         return 2
 
-    if args.include_upstream and not is_production_checkout() and not args.force_upstream:
+    _why = production_checkout_reason() if args.include_upstream else None
+    if _why and not args.force_upstream and args.apply:
         # F-4′：上游 emit-site 写的是它**自己配置的**（生产）站点路径，本工具的 env 注入无效；
         # 在克隆/副本里跑会把产物写进生产仓（实测污染 records.json / index.html / snapshots）。
-        print("拒绝执行：`--include-upstream` 只在生产检出内允许（当前 ROOT 的 origin 不是规范远端）。",
-              file=sys.stderr)
+        print(f"拒绝执行：`--include-upstream` 只在生产检出内允许（{_why}）。", file=sys.stderr)
         print("  如确需在副本里跑，先设好上游沙箱四件套（DT_SANDBOX=1 + DT_BASE + DT_HEALTH_DATA + "
               "DT_SITE_REPO）再加 --force-upstream；否则请在生产检出执行。", file=sys.stderr)
         return 2
+    if _why:
+        # O-12：dry-run 允许预览，但必须显式提示这不是生产检出
+        print(f"⚠️  非生产检出（{_why}）：dry-run 仅预览；真正 --apply 会被拒绝（除 --force-upstream）",
+              file=sys.stderr)
 
     steps = plan(manifest, args.only, args.include_upstream)
     # 同一 (cwd, cmd) 只执行一次：多个产物可能来自同一次生成（如 tokens-board + tokens-live 同属 mirror）

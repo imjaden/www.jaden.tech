@@ -361,7 +361,7 @@ def main() -> int:
     args = ap.parse_args()
     _site = Path(args.site).expanduser()
     if not _site.is_dir():
-        print(f"⚠️ tokens-tracker mirror: --site 不是目录 {_site}")
+        print(f"⚠️ tokens-tracker mirror: --site 不是目录 {_site}", file=sys.stderr)   # O-16：错误走 stderr
         return 2
     if _site.resolve() != WWW_REPO.resolve():
         WWW_REPO = _site.resolve()
@@ -479,6 +479,11 @@ def main() -> int:
     if old_css != src_css:
         (DST_ASSETS / "style.css").write_bytes(src_css)
         changed = True
+
+    if not args.write_only and not (_site / ".git").exists():   # O-15：非仓目录不得静默建目录+提交
+        print(f"⚠️ tokens-tracker mirror: --site 不是 git 仓 {_site}（只读预览请加 --write-only）",
+              file=sys.stderr)
+        return 2
 
     if args.write_only:
         print("✅ tokens-tracker mirror: files written (write-only)")

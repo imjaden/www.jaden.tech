@@ -2312,6 +2312,54 @@ O8 归档页自身 `integrity` 1 + `crossorigin` 1 + `referrer` 1 齐备，与�
 
 ---
 
+## 2026-11-16 — F-4′ 收口（含 O-7/O-8）审计（1 笔已推）：守卫 ssh/https 双形态放行、惰性注入注释与上游 `_seam` 实证一致；守卫判据是 origin 身份而非检出路径身份（另开 🟡）→ PASS 95
+
+- **review者**: review/jaden-tech-review (review profile cli · Security Reviewer)
+- **范围**: `scripts/sync-run.py`（`CANONICAL_REMOTE_RE`/`is_production_checkout()`/`run_step()` 注释/`commit_artifacts()`/argparse 守卫与 `--force-upstream`）· `scripts/tokens-tracker-mirror.py`（`--site` 前置 `is_dir()`）· 台账 2 文件
+- **Tracking**: JT-SEC-034 F-4′/O-7/O-8
+- **状态**: ✅ PASS
+- **报告**: 本 entry（收尾轮，无独立报告文件）
+- **实现 prompt**: ⬜ 无需生成
+
+### 一、验收（隔离 clone `/tmp/f4p-clone` @ `a919756` + 生产检出只读 dry-run；生产 worktree 全程 `porcelain` 空）
+
+1. **守卫正例（生产检出）**：`origin=git@github.com:imjaden/www.jaden.tech.git` ⇒ `--include-upstream` dry **rc=0**，2 DRY / 3 SKIP / 1 DUP 正常列出（与 ops 自测一致）。
+2. **守卫形态覆盖（8 例，正则级 + CLI 级）**：`git@github.com:imjaden/…git`、`git@github.com:imjaden/…`、`ssh://git@github.com/…`、`git://…`、https（带/不带 `.git`）**全 MATCH**；本机路径 `/Users/jadenli/CodeSpace/www.jaden.tech` 与「`origin` 被移除」**rc=2**（fail-closed，且报错文案点名 origin 与生产检出）。
+3. **`--force-upstream` 语义**：非规范 origin + `--force-upstream` ⇒ **rc=0**（显式危险开关确实放行）；help 文本标注「上游仍会写生产路径，危险」。
+4. **O-7 复测**：clone 内装 `pre-commit` hook `exit 1` ⇒ `COMMIT rc=1` + `detail` = 真实诊断（不再是 `committed`）、`HEAD` 不变、索引无 staged 残留（失败分支 `git reset` 生效）、进程 `EXIT=1`。
+5. **O-8 复测**：`--site /tmp/no-such-dir-xyz` ⇒ **rc=2**「⚠️ --site 不是目录」，该路径**未被创建**（前置校验早于任何 mkdir/写盘，上轮的 `FileNotFoundError` 裸栈形态消失）。
+6. **注释口径核对上游源码**：`daily-tracker/scripts/daily-tracker-update.py:138-149` 的 `_seam()` 仅在 `DT_SANDBOX=="1"` 时接受 `DT_*` 覆盖（`:149` 绑定 `SITE_REPO`）⇒ 本笔注释「`DT_SITE_REPO` 注入是惰性的、不能当隔离手段、真正的护栏在生产检出校验」**与实现逐字一致**。
+7. **门禁逐值复跑**：`sync-check --selftest` **15/15 rc=0** · `sync-check` **rc=1**（`artifacts 6`，过渡态）· `portal-check --mode post` **16/16 rc=0**（S17 `rc=1`）· `portal-check --selftest` **20/20 rc=0** · `perf-check` **rc=0** · `sync-run` dry **rc=0** · `py_compile` **rc=0**。
+
+### 二、发现（🔴 0 / 🟡 2，均非阻断）
+
+- **O-7 ✅ CLOSED**、**O-8 ✅ CLOSED**（见一.4 / 一.5，无回归）。
+- **🟡 F-4″（新）守卫判据是 origin 身份，不是检出路径身份** ⇒ 同仓的**第二份 clone / linked worktree** 天然带规范 origin，被判为「生产检出」而放行，而 emit-site 写的仍是上游硬编码的生产路径 —— 即 F-4′ 本要拦的场景。**取证**：`/tmp/f4p-clone`（`ROOT=/private/tmp/f4p-clone`）把 origin 设为 `git@github.com:imjaden/www.jaden.tech.git` 后，`is_production_checkout()` 返回 **True**、`--include-upstream` dry **rc=0**。**修法**：加路径身份并与 origin 判据取与 —— `ROOT == os.environ.get("SYNC_PROD_ROOT", ~/CodeSpace/www.jaden.tech)`（推荐，不跨仓耦合），或与上游 `SITE_REPO` 默认常量比对。
+- **🟡 F-4‴（新，小）正则子串未锚定**：`github\.com[:/]+imjaden/www\.jaden\.tech` 对 `www.jaden.tech-fork`、`www.jaden.tech.bak`、`https://mirror.example.com/proxy/github.com/imjaden/…` **均 MATCH**（实测 3/3），而大小写变体 `IMJaden/…` 反而不匹配（GitHub 侧 owner/repo 大小写不敏感）。**修法**：`r"github\.com[:/]+imjaden/www\.jaden\.tech(?:\.git)?/?$"` + `re.I`，或补 `(?![-\w.])` 边界。
+
+### 三、🟢 观察（不计分，归批次）
+
+| # | 观察 | 处置建议 |
+|:-:|:--|:--|
+| O-12 | 守卫在 `args.apply` 判断之前 ⇒ 副本里连 dry-run 预览也被拒（rc=2），可诊断性下降 | 守卫条件加 `and args.apply` |
+| O-13 | `--force-upstream` 的 stderr 提示「先设好上游沙箱四件套」只是**劝告**，代码不校验 `DT_SANDBOX=1`；单加 `--force-upstream` 即绕过 | 硬绑：`--force-upstream` 且 `DT_SANDBOX != "1"` ⇒ rc=2 |
+| O-14 | O-7 仍取 `stdout+stderr` **首个**非空行（`sync-run.py:226-229`）：hook 两路都写时保留 stdout 的「形式消息」、丢掉 stderr 的真实原因（实测 `detail='STDOUT-A: pre-commit policy x'`，`STDERR-B: real reason here` 被弃） | 有 stderr 时优先 stderr 末行 |
+| O-15 | `--site` 指向「已存在但不是仓 / 无 `tokens-tracker/`」的目录时，静默就地新建 `tokens-tracker/` 并写文件、rc=0（实测 `/tmp/empty-site-xyz`） | 预览用途可接受；要收紧则校验目标含 `tokens-tracker/index.html` 或 `git rev-parse --show-toplevel` |
+| O-16 | `--site` 错误消息走 stdout（`print` 未带 `file=sys.stderr`），与 `sync-run` 守卫的 stderr 口径不一致 | 改 stderr |
+| O-9 | 上轮遗留（`commit_info.paths` ≠ 实际提交面）本笔未动 | 同前建议改 `len(changed(_pats))` |
+
+### 四、计分与推送
+
+**100 − 3（F-4″：claim「outside production checkout」对同仓副本不成立，结构性）− 2（F-4‴：子串未锚定）= 95 → PASS**（0 🔴；O-7/O-8 全闭无回归；门禁 6 项零漂移；生产面零写）。
+
+- **推送**：前 `HEAD=a919756` / `origin/main=f68031a` / ahead **1** / behind 0 / 树空 ⇒ `git push origin HEAD:main` = `f68031a..a919756  HEAD -> main`；后 `rev-parse HEAD` = `rev-parse origin/main` = `ls-remote refs/heads/main` = **`a9197563ee90f6e0c76069d0849d6a372fec6b20`**，ahead **0** / behind **0**
+- **边界**：本 entry 与 `.review-level.yaml` 留工作树，由 ops 下一笔携带；推送后未追加提交
+- **建议修序**（批次）：**F-4″（路径身份判据）→ O-13（`--force-upstream` × `DT_SANDBOX=1` 绑定）→ F-4‴（正则锚定）→ O-14/O-16**
+
+**待决 1 项**：F-4″ 判据取「`SYNC_PROD_ROOT`（默认 `~/CodeSpace/www.jaden.tech`）」还是「上游 `SITE_REPO` 默认常量」，推荐前者（不跨仓耦合）。
+
+---
+
 ## 条目格式说明
 
 ```
