@@ -62,13 +62,19 @@ def load():
     return data
 
 
-def plan(manifest, only=None):
+def plan(manifest, only=None, include_upstream=False):
     steps = []
     for art in manifest.get("artifacts", []):
         if only and art["id"] not in only:
             continue
         producer = art.get("producer", {})
         mode = producer.get("mode", "?")
+        # N-2：emit-site 会驱动上游仓的完整流水线（其内部自行 commit/push，本站关不掉），
+        # 因此默认不跑；要跑必须显式 --include-upstream，且知道副作用。
+        if mode == "emit-site" and not include_upstream:
+            steps.append({"id": art["id"], "mode": mode, "action": "skip",
+                          "reason": "emit-site 默认不跑（上游会自行 commit/push）；加 --include-upstream 才执行"})
+            continue
         cmd = resolve_cmd(art)
         if cmd is None:
             steps.append({"id": art["id"], "mode": mode, "action": "skip",
@@ -96,6 +102,8 @@ def main():
     ap.add_argument("--only", action="append", help="只跑指定 id（可重复）")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--skip-check", action="store_true", help="执行后不跑 sync-check")
+    ap.add_argument("--include-upstream", action="store_true",
+                    help="同时跑 emit-site 上游腿（会上游仓自行 commit/push，副作用自负）")
     args = ap.parse_args()
 
     try:
@@ -104,7 +112,7 @@ def main():
         print(f"manifest unreadable: {exc}", file=sys.stderr)
         return 2
 
-    steps = plan(manifest, args.only)
+    steps = plan(manifest, args.only, args.include_upstream)
     # 同一 (cwd, cmd) 只执行一次：多个产物可能来自同一次生成（如 tokens-board + tokens-live 同属 mirror）
     seen, deduped = set(), []
     for step in steps:

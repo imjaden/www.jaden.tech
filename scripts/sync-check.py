@@ -98,7 +98,9 @@ def check_artifact(art):
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as exc:
-            worst = ("unknown", f"{rel}: unreadable ({exc})")
+            # N-4：不覆盖更严重的既有判定（mismatch 不应被 unknown 降级）
+            if worst[0] in ("none", "ok", "unstamped", "stale"):
+                worst = ("unknown", f"{rel}: unreadable ({exc})")
             recs.append(base)
             continue
         stamp = sync_stamp.parse(text)

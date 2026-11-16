@@ -256,7 +256,10 @@ def transform_shell(html: str) -> str:
     #    避免「把坏链静默改成坏相对链」。
     def _rel_static(m):
         target = m.group("path").lstrip("/")
-        if not (_SITE_ROOT / target).exists():
+        # N-1：存在性判定先剥查询串/锚点（本站全局用 ?t=<ts> 缓存清除），
+        # 但降级时**原样保留**查询串与锚点，避免把 ?t= 丢掉。
+        probe = target.split("?", 1)[0].split("#", 1)[0]
+        if not (_SITE_ROOT / probe).exists():
             print(f"⚠️ 站点资源不存在，保留原样交守卫拦截: {m.group(0)}")
             return m.group(0)
         return f'{m.group("attr")}="../{target}"'
