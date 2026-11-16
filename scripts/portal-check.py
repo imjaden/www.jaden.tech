@@ -23,6 +23,7 @@ import json
 import re
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -490,7 +491,10 @@ def status_page_guard(root=None):
     colored = len(re.findall(r'<span class="(?:ok|warn|bad)" title=', html))
     try:
         hist = json.loads((root / "data/sync-history.json").read_text(encoding="utf-8"))
-        days_recorded = len(hist.get("days") or {})
+        # 页面只画最近 90 天窗口，历史文件不裁剪 ⇒ 拿全量天数比会在第 91 天起恒红。
+        _days = sorted((hist.get("days") or {}).keys())
+        _cut = (datetime.now(timezone.utc).date() - timedelta(days=89)).isoformat()
+        days_recorded = sum(1 for d in _days if d >= _cut)
         if colored != days_recorded:
             problems.append(f"彩色格数 {colored} != 历史记录天数 {days_recorded}")
     except (OSError, json.JSONDecodeError, AttributeError):
@@ -541,6 +545,28 @@ def check_s25(root=None):
     return ok
 
 
+S25_FILES = ("sync-status.html", "index.html", "data/sync-status.json",
+             "config/sync-manifest.json", "data/sync-history.json")
+
+
+def _seed_s25(root):
+    """把 S25 判据读到的**全部**输入拷进副本（少一个 ⇒ 每条变异都会被同一个原因判红）。"""
+    import shutil
+    for rel in S25_FILES:
+        dest = root / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / rel, dest)
+
+
+def _add_hist_day(root):
+    """历史多一天、页面没重出 —— 只该由「彩色格数 != 天数」抓到（90 格不动）。"""
+    p = Path(root) / "data/sync-history.json"
+    data = json.loads(p.read_text(encoding="utf-8"))
+    data.setdefault("days", {})["2999-01-01"] = {"rc": 0, "verdict": "PASS",
+                                                "artifacts": {}, "ok_ratio": 1.0}
+    p.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
 def status_selftest():
     """S25 判别力自证：在临时副本里造 4 种破坏，判据必须逐条转红。"""
     import tempfile
@@ -548,7 +574,18 @@ def status_selftest():
 
     results = []
     src = ROOT
+    # 副本基线（无变异）必须绿：否则下面每条「必红」都可能红在同一个无关原因上
+    tmp = Path(tempfile.mkdtemp(prefix="s25-base-"))
+    try:
+        _seed_s25(tmp)
+        ok, detail = status_page_guard(tmp)
+        results.append((f"副本基线（无变异）通过", ok if ok else False))
+        if not ok:
+            results.append((f"副本基线红因: {detail[:60]}", False))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
     for name, breaker in (
+        ("历史多一天而页面未重出", _add_hist_day),
         ("球色与横幅不同源", lambda d: _mutate(d, "index.html", _flip_dot)),
         ("删 favicon 戳", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace(FAVICON_STAMP, "static/img/nope.png?t="))),
@@ -570,10 +607,7 @@ def status_selftest():
     ):
         tmp = Path(tempfile.mkdtemp(prefix="s25-"))
         try:
-            for rel in ("sync-status.html", "index.html", "data/sync-status.json", "config/sync-manifest.json"):
-                dest = tmp / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(src / rel, dest)
+            _seed_s25(tmp)
             breaker(tmp)
             ok, _ = status_page_guard(tmp)
             results.append((name, not ok))
