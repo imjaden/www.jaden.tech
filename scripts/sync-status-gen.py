@@ -188,7 +188,9 @@ def _fmt_ts(raw):
     except ValueError:
         return s
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        # 无偏移的串由上游按**本地时区**写入（sync-check.parse_iso 同一口径）；
+        # 这里不能再当 UTC，否则同一行「打戳」与「年龄」会互相矛盾（实测差 8h）。
+        dt = dt.astimezone()
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -216,6 +218,9 @@ def _window_keys(payload, history):
 def build_page(payload, history, gates, incidents) -> str:
     rc = payload["rc"]
     vcls, vtext = V_CLASS[rc], V_TEXT[rc]
+    # rc=0 但存在过渡豁免时，绿色横幅必须自带说明，否则「全部正常」会被读成「6/6 都新鲜」
+    _n_ex = sum(1 for d in (payload.get("details") or []) if str(d.get("status")) == "exempt")
+    exempt_note = f"（{_n_ex} 项过渡豁免，见组件表灰徽）" if rc == 0 and _n_ex else ""
     budgets = {}
     try:
         for art in json.loads(MANIFEST.read_text(encoding="utf-8"))["artifacts"]:
@@ -294,7 +299,7 @@ def build_page(payload, history, gates, incidents) -> str:
 <body>
 <h1>同步面状态 · Sync Status</h1>
 <div class="banner {vcls}">
-  <div class="big">{vtext}</div>
+  <div class="big">{vtext}{exempt_note}</div>
   <div class="meta">快照 {esc(payload["checked_at"])}（UTC）· 清单 v{esc(payload.get("manifest_version"))} ·
     下次生成 {NEXT_RUN} · {GEN_MARK}</div>
 </div>
