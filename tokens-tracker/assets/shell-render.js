@@ -1253,7 +1253,10 @@
     if (!g) { return; }
     var ts = String(m.generated_at || "");
     var t = Date.parse(ts.replace(" ", "T"));
-    var stale = !isNaN(t) && (Date.now() - t) > 30 * 3600 * 1000;
+    /* CL364: 按该页自己的刷新周期判（缺省回退 30h） */
+    var max = (typeof m.max_age_ms === "number" && m.max_age_ms > 0)
+      ? m.max_age_ms : 30 * 3600 * 1000;
+    var stale = !isNaN(t) && (Date.now() - t) > max;
     g.textContent = "生成 " + (ts || "未知") + (stale ? " ⚠️ 偏旧" : "");
   }
 

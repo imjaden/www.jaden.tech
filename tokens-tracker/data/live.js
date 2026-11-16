@@ -1,15 +1,16 @@
 // 公开镜像 · 自动同步 · 已脱敏过滤 (ops mirror: 1acl run-state data)
 window.WEB_DATA_META = {
-  "filtered": 19,
+  "filtered": 20,
   "filtered_breakdown": {
-    "draft": 9,
-    "empty": 10,
+    "draft": 11,
+    "empty": 9,
     "kept": 13,
-    "window": 10
+    "window": 9
   },
-  "generated_at": "2026-11-14T20:39:43+08:00",
+  "generated_at": "2026-11-16T09:29:46+08:00",
   "generator": "1acl-board-gen",
-  "generator_version": "5208cf63",
+  "generator_version": "86fa4bc3",
+  "max_age_ms": 1200000,
   "pages": [
     "index"
   ]
@@ -74,22 +75,6 @@ window.BOARD_STATS = {
   "running": 2,
   "series": [
     {
-      "api_calls": 764,
-      "cache_read_tokens": 118087808,
-      "date": "20261108",
-      "estimated_cost_usd": 1.0817,
-      "files": 6,
-      "total_tokens": 3305480
-    },
-    {
-      "api_calls": 29,
-      "cache_read_tokens": 1208704,
-      "date": "20261109",
-      "estimated_cost_usd": 0.0156,
-      "files": 5,
-      "total_tokens": 60304
-    },
-    {
       "api_calls": 0,
       "cache_read_tokens": 0,
       "date": "20261110",
@@ -122,12 +107,28 @@ window.BOARD_STATS = {
       "total_tokens": 0
     },
     {
-      "api_calls": 10,
-      "cache_read_tokens": 163840,
+      "api_calls": 9,
+      "cache_read_tokens": 134912,
       "date": "20261114",
+      "estimated_cost_usd": 0.0037,
+      "files": 1,
+      "total_tokens": 151019
+    },
+    {
+      "api_calls": 9,
+      "cache_read_tokens": 155648,
+      "date": "20261115",
       "estimated_cost_usd": 0.0049,
       "files": 1,
-      "total_tokens": 184416
+      "total_tokens": 175720
+    },
+    {
+      "api_calls": 0,
+      "cache_read_tokens": 0,
+      "date": "20261116",
+      "estimated_cost_usd": 0.0,
+      "files": 0,
+      "total_tokens": 0
     }
   ]
 };
@@ -135,12 +136,12 @@ window.LIVE_ANOMALY = {
   "anomaly_total": 3,
   "doc_missing": 1,
   "idle": 0,
-  "ledger_total": 23,
-  "prompt": "【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-14（距今 2.27 天）\n【异常】实施停滞超阈值；复盘文档缺失 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值；台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/hermes-manager && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】html-gen · HTML-GEN-CL040\n【现状】台账状态=active；进度=[2/6] 设计评审；最近更新=2026-11-13（距今 0.96 天）\n【异常】实施停滞超阈值 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值\n【期望】回到该项目继续推进，并落一次步骤（step JSON），让「最近推进」刷新\n【验收】`cd ~/CodeSpace/html-gen.cli && hm loop status HTML-GEN-CL040` 的最近步骤时间已刷新，异常圆点消失\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
+  "ledger_total": 22,
+  "prompt": "【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-15（距今 3.8 天）\n【异常】实施停滞超阈值；复盘文档缺失 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值；台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`cd ~/CodeSpace/hermes-manager && hm loop list --done` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】html-gen · HTML-GEN-CL040\n【现状】台账状态=active；进度=[2/6] 设计评审；最近更新=2026-11-13（距今 2.49 天）\n【异常】实施停滞超阈值 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值\n【期望】回到该项目继续推进，并落一次步骤（step JSON），让「最近推进」刷新\n【验收】`cd ~/CodeSpace/html-gen.cli && hm loop status HTML-GEN-CL040` 的最近步骤时间已刷新，异常圆点消失\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
   "prompt_count": 2,
   "skipped": 1,
   "timeout": 2,
-  "total": 22,
+  "total": 21,
   "unknown": 0
 };
 window.HIST_TASKS = [];
@@ -148,7 +149,17 @@ window.HIST_SESSION_CAP = {
   "at_cap_sessions": [
     {
       "refs": 5,
+      "session_id": "20260829_013300_39325e",
+      "state": "at_cap"
+    },
+    {
+      "refs": 5,
       "session_id": "20261014_112906_913ac4",
+      "state": "at_cap"
+    },
+    {
+      "refs": 5,
+      "session_id": "20261014_114505_fc2dbe",
       "state": "at_cap"
     },
     {
@@ -166,13 +177,58 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
+      "refs": 26,
+      "session_id": "20260920_111536_2b3d89",
+      "state": "over"
+    },
+    {
       "refs": 21,
       "session_id": "20261017_230827_f01df4",
       "state": "over"
     },
     {
+      "refs": 19,
+      "session_id": "20260914_165612_4d8f00",
+      "state": "over"
+    },
+    {
+      "refs": 19,
+      "session_id": "20260928_113939_746d8e",
+      "state": "over"
+    },
+    {
+      "refs": 15,
+      "session_id": "20260922_094600_e83378",
+      "state": "over"
+    },
+    {
       "refs": 15,
       "session_id": "local-fc72f6c6de44d877ec3698e12f010a2920cefa3950142095d23ed0b8cf9d7fc3",
+      "state": "over"
+    },
+    {
+      "refs": 14,
+      "session_id": "20260929_212828_7c112c",
+      "state": "over"
+    },
+    {
+      "refs": 12,
+      "session_id": "20260930_175010_2a8ebc",
+      "state": "over"
+    },
+    {
+      "refs": 11,
+      "session_id": "20261009_102314_f18ce4",
+      "state": "over"
+    },
+    {
+      "refs": 11,
+      "session_id": "20261014_110802_f7bb3f",
+      "state": "over"
+    },
+    {
+      "refs": 10,
+      "session_id": "20261014_112946_f0330d",
       "state": "over"
     },
     {
@@ -186,13 +242,73 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 7,
+      "refs": 8,
+      "session_id": "20260917_222643_ce7e33",
+      "state": "over"
+    },
+    {
+      "refs": 8,
       "session_id": "20261015_221750_2f42ad",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20260913_174411_5672fb",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20260922_114618_5e33bb",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20261009_121011_122598",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20261014_131132_7196ef",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20261015_182157_f3cd84",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20260821_185753_577706",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20260913_101346_d1f949",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20260917_100907_6aa641",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20261006_161545_70b7e7",
       "state": "over"
     },
     {
       "refs": 6,
       "session_id": "20261014_111910_ac695b",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20261015_204022_7cfad0",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20261016_202615_aad5bd",
       "state": "over"
     },
     {
@@ -219,13 +335,58 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
+      "refs": 26,
+      "session_id": "20260920_111536_2b3d89",
+      "state": "over"
+    },
+    {
       "refs": 21,
       "session_id": "20261017_230827_f01df4",
       "state": "over"
     },
     {
+      "refs": 19,
+      "session_id": "20260914_165612_4d8f00",
+      "state": "over"
+    },
+    {
+      "refs": 19,
+      "session_id": "20260928_113939_746d8e",
+      "state": "over"
+    },
+    {
+      "refs": 15,
+      "session_id": "20260922_094600_e83378",
+      "state": "over"
+    },
+    {
       "refs": 15,
       "session_id": "local-fc72f6c6de44d877ec3698e12f010a2920cefa3950142095d23ed0b8cf9d7fc3",
+      "state": "over"
+    },
+    {
+      "refs": 14,
+      "session_id": "20260929_212828_7c112c",
+      "state": "over"
+    },
+    {
+      "refs": 12,
+      "session_id": "20260930_175010_2a8ebc",
+      "state": "over"
+    },
+    {
+      "refs": 11,
+      "session_id": "20261009_102314_f18ce4",
+      "state": "over"
+    },
+    {
+      "refs": 11,
+      "session_id": "20261014_110802_f7bb3f",
+      "state": "over"
+    },
+    {
+      "refs": 10,
+      "session_id": "20261014_112946_f0330d",
       "state": "over"
     },
     {
@@ -239,13 +400,73 @@ window.HIST_SESSION_CAP = {
       "state": "over"
     },
     {
-      "refs": 7,
+      "refs": 8,
+      "session_id": "20260917_222643_ce7e33",
+      "state": "over"
+    },
+    {
+      "refs": 8,
       "session_id": "20261015_221750_2f42ad",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20260913_174411_5672fb",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20260922_114618_5e33bb",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20261009_121011_122598",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20261014_131132_7196ef",
+      "state": "over"
+    },
+    {
+      "refs": 7,
+      "session_id": "20261015_182157_f3cd84",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20260821_185753_577706",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20260913_101346_d1f949",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20260917_100907_6aa641",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20261006_161545_70b7e7",
       "state": "over"
     },
     {
       "refs": 6,
       "session_id": "20261014_111910_ac695b",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20261015_204022_7cfad0",
+      "state": "over"
+    },
+    {
+      "refs": 6,
+      "session_id": "20261016_202615_aad5bd",
       "state": "over"
     },
     {
@@ -265,7 +486,17 @@ window.HIST_SESSION_CAP = {
     },
     {
       "refs": 5,
+      "session_id": "20260829_013300_39325e",
+      "state": "at_cap"
+    },
+    {
+      "refs": 5,
       "session_id": "20261014_112906_913ac4",
+      "state": "at_cap"
+    },
+    {
+      "refs": 5,
+      "session_id": "20261014_114505_fc2dbe",
       "state": "at_cap"
     },
     {
@@ -275,24 +506,24 @@ window.HIST_SESSION_CAP = {
     }
   ],
   "window": {
-    "days": 30,
+    "days": 400,
     "kind": "filename_date",
-    "start": "20261016"
+    "start": "20251013"
   }
 };
 window.HIST_EXTRA = {
   "analysis": {
     "baseline": {
-      "duration_mean": 4540.052034729618,
-      "first_pass_rate": 0.3474576271186441,
-      "n": 118,
-      "round_mean": 2.635593220338983
+      "duration_mean": 4113.700832596192,
+      "first_pass_rate": 0.3557692307692308,
+      "n": 104,
+      "round_mean": 2.4423076923076925
     },
     "recent": {
-      "duration_mean": 0.0,
-      "first_pass_rate": 0.0,
-      "n": 1,
-      "round_mean": 0.0
+      "duration_mean": null,
+      "first_pass_rate": null,
+      "n": 0,
+      "round_mean": null
     }
   },
   "offwindow": {
@@ -303,7 +534,7 @@ window.HIST_EXTRA = {
     "count": 1,
     "scan_days": 400
   },
-  "verdict": "部分改善（部分指标反向）"
+  "verdict": "数据不足（近2天或基线窗口无已验收任务）"
 };
 window.WEB_DATA_READY = true;
 if (window.dispatchEvent) { window.dispatchEvent(new Event('web-data-ready')); }
