@@ -61,9 +61,14 @@ python3 -m http.server 8099   # 8080 长期被 http-server.cli 占用，浏览�
 ## 同步面门禁（2026-11-16 追加）
 
 ```bash
-python3 scripts/tokens-tracker-mirror.py --selftest   # 必须 9/9：LIVE_ANOMALY 形态负控（var/window[]/追加/未知键/非字符串…）
+python3 scripts/tokens-tracker-mirror.py --selftest   # 必须 21/21：LIVE_ANOMALY 形态负控 20 例 + 结构钉
 python3 scripts/sync-check.py --selftest              # 15/15
 ```
+
+`LIVE_ANOMALY` 守卫是**词法近似**、不是 JS 解析器：唯一赋值形态由生成侧
+`hermes-manager/scripts/hm-1acl-board-gen.py:998` 的硬编码前缀 + `_serialize`(=json.dumps) 保证；
+计算型键名（`fromCharCode` / `["LIVE","_","ANOMALY"].join("")`）等形态**不在判据内，会静默透传且无外层兜底**
+（`_SENSITIVE_WORDS` 不含项目名）。改生成侧写法前先读本节。
 
 ## 台账归属（2026-11-16）
 

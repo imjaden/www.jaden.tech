@@ -1,4 +1,4 @@
-<!-- generated: 2026-11-16 · source: cache/draft/TODO-20261116.md · sha256:717a38b1 -->
+<!-- generated: 2026-11-16 · source: cache/draft/TODO-20261116.md · sha256:6b4862bf -->
 > 派生: 待执行 **2** 条 · 最近闭环 **CL13** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261116.md）
@@ -26,6 +26,11 @@
 - 线上: https://www.jaden.tech 首页 200（1.4s）· `bmi-tracker.html` 200 · `tokens-tracker/` 200；Pages `built` / `cname=www.jaden.tech` / `https_enforced=true`
 - harness（三颗钉子均已入仓；**现行计数见 §三「明早首跑」一行，此处不写死数字**）：`scripts/portal-check.py`、`scripts/perf-check.py`、`scripts/sync-check.py`
   - ⚠️ 旧口径作废: 历史里写的 `13/13`（10-25）、`9/9`/`10/10` 均为 S9/S10 修复前数字
+- ✅ **2026-11-16 镜像守卫线已冻结**（JT-SEC-042→046 十三轮，全 CLOSED）：
+  `LIVE_ANOMALY` 守卫 = 词法近似（形态负控 20 例 + 结构钉，`--selftest` 21/21）；唯一赋值形态由生成侧
+  `hermes-manager/scripts/hm-1acl-board-gen.py:998` 硬编码前缀 + `json.dumps` 保证。
+  计算型键名（`fromCharCode` / `join`）**静默透传、无外层兜底** —— 改生成侧前先读 `AGENTS.md` 同句。
+  剩余 🟢（八进制封顶、计算型键名硬化）挂「下次触碰该文件时顺手」，不再开轮。
 - 🆕 **2026-11-16 台账外置（JT-SEC-044）**：`review-log.md` / `.review-level.yaml` / `documents/`
   移入私有仓 `imjaden/jaden-tech-ledger`（历史经 `git filter-repo` 导入 138 提交），本仓 `git rm --cached`
   + `.gitignore` + **S24** 钉（`git ls-files` 断言 0 台账）。本地副本保留为 review 写入缓冲，
