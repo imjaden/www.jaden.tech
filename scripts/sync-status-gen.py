@@ -45,7 +45,7 @@ BADGE_START = "<!-- sync-badge:start -->"
 BADGE_END = "<!-- sync-badge:end -->"
 FAVICON = "static/img/favicon-64.png?t=1794394182"
 GEN_MARK = "由 scripts/sync-status-gen.py 生成，勿手改"
-NEXT_RUN = "随 sync-check 每次运行重出（见快照时间）"
+NEXT_RUN = "每日 21:55 由 ops cron 重出（手动：scripts/sync-status-gen.py）"
 
 V_CLASS = {0: "ok", 1: "warn", 2: "bad", 3: "warn"}
 V_TEXT = {0: "全部正常", 1: "有陈旧或过渡项", 2: "结构违规", 3: "无法判定"}
@@ -327,24 +327,28 @@ def main(argv=None) -> int:
     history = load_history()
     incidents = load_incidents()
 
-    # 第 1 遍：不带门禁（只为让 portal-check 有可读的「新页」）
-    html = build_page(payload, history, {}, incidents)
-    PAGE.write_text(html, encoding="utf-8")
-    # 第 2 遍：门禁数字取自刚刚写下的页面 ⇒ 页面上的 portal 数字不会再落后一轮
+    def _write_state(gates_map):
+        """三处同源一次落盘：页面 + 机器 JSON + 首页小球（同一 payload，绝不各自为政）。"""
+        page_html = build_page(payload, history, gates_map, incidents)
+        PAGE.write_text(page_html, encoding="utf-8")
+        STATE_JSON.parent.mkdir(parents=True, exist_ok=True)
+        STATE_JSON.write_text(json.dumps(
+            {"rc": payload["rc"], "verdict": V_TEXT[payload["rc"]], "checked_at": payload["checked_at"],
+             "artifacts": payload["artifacts"], "gates": gates_map, "days_recorded": len(history)},
+            ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        return page_html
+
+    # 第 1 遍：不带门禁，把三处先写成"同一轮"的值（否则 collect_gates 期间 JSON/小球还是上一轮，
+    # 一旦结论翻档就会发布一张自称门禁红的状态页 —— review ③ 的实证）
+    _write_state({})
+    changed = patch_index(payload)
+    gates = {}
     if not args.no_gates:
         gates = collect_gates()
-        html = build_page(payload, history, gates, incidents)
-        PAGE.write_text(html, encoding="utf-8")
+        html = _write_state(gates)          # 第 2 遍：门禁数字取自刚写下的新页
     else:
-        gates = {}
+        html = PAGE.read_text(encoding="utf-8")
 
-    STATE_JSON.parent.mkdir(parents=True, exist_ok=True)
-    STATE_JSON.write_text(json.dumps(
-        {"rc": payload["rc"], "verdict": V_TEXT[payload["rc"]], "checked_at": payload["checked_at"],
-         "artifacts": payload["artifacts"], "gates": gates, "days_recorded": len(history)},
-        ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-
-    changed = patch_index(payload)
     print(f"✅ sync-status.html {len(html)} B · data/sync-status.json · 小球"
           f"{'已更新' if changed else '无变化'} · 历史 {len(history)} 天 · rc={payload['rc']}")
     return 0
