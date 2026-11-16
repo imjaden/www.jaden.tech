@@ -14,7 +14,7 @@
   python3 scripts/sync-check.py --json          # 机器读（含 status 字段，逐产物）
   python3 scripts/sync-check.py --strict        # 把 stale/unstamped 也当失败（rc=2）
   python3 scripts/sync-check.py --selftest      # 自检（戳往返/篡改/幂等/新鲜度/清单）
-  python3 scripts/sync-check.py --emit-status sync-status.html   # 重出状态页
+  python3 scripts/sync-check.py --emit-status                    # 重出状态页（转调 sync-status-gen.py）
 """
 import argparse
 import fnmatch
@@ -60,9 +60,12 @@ def load_manifest(path=MANIFEST):
         for key in REQUIRED:
             if key not in art:
                 problems.append(f"{art.get('id', '?')}: missing field {key}")
-        mode = (art.get("producer") or {}).get("mode")
-        if mode is not None and mode not in modes:
-            problems.append(f"{art.get('id', '?')}: producer.mode {mode!r} 不在契约枚举 {sorted(modes)}")
+        prod = art.get("producer")
+        if isinstance(prod, dict):
+            if "mode" not in prod:
+                problems.append(f"{art.get('id', '?')}: producer.mode 必填（契约枚举 {sorted(modes)}）")
+            elif prod.get("mode") not in modes:
+                problems.append(f"{art.get('id', '?')}: producer.mode {prod.get('mode')!r} 不在契约枚举 {sorted(modes)}")
     return data, problems
 
 
@@ -234,70 +237,6 @@ def print_human(payload):
     print(f"\n{verdict} · artifacts {len(payload['artifacts'])} · rc={payload['rc']}")
 
 
-STATUS_HTML = """<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>同步面状态 · jaden.tech</title>
-<style>
-:root {{ color-scheme: dark; }}
-body {{ margin:0; padding:32px 20px; background:#0d1117; color:#e6edf3;
-  font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif; }}
-h1 {{ font-size:1.25rem; margin:0 0 4px; }}
-.sub {{ color:#8b949e; font-size:.82rem; margin-bottom:24px; }}
-table {{ border-collapse:collapse; width:100%; max-width:1080px; }}
-th,td {{ text-align:left; padding:9px 12px; border-bottom:1px solid #21262d; font-size:.85rem; vertical-align:top; }}
-th {{ color:#8b949e; font-weight:600; }}
-code {{ color:#7ee787; font-size:.8rem; }}
-.ok {{ color:#3fb950; }} .warn {{ color:#d29922; }} .bad {{ color:#f85149; }}
-footer {{ margin-top:28px; color:#6e7681; font-size:.78rem; }}
-a {{ color:#58a6ff; }}
-</style>
-</head>
-<body>
-<h1>同步面状态 · SYNC-MANIFEST</h1>
-<div class="sub">校验时间 {checked_at} · 清单版本 v{manifest_version} · 结论 <strong class="{verdict_cls}">{verdict}</strong> · 由 <code>scripts/sync-check.py --emit-status</code> 生成，勿手改</div>
-<table>
-<thead><tr><th>产物</th><th>来源仓 / 入口</th><th>触发</th><th>生成时间</th><th>年龄</th><th>结论</th></tr></thead>
-<tbody>
-{rows}
-</tbody>
-</table>
-<footer>判据：结构漂移（缺失/未注册/缺戳/哈希不符）、内容漂移（正文哈希≠戳）、时间漂移（超 freshness_h）。<a href="./">← 返回首页</a></footer>
-</body>
-</html>
-"""
-
-
-def emit_status(payload, dest):
-    cls = {0: "ok", 1: "warn", 2: "bad", 3: "warn"}[payload["rc"]]
-    verdict = {0: "PASS", 1: "PASS（含过渡/陈旧项）", 2: "FAIL（结构违规）", 3: "UNKNOWN"}[payload["rc"]]
-    detail_by_id = {}
-    for item in payload["details"]:
-        detail_by_id.setdefault(item["id"], item)
-    rows = []
-    for row in payload["artifacts"]:
-        verdict_item = detail_by_id.get(row["id"], {"status": "unknown", "detail": "—"})
-        mark = {"ok": ("ok", "正常"), "stale": ("warn", "陈旧"), "unstamped": ("warn", "过渡（未打戳）"),
-                "mismatch": ("bad", "结构违规"), "missing": ("bad", "缺失"),
-                "unknown": ("warn", "无法判定")}[verdict_item["status"]]
-        gen = row.get("generated") or "—"
-        age = f"{row['age_h']}h" if row.get("age_h") is not None else "—"
-        rows.append(
-            "<tr><td><code>{art}</code></td><td>{prod}</td><td>{trig}</td>"
-            "<td>{gen}</td><td>{age}</td><td class=\"{cls}\">{label}</td></tr>".format(
-                art=row.get("artifact", "?"), prod=row.get("producer", "?"),
-                trig=row.get("trigger", "?"), gen=gen, age=age, cls=mark[0], label=mark[1]))
-    html = STATUS_HTML.format(checked_at=payload["checked_at"], manifest_version=payload["manifest_version"],
-                              verdict=verdict, verdict_cls=cls, rows="\n".join(rows))
-    Path(dest).write_text(html, encoding="utf-8")
-    return len(html)
-
-
-VERDICT = {0: "PASS", 1: "PASS（含过渡/陈旧项）", 2: "FAIL（结构违规）", 3: "UNKNOWN"}
-
-
 def emit_history(payload, dest=None):
     """把本次校验压缩成「一天一行」写进历史（幂等：同一天重复跑 = 覆盖当天行）。
 
@@ -369,6 +308,27 @@ def selftest():
     ok("清单条目数 ≥ 5（当前 6：含 tokens-live）", _n >= 5, str(_n))
     ok("清单无绝对路径", "/Users/" not in json.dumps(manifest))
 
+    # 清单契约的判别力自证：缺 mode ⇒ 红、超枚举 ⇒ 红（2026-11-16 review ⑤）
+    import copy as _copy
+    import tempfile as _tf2
+    _probe_dir = ROOT / "cache" / "scratch"
+    _probe_dir.mkdir(parents=True, exist_ok=True)
+    for _label, _mut, _want in (
+        ("缺 producer.mode", lambda a: a["producer"].pop("mode", None), True),
+        ("producer.mode 超枚举", lambda a: a["producer"].__setitem__("mode", "overwrite"), True),
+        ("producer.mode=mirror", lambda a: a["producer"].__setitem__("mode", "mirror"), False),
+    ):
+        _m = _copy.deepcopy(manifest)
+        _mut(_m["artifacts"][0])
+        _f = _probe_dir / "_manifest_probe.json"
+        _f.write_text(json.dumps(_m, ensure_ascii=False), encoding="utf-8")
+        try:
+            _p = load_manifest(_f)[1]
+        finally:
+            _f.unlink(missing_ok=True)
+        ok(f"清单校验：{_label} ⇒ {'红' if _want else '绿'}",
+           bool(_p) == _want, "; ".join(_p)[:80])
+
     base = now_utc()
     ok("新鲜度边界（36h 内 ok）", (now_utc() - (base - timedelta(hours=35))) / timedelta(hours=1) < 36)
     ok("新鲜度边界（37h 超限）", (now_utc() - (base - timedelta(hours=37))) / timedelta(hours=1) > 36)
@@ -409,7 +369,9 @@ def main():
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--strict", action="store_true")
     ap.add_argument("--selftest", action="store_true")
-    ap.add_argument("--emit-status", metavar="PATH")
+    # 2026-11-16：旧内联模板已删；本开关保留为「一键重出状态页」的兼容入口，
+    # 无 PATH 形参（旧写法传路径只会在参数解析阶段报错，不会写出半截页面）。
+    ap.add_argument("--emit-status", action="store_true")
     ap.add_argument("--emit-history", metavar="PATH", nargs="?", const=str(HISTORY),
                     help="追加/覆盖当天日聚合（默认 data/sync-history.json）")
     args = ap.parse_args()
@@ -419,12 +381,17 @@ def main():
 
     rc, payload, _ = run()
     if args.emit_status:
-        # 2026-11-16：旧内联模板已退役（它产出的页面没有横幅/小球/90 格 ⇒ S25 必红）。
-        # 为兼容旧调用，这里转调生成器；--emit-status 的 PATH 参数不再使用。
-        print("note: --emit-status 已退役，转调 scripts/sync-status-gen.py", file=sys.stderr)
-        subprocess.run([sys.executable, str(ROOT / "scripts" / "sync-status-gen.py")], cwd=str(ROOT))
-        size = (ROOT / "sync-status.html").stat().st_size if (ROOT / "sync-status.html").exists() else 0
-        print(f"status page written: {args.emit_status} ({size} B)", file=sys.stderr)
+        gen = ROOT / "scripts" / "sync-status-gen.py"
+        print("note: --emit-status 已转调 scripts/sync-status-gen.py（旧内联模板已删）", file=sys.stderr)
+        proc = subprocess.run([sys.executable, str(gen)], cwd=str(ROOT))
+        page = ROOT / "sync-status.html"
+        if proc.returncode != 0:
+            print(f"status page FAILED: {proc.returncode}（{page}）", file=sys.stderr)
+            raise SystemExit(proc.returncode)          # 子进程失败绝不打印成功
+        if not page.exists():
+            print(f"status page FAILED: 生成器 rc=0 但未落盘 {page}", file=sys.stderr)
+            raise SystemExit(2)
+        print(f"status page written: {page} ({page.stat().st_size} B)", file=sys.stderr)
     if args.emit_history:
         days = emit_history(payload, args.emit_history)
         print(f"history written: {args.emit_history} ({days} 天)", file=sys.stderr)
