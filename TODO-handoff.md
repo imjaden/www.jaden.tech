@@ -32,7 +32,7 @@
   钉子：`portal-check` **S22**（8 禁用 + 1 active + 0 href + title 齐）+ **S23** 判别力自证（href/丢 title 必红）；
   manifest `publish.allowlist` 已补导航口径；`perf-check` 新增 `tokens-tracker/index.html`（11500B）与 `data/live.js`（4800B）两档预算
 - 夜间链（时点为快照）: 镜像同步 **20:45** → 数据生成 **21:45** → 评审推送 **21:50**；备份 `jobs.json.bak-20261109` 各仓可回滚
-- 工作树: 本轮为 `documents/reports/JT-SEC-027-history-rewrite-20261111.md` + 本文件，随本笔提交；`cache/**` gitignored
+- 工作树: 本轮为台账两本（`review-log.md` / `.review-level.yaml`）+ 本文件，随本笔提交；`cache/**` gitignored
 
 ## 三、待执行（人工维护）
 
