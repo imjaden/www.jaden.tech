@@ -1,0 +1,17 @@
+# 隐私面收口（review SEC-2 / SEC-3，2026-11-16）
+# GitHub Pages 默认用 Jekyll 构建：根目录 .md 会被渲染成 HTML 页面
+# （实测 /TODO-handoff、/review-log、/AGENTS 均 200，其中 review-log 约 674 KB）。
+# 这里把文档类文件排除出构建产物 —— 它们在站点上变为 404。
+# 注意：本仓是公开仓，文件仍可在 GitHub 仓库界面浏览；要真正私有需迁到别的仓或改仓可见性，
+# 属待裁决策项（见 cache/draft 的 sec-030-handoff-public）。
+exclude:
+  - "*.md"
+  - "documents/**/*.md"
+  - "cache/"
+  - ".review-level.yaml"
+  - "AGENTS.md"
+
+# 站点资产必须保留（排除规则不得吞掉它们）
+keep_files:
+  - "static"
+  - "tokens-tracker"

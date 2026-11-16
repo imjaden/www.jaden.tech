@@ -14,9 +14,9 @@
 
 ## 二、基线（人工维护）
 
-- 仓: `~/CodeSpace/www.jaden.tech` · branch `main`
+- 仓: 站点仓 · branch `main`
 - 基线（**不写死数字**，A-1 治本）：本地 `git rev-parse --short HEAD` · 远端 `git rev-parse --short origin/main` · 未推 `git rev-list --count origin/main..HEAD` · 今日推送笔数 `git rev-list --count <今日首笔父>..origin/main` · 放行轮次见 `review-log.md` 当日 entry 数（各自现取，避免每笔自指滞后）
-- gitee 复核命令：`git -C ~/CodeSpace/www.jaden.tech-gitee ls-remote origin refs/heads/master`（收工时实取，勿只留旧 sha）
+- 镜像仓复核：收工时对私有镜像仓实取 `ls-remote`（勿只留旧 sha）
 - 🆕 **2026-11-15 23:15 落地 JT-CL005 设计件**：`documents/design/JT-CL005-sync-manifest-design-v1.0-20261115.md`（门户同步面契约化：`config/sync-manifest.json` 单文件 + 产物内注释戳 + `sync-check.py` + `sync-status.html` + push→pull 模型）。三仓只读核对结论：daily-tracker **无 CLI**（monolithic，直写本仓 + 内部 commit + `_SITE_NIGHT_SLOT=(21,45)`）、script-miner **已有** `daily-poetry.py deploy --target`、hermes-manager 为壳/数据分离契约（CL039/CL058，双哨兵）
 - ✅ **`JT-SEC-029` 已由上游修复并上线**（2026-11-15 22:54/22:56 两次重渲，`b35ff95`/`69ebf7d`）：daily-tracker 源码 3146–3160 行 `_MIRROR_RESTORE_TAB_JS` 只恢复本页确实存在的 tab（含 `getElementById` 检查 + `removeItem`）；真机对照实测 —— `archived` 陈旧值下 **修复前**：四页签全 `display:none`、`bodyText` 38 字符、`_wtChart` undefined（=review 报的空白）；**修复后**：`localStorage` 归一 `null`、`tab-today` 可见、1005 字符、chart `object`；`omad`/`faq`/`junk-tab` 三档均安全。线上与本地 sha256 一致 `82c6488e…`（47283 B）⇒ 线上缺陷已消除，**待 review 下轮 L2 复核关号**（本会话不自行关号）
 - 同轮复核：`JT-SEC-028` ✅ CLOSED（bundle 已删）；`JT-SEC-019/020/022/023` 🟢 结转
@@ -29,7 +29,7 @@
 - 线上: https://www.jaden.tech 首页 200（1.4s）· `bmi-tracker.html` 200 · `tokens-tracker/` 200；Pages `built` / `cname=www.jaden.tech` / `https_enforced=true`
 - harness（三颗钉子均已入仓；**现行计数见 §三「明早首跑」一行，此处不写死数字**）：`scripts/portal-check.py`、`scripts/perf-check.py`、`scripts/sync-check.py`
   - ⚠️ 旧口径作废: 历史里写的 `13/13`（10-25）、`9/9`/`10/10` 均为 S9/S10 修复前数字
-- 夜间链: `ops tokens-tracker-mirror` **20:45** → `personal daily-tracker-2145` **21:45** → `review daily-tracker-review` **21:50**；备份 `jobs.json.bak-20261109` 各仓可回滚
+- 夜间链（时点为快照）: 镜像同步 **20:45** → 数据生成 **21:45** → 评审推送 **21:50**；备份 `jobs.json.bak-20261109` 各仓可回滚
 - 工作树: 本轮为 `documents/reports/JT-SEC-027-history-rewrite-20261111.md` + 本文件，随本笔提交；`cache/**` gitignored
 
 ## 三、待执行（人工维护）
@@ -63,5 +63,5 @@
 - **gitee 镜像**（用户裁「走 A」）：`master` 每次收工随本地强推；旧对象 `gc` 后 resume 计数 0；gitee 侧 5 个 2022 年旧提交已弃（内容被现版覆盖）
 - 已闭合、无需再动：CL003 门户改版（PASS 100）/ CL063·CL068 站点同步（PASS 95）/ imjaden 转交件（`3f7e246`）/ BWH 数据面由上游闭合
 - 日更口径（2026-11-08 裁定）：`bmi-tracker.html` 头部读今日 ⇒ 每天一笔 `data@archive`；推送节奏 = **每日一次收口**（现与 21:50 L2 同批）
-- 备份现状：**仅存干净备份** `~/CodeSpace/cache/rewrite-backup/www-jaden-tech-post-rewrite-20261111.bundle`（16M，clone 验证 resume 对象 0）；含 PII 的 `pre-rewrite` bundle 已于 21:00 删除
+- 备份现状：**仅存一份干净备份**（16M，clone 验证 PII 对象 0）；含 PII 的 `pre-rewrite` bundle 已于 21:00 删除
 - 快校验口径: `hm check readme .` 在本仓**不适用**（手写索引被判「多余索引」+ 一处归档断链，10-25 存量），本轮复跑仍 `1/1 未通过`，属既有漂移；`hm check handoff .` 0 err 0 warn、`hm check draft .` 1 warn（JT-CL004 一闭环两条目，合法）；本仓无 `tests/` ⇒ pytest 定向不适用
