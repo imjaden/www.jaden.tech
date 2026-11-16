@@ -10,3 +10,6 @@ cache/
 review-log.md
 .review-level.yaml
 documents/
+
+# 原子写的半成品（sync-check/sync-status-gen 的 *.tmp）
+data/*.tmp

@@ -218,6 +218,9 @@ def run():
     return rc, payload, struct
 
 
+VERDICT = {0: "PASS", 1: "PASS（含过渡/陈旧项）", 2: "FAIL（结构违规）", 3: "UNKNOWN"}
+
+
 def print_human(payload):
     print(f"sync-check · {payload['checked_at']} · manifest v{payload['manifest_version']}")
     width = max([len(r.get("artifact", "")) for r in payload["artifacts"]] + [8])
@@ -233,11 +236,7 @@ def print_human(payload):
     if payload["unregistered"]:
         for rel in payload["unregistered"]:
             print(f"  ❌ 未注册产物: {rel}")
-    verdict = {0: "PASS", 1: "PASS（含过渡/陈旧项）", 2: "FAIL（结构违规）", 3: "UNKNOWN"}[payload["rc"]]
-    print(f"\n{verdict} · artifacts {len(payload['artifacts'])} · rc={payload['rc']}")
-
-
-VERDICT = {0: "PASS", 1: "PASS（含过渡/陈旧项）", 2: "FAIL（结构违规）", 3: "UNKNOWN"}
+    print(f"\n{VERDICT[payload['rc']]} · artifacts {len(payload['artifacts'])} · rc={payload['rc']}")
 
 
 def emit_history(payload, dest=None):
@@ -322,7 +321,8 @@ def selftest():
         _j = json.loads(_hp.read_text(encoding="utf-8"))
         ok("emit_history 同日幂等", n1 == n2 == len(_j["days"]), f"{n1}/{n2}")
         _day = _j["days"][sorted(_j["days"])[0]]
-        ok("emit_history 落 verdict（日记录内）", _day.get("verdict") == VERDICT[1], str(_day.get("verdict")))
+        ok("emit_history 落 verdict（日记录内）",
+           _day.get("verdict") == "PASS（含过渡/陈旧项）", str(_day.get("verdict")))
     except NameError as exc:                     # 本次事故形态：VERDICT 被误删
         ok("emit_history 可用（无 NameError）", False, str(exc))
     finally:
