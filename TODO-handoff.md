@@ -35,7 +35,7 @@
 
 ### 待审计 commit 清单
 
-**无待审计笔**（`origin/main..HEAD` = 0）。今日 21 笔已按 5 轮 review 逐批 PASS 并 ff-only 推送：
+**无待审计笔**（`origin/main..HEAD` 现取为 0）。本日各批次均已 review PASS 并 ff-only 推送；笔数与轮次不在此写死 —— 现取 `git rev-list --count <今日首笔父>..origin/main` 与 `review-log.md` 当日 entry 数，下表仅记批次构成与代表 sha。
 
 | 放行批次 | 笔数 | 范围 |
 |:--|:--|:--|
