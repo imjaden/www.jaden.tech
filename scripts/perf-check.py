@@ -30,7 +30,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # gzip byte budgets (measured 2026-11-04; leave ~25-40% headroom over actual)
 BUDGETS = {
     "index.html": 8_000,
-    "static/css/index.css": 3_500,
+    "static/css/index.css": 4_200,          # 2026-11-16：+同步面小球样式（实测 3,643 gz，余 15%）
+    "sync-status.html": 4_600,              # 2026-11-16：状态页（实测 3,505 gz）
     "static/js/index.js": 2_500,
     "static/js/poetry-titles-202611.js": 1_500,   # any month, matched by glob below
     "static/img/bear01-1600.avif": 100_000,

@@ -305,6 +305,8 @@ def run(mode, html=None, css=None):
     # S24 台账外置（JT-SEC-044）
     _ok24, _d24 = ledger_guard()
     check("S24", "台账面外置私有仓：公开仓不得再跟踪 review-log / .review-level / documents/", _ok24, _d24)
+    # S25 状态页 + 首页小球契约（2026-11-16）
+    check_s25()
 
 
 # S17（JT-CL005）：同步面契约齐备 —— 清单存在、公开面脱敏、校验器不红
@@ -449,6 +451,117 @@ def check_s22(board_path=None):
     return ok
 
 
+# S25（2026-11-16）：状态页 + 首页小球契约 —— 三处同源（页面横幅 / 小球 / 机器 JSON）。
+STATUS_PAGE = ROOT / "sync-status.html"
+STATUS_JSON = ROOT / "data" / "sync-status.json"
+FAVICON_STAMP = "static/img/favicon-64.png?t="
+ROWS_CELL = '<td data-l="产物">'
+DOT_OF_BANNER = {"ok": "is-ok", "warn": "is-warn", "bad": "is-bad"}
+
+
+def status_page_guard(root=None):
+    """返回 (ok, detail)。任一条不符即红；用于钉住「球绿页红」这类不同源漂移。"""
+    root = Path(root or ROOT)
+    page, index = root / "sync-status.html", root / "index.html"
+    if not page.exists():
+        return False, "sync-status.html 缺失"
+    html = page.read_text(encoding="utf-8", errors="replace")
+
+    problems = []
+    m_banner = re.search(r'<div class="banner (ok|warn|bad)"', html)
+    if not m_banner:
+        problems.append("横幅缺结论类")
+    if FAVICON_STAMP not in html:
+        problems.append("favicon 戳缺失/格式不符")
+    # 根绝对路径会 404（页面在站点根，但仍统一要求相对引用，避免迁目录再翻车）
+    if re.search(r'(?:href|src)="/', html):
+        problems.append("存在根绝对引用")
+    bars = len(re.findall(r'<span class="(?:ok|warn|bad|none)" title=', html))
+    if bars != 90:
+        problems.append(f"90 天条格数 {bars} != 90")
+    try:
+        manifest = json.loads((root / "config/sync-manifest.json").read_text(encoding="utf-8"))
+        want = len(manifest["artifacts"])
+        got = html.count(ROWS_CELL)
+        if got != want:
+            problems.append(f"组件表行数 {got} != 清单产物数 {want}")
+    except (OSError, json.JSONDecodeError, KeyError):
+        problems.append("清单不可读，无法核对行数")
+
+    # 三处同源：页面横幅类 ↔ index.html 小球类 ↔ 机器 JSON rc
+    ih = index.read_text(encoding="utf-8", errors="replace") if index.exists() else ""
+    m_dot = re.search(r'class="sync-dot (is-ok|is-warn|is-bad)"', ih)
+    if not m_dot:
+        problems.append("index.html 小球缺失")
+    elif m_banner and DOT_OF_BANNER[m_banner.group(1)] != m_dot.group(1):
+        problems.append(f"小球 {m_dot.group(1)} 与横幅 {m_banner.group(1)} 不同源")
+    if STATUS_JSON.exists():
+        try:
+            rc = json.loads(STATUS_JSON.read_text(encoding="utf-8")).get("rc")
+            want_cls = {0: "ok", 1: "warn", 2: "bad", 3: "warn"}.get(rc)
+            if m_banner and want_cls and m_banner.group(1) != want_cls:
+                problems.append(f"横幅类与机器 JSON rc={rc} 不一致")
+        except (OSError, json.JSONDecodeError):
+            problems.append("data/sync-status.json 不可读")
+    else:
+        problems.append("data/sync-status.json 缺失")
+
+    if problems:
+        return False, "；".join(problems[:4])
+    if not (m_banner and m_dot):
+        return False, "横幅/小球解析失败"
+    return True, (f"横幅={m_banner.group(1)} 小球={m_dot.group(1)} 条=90 "
+                  f"行数={html.count(ROWS_CELL)} favicon✓ 相对引用✓")
+
+
+def check_s25(root=None):
+    ok, detail = status_page_guard(root)
+    check("S25", "状态页契约：横幅/小球/机器 JSON 同源 + favicon 戳 + 90 格 + 行数=清单", ok, detail)
+    return ok
+
+
+def status_selftest():
+    """S25 判别力自证：在临时副本里造 4 种破坏，判据必须逐条转红。"""
+    import tempfile
+    import shutil
+
+    results = []
+    src = ROOT
+    for name, breaker in (
+        ("球色与横幅不同源", lambda d: _mutate(d, "index.html",
+                                       lambda t: re.sub(r'class="sync-dot is-\w+"', 'class="sync-dot is-ok"', t))),
+        ("删 favicon 戳", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace(FAVICON_STAMP, "static/img/nope.png?t="))),
+        ("根绝对引用回流", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace("<footer>", '<footer><a href="/x">x</a>', 1))),
+        ("组件表少一行", lambda d: _mutate(d, "sync-status.html",
+                                    lambda t: re.sub(r'<tr>' + re.escape(ROWS_CELL) + r'.*?</tr>', "",
+                                                     t, count=1, flags=re.S))),
+    ):
+        tmp = Path(tempfile.mkdtemp(prefix="s25-"))
+        try:
+            for rel in ("sync-status.html", "index.html", "data/sync-status.json", "config/sync-manifest.json"):
+                dest = tmp / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src / rel, dest)
+            breaker(tmp)
+            ok, _ = status_page_guard(tmp)
+            results.append((name, not ok))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+    ok, detail = status_page_guard()
+    results.append(("未破坏时通过", ok))
+    for name, cond in results:
+        print(f"  {'✅' if cond else '❌'} {name}")
+    print(f"\n{sum(1 for _, c in results if c)}/{len(results)} 通过（S25 判别力）")
+    return all(c for _, c in results)
+
+
+def _mutate(root, rel, fn):
+    path = Path(root) / rel
+    path.write_text(fn(path.read_text(encoding="utf-8")), encoding="utf-8")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", choices=["pre", "post"], default="post")
@@ -559,6 +672,10 @@ def main():
         check("S23", "V16 判别力自证：禁用项带 href / 丢 title / tab-bar 回流 ⇒ S22 必红",
               _ok_a is False and _ok_b is False and _ok_c is False,
               f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c}")
+
+        # S25 判别力自证：四种破坏（球色/ favicon / 根绝对 / 少一行）⇒ 判据必红
+        check("S26", "V17 判别力自证：球色不同源 / 删 favicon / 根绝对回流 / 少一行 ⇒ S25 必红",
+              status_selftest(), "")
 
     fails = [r for r in results if not r[2]]
     for cid, desc, ok, detail in results:
