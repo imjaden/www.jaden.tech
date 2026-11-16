@@ -38,6 +38,12 @@ Never edits hermes-manager sources. Deterministic output → git clean when data
 """
 import argparse
 import json
+
+sys_path_dir = __import__('os').path.dirname(__import__('os').path.abspath(__file__))
+import sys as _sys
+if sys_path_dir not in _sys.path:
+    _sys.path.insert(0, sys_path_dir)
+import sync_stamp  # JT-CL005: 戳的唯一实现（与 sync-check 共用）
 import re
 import subprocess
 import sys
@@ -176,6 +182,16 @@ CHROME_CSS = """
 """
 
 
+def _stamp_generated(live_text: str) -> str:
+    """戳时间取数据源时间（不是 now()），保证幂等。"""
+    import re as _re
+    from datetime import datetime as _dt
+    m = _re.search(r'"generated_at"\s*:\s*"([^"]+)"', live_text)
+    if m:
+        return m.group(1)
+    return _dt.fromtimestamp(SRC_LIVE.stat().st_mtime).astimezone().isoformat(timespec="seconds")
+
+
 def inject_chrome(html: str) -> str:
     """Add github-corner + home tab-bar to the mirrored page (deterministic)."""
     if "github-corner" in html:
@@ -228,7 +244,14 @@ def project_items(items: list) -> list:
 
 
 def transform_shell(html: str) -> str:
-    """Desensitize the shell + drop links to pages the mirror does not publish."""
+    """Desensitize the shell + drop links to pages the mirror does not publish.
+
+    JT-CL005 (2026-11-16): 上游 2026-11-15 起在壳里加了 `<link rel="icon" href="/static/img/favicon.png">`，
+    根绝对路径在镜像面是死链（页面发布在 /tokens-tracker/ 一级深）且违 JT-SEC-018 守卫 ⇒
+    统一降级为相对路径 `../static/...`（站点根确有该资源），下略保持守卫 fail-closed 不变。
+    """
+    # 0) root-absolute 站点资源降级为相对（镜像面在 /tokens-tracker/，上一级即站点根）
+    html = re.sub(r'(?P<attr>href|src)="/static/', r'\g<attr>="../static/', html)
     # 1) path desensitization (E1/B1): /Users/<user>/CodeSpace/xxx -> xxx (project-relative)
     html = LOCAL_PREFIX.sub("", html)
     # 2) drop nav to non-mirrored pages (history/projects/guide → 404 otherwise)
@@ -337,6 +360,21 @@ def main() -> int:
     # 必然命中 ⇒ 镜像自 2026-09-23 起每晚 rc=2 中止（站点数据冻结；job deliver=local 无人可见）。
     if not guard_ok(new_html, "index.html", SENSITIVE_CONTENT):
         return 2
+    # JT-CL005: 打 SYNC 戳（守卫通过之后、写盘之前）。
+    # generated 取上游 data/live.js 的 WEB_DATA_META.generated_at ⇒ 数据不变则逐字节不变（幂等，
+    # 不会每次运行都脏工作树）。哈希口径 = 去戳后正文，见 scripts/sync_stamp.py。
+    try:
+        _meta = new_live if 'new_live' in dir() else ""
+    except Exception:
+        _meta = ""
+    new_html = sync_stamp.html_stamp(
+        new_html,
+        id="tokens-board",
+        producer="hermes-manager/1acl-board-gen",
+        v="1",
+        generated=_stamp_generated(transform_live(SRC_LIVE.read_text(encoding="utf-8"))),
+        sha256=sync_stamp.digest(new_html),
+    )
 
     new_live = transform_live(SRC_LIVE.read_text(encoding="utf-8"))
     if not guard_ok(new_live, "data/live.js"):

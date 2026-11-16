@@ -20,6 +20,11 @@ Usage:
 """
 import argparse
 import json
+import sys
+from datetime import datetime
+
+sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parent))
+import sync_stamp  # JT-CL005: 戳的唯一实现
 import pathlib
 import re
 import sys
@@ -55,10 +60,22 @@ def titles_for(archive):
     return out
 
 
-def render(titles):
+def render(titles, generated):
+    """渲染月索引。generated 取自源月包 mtime ⇒ 同一输入逐字节相同（幂等）。
+
+    戳由 sync_stamp 统一写入（JT-CL005）：sha256 = 去戳后正文哈希。
+    """
     ordered = {k: titles[k] for k in sorted(titles)}
     body = json.dumps(ordered, ensure_ascii=False, separators=(",", ":"))
-    return "window.poetryTitles=%s;\n" % body
+    payload = "window.poetryTitles=%s;\n" % body
+    return sync_stamp.js_stamp(
+        payload,
+        id="poetry-titles",
+        producer="www.jaden.tech/scripts/poetry-titles-gen.py",
+        v="1",
+        generated=generated,
+        sha256=sync_stamp.digest(payload),
+    )
 
 
 def main():
@@ -77,7 +94,8 @@ def main():
         if match is None:  # guarded by the months list comprehension
             continue
         dest = JS_DIR / f"poetry-titles-{match.group(1)}.js"
-        expected = render(titles_for(load_archive(src)))
+        generated = datetime.fromtimestamp(src.stat().st_mtime).astimezone().isoformat(timespec="seconds")
+        expected = render(titles_for(load_archive(src)), generated)
         if dest.exists() and dest.read_text(encoding="utf-8") == expected:
             print(f"ok      {dest.name} ({dest.stat().st_size} B)")
             continue

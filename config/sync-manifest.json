@@ -1,0 +1,158 @@
+{
+  "_note": "门户同步面唯一真值（JT-CL005）。禁绝对路径 / 用户名 / 内部项目代号；仓别名可用。检出后由 scripts/sync-check.py 校验。",
+  "version": 1,
+  "watch": [
+    "bmi-tracker.html",
+    "daily-tracker-archive-*.html",
+    "tokens-tracker/index.html",
+    "daily-poetry.html",
+    "static/js/poetry-titles-*.js"
+  ],
+  "artifacts": [
+    {
+      "id": "bmi-tracker",
+      "artifact": "bmi-tracker.html",
+      "producer": {
+        "repo": "daily-tracker",
+        "entry": "scripts/daily-tracker-update.py",
+        "mode": "emit-site",
+        "profile": "personal"
+      },
+      "trigger": {
+        "cron": "10:00,21:45",
+        "cadence_h": 24
+      },
+      "contract": {
+        "version": 1,
+        "write": "overwrite",
+        "stamp": "pending",
+        "deterministic": false
+      },
+      "publish": {
+        "pii": "none"
+      },
+      "verify": {
+        "freshness_h": 36,
+        "hash": "required",
+        "guard": "none"
+      },
+      "_transition": "上游无 CLI、直写本仓（push 模型）；打戳待 P4 跨仓交接后启用"
+    },
+    {
+      "id": "dt-archive",
+      "artifact": "daily-tracker-archive-*.html",
+      "producer": {
+        "repo": "daily-tracker",
+        "entry": "scripts/daily-tracker-update.py",
+        "mode": "emit-site",
+        "profile": "personal"
+      },
+      "trigger": {
+        "cron": "10:00,21:45",
+        "cadence_h": 24
+      },
+      "contract": {
+        "version": 1,
+        "write": "overwrite",
+        "stamp": "pending",
+        "deterministic": false
+      },
+      "publish": {
+        "pii": "none"
+      },
+      "verify": {
+        "freshness_h": 36,
+        "hash": "optional",
+        "guard": "none"
+      },
+      "_transition": "与 bmi-tracker 同批产出；目录名随月份滚动，故用 glob"
+    },
+    {
+      "id": "tokens-board",
+      "artifact": "tokens-tracker/index.html",
+      "producer": {
+        "repo": "hermes-manager",
+        "entry": "scripts/tokens-tracker-mirror.py",
+        "mode": "mirror",
+        "profile": "ops"
+      },
+      "trigger": {
+        "cron": "20:45",
+        "cadence_h": 24
+      },
+      "contract": {
+        "version": 1,
+        "write": "projection",
+        "stamp": "inline",
+        "deterministic": true
+      },
+      "publish": {
+        "pii": "allowlist",
+        "allowlist": "project whitelist + safe columns (见 mirror 脚本头 §3)"
+      },
+      "verify": {
+        "freshness_h": 26,
+        "hash": "required",
+        "guard": "fail-closed rc=2"
+      }
+    },
+    {
+      "id": "daily-poetry",
+      "artifact": "daily-poetry.html",
+      "producer": {
+        "repo": "script-miner",
+        "entry": "daily-poetry/daily-poetry.py deploy --target",
+        "mode": "emit-site",
+        "profile": "manual"
+      },
+      "trigger": {
+        "cron": "manual",
+        "cadence_h": 24
+      },
+      "contract": {
+        "version": 1,
+        "write": "overwrite",
+        "stamp": "pending",
+        "deterministic": true
+      },
+      "publish": {
+        "pii": "none"
+      },
+      "verify": {
+        "freshness_h": 48,
+        "hash": "optional",
+        "guard": "none"
+      },
+      "_transition": "上游已有幂等 deploy CLI（--target）；打戳待 P4"
+    },
+    {
+      "id": "poetry-titles",
+      "artifact": "static/js/poetry-titles-*.js",
+      "producer": {
+        "repo": "www.jaden.tech",
+        "entry": "scripts/poetry-titles-gen.py",
+        "mode": "local",
+        "profile": "ops"
+      },
+      "trigger": {
+        "cron": "on-pack-landing",
+        "cadence_h": 720
+      },
+      "contract": {
+        "version": 1,
+        "write": "derive",
+        "stamp": "inline",
+        "deterministic": true
+      },
+      "publish": {
+        "pii": "none"
+      },
+      "verify": {
+        "freshness_h": 0,
+        "hash": "required",
+        "guard": "none"
+      },
+      "_transition": "派生缓存：新鲜度靠 hash + `python3 scripts/poetry-titles-gen.py --check` 判，freshness_h=0 表示不按时间判；月包预生成多月份 ⇒ 源 mtime 本就旧"
+    }
+  ]
+}
