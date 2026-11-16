@@ -536,7 +536,9 @@ def status_page_guard(root=None):
             rc = _j.get("rc")
             # 机器 JSON 的 days_recorded 必须与页面彩色格同口径（r6 🟢：此前无任何门禁读它）
             _jr = _j.get("days_recorded")
-            if isinstance(_jr, int) and colored != _jr:
+            if not isinstance(_jr, int) or isinstance(_jr, bool):
+                problems.append(f"JSON days_recorded 缺失或非整数（{_jr!r}）")   # fail-closed，原为静默放行
+            elif colored != _jr:
                 problems.append(f"JSON days_recorded {_jr} != 彩色格数 {colored}")
             want_cls = {0: "ok", 1: "warn", 2: "bad", 3: "warn"}.get(rc)
             if m_banner and want_cls and m_banner.group(1) != want_cls:
@@ -592,11 +594,19 @@ def _add_hist_day(root):
     days = data.get("days") or {}
     day = next(((base - timedelta(days=i)).isoformat() for i in range(1, 90)
                 if (base - timedelta(days=i)).isoformat() not in days), None)
-    if day is None:                                        # 90 天全满 ⇒ 退回最早空缺约定
-        day = (base - timedelta(days=89)).isoformat()
+    if day is None:                    # 窗口全满（2027-02-12 起）：删一条入窗记录，彩色 90 vs 历史 89 必红
+        _victim = next((d for d in sorted(days) if d >= (base - timedelta(days=89)).isoformat()), None)
+        if _victim is None:
+            raise RuntimeError("S25 负控无法构造：窗口内既无空缺日也无入窗记录")
+        days.pop(_victim)
+        p.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+        return
+    _before = len(days)
     data.setdefault("days", {})[day] = {"rc": 0, "verdict": "PASS",
                                         "artifacts": {}, "ok_ratio": 1.0}
     p.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    if len(data["days"]) != _before + 1:      # 后置断言：变异没生效就别让「判据失效」冒充「判据失效」
+        raise RuntimeError(f"S25 负控未生效：期望 +1 天，实得 {_before} → {len(data['days'])}")
 
 
 def _add_future_day(root):
@@ -822,7 +832,7 @@ def main():
               f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c} active={_ok_d}")
 
         # S25 判别力自证：四种破坏（球色/ favicon / 根绝对 / 少一行）⇒ 判据必红
-        check("S26", "V17 判别力自证：11 个变异（球色/favicon/根绝对/快照/下次生成/href/少一格/横幅↔JSON/少一行/未来日/JSON 天数）⇒ S25 必红",
+        check("S26", "V17 判别力自证：12 个变异（球色/favicon/根绝对/快照/下次生成/href/少一格/横幅↔JSON/少一行/历史多一天/未来日/JSON 天数）⇒ S25 必红",
               status_selftest(), "")
 
     fails = [r for r in results if not r[2]]
