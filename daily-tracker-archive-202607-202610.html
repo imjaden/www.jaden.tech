@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNC id=dt-archive producer=daily-tracker/scripts/daily-tracker-update.py v=1 generated=2026-11-17T00:00:00+08:00 sha256=8730694993889926 -->
+<!-- SYNC id=dt-archive producer=www.jaden.tech/scripts/site_chrome.py v=1 generated=2026-11-17T00:00:00+08:00 sha256=6cecbca51f0e2970 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -45,6 +45,31 @@ h2 .toggle:hover{background:#21262d;color:#e6edf3}
 .github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}
 @keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}
 @media (max-width:500px){.github-corner:hover .octo-arm{animation:none}}
+</style>
+<style id="jt-chrome-css">
+/* 站点 chrome（由 scripts/site_chrome.py 注入，勿手改；上游写盘后重跑本脚本即可恢复） */
+.jt-gh { position: fixed; top: 0; right: 0; z-index: 999; width: 64px; height: 64px; }
+.jt-gh svg { position: absolute; top: 0; right: 0; border: 0; fill: #e6edf3; color: #0d1117; }
+.jt-gh:hover svg { filter: drop-shadow(0 0 8px rgba(96,165,250,.55)); }
+.jt-gh .octo-arm { transform-origin: 130px 106px; }
+.jt-gh:hover .octo-arm { animation: jt-octo 560ms ease-in-out; }
+@keyframes jt-octo { 0%,100%{transform:rotate(0)} 20%,60%{transform:rotate(-25deg)} 40%,80%{transform:rotate(10deg)} }
+.jt-home { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); z-index: 999;
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; color: #e6edf3; text-decoration: none;
+  background: rgba(8,12,20,.55); border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 6px 18px rgba(0,0,0,.28);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.jt-home:hover { background: rgba(12,18,30,.72); border-color: rgba(255,255,255,.45);
+  transform: translateY(-50%) scale(1.05); }
+.jt-home:focus-visible { outline: 2px solid #9ecbff; outline-offset: 2px; }
+@media (max-width: 600px) {
+  .jt-gh { width: 52px; height: 52px; }
+  .jt-gh svg { width: 52px; height: 52px; }
+  .jt-home { right: 10px; width: 40px; height: 40px; border-radius: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .jt-home { transition: none; } .jt-gh:hover .octo-arm { animation: none; } }
 </style>
 </head>
 <body>
@@ -220,5 +245,10 @@ new Chart(document.getElementById('wtChart'),{
 }
 document.addEventListener('DOMContentLoaded', renderChart);
 </script>
+<!-- jt-chrome:start -->
+<a href="./" class="jt-home" aria-label="返回首页 ｜ Back to home" title="返回首页 ｜ Back to home">
+<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 3.2 2.8 11h2.5v9.2h5.1v-6h3.2v6h5.1V11h2.5z" fill="currentColor"/></svg>
+</a>
+<!-- jt-chrome:end -->
 </body>
 </html>
