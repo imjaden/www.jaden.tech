@@ -214,8 +214,8 @@ CHROME_CSS = """
 @media (max-width: 500px) { .github-corner:hover .octo-arm { animation: none; } }
 /* 右侧垂直居中的「返回首页」悬浮按钮（2026-11-16）：bmi-tracker 与本页共用同一形态 */
 .jt-home {
-  position: fixed; right: 18px; top: 50%; transform: translateY(-50%); z-index: 999;
-  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  position: fixed; right: 10px; top: 50%; transform: translateY(-50%); z-index: 999;
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
   border-radius: 12px; color: #fff; text-decoration: none;
   background: rgba(8, 12, 20, .55); border: 1px solid rgba(255, 255, 255, .22);
   box-shadow: 0 6px 18px rgba(0, 0, 0, .28);

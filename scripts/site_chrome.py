@@ -53,8 +53,8 @@ CHROME_CSS = """<style id="jt-chrome-css">
 .jt-gh .octo-arm { transform-origin: 130px 106px; }
 .jt-gh:hover .octo-arm { animation: jt-octo 560ms ease-in-out; }
 @keyframes jt-octo { 0%,100%{transform:rotate(0)} 20%,60%{transform:rotate(-25deg)} 40%,80%{transform:rotate(10deg)} }
-.jt-home { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); z-index: 999;
-  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+.jt-home { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); z-index: 999;
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
   border-radius: 12px; color: #e6edf3; text-decoration: none;
   background: rgba(8,12,20,.55); border: 1px solid rgba(255,255,255,.22);
   box-shadow: 0 6px 18px rgba(0,0,0,.28);
