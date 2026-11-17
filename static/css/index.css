@@ -171,6 +171,7 @@ body {
     border: 0;
     right: 0;
 }
+.github-corner path:first-child { fill: var(--btn-surface, rgba(8, 12, 20, .34)); }
 .github-corner:hover svg {
     filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.5));
 }
@@ -291,6 +292,15 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .sync-dot.is-ok, .sync-dot.is-bad { animation: none; }
 }
+/* 按钮面统一透明度（2026-11-16）：所有浮在背景图上的可点元素共用同一档 alpha ——
+   底 .34 / 悬停 .46，两者只差状态、不差材质；改这一处全站生效。
+   目的是让门户背景图（北极熊全身照）始终可辨，又不牺牲白字可读性。 */
+:root {
+    --btn-surface: rgba(8, 12, 20, .34);
+    --btn-surface-hover: rgba(12, 18, 30, .46);
+    --btn-border: rgba(255, 255, 255, .22);
+    --btn-border-hover: rgba(255, 255, 255, .48);
+}
 .now-card {
     display: flex;
     align-items: center;
@@ -304,17 +314,17 @@ body {
     cursor: pointer;
     text-decoration: none;
     color: #fff;
-    background: rgba(8, 12, 20, .42);
-    border: 1px solid rgba(255, 255, 255, .20);
+    background: var(--btn-surface, rgba(8, 12, 20, .34));
+    border: 1px solid var(--btn-border, rgba(255, 255, 255, .22));
     box-shadow: 0 6px 18px rgba(0, 0, 0, .28);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     transition: transform .18s ease, border-color .18s ease, background .18s ease;
 }
 .now-card:hover {
     transform: translateY(-1px);
-    border-color: rgba(255, 255, 255, .50);
-    background: rgba(12, 18, 30, .55);
+    border-color: var(--btn-border-hover, rgba(255, 255, 255, .48));
+    background: var(--btn-surface-hover, rgba(12, 18, 30, .46));
 }
 .now-card:focus-visible {
     outline: 2px solid #9ecbff;
