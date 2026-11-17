@@ -70,6 +70,7 @@
 | 收口加固（naive 时间戳按本地/快照解释、--emit-status 退役、S25 判据 root 化与窗口基准、S26 11 变异） | `1db6cee` `b4c090f` `99e5729` `1ea6062` `fe3adf7` `624e806` `cae4694` `886e7e7` |
 | 状态页 C 方案（过渡豁免到期）+ 表格单行收口 + 文档订正 + 第 9 轮 forward-fix | `a36cb29` `3075860` `14a41b4` `b0e2595` `14d4c4d` `01bb14c` `67f2d00` `ffa03ad` `ae9c5f5` `ac5415a` `dcd2f74`（第 9 轮 PASS 88 后由 review 推送）；forward-fix `a8d95ff` `df1856b` `81edfeb` `fd266ef`（ops 自推） |
 | 上游打戳收尾（每日三条转 required + 去豁免）+ 镜像戳时区修正 | `3f8f9b7` `4e5650e` `09cbbf0`；`c8be56d`（他线代跑 daily-poetry deploy）· `e22c55b`（mirror generator 补 +08:00） |
+| 站点一致性 UI 批次：按钮透明度统一 / 两页 Home 悬浮按钮 / bmi GitHub 角标 / 「公开镜像」徽章 / 陈旧阈值 24h | `4eaff22` `14e8c5a` `d11e315` `ea08f6b` `1239b17` `4f8866d` `bd12559`；新增 `scripts/site_chrome.py` + cron `site-chrome-refresh` 21:10 |
 
 - 今日串行序（下一轮）
   ① ✅ 已落（`2fd0f92`）：`D-2` 文档一处（`§十三 时点基线` 去 `09:50`）
