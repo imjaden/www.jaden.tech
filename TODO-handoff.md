@@ -73,7 +73,7 @@
 | 站点一致性 UI 批次：按钮透明度统一 / 两页 Home 悬浮按钮 / bmi GitHub 角标 / 「公开镜像」徽章 / 陈旧阈值 24h | `4eaff22` `14e8c5a` `d11e315` `ea08f6b` `1239b17` `4f8866d` `bd12559`；新增 `scripts/site_chrome.py` + cron `site-chrome-refresh` 21:10 |
 | 状态页按 A 方案重设计（方案 A 全采 D1–D8）：横幅三档 + 组件分组 + 每组件 30 天色块 + 可用率样本数 + 事件派生 + 三件套抽屉 + JSON 扩展（保留兼容键） | `e91b592` `f088a14`；新增门禁 S27（5 条负控）· 页面 gz 预算 4,600→8,200（实测 7,817）| 
 | 状态页第二轮（用户 5 条）：删 h1/banner 元信息 + 时间统一 `yyyy-mm-dd HH:MM:SS` + Uptime 上移 + 只列门户 3 页（隐藏项页脚说明）+ 门禁进抽屉；并做同页文字去重（变更日志按版本聚合、卡片副行改占预算比） | `portal 21/21` `status st 19/19` `perf passed`；gz 7,606 |
-| 站点外壳统一（方案 C，上游 daily-tracker 8a18f49 落地 jt-nav）：tokens 内容 1400→1200 + 顶栏 43→48；bmi/archive 补回 chrome；新增门禁 S28（9 判据 + 8 负控） | `portal 22/22` `selftest 29/29` `mirror st 36/36`；F1 nav 品牌对齐已闭环（上游 c5ba5a3，实测 +16，站点 3d55705 后补 chrome 再提交）；**上游未推**：8a18f49 / ac60099 / c5ba5a3 |
+| 站点外壳统一（方案 C，上游 daily-tracker 8a18f49 落地 jt-nav）：tokens 内容 1400→1200 + 顶栏 43→48；bmi/archive 补回 chrome；新增门禁 S28（9 判据 + 8 负控） | `portal 22/22` `selftest 29/29` `mirror st 37/37`；F1 nav 品牌对齐已闭环（上游 c5ba5a3，实测 +16）；A1 对侧已闭环（tokens .dash-wrap 改绑 --page-max，两页宽差 0）；**上游未推**：8a18f49 / ac60099 / c5ba5a3 |
 
 - 今日串行序（下一轮）
   ① ✅ 已落（`2fd0f92`）：`D-2` 文档一处（`§十三 时点基线` 去 `09:50`）
