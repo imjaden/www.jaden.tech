@@ -308,6 +308,8 @@ def run(mode, html=None, css=None):
     check("S24", "台账面外置私有仓：公开仓不得再跟踪 review-log / .review-level / documents/", _ok24, _d24)
     # S25 状态页 + 首页小球契约（2026-11-16）
     check_s25()
+    # S27 状态页可读性 + 三件套（2026-11-17）
+    check_s27()
 
 
 # S17（JT-CL005）：同步面契约齐备 —— 清单存在、公开面脱敏、校验器不红
@@ -575,6 +577,87 @@ def check_s25(root=None):
     return ok
 
 
+# S27（2026-11-17）：状态页「可读性 + 三件套」契约。
+# 判据只认机械事实：三件套四件、分组行、每组件色块数、可用率样本数、事件区不再是空壳、人机入口分离。
+DOCS_BLOCK = "SYNC_STATUS_DOCS"
+PC_DAYS = 30          # 与 sync-status-gen.py 的每组件窗口一致（改那里要同批改这里）
+
+
+def status_docs_guard(root=None):
+    """返回 (ok, detail)。任一不符即红：用于钉住「重设计被下一次改版悄悄回退」。"""
+    root = Path(root or ROOT)
+    page = root / "sync-status.html"
+    if not page.exists():
+        return False, "sync-status.html 缺失"
+    html = page.read_text(encoding="utf-8", errors="replace")
+    problems = []
+
+    if 'id="sdocsOpen"' not in html or 'id="sdocs"' not in html:
+        problems.append("缺版本行入口或抽屉容器（三件套未落）")
+    if html.count("data-docs-tab=") != 3 or html.count("data-docs-pane=") != 3:
+        problems.append(f"抽屉 tab/pane 数 {html.count('data-docs-tab=')}/{html.count('data-docs-pane=')} != 3/3")
+    m = re.search(r'<script id="' + DOCS_BLOCK + r'" type="application/json">(.*?)</script>', html, re.S)
+    if not m:
+        problems.append("缺内联文档数据块")
+    else:
+        try:
+            d = json.loads(m.group(1))
+            pv = (d.get("page") or {}).get("version")
+            if not pv:
+                problems.append("内联数据缺 page.version")
+            if "version" in d:
+                problems.append("内联数据顶层出现 version（§2-17 语义分层）")
+            rec = (d.get("changelog_recent") or [{}])[0].get("ver")
+            if pv and rec != pv:
+                problems.append(f"版本行 {pv} 与变更日志首条 {rec} 错位")
+        except json.JSONDecodeError:
+            problems.append("内联文档数据块不可解析")
+
+    try:
+        want = len(json.loads((root / "config/sync-manifest.json").read_text(encoding="utf-8"))["artifacts"])
+    except (OSError, json.JSONDecodeError, KeyError):
+        want = None
+        problems.append("清单不可读，无法核对分组/色块数")
+
+    grp = html.count('tr class="grp"')
+    if grp < 2:
+        problems.append(f"组件分组行 {grp}（应 ≥2，按用户视角分组）")
+    prows = html.count('<div class="prow">')
+    pcs = html.count('<span class="pc pc-')
+    if want is not None:
+        if prows != want:
+            problems.append(f"每组件行 {prows} != 清单产物 {want}")
+        if pcs != want * PC_DAYS:
+            problems.append(f"色块数 {pcs} != {want}×{PC_DAYS}")
+    if "样本 " not in html:
+        problems.append("可用率缺样本数（1/1 会被读成 100%）")
+
+    if "暂时无可用数据" in html:
+        problems.append("出现兜底空文案（生成失败残留）")
+    if "自动派生" not in html and "起无事件" not in html:
+        problems.append("事件区既无派生行、也无事实陈述")
+    if "暂无事件记录" in html:
+        problems.append("事件区回落旧空壳文案")
+
+    if "机器：" not in html or "人读：" not in html:
+        problems.append("页脚未分离人读 / 机器入口")
+    if "（UTC）" not in html:
+        problems.append("快照缺 UTC 绝对时刻")
+    if not re.search(r"\d{2}:\d{2}:\d{2} [A-Z]{2,5}", html):
+        problems.append("缺本地时区后缀（打戳时间会与年龄互相矛盾）")
+
+    if problems:
+        return False, "；".join(problems[:4])
+    return True, f"三件套✓ 分组={grp} 每组件={prows} 色块={pcs} 事件✓ 入口分离✓ 时区✓"
+
+
+def check_s27(root=None):
+    ok, detail = status_docs_guard(root)
+    check("S27", "状态页可读性：三件套（版本行/抽屉/内联数据）+ 分组 + 每组件色块 + 样本数 + 事件非空壳 + 人机入口分离",
+          ok, detail)
+    return ok
+
+
 S25_FILES = ("sync-status.html", "index.html", "data/sync-status.json",
              "config/sync-manifest.json", "data/sync-history.json")
 
@@ -684,13 +767,27 @@ def status_selftest():
         ("组件表少一行", lambda d: _mutate(d, "sync-status.html",
                                     lambda t: re.sub(r'<tr>' + re.escape(ROWS_CELL) + r'.*?</tr>', "",
                                                      t, count=1, flags=re.S))),
+        # ── S27 负控（2026-11-17）：每条对应一条判据
+        ("S27 删版本行入口", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace('id="sdocsOpen"', 'id="sdocsGone"'))),
+        ("S27 内联数据版本与变更日志错位", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace('"version": "1.1"', '"version": "9.9"', 1))),
+        ("S27 每组件色块少一格", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace('<span class="pc pc-', '<span class="pc-x pc-', 1))),
+        ("S27 事件区回落旧空壳", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace("起无事件", "暂无事件记录"))),
+        ("S27 页脚回到人机混排", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace("机器：", "入口：", 1))),
     ):
         tmp = Path(tempfile.mkdtemp(prefix="s25-"))
         try:
             _seed_s25(tmp)
             breaker(tmp)
-            ok, _ = status_page_guard(tmp)
-            results.append((name, not ok))
+            ok25, _ = status_page_guard(tmp)
+            ok27, _ = status_docs_guard(tmp)
+            # S27 负控必须由 S27 自己抓到（不能借 S25 的红混过去，否则判别力是假的）
+            caught = (not ok27) if name.startswith("S27") else (not ok25)
+            results.append((name, caught))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
     ok, detail = status_page_guard()
@@ -848,7 +945,7 @@ def main():
               f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c} active={_ok_d}")
 
         # S25 判别力自证：四种破坏（球色/ favicon / 根绝对 / 少一行）⇒ 判据必红
-        check("S26", "V17 判别力自证：12 个变异（球色/favicon/根绝对/快照/下次生成/href/少一格/横幅↔JSON/少一行/历史多一天/未来日/JSON 天数）⇒ S25 必红",
+        check("S26", "V17 判别力自证：17 个变异（S25 十二项 + S27 五项：版本行 / 内联版本错位 / 色块 / 事件空壳 / 人机入口）⇒ 各自判据必红",
               status_selftest(), "")
 
     fails = [r for r in results if not r[2]]

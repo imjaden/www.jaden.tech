@@ -31,7 +31,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUDGETS = {
     "index.html": 8_000,
     "static/css/index.css": 4_200,          # 2026-11-16：+同步面小球样式（实测 3,643 gz，余 15%）
-    "sync-status.html": 4_600,              # 2026-11-16：状态页（实测 3,505 gz）
+    # 2026-11-17 重设计后实测 7,720 gz：+分组/每组件 30 色块(180 span)/抽屉/内联数据；
+    # 抬预算是有意的（可读性优先），但仍设上限防继续膨胀 —— 再加功能时先看能不能压缩复用。
+    "sync-status.html": 8_200,
     "static/js/index.js": 2_500,
     "static/js/poetry-titles-202611.js": 1_500,   # any month, matched by glob below
     "static/img/bear01-1600.avif": 100_000,
