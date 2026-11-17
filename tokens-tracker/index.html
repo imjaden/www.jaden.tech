@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNC id=tokens-board producer=hermes-manager/dashboard-gen v=1 generated=2026-11-17T20:29:57+08:00 sha256=2e9a41a6ac25d82d -->
+<!-- SYNC id=tokens-board producer=hermes-manager/dashboard-gen v=1 generated=2026-11-17T20:49:56+08:00 sha256=41a5a319545e6e1c -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -12,7 +12,7 @@
 :root { --cobalt-600: #4f46e5; --surface-900: #15151f; }
 body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei",
   sans-serif; background: #0e0e16; color: #e0e0e0; }
-.dash-wrap { max-width: 1400px; margin: 0 auto; padding: 16px var(--page-pad, 16px); box-sizing: border-box; }
+.dash-wrap { max-width: var(--page-max, 1200px); margin: 0 auto; padding: 16px var(--page-pad, 16px); box-sizing: border-box; }
 .dash-range { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   margin-bottom: 14px; }
 .dash-range .range-label { color: #6b7280; font-size: 0.75rem; }
@@ -111,11 +111,10 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei",
 .jt-home:focus-visible { outline: 2px solid #9ecbff; outline-offset: 2px; }
 @media (max-width: 600px) { .jt-home { right: 10px; width: 40px; height: 40px; border-radius: 10px; } }
 @media (prefers-reduced-motion: reduce) { .jt-home { transition: none; } }
-/* 内容宽度与上游 bmi 侧对齐（2026-11-17 D4=A）：镜像自带 .dash-wrap{max-width:1400px}，
-   body 前缀把特异性抬到 (0,1,1) 压过它；--page-max 同时供 .wc-nav 的居中 padding 复用，
-   否则 nav 链接会按 1400 居中、内容按 1200 → 左边缘错开 100px。 */
+/* 内容宽度与上游 bmi 侧 --jt-maxw 同源（2026-11-17 转交件 A1 对侧）：.dash-wrap 的 max-width 已由
+   注入步骤改写成 var(--page-max)，这里只声明真值；同一变量同时供 .wc-nav 的居中 padding 复用，
+   否则 nav 链接按 1400 居中、内容按 1200 → 左边缘错开 100px。 */
 body { --page-max: 1200px; }
-body .dash-wrap { max-width: 1200px; }
 /* 顶栏高度与上游 bmi 侧 .jt-nav（48px）对齐；本页原为 padding 撑出的 43px，差 5px 并排看得出来 */
 body .wc-nav { min-height: 48px; align-items: center; }
 .wc-nav .wc-nav-item{padding:4px 10px;border-radius:6px;white-space:nowrap;}.wc-nav .wc-tag{margin-left:8px;padding:2px 8px;border-radius:999px;border:1px solid #3a3a52;background:rgba(79,70,229,.16);color:#c7d2fe;font-size:.72rem;font-weight:600;line-height:1.5;letter-spacing:.02em;white-space:nowrap;vertical-align:middle;}.wc-nav .wc-nav-item.is-active{background:var(--cobalt-600,#4f46e5);color:#fff;}.wc-nav .wc-nav-item.is-disabled{color:#9ca3af;opacity:.45;cursor:not-allowed;}.wc-nav .wc-nav-item.is-disabled:hover{background:transparent;color:#9ca3af;}.wc-nav .wc-pub{margin-right:80px;}body .wc-nav{padding-right:96px;}</style>
