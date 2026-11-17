@@ -1,6 +1,6 @@
-/* SYNC id=tokens-live producer=hermes-manager/dashboard-gen v=1 generated=2026-11-17T18:19:56+08:00 sha256=378febe736ff4b14 */
+/* SYNC id=tokens-live producer=hermes-manager/dashboard-gen v=1 generated=2026-11-17T20:29:57+08:00 sha256=a2dc1fe0b901e95c */
 window.WEB_DATA_META = {
-  "generated_at": "2026-11-17T18:19:56+08:00",
+  "generated_at": "2026-11-17T20:29:57+08:00",
   "generator": "hub-build",
   "generator_version": "4abba8e9",
   "max_age_ms": 86400000,
@@ -11,18 +11,18 @@ window.WEB_DATA_META = {
 window.DASHBOARD = {
   "board": {
     "counts": {
-      "anomaly_total": 9,
-      "doc_missing": 7,
+      "anomaly_total": 10,
+      "doc_missing": 8,
       "idle": 1,
-      "ledger_total": 48,
-      "prompt": "【已过滤】8 条非白名单项目的异常明细（公开面不列）\n\n【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-17（距今 0.24 天）\n【异常】实施停滞超阈值 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值\n【期望】回到该项目继续推进，并落一次步骤（step JSON），让「最近推进」刷新\n【验收】`（本地命令）HERMES-MANAGER-CL353` 的最近步骤时间已刷新，异常圆点消失\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
-      "prompt_count": 9,
+      "ledger_total": 49,
+      "prompt": "【已过滤】9 条非白名单项目的异常明细（公开面不列）\n\n【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-17（距今 0.33 天）\n【异常】实施停滞超阈值 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值\n【期望】回到该项目继续推进，并落一次步骤（step JSON），让「最近推进」刷新\n【验收】`（本地命令）HERMES-MANAGER-CL353` 的最近步骤时间已刷新，异常圆点消失\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
+      "prompt_count": 10,
       "skipped": 11,
       "timeout": 1,
-      "total": 37,
+      "total": 38,
       "unknown": 0
     },
-    "note": "台账 48 条 · 可判定任务 37 条（跳过无闭环编号 11 条）· 异常 9 条（1 超时 / 7 文档不全 / 1 搁置）",
+    "note": "台账 49 条 · 可判定任务 38 条（跳过无闭环编号 11 条）· 异常 10 条（1 超时 / 8 文档不全 / 1 搁置）",
     "rows": [
       {
         "number": "HERMES-MANAGER-CL353",
@@ -201,20 +201,20 @@ window.DASHBOARD = {
       "label": "Task 实施进度",
       "level": "critical",
       "action_label": "复制排查 Prompt",
-      "value": "1 / 37 超时",
+      "value": "1 / 38 超时",
       "note": "阈值 >1.5h（自最近一次步骤推进起算）· 全台账口径",
       "copy_cmd": "（本地命令）",
-      "prompt": "【任务】台账里有 1/37 个任务超过 1.5h 没有步骤推进\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：台账里有 1/37 个任务超过 1.5h 没有步骤推进\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：超时任务会占住队列、拖住复盘与收口；但卡住的原因可能是等授权、等窗口或真跑飞了\nHow：先跑 `（本地命令）HERMES-MANAGER-CL353` 定位超时任务键，再看每条停在哪个步骤（[N/6]）与最后一次动作时间；只读判断，不要直接改台账\nHow much：1 次只读查询；如需推进某条，走「开工 <编号>」，任何写操作须我点头"
+      "prompt": "【任务】台账里有 1/38 个任务超过 1.5h 没有步骤推进\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：台账里有 1/38 个任务超过 1.5h 没有步骤推进\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：超时任务会占住队列、拖住复盘与收口；但卡住的原因可能是等授权、等窗口或真跑飞了\nHow：先跑 `（本地命令）HERMES-MANAGER-CL353` 定位超时任务键，再看每条停在哪个步骤（[N/6]）与最后一次动作时间；只读判断，不要直接改台账\nHow much：1 次只读查询；如需推进某条，走「开工 <编号>」，任何写操作须我点头"
     },
     {
       "key": "task_doc",
       "label": "Task 复盘文档",
       "level": "critical",
       "action_label": "复制补记 Prompt",
-      "value": "7 条缺文档",
+      "value": "8 条缺文档",
       "note": "到 [6/6] 但无可用 retro 文件",
       "copy_cmd": "（本地命令）",
-      "prompt": "【任务】有 7 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：有 7 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：闭环缺最后一笔就不算完成；台账判 done 的判据里含 retro 件，缺件会让「已收口」变成假绿\nHow：用 `（本地命令）` 列出这些任务键，逐个确认 retro 文档是否真的不存在（而不是换了路径），再决定补文档还是补台账登记；不要凭空新造复盘内容\nHow much：1 次只读列举 + 每缺件 1 次补记；补记属写操作，须我点头"
+      "prompt": "【任务】有 8 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：有 8 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：闭环缺最后一笔就不算完成；台账判 done 的判据里含 retro 件，缺件会让「已收口」变成假绿\nHow：用 `（本地命令）` 列出这些任务键，逐个确认 retro 文档是否真的不存在（而不是换了路径），再决定补文档还是补台账登记；不要凭空新造复盘内容\nHow much：1 次只读列举 + 每缺件 1 次补记；补记属写操作，须我点头"
     },
     {
       "key": "memory_usage",
@@ -247,7 +247,7 @@ window.DASHBOARD = {
           "key": "task",
           "label": "Task",
           "window": "近 30 天 · filename_date 窗 20251014~（域 = registered 注册项目）",
-          "headline": "98 个任务键在账上，31 个会话已到 refs 上限（5）；未归属 653 件成本不可考",
+          "headline": "98 个任务键在账上，31 个会话已到 refs 上限（5）；未归属 675 件成本不可考",
           "href": "",
           "unavailable": null,
           "stats": [
@@ -259,9 +259,9 @@ window.DASHBOARD = {
             },
             {
               "label": "归因成本（独占 + 共享）",
-              "value": "$119.6089",
-              "raw": 119.608935,
-              "note": "独占 $75.8566（658 会话）/ 共享池 $43.7524（96 会话，单列不重复计）；旧口径 Σ $94.0530 已弃用（2026-09-29 后移除）"
+              "value": "$118.1478",
+              "raw": 118.147818,
+              "note": "独占 $75.8566（658 会话）/ 共享池 $42.2912（94 会话，单列不重复计）；旧口径 Σ $94.0530 已弃用（2026-09-29 后移除）"
             },
             {
               "label": "超限会话（上限 5）",
@@ -271,15 +271,15 @@ window.DASHBOARD = {
             },
             {
               "label": "未归属件",
-              "value": "653",
-              "raw": 653,
+              "value": "675",
+              "raw": 675,
               "note": "会话查无 / 无 session_id ⇒ 成本不可知（不猜测、不计入任务级）"
             },
             {
               "label": "归因占比（对全 profile 真值）",
-              "value": "11.2%",
-              "raw": 11.19,
-              "note": "真值 ¥7,608.35 ≈ $1,068.59（@7.12）；占比 = 归因合计 / 真值"
+              "value": "11.0%",
+              "raw": 11.0,
+              "note": "真值 ¥7,644.80 ≈ $1,073.71（@7.12）；占比 = 归因合计 / 真值"
             }
           ],
           "analysis": [
@@ -408,33 +408,33 @@ window.DASHBOARD = {
           "key": "session",
           "label": "Session",
           "window": "近 30 天 · 会话 started_at 滚动窗（本地会话库 sessions 真源; Session 页展示窗 = 近 14 天 / 每 profile ≤60 条）",
-          "headline": "3142 个会话花了 $108.6375，cache 命中 97.3% —— 钱主要花在上下文复用，不是新读",
+          "headline": "3148 个会话花了 $108.4585，cache 命中 97.3% —— 钱主要花在上下文复用，不是新读",
           "href": "",
           "unavailable": null,
           "stats": [
             {
               "label": "会话数（未结束）",
-              "value": "3,142（63）",
-              "raw": 3142,
+              "value": "3,148（63）",
+              "raw": 3148,
               "note": "未结束 = ended_at 缺失，耗时/成本仍在增长"
             },
             {
               "label": "成本合计",
-              "value": "$108.6375",
-              "raw": 108.637471,
+              "value": "$108.4585",
+              "raw": 108.458543,
               "note": "本地会话库 sessions 真源"
             },
             {
               "label": "tokens(in+out+reasoning)",
-              "value": "308,225,767",
-              "raw": 308225767,
+              "value": "307,667,058",
+              "raw": 307667058,
               "note": "cache_read 单列，不计入"
             },
             {
               "label": "cache_read tokens（占全部 tokens）",
-              "value": "11,081,630,716 / 11,389,856,483 ≈ 97.3%",
-              "raw": 97.29,
-              "note": "会话级不重复计数；其中 36 个到点会话占 30.8%"
+              "value": "11,082,555,900 / 11,390,222,958 ≈ 97.3%",
+              "raw": 97.3,
+              "note": "会话级不重复计数；其中 36 个到点会话占 28.0%"
             }
           ],
           "analysis": [
@@ -444,13 +444,13 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "deepseek-v4-flash",
-                  "value": "2,570",
-                  "raw": 2570
+                  "value": "2,586",
+                  "raw": 2586
                 },
                 {
                   "label": "deepseek-flash",
-                  "value": "556",
-                  "raw": 556
+                  "value": "546",
+                  "raw": 546
                 },
                 {
                   "label": "deepseek-v4-pro",
@@ -470,23 +470,23 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ops",
-                  "value": "$55.5241",
-                  "raw": 55.524058
+                  "value": "$55.7931",
+                  "raw": 55.793102
                 },
                 {
                   "label": "review",
-                  "value": "$38.7919",
-                  "raw": 38.791923
+                  "value": "$38.3696",
+                  "raw": 38.369634
                 },
                 {
                   "label": "dev",
-                  "value": "$5.9661",
-                  "raw": 5.96607
+                  "value": "$5.9245",
+                  "raw": 5.924461
                 },
                 {
                   "label": "personal",
-                  "value": "$5.4352",
-                  "raw": 5.435226
+                  "value": "$5.4512",
+                  "raw": 5.451153
                 },
                 {
                   "label": "personal-private",
@@ -701,7 +701,7 @@ window.DASHBOARD = {
           "key": "task",
           "label": "Task",
           "window": "近 7 天 · filename_date 窗 20251014~（域 = registered 注册项目）",
-          "headline": "19 个任务键在账上，31 个会话已到 refs 上限（5）；未归属 653 件成本不可考",
+          "headline": "19 个任务键在账上，31 个会话已到 refs 上限（5）；未归属 675 件成本不可考",
           "href": "",
           "unavailable": null,
           "stats": [
@@ -713,9 +713,9 @@ window.DASHBOARD = {
             },
             {
               "label": "归因成本（独占 + 共享）",
-              "value": "$119.6089",
-              "raw": 119.608935,
-              "note": "独占 $75.8566（658 会话）/ 共享池 $43.7524（96 会话，单列不重复计）；旧口径 Σ $3.5882 已弃用（2026-09-29 后移除）"
+              "value": "$118.1478",
+              "raw": 118.147818,
+              "note": "独占 $75.8566（658 会话）/ 共享池 $42.2912（94 会话，单列不重复计）；旧口径 Σ $3.5882 已弃用（2026-09-29 后移除）"
             },
             {
               "label": "超限会话（上限 5）",
@@ -725,15 +725,15 @@ window.DASHBOARD = {
             },
             {
               "label": "未归属件",
-              "value": "653",
-              "raw": 653,
+              "value": "675",
+              "raw": 675,
               "note": "会话查无 / 无 session_id ⇒ 成本不可知（不猜测、不计入任务级）"
             },
             {
               "label": "归因占比（对全 profile 真值）",
-              "value": "134.6%",
-              "raw": 134.63,
-              "note": "真值 ¥632.55 ≈ $88.84（@7.12）；占比 = 归因合计 / 真值"
+              "value": "126.5%",
+              "raw": 126.51,
+              "note": "真值 ¥664.95 ≈ $93.39（@7.12）；占比 = 归因合计 / 真值"
             }
           ],
           "analysis": [
@@ -852,33 +852,33 @@ window.DASHBOARD = {
           "key": "session",
           "label": "Session",
           "window": "近 7 天 · 会话 started_at 滚动窗（本地会话库 sessions 真源; Session 页展示窗 = 近 14 天 / 每 profile ≤60 条）",
-          "headline": "615 个会话花了 $10.7530，cache 命中 96.4% —— 钱主要花在上下文复用，不是新读",
+          "headline": "620 个会话花了 $11.1784，cache 命中 96.5% —— 钱主要花在上下文复用，不是新读",
           "href": "",
           "unavailable": null,
           "stats": [
             {
               "label": "会话数（未结束）",
-              "value": "615（4）",
-              "raw": 615,
+              "value": "620（4）",
+              "raw": 620,
               "note": "未结束 = ended_at 缺失，耗时/成本仍在增长"
             },
             {
               "label": "成本合计",
-              "value": "$10.7530",
-              "raw": 10.753041,
+              "value": "$11.1784",
+              "raw": 11.178409,
               "note": "本地会话库 sessions 真源"
             },
             {
               "label": "tokens(in+out+reasoning)",
-              "value": "28,974,220",
-              "raw": 28974220,
+              "value": "30,170,318",
+              "raw": 30170318,
               "note": "cache_read 单列，不计入"
             },
             {
               "label": "cache_read tokens（占全部 tokens）",
-              "value": "773,852,544 / 802,826,764 ≈ 96.4%",
-              "raw": 96.39,
-              "note": "会话级不重复计数；其中 36 个到点会话占 441.1%"
+              "value": "821,262,976 / 851,433,294 ≈ 96.5%",
+              "raw": 96.46,
+              "note": "会话级不重复计数；其中 36 个到点会话占 377.8%"
             }
           ],
           "analysis": [
@@ -888,8 +888,8 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "deepseek-v4-flash",
-                  "value": "606",
-                  "raw": 606
+                  "value": "611",
+                  "raw": 611
                 },
                 {
                   "label": "deepseek-v4-pro",
@@ -909,13 +909,13 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ops",
-                  "value": "$4.9662",
-                  "raw": 4.966192
+                  "value": "$5.1937",
+                  "raw": 5.193721
                 },
                 {
                   "label": "review",
-                  "value": "$3.7954",
-                  "raw": 3.795354
+                  "value": "$3.9773",
+                  "raw": 3.977266
                 },
                 {
                   "label": "dev",
@@ -924,8 +924,8 @@ window.DASHBOARD = {
                 },
                 {
                   "label": "personal",
-                  "value": "$0.3972",
-                  "raw": 0.39719
+                  "value": "$0.4131",
+                  "raw": 0.413116
                 },
                 {
                   "label": "default",
