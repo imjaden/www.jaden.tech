@@ -69,57 +69,191 @@ font-size:.76rem;text-align:center}
   .data-table td[data-l="状态"],.data-table td[data-l="年龄/预算"]{overflow:visible;text-overflow:clip}
   .data-table td::before{content:attr(data-l);color:var(--muted);font-size:.72rem;text-transform:uppercase}
 }
+/* ── 2026-11-17 重设计（横幅三重表征 / 组件分组 / 每组件色块 / 文档三件套） ── */
+.banner .big .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;
+vertical-align:middle;background:var(--banner)}
+.banner .big .en{color:var(--muted);font-weight:500;font-size:.82rem;margin-left:8px}
+.data-table tr.grp td{background:rgba(255,255,255,.03);color:var(--muted);font-size:.7rem;
+text-transform:uppercase;letter-spacing:.06em;padding:6px 10px;border-bottom:1px solid var(--line)}
+.pgrid{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.prow{display:grid;grid-template-columns:minmax(0,240px) 1fr auto;align-items:center;gap:10px}
+.prow .pname{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.76rem;
+overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow .bars{margin:0}
+.prow .bars span{width:7px;height:16px}
+.prow .pct{font-size:.75rem;color:var(--muted);white-space:nowrap}
+.bars span.pc-ok{background:#3fb950}.bars span.pc-warn{background:#d29922}.bars span.pc-bad{background:#f85149}
+.samples{color:var(--muted);font-size:.74rem;margin-top:8px}
+footer .verline{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--cobalt-400);
+border:0;background:none;font:inherit;padding:2px 4px;border-radius:6px}
+footer .verline:hover,footer .verline:focus-visible{background:rgba(99,102,241,.12);text-decoration:none;outline:none}
+footer .foot2{margin-top:4px}
+footer .foot3{margin-top:6px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+#sdocs{position:fixed;inset:0;z-index:10000;background:rgba(3,4,10,.72);display:none;
+align-items:center;justify-content:center;padding:24px}
+#sdocs[open]{display:flex}
+#sdocs .panel{background:var(--surface-900);border:1px solid var(--line);border-radius:12px;
+width:min(760px,92vw);max-height:86vh;display:flex;flex-direction:column;overflow:hidden}
+#sdocs .hd{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+#sdocs .hd b{font-size:.9rem}
+#sdocs .hd .sub{color:var(--muted);font-size:.72rem}
+#sdocs .hd .x{margin-left:auto;background:none;border:1px solid var(--line);color:var(--fg);
+border-radius:8px;padding:2px 8px;cursor:pointer;font-size:.8rem}
+#sdocs .tabs{display:flex;gap:6px;padding:8px 14px 0}
+#sdocs .tabs button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:9999px;
+padding:3px 10px;font-size:.74rem;cursor:pointer}
+#sdocs .tabs button[aria-selected="true"]{color:#fff;border-color:var(--cobalt-500);background:rgba(99,102,241,.18)}
+#sdocs .body{padding:12px 14px 16px;overflow-y:auto;flex:1;font-size:.8rem}
+#sdocs table{width:100%;border-collapse:collapse;table-layout:auto}
+#sdocs th,#sdocs td{text-align:left;padding:6px 8px;border-bottom:1px solid #1a1a2e;vertical-align:top}
+#sdocs th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
+#sdocs td:first-child{width:86px;white-space:nowrap;color:var(--muted)}
+#sdocs td:nth-child(2),#sdocs th:nth-child(2){width:56px;white-space:nowrap;color:var(--muted)}
+@media (max-width:520px){#sdocs .body{font-size:.76rem}#sdocs td:nth-child(2),#sdocs th:nth-child(2){display:none}}
+#sdocs .kv{display:grid;grid-template-columns:130px 1fr;gap:5px 10px}
+#sdocs .kv span:nth-child(odd){color:var(--muted)}
+@media (max-width:720px){.prow{grid-template-columns:1fr auto}.prow .bars{grid-column:1/-1}}
 </style>
 </head>
 <body>
 <h1>同步面状态 · Sync Status</h1>
-<div class="banner ok">
-  <div class="big">全部正常</div>
-  <div class="meta">快照 2026-11-16T13:53:08+00:00（UTC）· 清单 v1 ·
-    下次生成 每日 21:55 由 ops cron 重出（手动：scripts/sync-status-gen.py） · 由 scripts/sync-status-gen.py 生成，勿手改</div>
+<div class="banner ok" role="status" aria-live="polite">
+  <div class="big"><span class="dot" aria-hidden="true"></span>全部正常<span class="en">All Systems Operational</span></div>
+  <div class="meta">快照 2026-11-17T07:58:18+00:00（UTC）· 本地 2026-11-17 15:58:18 CST · 清单 v1 ·
+    下次生成 每日 21:45 由 ops cron 重出（手动：scripts/sync-status-gen.py） · 由 scripts/sync-status-gen.py 生成，勿手改</div>
 </div>
 
 <div class="cards">
   <div class="card"><div class="k">产物按时</div><div class="v">6/6</div><div class="n">打戳且在预算内 / 全部产物</div></div>
-  <div class="card"><div class="k">最旧产物</div><div class="v">1637h</div><div class="n">static/js/poetry-titles-*.js（5 个文件）</div></div>
-  <div class="card"><div class="k">平均年龄</div><div class="v">281.1h</div><div class="n">仅计已打戳产物</div></div>
+  <div class="card"><div class="k">最旧产物</div><div class="v">1655h</div><div class="n">static/js/poetry-titles-*.js（5 个文件）</div></div>
+  <div class="card"><div class="k">平均年龄</div><div class="v">293.9h</div><div class="n">仅计已打戳产物</div></div>
   <div class="card"><div class="k">结构违规</div><div class="v">0</div><div class="n">未注册产物文件数</div></div>
 </div>
+
+<h2>事件 · Incidents</h2>
+<div class="empty">自 2026-11-16 起无事件：日聚合已覆盖 2 天，逐日结论均为通过。</div>
 
 <h2>组件状态 · Components</h2>
 <table class="data-table">
 <colgroup><col style="width:22%"><col style="width:24%"><col style="width:10%"><col style="width:15%"><col style="width:14%"><col style="width:15%"></colgroup>
 <thead><tr><th>产物</th><th>来源仓 / 入口</th><th>班次</th><th>上次打戳</th><th>年龄 / 预算</th><th>状态</th></tr></thead>
 <tbody>
-<tr><td data-l="产物" title="bmi-tracker.html"><code>bmi-tracker.html</code></td><td data-l="来源" title="daily-tracker/scripts/daily-tracker-update.py">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次" title="10:00,21:45">10:00,21:45</td><td data-l="上次打戳" title="2026-11-16T00:00:00+08:00">2026-11-15 16:00:00</td><td data-l="年龄/预算" title="21.9h / 预算 36h">21.9h / 36h <div class="bar bar-ok" title="21.9h / 预算 36h"><i style="width:61%"></i></div></td><td data-l="状态" title="bmi-tracker.html: 21.9h ≤ 36h"><span class="badge badge-ok">正常</span></td></tr>
-<tr><td data-l="产物" title="daily-tracker-archive-202607-202610.html"><code>daily-tracker-archive-202607-202610.html</code></td><td data-l="来源" title="daily-tracker/scripts/daily-tracker-update.py">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次" title="10:00,21:45">10:00,21:45</td><td data-l="上次打戳" title="2026-11-16T00:00:00+08:00">2026-11-15 16:00:00</td><td data-l="年龄/预算" title="21.9h / 预算 36h">21.9h / 36h <div class="bar bar-ok" title="21.9h / 预算 36h"><i style="width:61%"></i></div></td><td data-l="状态" title="daily-tracker-archive-202607-202610.html: 21.9h ≤ 36h"><span class="badge badge-ok">正常</span></td></tr>
-<tr><td data-l="产物" title="tokens-tracker/index.html"><code>tokens-tracker/index.html</code></td><td data-l="来源" title="www.jaden.tech/scripts/tokens-tracker-mirror.py">www.jaden.tech/scripts/tokens-tracker-mirror.py</td><td data-l="班次" title="20:45">20:45</td><td data-l="上次打戳" title="2026-11-16T20:29:32+08:00">2026-11-16 12:29:32</td><td data-l="年龄/预算" title="1.4h / 预算 26h">1.4h / 26h <div class="bar bar-ok" title="1.4h / 预算 26h"><i style="width:5%"></i></div></td><td data-l="状态" title="tokens-tracker/index.html: 1.4h ≤ 26h"><span class="badge badge-ok">正常</span></td></tr>
-<tr><td data-l="产物" title="daily-poetry.html"><code>daily-poetry.html</code></td><td data-l="来源" title="script-miner/daily-poetry/daily-poetry.py deploy --target">script-miner/daily-poetry/daily-poetry.py deploy --target</td><td data-l="班次" title="manual">manual</td><td data-l="上次打戳" title="2026-11-16T19:10:56+08:00">2026-11-16 11:10:56</td><td data-l="年龄/预算" title="2.7h / 预算 2160h">2.7h / 2160h <div class="bar bar-ok" title="2.7h / 预算 2160h"><i style="width:0%"></i></div></td><td data-l="状态" title="daily-poetry.html: 2.7h ≤ 2160h"><span class="badge badge-ok">正常</span></td></tr>
-<tr><td data-l="产物" title="static/js/poetry-titles-*.js（5 个文件）"><code>static/js/poetry-titles-*.js（5 个文件）</code></td><td data-l="来源" title="www.jaden.tech/scripts/poetry-titles-gen.py">www.jaden.tech/scripts/poetry-titles-gen.py</td><td data-l="班次" title="on-pack-landing">on-pack-landing</td><td data-l="上次打戳" title="2026-09-09T16:34:17+08:00">2026-09-09 08:34:17</td><td data-l="年龄/预算" title="1637.3h / 预算 —">1637.3h <span class="badge badge-muted">—</span></td><td data-l="状态" title="static/js/poetry-titles-202609.js: 1637.3h（freshness 关闭，靠 hash/派生判据）"><span class="badge badge-ok">正常</span></td></tr>
-<tr><td data-l="产物" title="tokens-tracker/data/dashboard.js"><code>tokens-tracker/data/dashboard.js</code></td><td data-l="来源" title="www.jaden.tech/scripts/tokens-tracker-mirror.py">www.jaden.tech/scripts/tokens-tracker-mirror.py</td><td data-l="班次" title="20:45">20:45</td><td data-l="上次打戳" title="2026-11-16T20:29:32+08:00">2026-11-16 12:29:32</td><td data-l="年龄/预算" title="1.4h / 预算 26h">1.4h / 26h <div class="bar bar-ok" title="1.4h / 预算 26h"><i style="width:5%"></i></div></td><td data-l="状态" title="tokens-tracker/data/dashboard.js: 1.4h ≤ 26h"><span class="badge badge-ok">正常</span></td></tr>
+<tr class="grp"><td colspan="6">页面产物 · Pages</td></tr>
+<tr><td data-l="产物" title="bmi-tracker.html"><code>bmi-tracker.html</code></td><td data-l="来源" title="daily-tracker/scripts/daily-tracker-update.py">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次" title="10:00,21:45">10:00,21:45</td><td data-l="上次打戳" title="2026-11-16T00:00:00+08:00">2026-11-16 00:00:00 CST</td><td data-l="年龄/预算" title="40.0h / 预算 48h">40.0h / 48h <div class="bar bar-warn" title="40.0h / 预算 48h"><i style="width:83%"></i></div></td><td data-l="状态" title="bmi-tracker.html: 40.0h ≤ 48h"><span class="badge badge-ok">正常</span></td></tr>
+<tr><td data-l="产物" title="daily-tracker-archive-202607-202610.html"><code>daily-tracker-archive-202607-202610.html</code></td><td data-l="来源" title="daily-tracker/scripts/daily-tracker-update.py">daily-tracker/scripts/daily-tracker-update.py</td><td data-l="班次" title="10:00,21:45">10:00,21:45</td><td data-l="上次打戳" title="2026-11-16T00:00:00+08:00">2026-11-16 00:00:00 CST</td><td data-l="年龄/预算" title="40.0h / 预算 48h">40.0h / 48h <div class="bar bar-warn" title="40.0h / 预算 48h"><i style="width:83%"></i></div></td><td data-l="状态" title="daily-tracker-archive-202607-202610.html: 40.0h ≤ 48h"><span class="badge badge-ok">正常</span></td></tr>
+<tr><td data-l="产物" title="daily-poetry.html"><code>daily-poetry.html</code></td><td data-l="来源" title="script-miner/daily-poetry/daily-poetry.py deploy --target">script-miner/daily-poetry/daily-poetry.py deploy --target</td><td data-l="班次" title="manual">manual</td><td data-l="上次打戳" title="2026-11-16T19:10:56+08:00">2026-11-16 19:10:56 CST</td><td data-l="年龄/预算" title="20.8h / 预算 2160h">20.8h / 2160h <div class="bar bar-ok" title="20.8h / 预算 2160h"><i style="width:1%"></i></div></td><td data-l="状态" title="daily-poetry.html: 20.8h ≤ 2160h"><span class="badge badge-ok">正常</span></td></tr>
+<tr class="grp"><td colspan="6">数据层 · Data</td></tr>
+<tr><td data-l="产物" title="tokens-tracker/index.html"><code>tokens-tracker/index.html</code></td><td data-l="来源" title="www.jaden.tech/scripts/tokens-tracker-mirror.py">www.jaden.tech/scripts/tokens-tracker-mirror.py</td><td data-l="班次" title="20:45">20:45</td><td data-l="上次打戳" title="2026-11-17T12:29:58+08:00">2026-11-17 12:29:58 CST</td><td data-l="年龄/预算" title="3.5h / 预算 26h">3.5h / 26h <div class="bar bar-ok" title="3.5h / 预算 26h"><i style="width:13%"></i></div></td><td data-l="状态" title="tokens-tracker/index.html: 3.5h ≤ 26h"><span class="badge badge-ok">正常</span></td></tr>
+<tr><td data-l="产物" title="tokens-tracker/data/dashboard.js"><code>tokens-tracker/data/dashboard.js</code></td><td data-l="来源" title="www.jaden.tech/scripts/tokens-tracker-mirror.py">www.jaden.tech/scripts/tokens-tracker-mirror.py</td><td data-l="班次" title="20:45">20:45</td><td data-l="上次打戳" title="2026-11-17T12:29:58+08:00">2026-11-17 12:29:58 CST</td><td data-l="年龄/预算" title="3.5h / 预算 26h">3.5h / 26h <div class="bar bar-ok" title="3.5h / 预算 26h"><i style="width:13%"></i></div></td><td data-l="状态" title="tokens-tracker/data/dashboard.js: 3.5h ≤ 26h"><span class="badge badge-ok">正常</span></td></tr>
+<tr class="grp"><td colspan="6">静态资产 · Assets</td></tr>
+<tr><td data-l="产物" title="static/js/poetry-titles-*.js（5 个文件）"><code>static/js/poetry-titles-*.js（5 个文件）</code></td><td data-l="来源" title="www.jaden.tech/scripts/poetry-titles-gen.py">www.jaden.tech/scripts/poetry-titles-gen.py</td><td data-l="班次" title="on-pack-landing">on-pack-landing</td><td data-l="上次打戳" title="2026-09-09T16:34:17+08:00">2026-09-09 16:34:17 CST</td><td data-l="年龄/预算" title="1655.4h / 预算 —">1655.4h <span class="badge badge-muted">—</span></td><td data-l="状态" title="static/js/poetry-titles-202609.js: 1655.4h（freshness 关闭，靠 hash/派生判据）"><span class="badge badge-ok">正常</span></td></tr>
 </tbody>
 </table>
 
+<h2>各组件近 30 天 · Per-component 30d</h2>
+<div class="pgrid">
+<div class="prow"><span class="pname" title="bmi-tracker.html">bmi-tracker.html</span><div class="bars"><span class="pc pc-none" title="2026-10-19 · 无记录"></span><span class="pc pc-none" title="2026-10-20 · 无记录"></span><span class="pc pc-none" title="2026-10-21 · 无记录"></span><span class="pc pc-none" title="2026-10-22 · 无记录"></span><span class="pc pc-none" title="2026-10-23 · 无记录"></span><span class="pc pc-none" title="2026-10-24 · 无记录"></span><span class="pc pc-none" title="2026-10-25 · 无记录"></span><span class="pc pc-none" title="2026-10-26 · 无记录"></span><span class="pc pc-none" title="2026-10-27 · 无记录"></span><span class="pc pc-none" title="2026-10-28 · 无记录"></span><span class="pc pc-none" title="2026-10-29 · 无记录"></span><span class="pc pc-none" title="2026-10-30 · 无记录"></span><span class="pc pc-none" title="2026-10-31 · 无记录"></span><span class="pc pc-none" title="2026-11-01 · 无记录"></span><span class="pc pc-none" title="2026-11-02 · 无记录"></span><span class="pc pc-none" title="2026-11-03 · 无记录"></span><span class="pc pc-none" title="2026-11-04 · 无记录"></span><span class="pc pc-none" title="2026-11-05 · 无记录"></span><span class="pc pc-none" title="2026-11-06 · 无记录"></span><span class="pc pc-none" title="2026-11-07 · 无记录"></span><span class="pc pc-none" title="2026-11-08 · 无记录"></span><span class="pc pc-none" title="2026-11-09 · 无记录"></span><span class="pc pc-none" title="2026-11-10 · 无记录"></span><span class="pc pc-none" title="2026-11-11 · 无记录"></span><span class="pc pc-none" title="2026-11-12 · 无记录"></span><span class="pc pc-none" title="2026-11-13 · 无记录"></span><span class="pc pc-none" title="2026-11-14 · 无记录"></span><span class="pc pc-none" title="2026-11-15 · 无记录"></span><span class="pc pc-ok" title="2026-11-16 · ok"></span><span class="pc pc-ok" title="2026-11-17 · ok"></span></div><span class="pct">100% · 2/2 天</span></div><div class="prow"><span class="pname" title="daily-tracker-archive-202607-202610.html">daily-tracker-archive-202607-202610.html</span><div class="bars"><span class="pc pc-none" title="2026-10-19 · 无记录"></span><span class="pc pc-none" title="2026-10-20 · 无记录"></span><span class="pc pc-none" title="2026-10-21 · 无记录"></span><span class="pc pc-none" title="2026-10-22 · 无记录"></span><span class="pc pc-none" title="2026-10-23 · 无记录"></span><span class="pc pc-none" title="2026-10-24 · 无记录"></span><span class="pc pc-none" title="2026-10-25 · 无记录"></span><span class="pc pc-none" title="2026-10-26 · 无记录"></span><span class="pc pc-none" title="2026-10-27 · 无记录"></span><span class="pc pc-none" title="2026-10-28 · 无记录"></span><span class="pc pc-none" title="2026-10-29 · 无记录"></span><span class="pc pc-none" title="2026-10-30 · 无记录"></span><span class="pc pc-none" title="2026-10-31 · 无记录"></span><span class="pc pc-none" title="2026-11-01 · 无记录"></span><span class="pc pc-none" title="2026-11-02 · 无记录"></span><span class="pc pc-none" title="2026-11-03 · 无记录"></span><span class="pc pc-none" title="2026-11-04 · 无记录"></span><span class="pc pc-none" title="2026-11-05 · 无记录"></span><span class="pc pc-none" title="2026-11-06 · 无记录"></span><span class="pc pc-none" title="2026-11-07 · 无记录"></span><span class="pc pc-none" title="2026-11-08 · 无记录"></span><span class="pc pc-none" title="2026-11-09 · 无记录"></span><span class="pc pc-none" title="2026-11-10 · 无记录"></span><span class="pc pc-none" title="2026-11-11 · 无记录"></span><span class="pc pc-none" title="2026-11-12 · 无记录"></span><span class="pc pc-none" title="2026-11-13 · 无记录"></span><span class="pc pc-none" title="2026-11-14 · 无记录"></span><span class="pc pc-none" title="2026-11-15 · 无记录"></span><span class="pc pc-ok" title="2026-11-16 · ok"></span><span class="pc pc-ok" title="2026-11-17 · ok"></span></div><span class="pct">100% · 2/2 天</span></div><div class="prow"><span class="pname" title="tokens-tracker/index.html">tokens-tracker/index.html</span><div class="bars"><span class="pc pc-none" title="2026-10-19 · 无记录"></span><span class="pc pc-none" title="2026-10-20 · 无记录"></span><span class="pc pc-none" title="2026-10-21 · 无记录"></span><span class="pc pc-none" title="2026-10-22 · 无记录"></span><span class="pc pc-none" title="2026-10-23 · 无记录"></span><span class="pc pc-none" title="2026-10-24 · 无记录"></span><span class="pc pc-none" title="2026-10-25 · 无记录"></span><span class="pc pc-none" title="2026-10-26 · 无记录"></span><span class="pc pc-none" title="2026-10-27 · 无记录"></span><span class="pc pc-none" title="2026-10-28 · 无记录"></span><span class="pc pc-none" title="2026-10-29 · 无记录"></span><span class="pc pc-none" title="2026-10-30 · 无记录"></span><span class="pc pc-none" title="2026-10-31 · 无记录"></span><span class="pc pc-none" title="2026-11-01 · 无记录"></span><span class="pc pc-none" title="2026-11-02 · 无记录"></span><span class="pc pc-none" title="2026-11-03 · 无记录"></span><span class="pc pc-none" title="2026-11-04 · 无记录"></span><span class="pc pc-none" title="2026-11-05 · 无记录"></span><span class="pc pc-none" title="2026-11-06 · 无记录"></span><span class="pc pc-none" title="2026-11-07 · 无记录"></span><span class="pc pc-none" title="2026-11-08 · 无记录"></span><span class="pc pc-none" title="2026-11-09 · 无记录"></span><span class="pc pc-none" title="2026-11-10 · 无记录"></span><span class="pc pc-none" title="2026-11-11 · 无记录"></span><span class="pc pc-none" title="2026-11-12 · 无记录"></span><span class="pc pc-none" title="2026-11-13 · 无记录"></span><span class="pc pc-none" title="2026-11-14 · 无记录"></span><span class="pc pc-none" title="2026-11-15 · 无记录"></span><span class="pc pc-ok" title="2026-11-16 · ok"></span><span class="pc pc-ok" title="2026-11-17 · ok"></span></div><span class="pct">100% · 2/2 天</span></div><div class="prow"><span class="pname" title="daily-poetry.html">daily-poetry.html</span><div class="bars"><span class="pc pc-none" title="2026-10-19 · 无记录"></span><span class="pc pc-none" title="2026-10-20 · 无记录"></span><span class="pc pc-none" title="2026-10-21 · 无记录"></span><span class="pc pc-none" title="2026-10-22 · 无记录"></span><span class="pc pc-none" title="2026-10-23 · 无记录"></span><span class="pc pc-none" title="2026-10-24 · 无记录"></span><span class="pc pc-none" title="2026-10-25 · 无记录"></span><span class="pc pc-none" title="2026-10-26 · 无记录"></span><span class="pc pc-none" title="2026-10-27 · 无记录"></span><span class="pc pc-none" title="2026-10-28 · 无记录"></span><span class="pc pc-none" title="2026-10-29 · 无记录"></span><span class="pc pc-none" title="2026-10-30 · 无记录"></span><span class="pc pc-none" title="2026-10-31 · 无记录"></span><span class="pc pc-none" title="2026-11-01 · 无记录"></span><span class="pc pc-none" title="2026-11-02 · 无记录"></span><span class="pc pc-none" title="2026-11-03 · 无记录"></span><span class="pc pc-none" title="2026-11-04 · 无记录"></span><span class="pc pc-none" title="2026-11-05 · 无记录"></span><span class="pc pc-none" title="2026-11-06 · 无记录"></span><span class="pc pc-none" title="2026-11-07 · 无记录"></span><span class="pc pc-none" title="2026-11-08 · 无记录"></span><span class="pc pc-none" title="2026-11-09 · 无记录"></span><span class="pc pc-none" title="2026-11-10 · 无记录"></span><span class="pc pc-none" title="2026-11-11 · 无记录"></span><span class="pc pc-none" title="2026-11-12 · 无记录"></span><span class="pc pc-none" title="2026-11-13 · 无记录"></span><span class="pc pc-none" title="2026-11-14 · 无记录"></span><span class="pc pc-none" title="2026-11-15 · 无记录"></span><span class="pc pc-ok" title="2026-11-16 · ok"></span><span class="pc pc-ok" title="2026-11-17 · ok"></span></div><span class="pct">100% · 2/2 天</span></div><div class="prow"><span class="pname" title="static/js/poetry-titles-*.js（5 个文件）">static/js/poetry-titles-*.js（5 个文件）</span><div class="bars"><span class="pc pc-none" title="2026-10-19 · 无记录"></span><span class="pc pc-none" title="2026-10-20 · 无记录"></span><span class="pc pc-none" title="2026-10-21 · 无记录"></span><span class="pc pc-none" title="2026-10-22 · 无记录"></span><span class="pc pc-none" title="2026-10-23 · 无记录"></span><span class="pc pc-none" title="2026-10-24 · 无记录"></span><span class="pc pc-none" title="2026-10-25 · 无记录"></span><span class="pc pc-none" title="2026-10-26 · 无记录"></span><span class="pc pc-none" title="2026-10-27 · 无记录"></span><span class="pc pc-none" title="2026-10-28 · 无记录"></span><span class="pc pc-none" title="2026-10-29 · 无记录"></span><span class="pc pc-none" title="2026-10-30 · 无记录"></span><span class="pc pc-none" title="2026-10-31 · 无记录"></span><span class="pc pc-none" title="2026-11-01 · 无记录"></span><span class="pc pc-none" title="2026-11-02 · 无记录"></span><span class="pc pc-none" title="2026-11-03 · 无记录"></span><span class="pc pc-none" title="2026-11-04 · 无记录"></span><span class="pc pc-none" title="2026-11-05 · 无记录"></span><span class="pc pc-none" title="2026-11-06 · 无记录"></span><span class="pc pc-none" title="2026-11-07 · 无记录"></span><span class="pc pc-none" title="2026-11-08 · 无记录"></span><span class="pc pc-none" title="2026-11-09 · 无记录"></span><span class="pc pc-none" title="2026-11-10 · 无记录"></span><span class="pc pc-none" title="2026-11-11 · 无记录"></span><span class="pc pc-none" title="2026-11-12 · 无记录"></span><span class="pc pc-none" title="2026-11-13 · 无记录"></span><span class="pc pc-none" title="2026-11-14 · 无记录"></span><span class="pc pc-none" title="2026-11-15 · 无记录"></span><span class="pc pc-ok" title="2026-11-16 · ok"></span><span class="pc pc-ok" title="2026-11-17 · ok"></span></div><span class="pct">100% · 2/2 天</span></div><div class="prow"><span class="pname" title="tokens-tracker/data/dashboard.js">tokens-tracker/data/dashboard.js</span><div class="bars"><span class="pc pc-none" title="2026-10-19 · 无记录"></span><span class="pc pc-none" title="2026-10-20 · 无记录"></span><span class="pc pc-none" title="2026-10-21 · 无记录"></span><span class="pc pc-none" title="2026-10-22 · 无记录"></span><span class="pc pc-none" title="2026-10-23 · 无记录"></span><span class="pc pc-none" title="2026-10-24 · 无记录"></span><span class="pc pc-none" title="2026-10-25 · 无记录"></span><span class="pc pc-none" title="2026-10-26 · 无记录"></span><span class="pc pc-none" title="2026-10-27 · 无记录"></span><span class="pc pc-none" title="2026-10-28 · 无记录"></span><span class="pc pc-none" title="2026-10-29 · 无记录"></span><span class="pc pc-none" title="2026-10-30 · 无记录"></span><span class="pc pc-none" title="2026-10-31 · 无记录"></span><span class="pc pc-none" title="2026-11-01 · 无记录"></span><span class="pc pc-none" title="2026-11-02 · 无记录"></span><span class="pc pc-none" title="2026-11-03 · 无记录"></span><span class="pc pc-none" title="2026-11-04 · 无记录"></span><span class="pc pc-none" title="2026-11-05 · 无记录"></span><span class="pc pc-none" title="2026-11-06 · 无记录"></span><span class="pc pc-none" title="2026-11-07 · 无记录"></span><span class="pc pc-none" title="2026-11-08 · 无记录"></span><span class="pc pc-none" title="2026-11-09 · 无记录"></span><span class="pc pc-none" title="2026-11-10 · 无记录"></span><span class="pc pc-none" title="2026-11-11 · 无记录"></span><span class="pc pc-none" title="2026-11-12 · 无记录"></span><span class="pc pc-none" title="2026-11-13 · 无记录"></span><span class="pc pc-none" title="2026-11-14 · 无记录"></span><span class="pc pc-none" title="2026-11-15 · 无记录"></span><span class="pc pc-ok" title="2026-11-16 · ok"></span><span class="pc pc-ok" title="2026-11-17 · ok"></span></div><span class="pct">100% · 2/2 天</span></div>
+</div>
+<div class="samples">绿 = 当天该产物正常，黄 = 陈旧 / 过渡，红 = 结构违规，深灰 = 无记录。样本不足 30 天按实际天数计。</div>
+
 <h2>近 90 天 · Uptime</h2>
-<div class="bars"><span class="none" title="2026-08-19 · 无记录"></span><span class="none" title="2026-08-20 · 无记录"></span><span class="none" title="2026-08-21 · 无记录"></span><span class="none" title="2026-08-22 · 无记录"></span><span class="none" title="2026-08-23 · 无记录"></span><span class="none" title="2026-08-24 · 无记录"></span><span class="none" title="2026-08-25 · 无记录"></span><span class="none" title="2026-08-26 · 无记录"></span><span class="none" title="2026-08-27 · 无记录"></span><span class="none" title="2026-08-28 · 无记录"></span><span class="none" title="2026-08-29 · 无记录"></span><span class="none" title="2026-08-30 · 无记录"></span><span class="none" title="2026-08-31 · 无记录"></span><span class="none" title="2026-09-01 · 无记录"></span><span class="none" title="2026-09-02 · 无记录"></span><span class="none" title="2026-09-03 · 无记录"></span><span class="none" title="2026-09-04 · 无记录"></span><span class="none" title="2026-09-05 · 无记录"></span><span class="none" title="2026-09-06 · 无记录"></span><span class="none" title="2026-09-07 · 无记录"></span><span class="none" title="2026-09-08 · 无记录"></span><span class="none" title="2026-09-09 · 无记录"></span><span class="none" title="2026-09-10 · 无记录"></span><span class="none" title="2026-09-11 · 无记录"></span><span class="none" title="2026-09-12 · 无记录"></span><span class="none" title="2026-09-13 · 无记录"></span><span class="none" title="2026-09-14 · 无记录"></span><span class="none" title="2026-09-15 · 无记录"></span><span class="none" title="2026-09-16 · 无记录"></span><span class="none" title="2026-09-17 · 无记录"></span><span class="none" title="2026-09-18 · 无记录"></span><span class="none" title="2026-09-19 · 无记录"></span><span class="none" title="2026-09-20 · 无记录"></span><span class="none" title="2026-09-21 · 无记录"></span><span class="none" title="2026-09-22 · 无记录"></span><span class="none" title="2026-09-23 · 无记录"></span><span class="none" title="2026-09-24 · 无记录"></span><span class="none" title="2026-09-25 · 无记录"></span><span class="none" title="2026-09-26 · 无记录"></span><span class="none" title="2026-09-27 · 无记录"></span><span class="none" title="2026-09-28 · 无记录"></span><span class="none" title="2026-09-29 · 无记录"></span><span class="none" title="2026-09-30 · 无记录"></span><span class="none" title="2026-10-01 · 无记录"></span><span class="none" title="2026-10-02 · 无记录"></span><span class="none" title="2026-10-03 · 无记录"></span><span class="none" title="2026-10-04 · 无记录"></span><span class="none" title="2026-10-05 · 无记录"></span><span class="none" title="2026-10-06 · 无记录"></span><span class="none" title="2026-10-07 · 无记录"></span><span class="none" title="2026-10-08 · 无记录"></span><span class="none" title="2026-10-09 · 无记录"></span><span class="none" title="2026-10-10 · 无记录"></span><span class="none" title="2026-10-11 · 无记录"></span><span class="none" title="2026-10-12 · 无记录"></span><span class="none" title="2026-10-13 · 无记录"></span><span class="none" title="2026-10-14 · 无记录"></span><span class="none" title="2026-10-15 · 无记录"></span><span class="none" title="2026-10-16 · 无记录"></span><span class="none" title="2026-10-17 · 无记录"></span><span class="none" title="2026-10-18 · 无记录"></span><span class="none" title="2026-10-19 · 无记录"></span><span class="none" title="2026-10-20 · 无记录"></span><span class="none" title="2026-10-21 · 无记录"></span><span class="none" title="2026-10-22 · 无记录"></span><span class="none" title="2026-10-23 · 无记录"></span><span class="none" title="2026-10-24 · 无记录"></span><span class="none" title="2026-10-25 · 无记录"></span><span class="none" title="2026-10-26 · 无记录"></span><span class="none" title="2026-10-27 · 无记录"></span><span class="none" title="2026-10-28 · 无记录"></span><span class="none" title="2026-10-29 · 无记录"></span><span class="none" title="2026-10-30 · 无记录"></span><span class="none" title="2026-10-31 · 无记录"></span><span class="none" title="2026-11-01 · 无记录"></span><span class="none" title="2026-11-02 · 无记录"></span><span class="none" title="2026-11-03 · 无记录"></span><span class="none" title="2026-11-04 · 无记录"></span><span class="none" title="2026-11-05 · 无记录"></span><span class="none" title="2026-11-06 · 无记录"></span><span class="none" title="2026-11-07 · 无记录"></span><span class="none" title="2026-11-08 · 无记录"></span><span class="none" title="2026-11-09 · 无记录"></span><span class="none" title="2026-11-10 · 无记录"></span><span class="none" title="2026-11-11 · 无记录"></span><span class="none" title="2026-11-12 · 无记录"></span><span class="none" title="2026-11-13 · 无记录"></span><span class="none" title="2026-11-14 · 无记录"></span><span class="none" title="2026-11-15 · 无记录"></span><span class="ok" title="2026-11-16 · PASS · 按时 1.0"></span></div>
+<div class="bars"><span class="none" title="2026-08-20 · 无记录"></span><span class="none" title="2026-08-21 · 无记录"></span><span class="none" title="2026-08-22 · 无记录"></span><span class="none" title="2026-08-23 · 无记录"></span><span class="none" title="2026-08-24 · 无记录"></span><span class="none" title="2026-08-25 · 无记录"></span><span class="none" title="2026-08-26 · 无记录"></span><span class="none" title="2026-08-27 · 无记录"></span><span class="none" title="2026-08-28 · 无记录"></span><span class="none" title="2026-08-29 · 无记录"></span><span class="none" title="2026-08-30 · 无记录"></span><span class="none" title="2026-08-31 · 无记录"></span><span class="none" title="2026-09-01 · 无记录"></span><span class="none" title="2026-09-02 · 无记录"></span><span class="none" title="2026-09-03 · 无记录"></span><span class="none" title="2026-09-04 · 无记录"></span><span class="none" title="2026-09-05 · 无记录"></span><span class="none" title="2026-09-06 · 无记录"></span><span class="none" title="2026-09-07 · 无记录"></span><span class="none" title="2026-09-08 · 无记录"></span><span class="none" title="2026-09-09 · 无记录"></span><span class="none" title="2026-09-10 · 无记录"></span><span class="none" title="2026-09-11 · 无记录"></span><span class="none" title="2026-09-12 · 无记录"></span><span class="none" title="2026-09-13 · 无记录"></span><span class="none" title="2026-09-14 · 无记录"></span><span class="none" title="2026-09-15 · 无记录"></span><span class="none" title="2026-09-16 · 无记录"></span><span class="none" title="2026-09-17 · 无记录"></span><span class="none" title="2026-09-18 · 无记录"></span><span class="none" title="2026-09-19 · 无记录"></span><span class="none" title="2026-09-20 · 无记录"></span><span class="none" title="2026-09-21 · 无记录"></span><span class="none" title="2026-09-22 · 无记录"></span><span class="none" title="2026-09-23 · 无记录"></span><span class="none" title="2026-09-24 · 无记录"></span><span class="none" title="2026-09-25 · 无记录"></span><span class="none" title="2026-09-26 · 无记录"></span><span class="none" title="2026-09-27 · 无记录"></span><span class="none" title="2026-09-28 · 无记录"></span><span class="none" title="2026-09-29 · 无记录"></span><span class="none" title="2026-09-30 · 无记录"></span><span class="none" title="2026-10-01 · 无记录"></span><span class="none" title="2026-10-02 · 无记录"></span><span class="none" title="2026-10-03 · 无记录"></span><span class="none" title="2026-10-04 · 无记录"></span><span class="none" title="2026-10-05 · 无记录"></span><span class="none" title="2026-10-06 · 无记录"></span><span class="none" title="2026-10-07 · 无记录"></span><span class="none" title="2026-10-08 · 无记录"></span><span class="none" title="2026-10-09 · 无记录"></span><span class="none" title="2026-10-10 · 无记录"></span><span class="none" title="2026-10-11 · 无记录"></span><span class="none" title="2026-10-12 · 无记录"></span><span class="none" title="2026-10-13 · 无记录"></span><span class="none" title="2026-10-14 · 无记录"></span><span class="none" title="2026-10-15 · 无记录"></span><span class="none" title="2026-10-16 · 无记录"></span><span class="none" title="2026-10-17 · 无记录"></span><span class="none" title="2026-10-18 · 无记录"></span><span class="none" title="2026-10-19 · 无记录"></span><span class="none" title="2026-10-20 · 无记录"></span><span class="none" title="2026-10-21 · 无记录"></span><span class="none" title="2026-10-22 · 无记录"></span><span class="none" title="2026-10-23 · 无记录"></span><span class="none" title="2026-10-24 · 无记录"></span><span class="none" title="2026-10-25 · 无记录"></span><span class="none" title="2026-10-26 · 无记录"></span><span class="none" title="2026-10-27 · 无记录"></span><span class="none" title="2026-10-28 · 无记录"></span><span class="none" title="2026-10-29 · 无记录"></span><span class="none" title="2026-10-30 · 无记录"></span><span class="none" title="2026-10-31 · 无记录"></span><span class="none" title="2026-11-01 · 无记录"></span><span class="none" title="2026-11-02 · 无记录"></span><span class="none" title="2026-11-03 · 无记录"></span><span class="none" title="2026-11-04 · 无记录"></span><span class="none" title="2026-11-05 · 无记录"></span><span class="none" title="2026-11-06 · 无记录"></span><span class="none" title="2026-11-07 · 无记录"></span><span class="none" title="2026-11-08 · 无记录"></span><span class="none" title="2026-11-09 · 无记录"></span><span class="none" title="2026-11-10 · 无记录"></span><span class="none" title="2026-11-11 · 无记录"></span><span class="none" title="2026-11-12 · 无记录"></span><span class="none" title="2026-11-13 · 无记录"></span><span class="none" title="2026-11-14 · 无记录"></span><span class="none" title="2026-11-15 · 无记录"></span><span class="ok" title="2026-11-16 · PASS · 按时 1.0"></span><span class="ok" title="2026-11-17 · PASS · 按时 1.0"></span></div>
 <div class="legend">自 2026-11-16 起记录（每日一行，同日重复校验覆盖当天）；灰 = 无记录，绿 = 全部在预算内，
 黄 = 存在陈旧/过渡项，红 = 结构违规。</div>
-
-<h2>事件 · Incidents</h2>
-<div class="empty">暂无事件记录（页面自 2026-11-16 起记录日聚合）。</div>
+<div class="samples">30 天 100.0%（样本 2/30 天） · 90 天 100.0%（样本 2/90 天） · 其中通过 2 天</div>
 
 <h2>门禁 · Gates</h2>
 <div class="gates">
-  <span>portal-check <b>20/20</b></span>
+  <span>portal-check <b>21/21</b></span>
   <span>perf-check <b>PASS</b></span>
   <span>sync-check selftest <b>28/28</b></span>
 </div>
 
 <footer>
-判据：结构漂移（缺失 / 未注册 / 缺戳 / 哈希不符）、内容漂移（正文哈希 ≠ 戳）、时间漂移（超 freshness_h 预算）。<br>
-时间基准：快照与「上次打戳」均按 UTC 显示（<code>yyyy-mm-dd HH:MM:SS</code>）。<br>
-机器入口 <a href="./data/sync-status.json">data/sync-status.json</a> ·
-<a href="./tokens-tracker/">公开镜像看板</a> · <a href="./">← 返回首页</a>
+  <button class="verline" id="sdocsOpen" type="button" aria-haspopup="dialog" aria-controls="sdocs" aria-expanded="false">页面文档 · 同步面状态 · 1.1(20261117) <span aria-hidden="true">▾</span></button>
+  <div class="foot2">生成于 2026-11-17 15:58:18 CST · 下次生成 每日 21:45 由 ops cron 重出（手动：scripts/sync-status-gen.py）</div>
+  <div class="foot3">
+    <span>机器：<a href="./data/sync-status.json">sync-status.json</a> · <a href="./data/sync-history.json">sync-history.json</a></span>
+    <span>人读：<a href="./tokens-tracker/">公开镜像看板</a> · <a href="./">← 返回首页</a></span>
+  </div>
 </footer>
+
+<div id="sdocs" role="dialog" aria-modal="true" aria-labelledby="sdocsTitle">
+  <div class="panel">
+    <div class="hd">
+      <b id="sdocsTitle">同步面状态 · 页面文档</b>
+      <span class="sub">v1.1(20261117) · 数据生成于 2026-11-17 15:58:18 CST</span>
+      <button class="x" type="button" aria-label="关闭">✕</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-docs-tab="log" aria-selected="true">变更日志</button>
+      <button type="button" role="tab" data-docs-tab="caliber" aria-selected="false">判据说明</button>
+      <button type="button" role="tab" data-docs-tab="api" aria-selected="false">机器接口</button>
+    </div>
+    <div class="body">
+      <div data-docs-pane="log">
+        <table><thead><tr><th>版本</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>1.1(20261117)</td><td>feat</td><td>底部栏改用三件套：版本行即入口，判据搬进抽屉（变更日志 / 判据说明 / 机器接口）</td></tr><tr><td>1.1(20261117)</td><td>feat</td><td>横幅三档命名 + 英文副标 + aria-live；组件按页面/数据层/资产分组</td></tr><tr><td>1.1(20261117)</td><td>feat</td><td>新增每组件 30 天色块与可用率样本数；事件由历史 rc≠0 自动派生</td></tr><tr><td>1.0(20261116)</td><td>init</td><td>首版：banner + 组件表 + 90 天 Uptime + 门禁三数字 + 机器 JSON</td></tr></tbody></table>
+      </div>
+      <div data-docs-pane="caliber" hidden>
+        <div class="kv">
+          <span>结构漂移</span><span>产物文件缺失 / 未在清单注册 / 缺 SYNC 戳 / 戳的 id 与清单不一致</span>
+          <span>内容漂移</span><span>戳内 sha256 ≠ 剥戳后正文重算值（被手改，或上游重写未重打戳）</span>
+          <span>时间漂移</span><span>戳的 generated 距今超过 config/sync-manifest.json 的 verify.freshness_h</span>
+          <span>三档判定</span><span>全 ok ⇒ 全部正常；任一 stale / unstamped ⇒ 部分降级；任一 mismatch / missing ⇒ 服务中断</span>
+          <span>时间口径</span><span>页面人读时间为本地时区；title、机器 JSON 与戳内时间用 ISO8601 绝对时刻</span>
+          <span>记账口径</span><span>每日一行写 data/sync-history.json（同日重跑覆盖当天），不与历史裁剪耦合</span>
+        </div>
+      </div>
+      <div data-docs-pane="api" hidden>
+        <div class="kv">
+          <span>状态 JSON</span><span><a href="./data/sync-status.json">data/sync-status.json</a> —— version / service / status / components / incidents / updated_at，另保留 rc / checked_at / artifacts / gates / days_recorded 兼容键</span>
+          <span>历史 JSON</span><span><a href="./data/sync-history.json">data/sync-history.json</a> —— 每日一行，含逐产物状态、ok_ratio、rc、verdict</span>
+          <span>事件登记</span><span>data/incidents.json（人工）；页面另外从历史 rc≠0 自动派生</span>
+          <span>门禁复跑</span><span><code>python3 scripts/portal-check.py --mode post</code> · <code>python3 scripts/sync-check.py --selftest</code> · <code>python3 scripts/perf-check.py</code></span>
+          <span>重出页面</span><span><code>python3 scripts/sync-status-gen.py</code>（无网络依赖，含 --selftest）</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script id="SYNC_STATUS_DOCS" type="application/json">{"name": "sync-status", "page": {"version": "1.1", "release_date": "20261117", "file": "sync-status.html"}, "generated_at": "2026-11-17T07:58:18+00:00", "changelog_recent": [{"ver": "1.1", "date": "20261117", "kind": "feat", "summary": "底部栏改用三件套：版本行即入口，判据搬进抽屉（变更日志 / 判据说明 / 机器接口）"}, {"ver": "1.1", "date": "20261117", "kind": "feat", "summary": "横幅三档命名 + 英文副标 + aria-live；组件按页面/数据层/资产分组"}, {"ver": "1.1", "date": "20261117", "kind": "feat", "summary": "新增每组件 30 天色块与可用率样本数；事件由历史 rc≠0 自动派生"}, {"ver": "1.0", "date": "20261116", "kind": "init", "summary": "首版：banner + 组件表 + 90 天 Uptime + 门禁三数字 + 机器 JSON"}], "changelog_index": [{"ver": "1.1", "date": "20261117", "kind": "feat"}, {"ver": "1.1", "date": "20261117", "kind": "feat"}, {"ver": "1.1", "date": "20261117", "kind": "feat"}, {"ver": "1.0", "date": "20261116", "kind": "init"}], "features": [{"section": "状态面", "items": ["横幅三档（全部正常 / 部分降级 / 服务中断）+ 颜色 + 文字 + 圆点", "组件按页面产物 / 数据层 / 静态资产分组，逐产物显示年龄与预算余量", "每组件近 30 天色块与可用率（样本不足时显式标注天数）", "事件由历史 rc≠0 自动派生，人工事件登记在 data/incidents.json", "机器面 data/sync-status.json（IETF 风格字段 + 兼容键）"]}, {"section": "判定口径", "items": ["结构漂移：缺失 / 未注册 / 缺戳 / 戳 id 与清单不符", "内容漂移：戳内 sha256 ≠ 正文重算值", "时间漂移：戳的 generated 距今超 manifest 的 verify.freshness_h"]}], "snapshot_local": "2026-11-17 15:58:18 CST", "days_recorded": 2}</script>
+<script>(function(){
+  var dlg = document.getElementById('sdocs'), op = document.getElementById('sdocsOpen');
+  if (!dlg || !op) return;
+  var last = null;
+  function showTab(id){
+    var tabs = dlg.querySelectorAll('[data-docs-tab]');
+    var panes = dlg.querySelectorAll('[data-docs-pane]');
+    for (var i=0;i<tabs.length;i++){ tabs[i].setAttribute('aria-selected', tabs[i].getAttribute('data-docs-tab')===id ? 'true':'false'); }
+    for (var j=0;j<panes.length;j++){ panes[j].hidden = panes[j].getAttribute('data-docs-pane')!==id; }
+  }
+  function openDlg(){
+    last = document.activeElement;
+    dlg.setAttribute('open','');
+    op.setAttribute('aria-expanded','true');
+    document.body.style.overflow = 'hidden';
+    var first = dlg.querySelector('[data-docs-tab]');
+    if (first) first.focus();
+  }
+  function closeDlg(){
+    dlg.removeAttribute('open');
+    op.setAttribute('aria-expanded','false');
+    document.body.style.overflow = '';
+    op.focus();          /* 契约：关闭后焦点回版本行（不恢复打开前的 activeElement —— 合成点击时那是 body） */
+  }
+  op.addEventListener('click', function(e){ e.preventDefault(); openDlg(); });
+  dlg.addEventListener('click', function(e){
+    var t = e.target;
+    if (t === dlg || (t && t.closest && t.closest('.x'))) closeDlg();
+  });
+  var tabs = dlg.querySelectorAll('[data-docs-tab]');
+  for (var i=0;i<tabs.length;i++){
+    tabs[i].addEventListener('click', function(){ showTab(this.getAttribute('data-docs-tab')); });
+  }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && dlg.hasAttribute('open')) { e.stopPropagation(); closeDlg(); }
+  }, true);
+  showTab('log');
+})();</script>
 </body>
 </html>
