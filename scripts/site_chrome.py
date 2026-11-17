@@ -41,9 +41,17 @@ sys.path.insert(0, str(SITE / "scripts"))
 import sync_stamp  # noqa: E402
 
 PRODUCER = "www.jaden.tech/scripts/site_chrome.py"
-TARGETS = [("bmi-tracker.html", "./")]     # 产物 → 首页相对路径（根级页面用 ./）
 CHROME_START = "<!-- jt-chrome:start -->"
 CHROME_END = "<!-- jt-chrome:end -->"
+
+# (产物, 首页相对路径, 是否补 GitHub 角标)
+# 首页一律用相对路径：根级页面 "./"，一级目录页面 "../"（root-absolute 违 JT-SEC-018）。
+# 上游已自带 github-corner 的页面把 gh 设 False —— 否则会并出第二个角标。
+TARGETS = [
+    ("bmi-tracker.html", "./", True),
+    ("daily-tracker-archive-*.html", "./", False),
+    ("daily-poetry.html", "./", False),
+]
 
 CHROME_CSS = """<style id="jt-chrome-css">
 /* 站点 chrome（由 scripts/site_chrome.py 注入，勿手改；上游写盘后重跑本脚本即可恢复） */
@@ -71,14 +79,15 @@ CHROME_CSS = """<style id="jt-chrome-css">
 @media (prefers-reduced-motion: reduce) { .jt-home { transition: none; } .jt-gh:hover .octo-arm { animation: none; } }
 </style>"""
 
-CHROME_HTML = """{start}
-<a href="https://github.com/imjaden" class="jt-gh" target="_blank" rel="noopener" aria-label="在 GitHub 查看源码 ｜ View source on GitHub" title="在 GitHub 查看源码 ｜ View source on GitHub">
+GH_HTML = """<a href="https://github.com/imjaden" class="jt-gh" target="_blank" rel="noopener" aria-label="在 GitHub 查看源码 ｜ View source on GitHub" title="在 GitHub 查看源码 ｜ View source on GitHub">
 <svg width="64" height="64" viewBox="0 0 250 250" aria-hidden="true" focusable="false"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" fill="rgba(0,0,0,0.35)"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg>
 </a>
-<a href="{home}" class="jt-home" aria-label="返回首页 ｜ Back to home" title="返回首页 ｜ Back to home">
+"""
+
+HOME_HTML = """<a href="{home}" class="jt-home" aria-label="返回首页 ｜ Back to home" title="返回首页 ｜ Back to home">
 <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 3.2 2.8 11h2.5v9.2h5.1v-6h3.2v6h5.1V11h2.5z" fill="currentColor"/></svg>
 </a>
-{end}"""
+"""
 
 
 def _strip_chrome(html: str) -> str:
@@ -87,13 +96,13 @@ def _strip_chrome(html: str) -> str:
     return re.sub(r'<style id="jt-chrome-css">.*?</style>\n?', "", html, flags=re.S)
 
 
-def inject(html: str, home: str) -> str:
+def inject(html: str, home: str, gh: bool) -> str:
     """注入 chrome（先清旧块 ⇒ 幂等），CSS 进 </head> 前，标记块进 </body> 前。"""
     body = _strip_chrome(html)
     if "</head>" not in body:
         raise RuntimeError("no </head> — cannot inject chrome (fail-closed)")
     body = body.replace("</head>", CHROME_CSS + "\n</head>", 1)
-    block = CHROME_HTML.format(start=CHROME_START, home=home, end=CHROME_END)
+    block = CHROME_START + "\n" + (GH_HTML if gh else "") + HOME_HTML.format(home=home) + CHROME_END
     if "</body>" in body:
         return body.replace("</body>", block + "\n</body>", 1)
     return body + "\n" + block + "\n"
@@ -111,14 +120,25 @@ def restamp(html: str) -> str:
                                  sha256=sync_stamp.digest(body))
 
 
-def process(path: Path, home: str) -> tuple[bool, str]:
+def process(path: Path, home: str, gh: bool) -> tuple[bool, str]:
     """返回 (是否改动, 说明)。"""
     html = path.read_text(encoding="utf-8")
-    new = restamp(inject(html, home))
+    new = restamp(inject(html, home, gh))
     if new == html:
         return False, f"{path.name}: 已是目标形态"
     path.write_text(new, encoding="utf-8")
     return True, f"{path.name}: chrome 已更新并重打戳"
+
+
+def resolve_targets() -> list[tuple[Path, str, bool]]:
+    """把 TARGETS 里的 glob 展开成实体文件（按月滚动的归档页名会变，不能写死）。"""
+    out: list[tuple[Path, str, bool]] = []
+    for pattern, home, gh in TARGETS:
+        hits = sorted(SITE.glob(pattern))
+        if not hits:
+            raise RuntimeError(f"target not found: {pattern}")
+        out.extend((p, home, gh) for p in hits)
+    return out
 
 
 def main() -> int:
@@ -126,23 +146,32 @@ def main() -> int:
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--write", action="store_true")
     g.add_argument("--check", action="store_true")
+    g.add_argument("--paths", action="store_true", help="打印受管产物（供 wrapper 复用，勿另维护清单）")
     a = ap.parse_args()
+
+    try:
+        targets = resolve_targets()
+    except RuntimeError as e:
+        print(f"❌ {e}", file=sys.stderr)
+        return 2
+
+    if a.paths:
+        for p, _, _ in targets:
+            print(p.relative_to(SITE))
+        return 0
+
     changed = 0
-    for name, home in TARGETS:
-        p = SITE / name
-        if not p.exists():
-            print(f"❌ {name} 不存在", file=sys.stderr)
-            return 2
+    for p, home, gh in targets:
         html = p.read_text(encoding="utf-8")
-        want = restamp(inject(html, home))
+        want = restamp(inject(html, home, gh))
         if want != html:
             changed += 1
             if a.write:
                 p.write_text(want, encoding="utf-8")
-            print(("✅ " if a.write else "⚠️ ") + f"{name}: "
+            print(("✅ " if a.write else "⚠️ ") + f"{p.name}: "
                   + ("chrome 已更新并重打戳" if a.write else "需要注入 chrome"))
         else:
-            print(f"·  {name}: 已是目标形态")
+            print(f"·  {p.name}: 已是目标形态")
     if a.check:
         return 1 if changed else 0
     return 0
