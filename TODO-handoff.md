@@ -1,12 +1,15 @@
-<!-- generated: 2026-11-16 · source: cache/draft/TODO-20261116.md · sha256:6b4862bf -->
-> 派生: 待执行 **2** 条 · 最近闭环 **CL13** · 差异知会 无（未找到含「差异知会」的设计文档）
+<!-- generated: 2026-11-17 · source: cache/draft/TODO-20261117.md · sha256:cb4be51d -->
+> 派生: 待执行 **5** 条 · 最近闭环 **CL305** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
-## 一、已登记待执行（来源: live draft cache/draft/TODO-20261116.md）
+## 一、已登记待执行（来源: live draft cache/draft/TODO-20261117.md）
 
 | 编号 | 标题 | 状态（派生摘要·全文见 draft） | kind | priority | 方案文档 |
 |:--|:--|:--|:--|:--|:--|
 | 待开（sec-030-handoff-public） | 公开面口径（站点面已收口，仓库面待裁） | 待裁 | verify | normal | - |
 | 待开（hm-rotate-done） | hm draft 轮转丢完成节（工具缺陷） | 待办 | bug | normal | - |
+| 待开（dt-push-3） | 上游三笔未推 | 待他线 | process | high | - |
+| 待开（dt-skip-empty-commit） | 上游空转 commit（观察项） | 待办 | process | low | - |
+| 待开（status-wip-cl305） | 他线脏件与失败班 | 待他线 | bug | normal | - |
 <!-- generated end -->
 
 ## 二、基线（人工维护）
