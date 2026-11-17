@@ -457,3 +457,13 @@ html.intro-skip .intro { animation: none; }
 @media (prefers-reduced-motion: reduce) {
     .intro { animation: none; }
 }
+
+/* 竖屏（窄而高）：背景图改 contain —— 宁可上下留出 LQIP 模糊带，也让人看到整张照片（熊的全身）。
+   宽屏维持 cover（裁掉少量两侧，画面更满）。判据用宽高比，避免只看宽度把平板横屏也算进来。 */
+@media (max-aspect-ratio: 1/1) {
+    #background {
+        object-fit: contain;
+        height: 100%;
+        top: 0;
+    }
+}
