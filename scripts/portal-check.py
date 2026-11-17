@@ -699,8 +699,10 @@ def shell_guard(root=None):
     # A1 宽度同源 1200：上游 --jt-maxw / 站点 --page-max + .dash-wrap 覆写
     if "--jt-maxw:1200px" not in b:
         problems.append("bmi 缺 --jt-maxw:1200px")
-    if "body .dash-wrap { max-width: 1200px" not in k:
-        problems.append("tokens 缺 1200 宽度覆写")
+    if not re.search(r"\.dash-wrap\s*\{[^}]*max-width:\s*var\(--page-max,\s*1200px\)", k):
+        problems.append("tokens .dash-wrap 未绑定 --page-max（容器宽会与 bmi 差 200px）")
+    if "--page-max: 1200px" not in k:
+        problems.append("tokens 未声明 --page-max:1200px")
 
     # A2 顶栏同高 48
     if not re.search(r"\.jt-nav\{[^}]*height:48px", b):
@@ -887,8 +889,8 @@ def status_selftest():
         # ── S28 负控（2026-11-17）：每条对应一条外壳判据
         ("S28 宽度回退 1400", lambda d: _mutate(d, "bmi-tracker.html",
                                      lambda t: t.replace("--jt-maxw:1200px", "--jt-maxw:1400px"))),
-        ("S28 tokens 宽度覆写被删", lambda d: _mutate(d, "tokens-tracker/index.html",
-                                     lambda t: t.replace("body .dash-wrap { max-width: 1200px; }", ""))),
+        ("S28 tokens 宽度变量被改回 1400", lambda d: _mutate(d, "tokens-tracker/index.html",
+                                     lambda t: t.replace("--page-max: 1200px", "--page-max: 1400px"))),
         ("S28 顶栏高度回退 43", lambda d: _mutate(d, "tokens-tracker/index.html",
                                      lambda t: t.replace("body .wc-nav { min-height: 48px;", "body .wc-nav { min-height: 43px;"))),
         ("S28 导航少一条链接", lambda d: _mutate(d, "bmi-tracker.html",
