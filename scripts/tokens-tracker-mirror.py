@@ -226,11 +226,10 @@ CHROME_CSS = """
 .jt-home:focus-visible { outline: 2px solid #9ecbff; outline-offset: 2px; }
 @media (max-width: 600px) { .jt-home { right: 10px; width: 40px; height: 40px; border-radius: 10px; } }
 @media (prefers-reduced-motion: reduce) { .jt-home { transition: none; } }
-/* 内容宽度与上游 bmi 侧对齐（2026-11-17 D4=A）：镜像自带 .dash-wrap{max-width:1400px}，
-   body 前缀把特异性抬到 (0,1,1) 压过它；--page-max 同时供 .wc-nav 的居中 padding 复用，
-   否则 nav 链接会按 1400 居中、内容按 1200 → 左边缘错开 100px。 */
+/* 内容宽度与上游 bmi 侧 --jt-maxw 同源（2026-11-17 转交件 A1 对侧）：.dash-wrap 的 max-width 已由
+   注入步骤改写成 var(--page-max)，这里只声明真值；同一变量同时供 .wc-nav 的居中 padding 复用，
+   否则 nav 链接按 1400 居中、内容按 1200 → 左边缘错开 100px。 */
 body { --page-max: 1200px; }
-body .dash-wrap { max-width: 1200px; }
 /* 顶栏高度与上游 bmi 侧 .jt-nav（48px）对齐；本页原为 padding 撑出的 43px，差 5px 并排看得出来 */
 body .wc-nav { min-height: 48px; align-items: center; }
 """
@@ -270,6 +269,16 @@ def inject_chrome(html: str) -> str:
     if not m:
         raise RuntimeError("no <body> — cannot inject chrome (fail-closed)")
     html = html[: m.end()] + "\n" + GH_CORNER_HTML + "\n" + HOME_BTN_HTML + html[m.end():]
+    # 1b) 容器宽度走变量（2026-11-17 转交件 A1 对侧）：镜像自带的 .dash-wrap 写死 max-width:1400px，
+    #     与 --page-max:1200px 两处打架（谁赢取决于特异性）。这里把规则本身改成 var，
+    #     上游若把 1400 换成别的值也照样覆盖（不依赖具体数字），失败即 fail-closed。
+    _before = html
+    html = re.sub(r"\.dash-wrap\s*\{[^}]*\}",
+                  lambda m: re.sub(r"max-width\s*:\s*\d+px", "max-width: var(--page-max, 1200px)", m.group(0), count=1),
+                  html)
+    if _before == html:
+        raise RuntimeError("no .dash-wrap rule — cannot bind width to --page-max (fail-closed)")
+
     # 2) style block before </head>
     m = re.search(r"</head>", html)
     if not m:
@@ -885,8 +894,15 @@ def _dash_selftest():
     _nav_out = render_nav(_nav)
     cases.append(("公开镜像渲染为徽章",
                   'class="wc-tag">公开镜像<' in _nav_out and "· 公开镜像" not in _nav_out))
+    # 夹具必须带 .dash-wrap 规则：2026-11-17 起 inject 会把容器宽改绑 --page-max，
+    # 缺规则即 fail-closed（这条本身也是判据，见下一条用例）
     _stamped_html = inject_chrome(
-        '<html><head><meta name="viewport" content="width=device-width"></head><body><p>x</p></body></html>')
+        '<html><head><meta name="viewport" content="width=device-width">'
+        '<style>.dash-wrap { max-width: 1400px; margin: 0 auto; }</style>'
+        '</head><body><p>x</p></body></html>')
+    cases.append(("容器宽改绑 --page-max（不再写死 1400）",
+                  "max-width: var(--page-max, 1200px)" in _stamped_html
+                  and "max-width: 1400px" not in _stamped_html))
     cases.append(("首页按钮注入（相对 ../）",
                   'class="jt-home"' in _stamped_html and 'href="../"' in _stamped_html
                   and _stamped_html.count("jt-home") >= 2))     # HTML + CSS 各一次
