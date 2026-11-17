@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "service": "jaden-sites",
-  "status": "operational",
-  "updated_at": "2026-11-17T17:32:07+08:00",
+  "status": "degraded",
+  "updated_at": "2026-11-17T17:33:18+08:00",
   "components": [
     {
       "id": "gh-pages",
@@ -13,7 +13,7 @@
       "url": "https://www.githubstatus.com/",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "state": "operational",
@@ -35,11 +35,11 @@
       "url": "https://www.jaden.tech",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 603,
+          "ttfb_ms": 3724,
           "bytes": 10881,
           "location": "",
           "server": "GitHub.com",
@@ -47,12 +47,13 @@
           "sha256_16": "4bf764aec18d7c07",
           "tls_days": 80,
           "attempt": 1,
-          "state": "operational"
+          "state": "operational",
+          "note": "响应偏慢 3724ms（未超阈值）"
         },
         "freshness": {
           "anchor": "git",
-          "sha": "28f2434",
-          "at": "2026-11-17T17:31:16+08:00",
+          "sha": "47a59bc",
+          "at": "2026-11-17T17:32:19+08:00",
           "age_h": 0.0,
           "budget_d": 30,
           "state": "operational"
@@ -63,16 +64,16 @@
       "id": "agent-loop",
       "name": "Agent Loop 实验室",
       "group": "实验室",
-      "status": "operational",
+      "status": "degraded",
       "desc": "Think→Act→Observe→Verify 框架与交互式可视化",
       "url": "https://agent-loop.lab.jaden.tech",
-      "uptime_30d": 1.0,
-      "uptime_90d": 1.0,
-      "samples": 13,
+      "uptime_30d": 0.9286,
+      "uptime_90d": 0.9286,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 370,
+          "ttfb_ms": 7298,
           "bytes": 28393,
           "location": "",
           "server": "GitHub.com",
@@ -80,7 +81,8 @@
           "sha256_16": "c1ef48c4e7dc959f",
           "tls_days": 62,
           "attempt": 1,
-          "state": "operational"
+          "state": "degraded",
+          "note": "响应偏慢 7298ms"
         },
         "freshness": {
           "anchor": "git",
@@ -101,11 +103,11 @@
       "url": "https://llm-radar.lab.jaden.tech",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 278,
+          "ttfb_ms": 988,
           "bytes": 71642,
           "location": "",
           "server": "GitHub.com",
@@ -134,11 +136,11 @@
       "url": "https://http-server.cli.jaden.tech",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 412,
+          "ttfb_ms": 1172,
           "bytes": 29387,
           "location": "",
           "server": "GitHub.com",
@@ -167,11 +169,11 @@
       "url": "https://html-gen.cli.jaden.tech",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 237,
+          "ttfb_ms": 714,
           "bytes": 29508,
           "location": "",
           "server": "GitHub.com",
@@ -200,25 +202,25 @@
       "url": "https://tools.cli.jaden.tech",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 319,
+          "ttfb_ms": 732,
           "bytes": 48892,
           "location": "",
           "server": "GitHub.com",
           "error": null,
-          "sha256_16": "0fe7300c6664fbfa",
+          "sha256_16": "78216d4b1dc1b181",
           "tls_days": 87,
           "attempt": 1,
           "state": "operational"
         },
         "freshness": {
           "anchor": "stamp",
-          "sha": "d8825acd",
-          "at": "2026-11-17T17:28:21+08:00",
-          "age_h": 0.1,
+          "sha": "1630bb35",
+          "at": "2026-11-17T17:31:11+08:00",
+          "age_h": 0.0,
           "budget_d": 30,
           "state": "operational"
         }
@@ -233,11 +235,11 @@
       "url": "https://cloudwise.archived.jaden.tech",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 310,
+          "ttfb_ms": 849,
           "bytes": 47059,
           "location": "",
           "server": "GitHub.com",
@@ -262,11 +264,11 @@
       "url": "https://intfocus.archived.jaden.tech",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 297,
+          "ttfb_ms": 730,
           "bytes": 28718,
           "location": "",
           "server": "GitHub.com",
@@ -291,11 +293,11 @@
       "url": "https://imjaden.github.io/agent-loop.lab/",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 301,
-          "ttfb_ms": 449,
+          "ttfb_ms": 222,
           "bytes": 162,
           "location": "https://agent-loop.lab.jaden.tech/",
           "server": "GitHub.com",
@@ -317,11 +319,11 @@
       "url": "http://jaden.tech",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 301,
-          "ttfb_ms": 222,
+          "ttfb_ms": 198,
           "bytes": 0,
           "location": "https://www.jaden.tech",
           "server": "Tengine",
@@ -343,11 +345,11 @@
       "url": "https://imjaden.github.io/tools.cli/",
       "uptime_30d": 1.0,
       "uptime_90d": 1.0,
-      "samples": 13,
+      "samples": 14,
       "extensions": {
         "reach": {
           "http": 301,
-          "ttfb_ms": 232,
+          "ttfb_ms": 349,
           "bytes": 162,
           "location": "https://tools.cli.jaden.tech/",
           "server": "GitHub.com",
@@ -367,14 +369,14 @@
       "started_at": "2026-11-17",
       "severity": "warn",
       "state_label": "降级",
-      "summary": "探测异常：",
+      "summary": "探测异常：Agent Loop 实验室",
       "source": "auto"
     }
   ],
   "maintenance": [],
   "uptime": {
-    "30d": 1.0,
-    "90d": 1.0
+    "30d": 0.9929,
+    "90d": 0.9929
   },
   "meta": {
     "schedule": "09:05 / 21:45",
