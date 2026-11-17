@@ -1,9 +1,9 @@
-/* SYNC id=tokens-live producer=hermes-manager/dashboard-gen v=1 generated=2026-11-16T20:29:32+08:00 sha256=df371f53ca2b75e6 */
+/* SYNC id=tokens-live producer=hermes-manager/dashboard-gen v=1 generated=2026-11-17T12:19:59+08:00 sha256=7f4c07c390ba2260 */
 window.WEB_DATA_META = {
-  "generated_at": "2026-11-16T20:29:32+08:00",
+  "generated_at": "2026-11-17T12:19:59+08:00",
   "generator": "hub-build",
-  "generator_version": "24bfd418",
-  "max_age_ms": 7200000,
+  "generator_version": "ebc83f06",
+  "max_age_ms": 86400000,
   "pages": [
     "dashboard"
   ]
@@ -11,18 +11,18 @@ window.WEB_DATA_META = {
 window.DASHBOARD = {
   "board": {
     "counts": {
-      "anomaly_total": 21,
-      "doc_missing": 18,
-      "idle": 1,
-      "ledger_total": 58,
-      "prompt": "【已过滤】17 条非白名单项目的异常明细（公开面不列）\n\n【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-16（距今 4.26 天）\n【异常】实施停滞超阈值；复盘文档缺失 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值；台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`（本地命令）` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL384\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.85 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`（本地命令）` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL385\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-16（距今 0.85 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`（本地命令）` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
-      "prompt_count": 20,
+      "anomaly_total": 12,
+      "doc_missing": 1,
+      "idle": 9,
+      "ledger_total": 41,
+      "prompt": "【已过滤】2 条非白名单项目的异常明细（公开面不列）\n\n【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-16（距今 4.92 天）\n【异常】实施停滞超阈值；复盘文档缺失 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值；台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`（本地命令）` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL349\n【现状】台账状态=pending；进度=-；最近更新=2026-11-04（已搁置 13.1 天）\n【异常】长时间搁置 —— 「待执行」条目长期未更新\n【期望】决定开工或关闭该条：能做的拆出第一步，不能做的写明搁置原因并关掉\n【验收】`（本地命令）` 不再包含该条（或状态前进）\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL336\n【现状】台账状态=pending；进度=-；最近更新=2026-11-04（已搁置 13.1 天）\n【异常】长时间搁置 —— 「待执行」条目长期未更新\n【期望】决定开工或关闭该条：能做的拆出第一步，不能做的写明搁置原因并关掉\n【验收】`（本地命令）` 不再包含该条（或状态前进）\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL337\n【现状】台账状态=pending；进度=-；最近更新=2026-11-04（已搁置 13.1 天）\n【异常】长时间搁置 —— 「待执行」条目长期未更新\n【期望】决定开工或关闭该条：能做的拆出第一步，不能做的写明搁置原因并关掉\n【验收】`（本地命令）` 不再包含该条（或状态前进）\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL338\n【现状】台账状态=pending；进度=-；最近更新=2026-11-04（已搁置 13.1 天）\n【异常】长时间搁置 —— 「待执行」条目长期未更新\n【期望】决定开工或关闭该条：能做的拆出第一步，不能做的写明搁置原因并关掉\n【验收】`（本地命令）` 不再包含该条（或状态前进）\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL149\n【现状】台账状态=pending；进度=-；最近更新=2026-11-04（已搁置 13.1 天）\n【异常】长时间搁置 —— 「待执行」条目长期未更新\n【期望】决定开工或关闭该条：能做的拆出第一步，不能做的写明搁置原因并关掉\n【验收】`（本地命令）` 不再包含该条（或状态前进）\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL161\n【现状】台账状态=pending；进度=-；最近更新=2026-11-04（已搁置 13.1 天）\n【异常】长时间搁置 —— 「待执行」条目长期未更新\n【期望】决定开工或关闭该条：能做的拆出第一步，不能做的写明搁置原因并关掉\n【验收】`（本地命令）` 不再包含该条（或状态前进）\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL141\n【现状】台账状态=pending；进度=-；最近更新=2026-11-04（已搁置 13.1 天）\n【异常】长时间搁置 —— 「待执行」条目长期未更新\n【期望】决定开工或关闭该条：能做的拆出第一步，不能做的写明搁置原因并关掉\n【验收】`（本地命令）` 不再包含该条（或状态前进）\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】hermes-manager · HERMES-MANAGER-CL150\n【现状】台账状态=pending；进度=-；最近更新=2026-11-04（已搁置 13.1 天）\n【异常】长时间搁置 —— 「待执行」条目长期未更新\n【期望】决定开工或关闭该条：能做的拆出第一步，不能做的写明搁置原因并关掉\n【验收】`（本地命令）` 不再包含该条（或状态前进）\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
+      "prompt_count": 11,
       "skipped": 11,
       "timeout": 2,
-      "total": 47,
+      "total": 30,
       "unknown": 0
     },
-    "note": "台账 58 条 · 可判定任务 47 条（跳过无闭环编号 11 条）· 异常 21 条（2 超时 / 18 文档不全 / 1 搁置）",
+    "note": "台账 41 条 · 可判定任务 30 条（跳过无闭环编号 11 条）· 异常 12 条（2 超时 / 1 文档不全 / 9 搁置）",
     "rows": [
       {
         "number": "HERMES-MANAGER-CL353",
@@ -30,7 +30,7 @@ window.DASHBOARD = {
         "status": "active",
         "level": "critical",
         "progress": "[6/6] 收尾复盘",
-        "updated_at": "2026-11-16 19:31",
+        "updated_at": "2026-11-16 22:01",
         "signals": [
           "timeout",
           "doc-missing"
@@ -39,39 +39,15 @@ window.DASHBOARD = {
         "copy_cmd": "（本地命令）"
       },
       {
-        "number": "HERMES-MANAGER-CL384",
-        "project": "hermes-manager",
-        "status": "done",
-        "level": "critical",
-        "progress": "[6/6]",
-        "updated_at": "2026-11-16",
-        "signals": [
-          "doc-missing"
-        ],
-        "desc": "**公开镜像停更修复（控制台 图标相对化）**",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "HERMES-MANAGER-CL385",
-        "project": "hermes-manager",
-        "status": "done",
-        "level": "critical",
-        "progress": "[6/6]",
-        "updated_at": "2026-11-16",
-        "signals": [
-          "doc-missing"
-        ],
-        "desc": "**generated_at 补时区偏移**",
-        "copy_cmd": "（本地命令）"
-      },
-      {
         "number": "HERMES-MANAGER-CL349",
         "project": "hermes-manager",
         "status": "pending",
-        "level": "ok",
+        "level": "warn",
         "progress": "-",
-        "updated_at": "2026-11-16 18:55",
-        "signals": [],
+        "updated_at": "2026-11-04 10:01",
+        "signals": [
+          "idle"
+        ],
         "desc": "**消息通道实机联调 + 主菜单 TODO 入口**",
         "copy_cmd": "（本地命令）"
       },
@@ -79,10 +55,12 @@ window.DASHBOARD = {
         "number": "HERMES-MANAGER-CL336",
         "project": "hermes-manager",
         "status": "pending",
-        "level": "ok",
+        "level": "warn",
         "progress": "-",
-        "updated_at": "2026-11-16 18:55",
-        "signals": [],
+        "updated_at": "2026-11-04 10:01",
+        "signals": [
+          "idle"
+        ],
         "desc": "**SEC-571-16：深探 key 轮换**",
         "copy_cmd": "（本地命令）"
       },
@@ -90,10 +68,12 @@ window.DASHBOARD = {
         "number": "HERMES-MANAGER-CL337",
         "project": "hermes-manager",
         "status": "pending",
-        "level": "ok",
+        "level": "warn",
         "progress": "-",
-        "updated_at": "2026-11-16 18:55",
-        "signals": [],
+        "updated_at": "2026-11-04 10:01",
+        "signals": [
+          "idle"
+        ],
         "desc": "**AC-4：镜像守卫跨仓执行**",
         "copy_cmd": "（本地命令）"
       },
@@ -101,10 +81,12 @@ window.DASHBOARD = {
         "number": "HERMES-MANAGER-CL338",
         "project": "hermes-manager",
         "status": "pending",
-        "level": "ok",
+        "level": "warn",
         "progress": "-",
-        "updated_at": "2026-11-16 18:55",
-        "signals": [],
+        "updated_at": "2026-11-04 10:01",
+        "signals": [
+          "idle"
+        ],
         "desc": "**P6 判读：消息通道通知降噪 24h 取证**",
         "copy_cmd": "（本地命令）"
       },
@@ -112,10 +94,12 @@ window.DASHBOARD = {
         "number": "HERMES-MANAGER-CL149",
         "project": "hermes-manager",
         "status": "pending",
-        "level": "ok",
+        "level": "warn",
         "progress": "-",
-        "updated_at": "2026-11-16 18:55",
-        "signals": [],
+        "updated_at": "2026-11-04 10:01",
+        "signals": [
+          "idle"
+        ],
         "desc": "**§C3 实证段补「正例样本」+ §C2 一句口径**",
         "copy_cmd": "（本地命令）"
       },
@@ -123,10 +107,12 @@ window.DASHBOARD = {
         "number": "HERMES-MANAGER-CL161",
         "project": "hermes-manager",
         "status": "pending",
-        "level": "ok",
+        "level": "warn",
         "progress": "-",
-        "updated_at": "2026-11-16 18:55",
-        "signals": [],
+        "updated_at": "2026-11-04 10:01",
+        "signals": [
+          "idle"
+        ],
         "desc": "**观察项：`（本地命令）` 的 `loop_id`⇒stric…",
         "copy_cmd": "（本地命令）"
       },
@@ -134,10 +120,12 @@ window.DASHBOARD = {
         "number": "HERMES-MANAGER-CL141",
         "project": "hermes-manager",
         "status": "pending",
-        "level": "ok",
+        "level": "warn",
         "progress": "-",
-        "updated_at": "2026-11-16 18:55",
-        "signals": [],
+        "updated_at": "2026-11-04 10:01",
+        "signals": [
+          "idle"
+        ],
         "desc": "**TC15 首屏工具表断言间歇性红（全量门禁不可信）**",
         "copy_cmd": "（本地命令）"
       },
@@ -145,10 +133,12 @@ window.DASHBOARD = {
         "number": "HERMES-MANAGER-CL150",
         "project": "hermes-manager",
         "status": "pending",
-        "level": "ok",
+        "level": "warn",
         "progress": "-",
-        "updated_at": "2026-11-16 18:55",
-        "signals": [],
+        "updated_at": "2026-11-04 10:01",
+        "signals": [
+          "idle"
+        ],
         "desc": "**C3 首次真实触发核验（观察项，不立项）**",
         "copy_cmd": "（本地命令）"
       },
@@ -228,20 +218,20 @@ window.DASHBOARD = {
       "label": "Task 实施进度",
       "level": "critical",
       "action_label": "复制排查 Prompt",
-      "value": "2 / 47 超时",
+      "value": "2 / 30 超时",
       "note": "阈值 >1.5h（自最近一次步骤推进起算）· 全台账口径",
       "copy_cmd": "（本地命令）",
-      "prompt": "【任务】台账里有 2/47 个任务超过 1.5h 没有步骤推进\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：台账里有 2/47 个任务超过 1.5h 没有步骤推进\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：超时任务会占住队列、拖住复盘与收口；但卡住的原因可能是等授权、等窗口或真跑飞了\nHow：先跑 `（本地命令）` 定位超时任务键，再看每条停在哪个步骤（[N/6]）与最后一次动作时间；只读判断，不要直接改台账\nHow much：1 次只读查询；如需推进某条，走「开工 <编号>」，任何写操作须我点头"
+      "prompt": "【任务】台账里有 2/30 个任务超过 1.5h 没有步骤推进\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：台账里有 2/30 个任务超过 1.5h 没有步骤推进\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：超时任务会占住队列、拖住复盘与收口；但卡住的原因可能是等授权、等窗口或真跑飞了\nHow：先跑 `（本地命令）` 定位超时任务键，再看每条停在哪个步骤（[N/6]）与最后一次动作时间；只读判断，不要直接改台账\nHow much：1 次只读查询；如需推进某条，走「开工 <编号>」，任何写操作须我点头"
     },
     {
       "key": "task_doc",
       "label": "Task 复盘文档",
       "level": "critical",
       "action_label": "复制补记 Prompt",
-      "value": "18 条缺文档",
+      "value": "1 条缺文档",
       "note": "到 [6/6] 但无可用 retro 文件",
       "copy_cmd": "（本地命令）",
-      "prompt": "【任务】有 18 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：有 18 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：闭环缺最后一笔就不算完成；台账判 done 的判据里含 retro 件，缺件会让「已收口」变成假绿\nHow：用 `（本地命令）` 列出这些任务键，逐个确认 retro 文档是否真的不存在（而不是换了路径），再决定补文档还是补台账登记；不要凭空新造复盘内容\nHow much：1 次只读列举 + 每缺件 1 次补记；补记属写操作，须我点头"
+      "prompt": "【任务】有 1 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：有 1 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：闭环缺最后一笔就不算完成；台账判 done 的判据里含 retro 件，缺件会让「已收口」变成假绿\nHow：用 `（本地命令）` 列出这些任务键，逐个确认 retro 文档是否真的不存在（而不是换了路径），再决定补文档还是补台账登记；不要凭空新造复盘内容\nHow much：1 次只读列举 + 每缺件 1 次补记；补记属写操作，须我点头"
     },
     {
       "key": "memory_usage",
@@ -273,22 +263,22 @@ window.DASHBOARD = {
         {
           "key": "task",
           "label": "Task",
-          "window": "近 30 天 · filename_date 窗 20251013~（域 = registered 注册项目）",
-          "headline": "104 个任务键在账上，31 个会话已到 refs 上限（5）；未归属 650 件成本不可考",
+          "window": "近 30 天 · filename_date 窗 20251014~（域 = registered 注册项目）",
+          "headline": "98 个任务键在账上，31 个会话已到 refs 上限（5）；未归属 650 件成本不可考",
           "href": "",
           "unavailable": null,
           "stats": [
             {
               "label": "任务键数",
-              "value": "104",
-              "raw": 104,
+              "value": "98",
+              "raw": 98,
               "note": "键 = (项目, 编号)，编号取生产解析（禁裸编号回落）"
             },
             {
               "label": "归因成本（独占 + 共享）",
-              "value": "$116.7886",
-              "raw": 116.788593,
-              "note": "独占 $73.2929（657 会话）/ 共享池 $43.4956（97 会话，单列不重复计）；旧口径 Σ $92.5223 已弃用（2026-09-29 后移除）"
+              "value": "$116.8314",
+              "raw": 116.831386,
+              "note": "独占 $73.2929（657 会话）/ 共享池 $43.5384（97 会话，单列不重复计）；旧口径 Σ $91.8055 已弃用（2026-09-29 后移除）"
             },
             {
               "label": "超限会话（上限 5）",
@@ -304,9 +294,9 @@ window.DASHBOARD = {
             },
             {
               "label": "归因占比（对全 profile 真值）",
-              "value": "11.1%",
-              "raw": 11.12,
-              "note": "真值 ¥7,474.79 ≈ $1,049.83（@7.12）；占比 = 归因合计 / 真值"
+              "value": "11.2%",
+              "raw": 11.21,
+              "note": "真值 ¥7,423.26 ≈ $1,042.59（@7.12）；占比 = 归因合计 / 真值"
             }
           ],
           "analysis": [
@@ -388,17 +378,17 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "step 成本 Σ（旧口径, 信封归一）",
-                  "value": "$92.5223",
-                  "raw": 92.522291
+                  "value": "$91.8055",
+                  "raw": 91.805477
                 },
                 {
                   "label": "tokens(in+out+reasoning)",
-                  "value": "307,092,601",
-                  "raw": 307092601
+                  "value": "305,235,657",
+                  "raw": 305235657
                 },
                 {
                   "label": "cache_read tokens（占全部 tokens）",
-                  "value": "12,199,776,630 / 12,506,869,231 ≈ 97.5%",
+                  "value": "12,106,709,366 / 12,411,945,023 ≈ 97.5%",
                   "raw": 97.54
                 }
               ]
@@ -409,8 +399,8 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "done",
-                  "value": "57",
-                  "raw": 57
+                  "value": "51",
+                  "raw": 51
                 },
                 {
                   "label": "done-exempt",
@@ -435,33 +425,33 @@ window.DASHBOARD = {
           "key": "session",
           "label": "Session",
           "window": "近 30 天 · 会话 started_at 滚动窗（本地会话库 sessions 真源; Session 页展示窗 = 近 14 天 / 每 profile ≤60 条）",
-          "headline": "3089 个会话花了 $108.1332，cache 命中 97.3% —— 钱主要花在上下文复用，不是新读",
+          "headline": "3093 个会话花了 $106.5007，cache 命中 97.3% —— 钱主要花在上下文复用，不是新读",
           "href": "",
           "unavailable": null,
           "stats": [
             {
               "label": "会话数（未结束）",
-              "value": "3,089（61）",
-              "raw": 3089,
+              "value": "3,093（55）",
+              "raw": 3093,
               "note": "未结束 = ended_at 缺失，耗时/成本仍在增长"
             },
             {
               "label": "成本合计",
-              "value": "$108.1332",
-              "raw": 108.133184,
+              "value": "$106.5007",
+              "raw": 106.500666,
               "note": "本地会话库 sessions 真源"
             },
             {
               "label": "tokens(in+out+reasoning)",
-              "value": "306,056,906",
-              "raw": 306056906,
+              "value": "302,116,554",
+              "raw": 302116554,
               "note": "cache_read 单列，不计入"
             },
             {
               "label": "cache_read tokens（占全部 tokens）",
-              "value": "11,000,046,972 / 11,306,103,878 ≈ 97.3%",
-              "raw": 97.29,
-              "note": "会话级不重复计数；其中 35 个到点会话占 26.8%"
+              "value": "10,807,778,300 / 11,109,894,854 ≈ 97.3%",
+              "raw": 97.28,
+              "note": "会话级不重复计数；其中 35 个到点会话占 27.3%"
             }
           ],
           "analysis": [
@@ -471,13 +461,13 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "deepseek-v4-flash",
-                  "value": "2,499",
-                  "raw": 2499
+                  "value": "2,521",
+                  "raw": 2521
                 },
                 {
                   "label": "deepseek-flash",
-                  "value": "574",
-                  "raw": 574
+                  "value": "556",
+                  "raw": 556
                 },
                 {
                   "label": "deepseek-v4-pro",
@@ -497,28 +487,28 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ops",
-                  "value": "$54.3326",
-                  "raw": 54.332576
+                  "value": "$53.5494",
+                  "raw": 53.549356
                 },
                 {
                   "label": "review",
-                  "value": "$39.4757",
-                  "raw": 39.475667
+                  "value": "$38.7234",
+                  "raw": 38.72338
                 },
                 {
                   "label": "dev",
-                  "value": "$6.0390",
-                  "raw": 6.039035
+                  "value": "$5.9285",
+                  "raw": 5.928514
                 },
                 {
                   "label": "personal",
-                  "value": "$5.3757",
-                  "raw": 5.375711
+                  "value": "$5.3792",
+                  "raw": 5.379223
                 },
                 {
                   "label": "personal-private",
-                  "value": "$2.3145",
-                  "raw": 2.314523
+                  "value": "$2.3211",
+                  "raw": 2.321074
                 },
                 {
                   "label": "summarizer",
@@ -527,8 +517,8 @@ window.DASHBOARD = {
                 },
                 {
                   "label": "default",
-                  "value": "$0.2229",
-                  "raw": 0.222933
+                  "value": "$0.2264",
+                  "raw": 0.22638
                 }
               ]
             }
@@ -538,7 +528,7 @@ window.DASHBOARD = {
           "key": "memory",
           "label": "Memory",
           "window": "状态快照（不受时间范围影响）",
-          "headline": "最高 99.0%（ops MEMORY），2 处已超限 —— 记忆会先满",
+          "headline": "最高 99.0%（ops MEMORY），3 处已超限 —— 记忆会先满",
           "href": "",
           "unavailable": null,
           "stats": [
@@ -546,18 +536,18 @@ window.DASHBOARD = {
               "label": "最高使用率",
               "value": "99.0%（ops MEMORY）",
               "raw": 99.0,
-              "note": "使用率 = 字符数 / 上限（config.yaml）；共 16 行 = 超限 2 + 预警 6 + 健康 8"
+              "note": "使用率 = 字符数 / 上限（config.yaml）；共 16 行 = 超限 3 + 预警 5 + 健康 8"
             },
             {
               "label": "超限 ≥95%",
-              "value": "2",
-              "raw": 2,
+              "value": "3",
+              "raw": 3,
               "note": "治理阈值（同 memory-health）⇒ 需要压缩"
             },
             {
               "label": "预警 ≥85%",
-              "value": "6",
-              "raw": 6,
+              "value": "5",
+              "raw": 5,
               "note": "治理阈值（同 memory-health）"
             }
           ],
@@ -577,14 +567,14 @@ window.DASHBOARD = {
                   "raw": 99.0
                 },
                 {
+                  "label": "ops USER",
+                  "value": "96.0%",
+                  "raw": 96.0
+                },
+                {
                   "label": "dev MEMORY",
                   "value": "94.0%",
                   "raw": 94.0
-                },
-                {
-                  "label": "ops USER",
-                  "value": "93.0%",
-                  "raw": 93.0
                 },
                 {
                   "label": "personal MEMORY",
@@ -614,13 +604,18 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ops MEMORY",
-                  "value": "2170/2200 字符 (99.0%)",
+                  "value": "2184/2200 字符 (99.0%)",
                   "raw": 99.0
                 },
                 {
                   "label": "review MEMORY",
                   "value": "3177/3200 字符 (99.0%)",
                   "raw": 99.0
+                },
+                {
+                  "label": "ops USER",
+                  "value": "1317/1375 字符 (96.0%)",
+                  "raw": 96.0
                 }
               ]
             }
@@ -630,7 +625,7 @@ window.DASHBOARD = {
           "key": "cron",
           "label": "Cron Job",
           "window": "状态快照（不受时间范围影响）",
-          "headline": "55 条定时任务（53 在跑），3 条连续失败 —— 无人值守链路有断点",
+          "headline": "55 条定时任务（53 在跑），1 条连续失败 —— 无人值守链路有断点",
           "href": "",
           "unavailable": null,
           "stats": [
@@ -642,9 +637,9 @@ window.DASHBOARD = {
             },
             {
               "label": "连续失败 >0",
-              "value": "3",
-              "raw": 3,
-              "note": "failure_streak；另有 3 条 last_error 非空（原文见 Cron 页详情）"
+              "value": "1",
+              "raw": 1,
+              "note": "failure_streak；另有 1 条 last_error 非空（原文见 Cron 页详情）"
             }
           ],
           "analysis": [
@@ -654,18 +649,18 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ok",
-                  "value": "48",
-                  "raw": 48
+                  "value": "52",
+                  "raw": 52
                 },
                 {
                   "label": "-",
-                  "value": "4",
-                  "raw": 4
+                  "value": "2",
+                  "raw": 2
                 },
                 {
                   "label": "error",
-                  "value": "3",
-                  "raw": 3
+                  "value": "1",
+                  "raw": 1
                 }
               ]
             },
@@ -674,19 +669,9 @@ window.DASHBOARD = {
               "note": "",
               "rows": [
                 {
-                  "label": "ops tokens-tracker-mirror",
-                  "value": "1",
-                  "raw": 1
-                },
-                {
-                  "label": "ops 消息通道-archive-daily",
-                  "value": "1",
-                  "raw": 1
-                },
-                {
                   "label": "ops git-status-evening",
-                  "value": "1",
-                  "raw": 1
+                  "value": "2",
+                  "raw": 2
                 }
               ]
             },
@@ -732,7 +717,7 @@ window.DASHBOARD = {
         {
           "key": "task",
           "label": "Task",
-          "window": "近 7 天 · filename_date 窗 20251013~（域 = registered 注册项目）",
+          "window": "近 7 天 · filename_date 窗 20251014~（域 = registered 注册项目）",
           "headline": "18 个任务键在账上，31 个会话已到 refs 上限（5）；未归属 650 件成本不可考",
           "href": "",
           "unavailable": null,
@@ -745,9 +730,9 @@ window.DASHBOARD = {
             },
             {
               "label": "归因成本（独占 + 共享）",
-              "value": "$116.7886",
-              "raw": 116.788593,
-              "note": "独占 $73.2929（657 会话）/ 共享池 $43.4956（97 会话，单列不重复计）；旧口径 Σ $1.3250 已弃用（2026-09-29 后移除）"
+              "value": "$116.8314",
+              "raw": 116.831386,
+              "note": "独占 $73.2929（657 会话）/ 共享池 $43.5384（97 会话，单列不重复计）；旧口径 Σ $1.3250 已弃用（2026-09-29 后移除）"
             },
             {
               "label": "超限会话（上限 5）",
@@ -763,9 +748,9 @@ window.DASHBOARD = {
             },
             {
               "label": "归因占比（对全 profile 真值）",
-              "value": "105.7%",
-              "raw": 105.74,
-              "note": "真值 ¥786.40 ≈ $110.45（@7.12）；占比 = 归因合计 / 真值"
+              "value": "160.9%",
+              "raw": 160.9,
+              "note": "真值 ¥516.99 ≈ $72.61（@7.12）；占比 = 归因合计 / 真值"
             }
           ],
           "analysis": [
@@ -884,33 +869,33 @@ window.DASHBOARD = {
           "key": "session",
           "label": "Session",
           "window": "近 7 天 · 会话 started_at 滚动窗（本地会话库 sessions 真源; Session 页展示窗 = 近 14 天 / 每 profile ≤60 条）",
-          "headline": "608 个会话花了 $12.4855，cache 命中 96.8% —— 钱主要花在上下文复用，不是新读",
+          "headline": "604 个会话花了 $12.4534，cache 命中 96.8% —— 钱主要花在上下文复用，不是新读",
           "href": "",
           "unavailable": null,
           "stats": [
             {
               "label": "会话数（未结束）",
-              "value": "608（4）",
-              "raw": 608,
+              "value": "604（0）",
+              "raw": 604,
               "note": "未结束 = ended_at 缺失，耗时/成本仍在增长"
             },
             {
               "label": "成本合计",
-              "value": "$12.4855",
-              "raw": 12.485506,
+              "value": "$12.4534",
+              "raw": 12.45336,
               "note": "本地会话库 sessions 真源"
             },
             {
               "label": "tokens(in+out+reasoning)",
-              "value": "33,542,500",
-              "raw": 33542500,
+              "value": "33,534,326",
+              "raw": 33534326,
               "note": "cache_read 单列，不计入"
             },
             {
               "label": "cache_read tokens（占全部 tokens）",
-              "value": "1,002,852,608 / 1,036,395,108 ≈ 96.8%",
-              "raw": 96.76,
-              "note": "会话级不重复计数；其中 35 个到点会话占 294.2%"
+              "value": "1,009,268,224 / 1,042,802,550 ≈ 96.8%",
+              "raw": 96.78,
+              "note": "会话级不重复计数；其中 35 个到点会话占 292.4%"
             }
           ],
           "analysis": [
@@ -920,8 +905,8 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "deepseek-v4-flash",
-                  "value": "599",
-                  "raw": 599
+                  "value": "595",
+                  "raw": 595
                 },
                 {
                   "label": "deepseek-v4-pro",
@@ -941,13 +926,13 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ops",
-                  "value": "$6.5555",
-                  "raw": 6.555517
+                  "value": "$6.7746",
+                  "raw": 6.774641
                 },
                 {
                   "label": "review",
-                  "value": "$4.0382",
-                  "raw": 4.038196
+                  "value": "$3.7808",
+                  "raw": 3.780784
                 },
                 {
                   "label": "dev",
@@ -956,13 +941,18 @@ window.DASHBOARD = {
                 },
                 {
                   "label": "personal",
-                  "value": "$0.3377",
-                  "raw": 0.337675
+                  "value": "$0.3412",
+                  "raw": 0.341186
                 },
                 {
                   "label": "default",
-                  "value": "$0.0180",
-                  "raw": 0.01802
+                  "value": "$0.0182",
+                  "raw": 0.01822
+                },
+                {
+                  "label": "personal-private",
+                  "value": "$0.0024",
+                  "raw": 0.00243
                 }
               ]
             }
@@ -972,7 +962,7 @@ window.DASHBOARD = {
           "key": "memory",
           "label": "Memory",
           "window": "状态快照（不受时间范围影响）",
-          "headline": "最高 99.0%（ops MEMORY），2 处已超限 —— 记忆会先满",
+          "headline": "最高 99.0%（ops MEMORY），3 处已超限 —— 记忆会先满",
           "href": "",
           "unavailable": null,
           "stats": [
@@ -980,18 +970,18 @@ window.DASHBOARD = {
               "label": "最高使用率",
               "value": "99.0%（ops MEMORY）",
               "raw": 99.0,
-              "note": "使用率 = 字符数 / 上限（config.yaml）；共 16 行 = 超限 2 + 预警 6 + 健康 8"
+              "note": "使用率 = 字符数 / 上限（config.yaml）；共 16 行 = 超限 3 + 预警 5 + 健康 8"
             },
             {
               "label": "超限 ≥95%",
-              "value": "2",
-              "raw": 2,
+              "value": "3",
+              "raw": 3,
               "note": "治理阈值（同 memory-health）⇒ 需要压缩"
             },
             {
               "label": "预警 ≥85%",
-              "value": "6",
-              "raw": 6,
+              "value": "5",
+              "raw": 5,
               "note": "治理阈值（同 memory-health）"
             }
           ],
@@ -1011,14 +1001,14 @@ window.DASHBOARD = {
                   "raw": 99.0
                 },
                 {
+                  "label": "ops USER",
+                  "value": "96.0%",
+                  "raw": 96.0
+                },
+                {
                   "label": "dev MEMORY",
                   "value": "94.0%",
                   "raw": 94.0
-                },
-                {
-                  "label": "ops USER",
-                  "value": "93.0%",
-                  "raw": 93.0
                 },
                 {
                   "label": "personal MEMORY",
@@ -1048,13 +1038,18 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ops MEMORY",
-                  "value": "2170/2200 字符 (99.0%)",
+                  "value": "2184/2200 字符 (99.0%)",
                   "raw": 99.0
                 },
                 {
                   "label": "review MEMORY",
                   "value": "3177/3200 字符 (99.0%)",
                   "raw": 99.0
+                },
+                {
+                  "label": "ops USER",
+                  "value": "1317/1375 字符 (96.0%)",
+                  "raw": 96.0
                 }
               ]
             }
@@ -1064,7 +1059,7 @@ window.DASHBOARD = {
           "key": "cron",
           "label": "Cron Job",
           "window": "状态快照（不受时间范围影响）",
-          "headline": "55 条定时任务（53 在跑），3 条连续失败 —— 无人值守链路有断点",
+          "headline": "55 条定时任务（53 在跑），1 条连续失败 —— 无人值守链路有断点",
           "href": "",
           "unavailable": null,
           "stats": [
@@ -1076,9 +1071,9 @@ window.DASHBOARD = {
             },
             {
               "label": "连续失败 >0",
-              "value": "3",
-              "raw": 3,
-              "note": "failure_streak；另有 3 条 last_error 非空（原文见 Cron 页详情）"
+              "value": "1",
+              "raw": 1,
+              "note": "failure_streak；另有 1 条 last_error 非空（原文见 Cron 页详情）"
             }
           ],
           "analysis": [
@@ -1088,18 +1083,18 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ok",
-                  "value": "48",
-                  "raw": 48
+                  "value": "52",
+                  "raw": 52
                 },
                 {
                   "label": "-",
-                  "value": "4",
-                  "raw": 4
+                  "value": "2",
+                  "raw": 2
                 },
                 {
                   "label": "error",
-                  "value": "3",
-                  "raw": 3
+                  "value": "1",
+                  "raw": 1
                 }
               ]
             },
@@ -1108,19 +1103,9 @@ window.DASHBOARD = {
               "note": "",
               "rows": [
                 {
-                  "label": "ops tokens-tracker-mirror",
-                  "value": "1",
-                  "raw": 1
-                },
-                {
-                  "label": "ops 消息通道-archive-daily",
-                  "value": "1",
-                  "raw": 1
-                },
-                {
                   "label": "ops git-status-evening",
-                  "value": "1",
-                  "raw": 1
+                  "value": "2",
+                  "raw": 2
                 }
               ]
             },
