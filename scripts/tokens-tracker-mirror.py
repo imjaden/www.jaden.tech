@@ -73,6 +73,11 @@ KEEP_FIELDS = ("project", "number", "status", "progress", "created_at", "updated
 DESC_MAX = 40
 # META fields dropped (internal-only prose; META is not read by the shell for rendering).
 META_DROP_FIELDS = ("source",)
+# 2026-11-16（用户口径）：公开面「数据偏旧」阈值 2h → 24h。
+# 上游 META.max_age_ms = 7200000 是按内部看板几分钟一刷定的；公开镜像按天看，
+# 沿用 2h 会让页面长期挂「数据偏旧」。机器可判的陈旧由 sync-check（26h 预算）负责，
+# 页面这行只作人眼提示，24h 更贴合实际节奏。
+PUBLIC_MAX_AGE_MS = 24 * 3600 * 1000
 # Row-level + data-output guard (hit → drop row / abort).
 # Two levels: content words always; retro_*/full-text FIELD NAMES additionally on data
 # outputs (they must never appear in mirrored data), but NOT on JS assets where they are
@@ -105,9 +110,17 @@ NAV_DISABLED_TITLE = "仅本地服务可访问"
 NAV_ITEMS_EXPECTED = 10          # 上游 wc-nav 当前项数；变化即中止（不猜）
 NAV_CURRENT_MATCH = 'class="active" href="/index.html"'   # 本页（Dashboard）对应项
 NAV_BRAND_OLD = '<span class="wc-brand">Hermes 控制台</span>'
-NAV_BRAND_NEW = '<span class="wc-brand">Hermes 控制台 · 公开镜像</span>'
+# 2026-11-16（用户要求）：「公开镜像」从品牌文字里拆出来做成徽章 —— 上游只发 «Hermes 控制台»，
+# 所以仍然只替换一次（幂等），徽章样式见 NAV_ITEM_CSS 的 .wc-tag。
+NAV_BRAND_NEW = ('<span class="wc-brand">Hermes 控制台</span>'
+                 '<span class="wc-tag">公开镜像</span>')
 NAV_ITEM_CSS = (
     ".wc-nav .wc-nav-item{padding:4px 10px;border-radius:6px;white-space:nowrap;}"
+    # 2026-11-16：「公开镜像」徽章（标签样式），与品牌文字分开，读作状态而不是名字
+    ".wc-nav .wc-tag{margin-left:8px;padding:2px 8px;border-radius:999px;"
+    "border:1px solid #3a3a52;background:rgba(79,70,229,.16);color:#c7d2fe;"
+    "font-size:.72rem;font-weight:600;line-height:1.5;letter-spacing:.02em;white-space:nowrap;"
+    "vertical-align:middle;}"
     ".wc-nav .wc-nav-item.is-active{background:var(--cobalt-600,#4f46e5);color:#fff;}"
     ".wc-nav .wc-nav-item.is-disabled{color:#9ca3af;opacity:.45;cursor:not-allowed;}"
     ".wc-nav .wc-nav-item.is-disabled:hover{background:transparent;color:#9ca3af;}"
@@ -178,6 +191,16 @@ GH_CORNER_HTML = (
     "</svg></a>"
 )
 
+# 右侧垂直居中的「返回首页」按钮（2026-11-16）：与 bmi-tracker.html 同一形态。
+# 链接用相对路径 "../"，因为镜像发布在 /tokens-tracker/ 一级深（root-absolute 会违 JT-SEC-018）。
+HOME_BTN_HTML = (
+    '<a href="../" class="jt-home" aria-label="返回首页 ｜ Back to home" '
+    'title="返回首页 ｜ Back to home">'
+    '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">'
+    '<path d="M12 3.2 2.8 11h2.5v9.2h5.1v-6h3.2v6h5.1V11h2.5z" fill="currentColor"/>'
+    "</svg></a>"
+)
+
 CHROME_CSS = """
 /* site chrome: github corner（dark-theme）—— 旧双层导航已废弃，只保留 corner */
 .github-corner {
@@ -189,6 +212,20 @@ CHROME_CSS = """
 .github-corner:hover .octo-arm { animation: octocat-wave 560ms ease-in-out; }
 @keyframes octocat-wave { 0%,100%{transform:rotate(0)} 20%,60%{transform:rotate(-25deg)} 40%,80%{transform:rotate(10deg)} }
 @media (max-width: 500px) { .github-corner:hover .octo-arm { animation: none; } }
+/* 右侧垂直居中的「返回首页」悬浮按钮（2026-11-16）：bmi-tracker 与本页共用同一形态 */
+.jt-home {
+  position: fixed; right: 18px; top: 50%; transform: translateY(-50%); z-index: 999;
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; color: #fff; text-decoration: none;
+  background: rgba(8, 12, 20, .55); border: 1px solid rgba(255, 255, 255, .22);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .28);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.jt-home:hover { background: rgba(12, 18, 30, .72); border-color: rgba(255, 255, 255, .45); transform: translateY(-50%) scale(1.05); }
+.jt-home:focus-visible { outline: 2px solid #9ecbff; outline-offset: 2px; }
+@media (max-width: 600px) { .jt-home { right: 10px; width: 40px; height: 40px; border-radius: 10px; } }
+@media (prefers-reduced-motion: reduce) { .jt-home { transition: none; } }
 """
 
 
@@ -225,7 +262,7 @@ def inject_chrome(html: str) -> str:
     m = re.search(r"(<body[^>]*>)", html)
     if not m:
         raise RuntimeError("no <body> — cannot inject chrome (fail-closed)")
-    html = html[: m.end()] + "\n" + GH_CORNER_HTML + html[m.end():]
+    html = html[: m.end()] + "\n" + GH_CORNER_HTML + "\n" + HOME_BTN_HTML + html[m.end():]
     # 2) style block before </head>
     m = re.search(r"</head>", html)
     if not m:
@@ -374,6 +411,7 @@ def transform_live(js: str) -> str:
     meta = json.loads(m_meta.group(1))
     for field in META_DROP_FIELDS:
         meta.pop(field, None)
+    meta["max_age_ms"] = PUBLIC_MAX_AGE_MS        # 公开面阈值 24h（见常量处说明）
     items = project_items(json.loads(m_items.group(1)))
     stats = json.loads(m_stats.group(1))
 
@@ -767,6 +805,7 @@ def transform_dashboard(js: str) -> str:
         counts["prompt"] = mask_text(counts["prompt"], deny)   # 块内 CLI/路径/模块名再做一遍词级掩码
     for field in META_DROP_FIELDS:
         meta.pop(field, None)
+    meta["max_age_ms"] = PUBLIC_MAX_AGE_MS        # 公开面阈值 24h（见常量处说明）
 
     out = {
         "board": {"counts": counts, "note": mask_text(board.get("note") or "", deny),
@@ -831,6 +870,20 @@ def _dash_selftest():
         cases.append(("counts 未知键 ⇒ raise", False))
     except RuntimeError:
         cases.append(("counts 未知键 ⇒ raise", True))
+
+    # 2026-11-16（用户要求）：品牌文字里的「公开镜像」改成徽章；首页按钮；陈旧阈值 24h
+    _nav = ('<nav class="wc-nav"><span class="wc-brand">Hermes 控制台</span>'
+            '<a class="active" href="/index.html">Dashboard</a>'
+            + "".join(f'<a href="/p{i}.html">P{i}</a>' for i in range(9)) + "</nav>")
+    _nav_out = render_nav(_nav)
+    cases.append(("公开镜像渲染为徽章",
+                  'class="wc-tag">公开镜像<' in _nav_out and "· 公开镜像" not in _nav_out))
+    _stamped_html = inject_chrome(
+        '<html><head><meta name="viewport" content="width=device-width"></head><body><p>x</p></body></html>')
+    cases.append(("首页按钮注入（相对 ../）",
+                  'class="jt-home"' in _stamped_html and 'href="../"' in _stamped_html
+                  and _stamped_html.count("jt-home") >= 2))     # HTML + CSS 各一次
+    cases.append(("公开面陈旧阈值 24h", '"max_age_ms": 86400000' in out))
 
     # 掩码正则档的判别力（2026-11-16 review ⑤）：删 `[0-9]*` 或把边界改回 `\b` 必须红
     for raw, want_contains, want_absent, label in (
