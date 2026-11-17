@@ -310,6 +310,8 @@ def run(mode, html=None, css=None):
     check_s25()
     # S27 状态页可读性 + 三件套（2026-11-17）
     check_s27()
+    # S28 站点外壳一致性（2026-11-17 方案 C）
+    check_s28()
 
 
 # S17（JT-CL005）：同步面契约齐备 —— 清单存在、公开面脱敏、校验器不红
@@ -670,6 +672,92 @@ def check_s27(root=None):
     return ok
 
 
+# ── S28 站点外壳一致性（2026-11-17 方案 C；上游 daily-tracker 起自带 jt-nav）───────────────
+# 只看「规则还在不在」：渲染后的几何（宽度差、吸顶位置、徽章是否被压）由真机三档人工复核，
+# 静态判据负责「上游改版 / 我方注入把规则冲掉」这类静默失效。
+S28_FILES = ("bmi-tracker.html", "tokens-tracker/index.html", "scripts/site_chrome.py")
+_NAV_LINKS = ('href="./"', 'href="./sync-status.html"',
+              'href="./tokens-tracker/"', 'href="./bmi-tracker.html"')
+
+
+def _sq(s):
+    return re.sub(r"\s+", " ", s)
+
+
+def shell_guard(root=None):
+    """返回 (ok, detail)。六组判据：宽度同源 / 顶栏同高 / 导航齐全 / 分页行为 / 标题字体 / 防双写。"""
+    root = Path(root or ROOT)
+    try:
+        bmi = (root / "bmi-tracker.html").read_text(encoding="utf-8", errors="replace")
+        tok = (root / "tokens-tracker/index.html").read_text(encoding="utf-8", errors="replace")
+        chrome_src = (root / "scripts/site_chrome.py").read_text(encoding="utf-8", errors="replace")
+    except OSError as exc:
+        return False, f"读取失败: {exc}"
+    b, k = _sq(bmi), _sq(tok)
+    problems = []
+
+    # A1 宽度同源 1200：上游 --jt-maxw / 站点 --page-max + .dash-wrap 覆写
+    if "--jt-maxw:1200px" not in b:
+        problems.append("bmi 缺 --jt-maxw:1200px")
+    if "body .dash-wrap { max-width: 1200px" not in k:
+        problems.append("tokens 缺 1200 宽度覆写")
+
+    # A2 顶栏同高 48
+    if not re.search(r"\.jt-nav\{[^}]*height:48px", b):
+        problems.append("bmi .jt-nav 不是 48px")
+    if "body .wc-nav { min-height: 48px" not in k:
+        problems.append("tokens 未把 wc-nav 对齐到 48px")
+
+    # A2b 站内导航 + 四条链接（相对路径，禁 root-absolute）
+    if 'class="jt-nav"' not in b:
+        problems.append("bmi 缺 .jt-nav")
+    for link in _NAV_LINKS:
+        if link not in bmi:
+            problems.append(f"bmi nav 缺 {link}")
+
+    # A3 二级分页 + 行为不回归
+    if 'class="jt-subnav"' not in b:
+        problems.append("bmi 缺 .jt-subnav（tab 未降级）")
+    if "switchTab(" not in bmi:
+        problems.append("bmi 的 switchTab 行为丢失")
+
+    # A4 标题 16px/700 且不再整行绿字（绿色只作左边框）
+    if "h2{font-size:16px;font-weight:700" not in b:
+        problems.append("bmi h2 不是 16px/700")
+    if re.search(r"h2\{[^}]*color:#7ee787", b):
+        problems.append("bmi h2 仍是整行绿字")
+
+    # A5 字体继承（原回落 Arial）
+    if not re.search(r"\.tab-btn\{[^}]*font-family:inherit", b):
+        problems.append("bmi .tab-btn 未继承字体栈")
+
+    # A6 页脚 provenance
+    if 'class="jt-foot"' not in b or "来源 daily-tracker" not in b:
+        problems.append("bmi 缺 .jt-foot 页脚")
+
+    # A8 前置：站点注入的 Home 按钮还在（每晚 21:10 由 wrapper 补回）
+    if 'class="jt-home"' not in b:
+        problems.append("bmi 缺 .jt-home（chrome 注入被覆盖后没补）")
+
+    # A9 防双写：站点侧不得再注入布局（回执 §五.1 的机制化）
+    for bad in ("--jt-maxw", "jt-nav", "dash-wrap"):
+        if bad in chrome_src:
+            problems.append(f"site_chrome.py 出现布局注入痕迹 {bad}")
+    m = re.search(r'<style id="jt-chrome-css">.*?</style>', bmi, re.S)
+    if m and ("--jt-maxw" in m.group(0) or "jt-nav" in m.group(0)):
+        problems.append("注入块里出现布局规则（双写）")
+
+    detail = f"宽=1200 nav=48 nav链接={len(_NAV_LINKS)} 分页✓ 标题✓ 字体✓ 页脚✓ 无双写✓" if not problems else "; ".join(problems[:3])
+    return (not problems), detail
+
+
+def check_s28(root=None):
+    ok, detail = shell_guard(root)
+    check("S28", "站点外壳一致：两页 1200 宽 / nav 48 / 二级分页 / h2 16px / 字体继承 / 页脚 / 站点侧不注入布局",
+          ok, detail)
+    return ok
+
+
 S25_FILES = ("sync-status.html", "index.html", "data/sync-status.json",
              "config/sync-manifest.json", "data/sync-history.json")
 
@@ -796,15 +884,39 @@ def status_selftest():
                                      lambda t: t.replace("项非门户产物", "项其它产物", 1))),
         ("S27 门禁段回流正文", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace("<footer>", "<h2>门禁 · Gates</h2>\n<footer>", 1))),
+        # ── S28 负控（2026-11-17）：每条对应一条外壳判据
+        ("S28 宽度回退 1400", lambda d: _mutate(d, "bmi-tracker.html",
+                                     lambda t: t.replace("--jt-maxw:1200px", "--jt-maxw:1400px"))),
+        ("S28 tokens 宽度覆写被删", lambda d: _mutate(d, "tokens-tracker/index.html",
+                                     lambda t: t.replace("body .dash-wrap { max-width: 1200px; }", ""))),
+        ("S28 顶栏高度回退 43", lambda d: _mutate(d, "tokens-tracker/index.html",
+                                     lambda t: t.replace("body .wc-nav { min-height: 48px;", "body .wc-nav { min-height: 43px;"))),
+        ("S28 导航少一条链接", lambda d: _mutate(d, "bmi-tracker.html",
+                                     lambda t: t.replace('href="./tokens-tracker/"', 'href="./nope/"'))),
+        ("S28 tab 未降级为 subnav", lambda d: _mutate(d, "bmi-tracker.html",
+                                     lambda t: t.replace('class="jt-subnav"', 'class="tab-bar"'))),
+        ("S28 h2 回落 14px", lambda d: _mutate(d, "bmi-tracker.html",
+                                     lambda t: t.replace("h2{font-size:16px;font-weight:700", "h2{font-size:14px;font-weight:700"))),
+        ("S28 字体回落 Arial", lambda d: _mutate(d, "bmi-tracker.html",
+                                     lambda t: t.replace("font-family:inherit", "font-family:Arial", 1))),
+        ("S28 站点侧双写布局", lambda d: _mutate(d, "scripts/site_chrome.py",
+                                     lambda t: t.replace("CHROME_CSS = \"\"\"", "CHROME_CSS = \"\"\"body{--jt-maxw:1200px}", 1))),
     ):
         tmp = Path(tempfile.mkdtemp(prefix="s25-"))
         try:
             _seed_s25(tmp)
+            _seed_s28(tmp)
             breaker(tmp)
             ok25, _ = status_page_guard(tmp)
             ok27, _ = status_docs_guard(tmp)
-            # S27 负控必须由 S27 自己抓到（不能借 S25 的红混过去，否则判别力是假的）
-            caught = (not ok27) if name.startswith("S27") else (not ok25)
+            ok28, _ = shell_guard(tmp)
+            # 每条负控必须由自己的判据抓到（不能借别人的红混过去，否则判别力是假的）
+            if name.startswith("S28"):
+                caught = not ok28
+            elif name.startswith("S27"):
+                caught = not ok27
+            else:
+                caught = not ok25
             results.append((name, caught))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
@@ -839,6 +951,17 @@ def _flip_dot(text):
         return text
     other = {"is-ok": "is-warn", "is-warn": "is-bad", "is-bad": "is-ok"}[m.group(1)]
     return text[:m.start()] + f'class="sync-dot {other}"' + text[m.end():]
+
+
+def _seed_s28(root):
+    """S28 判据读三份输入；少一份会让所有变异红在同一个原因上。"""
+    import shutil
+    for rel in S28_FILES:
+        dest = Path(root) / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / rel, dest)
+        if rel.endswith(".py"):      # 判据是「源码里不许出现布局注入痕迹」，副本要可读
+            dest.chmod(0o644)
 
 
 def _mutate(root, rel, fn):
@@ -963,7 +1086,7 @@ def main():
               f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c} active={_ok_d}")
 
         # S25 判别力自证：四种破坏（球色/ favicon / 根绝对 / 少一行）⇒ 判据必红
-        check("S26", "V17 判别力自证：17 个变异（S25 十二项 + S27 五项：版本行 / 内联版本错位 / 色块 / 事件空壳 / 人机入口）⇒ 各自判据必红",
+        check("S26", "V18 判别力自证：28 个变异（S25 十二项 + S27 八项 + S28 八项：宽度/顶栏/链接/分页/标题/字体/双写）⇒ 各自判据必红",
               status_selftest(), "")
 
     fails = [r for r in results if not r[2]]
