@@ -45,7 +45,7 @@ BADGE_START = "<!-- sync-badge:start -->"
 BADGE_END = "<!-- sync-badge:end -->"
 FAVICON = "static/img/favicon-64.png?t=1794394182"
 GEN_MARK = "由 scripts/sync-status-gen.py 生成，勿手改"
-NEXT_RUN = "每日 21:45 由 ops cron 重出（手动：scripts/sync-status-gen.py）"
+NEXT_RUN = "每日 21:45（ops cron）"
 
 V_CLASS = {0: "ok", 1: "warn", 2: "bad", 3: "warn"}
 V_TEXT = {0: "全部正常", 1: "有陈旧或过渡项", 2: "结构违规", 3: "无法判定"}
@@ -64,6 +64,12 @@ GROUPS = [
 ]
 GROUP_NAME = {gid: title for gid, title, _ids in GROUPS}
 ART_GROUP = {aid: gid for gid, _t, ids in GROUPS for aid in ids}
+
+# 2026-11-17（用户口径）：页面只关注「门户上有链接的页面」。
+# 其余产物仍由 sync-check 校验（banner 判色不变），只是不占页面行；机器 JSON 用 hidden_components 导出。
+VISIBLE_IDS = ("bmi-tracker", "tokens-board", "daily-poetry")
+TZ_NOTE = "页面时间均为本地时区（CST）"
+HIDDEN_LABEL = {"dt-archive": "BMI 归档页", "tokens-live": "看板数据层", "poetry-titles": "诗词题名集"}
 
 # 页面文档三件套（版本行 = 文档入口 + 同页抽屉 + 内联数据）
 PAGE_VERSION = "1.1"
@@ -144,6 +150,7 @@ font-size:.76rem;text-align:center}
   .data-table td::before{content:attr(data-l);color:var(--muted);font-size:.72rem;text-transform:uppercase}
 }
 /* ── 2026-11-17 重设计（横幅三重表征 / 组件分组 / 每组件色块 / 文档三件套） ── */
+.banner h1.big{margin:0;font-size:1.02rem;line-height:1.4}
 .banner .big .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;
 vertical-align:middle;background:var(--banner)}
 .banner .big .en{color:var(--muted);font-weight:500;font-size:.82rem;margin-left:8px}
@@ -186,6 +193,7 @@ padding:3px 10px;font-size:.74rem;cursor:pointer}
 @media (max-width:520px){#sdocs .body{font-size:.76rem}#sdocs td:nth-child(2),#sdocs th:nth-child(2){display:none}}
 #sdocs .kv{display:grid;grid-template-columns:130px 1fr;gap:5px 10px}
 #sdocs .kv span:nth-child(odd){color:var(--muted)}
+#sdocs ul.cl{margin:0;padding-left:16px}#sdocs ul.cl li{margin:2px 0}
 @media (max-width:720px){.prow{grid-template-columns:1fr auto}.prow .bars{grid-column:1/-1}}
 """
 
@@ -265,7 +273,7 @@ def _fmt_ts(raw):
         # 无偏移的串由上游按**本地时区**写入（sync-check.parse_iso 同一口径）；
         # 这里不能再当 UTC，否则同一行「打戳」与「年龄」会互相矛盾（实测差 8h）。
         dt = dt.astimezone()
-    return dt.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+    return dt.astimezone().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def _local_hm(raw):
@@ -277,7 +285,7 @@ def _local_hm(raw):
         return s or "—"
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+    return dt.astimezone().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def _snapshot_date(payload):
@@ -352,7 +360,7 @@ def docs_data(payload, history, local_ts) -> dict:
         "features": [
             {"section": "状态面", "items": [
                 "横幅三档（全部正常 / 部分降级 / 服务中断）+ 颜色 + 文字 + 圆点",
-                "组件按页面产物 / 数据层 / 静态资产分组，逐产物显示年龄与预算余量",
+                "组件只列门户上有链接的页面（其余产物隐藏但仍被 sync-check 校验，机器 JSON 可查）",
                 "每组件近 30 天色块与可用率（样本不足时显式标注天数）",
                 "事件由历史 rc≠0 自动派生，人工事件登记在 data/incidents.json",
                 "机器面 data/sync-status.json（IETF 风格字段 + 兼容键）" ]},
@@ -383,7 +391,7 @@ def derived_incidents(history, today, days=90):
 def build_page(payload, history, gates, incidents) -> str:
     local_ts = _local_hm(payload.get("checked_at"))
     rc = payload["rc"]
-    vcls, vtext = V_CLASS[rc], V_TEXT[rc]
+    vcls = V_CLASS[rc]
     # rc=0 但存在过渡豁免时，绿色横幅必须自带说明，否则「全部正常」会被读成「6/6 都新鲜」
     _n_ex = sum(1 for d in (payload.get("details") or []) if str(d.get("status")) == "exempt")
     exempt_note = f"（{_n_ex} 项过渡豁免，见组件表灰徽）" if rc == 0 and _n_ex else ""
@@ -398,10 +406,30 @@ def build_page(payload, history, gates, incidents) -> str:
     for item in payload["details"]:
         detail.setdefault(item["id"], item)
 
-    arts = payload["artifacts"]
+    # 2026-11-17（D4/D5=A）：页面只展示门户链接的页面；其余产物「隐藏但仍被 sync-check 校验」。
+    # 隐藏项异常时 banner 必须点名，否则会「页面变黄却找不到对应行」。
+    arts_all = payload["artifacts"]
+    by_id = {a["id"]: a for a in arts_all}
+    arts = [by_id[i] for i in VISIBLE_IDS if i in by_id]
+    hidden = [a for a in arts_all if a["id"] not in VISIBLE_IDS]
+
+    def _bad(xs):
+        return [a for a in xs if (detail.get(a["id"]) or {}).get("status") not in (None, "ok")]
+
+    hidden_bad = _bad(hidden)
+    hidden_note = ""
+    if hidden_bad and not _bad(arts):
+        hidden_note = f"（非门户产物 {len(hidden_bad)} 项异常，明细见机器 JSON）"
+
+    hidden_list = "、".join(HIDDEN_LABEL.get(a["id"], a["id"]) for a in hidden) or "—"
+
     ok_n = sum(1 for a in arts if detail.get(a["id"], {}).get("status") == "ok")
     ages = [a["age_h"] for a in arts if a.get("age_h") is not None]
-    oldest = max(arts, key=lambda a: a.get("age_h") or -1) if ages else None
+    oldest = max(arts, key=lambda a: a.get("age_h") or -1) if (arts and ages) else None
+    # 卡片副行给「占预算比例」而不是再写一遍文件名（表格与色块行已经列过，避免同页重复）
+    _ob = budgets.get(oldest["id"]) if oldest else None
+    oldest_note = (f"占预算 {oldest['age_h'] / _ob * 100:.0f}%" if (oldest and _ob and oldest.get("age_h") is not None)
+                   else "仅计已打戳页面")
     unreg = len(payload.get("unregistered") or [])
     ontime = f"{ok_n}/{len(arts)}"
 
@@ -417,7 +445,7 @@ def build_page(payload, history, gates, incidents) -> str:
                 f'<td data-l="产物" title="{esc(a.get("artifact") or a["id"])}"><code>{esc(a.get("artifact") or a["id"])}</code></td>'
                 f'<td data-l="来源" title="{esc(a.get("producer") or "—")}">{esc(a.get("producer") or "—")}</td>'
                 f'<td data-l="班次" title="{esc(a.get("trigger") or "—")}">{esc(a.get("trigger") or "—")}</td>'
-                f'<td data-l="上次打戳" title="{esc(gen)}">{esc(_fmt_ts(gen))}</td>'
+                f'<td data-l="上次打戳">{esc(_fmt_ts(gen))}</td>'
                 f'<td data-l="年龄/预算" title="{esc(age)} / 预算 {esc(budget_txt)}">{age}{bc} {bar_cell(a.get("age_h"), budget)}</td>'
                 f'<td data-l="状态" title="{esc(d.get("detail") or label)}"><span class="badge badge-{cls}">{label}</span></td>'
                 "</tr>")
@@ -496,7 +524,7 @@ def build_page(payload, history, gates, incidents) -> str:
     derived = derived_incidents(history, today)
     all_inc = sorted(derived + list(incidents), key=lambda i: str(i.get("at") or ""), reverse=True)
     inc_rows = "".join(
-        f'<tr><td data-l="时间" title="{esc(i.get("at") or "—")}">{esc(_fmt_ts(i.get("at") or "—"))}</td>'
+        f'<tr><td data-l="时间">{esc(_fmt_ts(i.get("at") or "—"))}</td>'
         f'<td data-l="影响面">{esc(i.get("scope") or "—")}</td>'
         f'<td data-l="来源">{esc("自动派生" if i.get("source") == "derived" else "人工登记")}</td>'
         f'<td data-l="状态">{esc(i.get("status") or "—")}</td>'
@@ -508,8 +536,17 @@ def build_page(payload, history, gates, incidents) -> str:
         inc_html = (f'<div class="empty">自 {first_day or "—"} 起无事件：日聚合已覆盖 '
                     f'{len(history)} 天，逐日结论均为通过。</div>')
 
-    chg_rows = "".join(
-        f'<tr><td>{esc(v)}({esc(d)})</td><td>{esc(k)}</td><td>{esc(s)}</td></tr>' for v, d, k, s in CHANGELOG)
+    # 变更日志按「版本+日期」聚合：同版本多条并成一个单元格里的列表，
+    # 避免表格里连续三行重复同一个版本号与同一个类型（页面去重，2026-11-17 用户要求）
+    from itertools import groupby as _gb
+    chg_rows = ""
+    for (_v, _d), _grp in _gb(CHANGELOG, key=lambda e: (e[0], e[1])):
+        _g = list(_grp)
+        _kinds = {g[2] for g in _g}
+        _items = "".join(f"<li>{esc(g[3])}</li>" for g in _g)
+        chg_rows += (f'<tr><td>{esc(_v)}({esc(_d)})</td>'
+                     f'<td>{esc(_g[0][2] if len(_kinds) == 1 else "mixed")}</td>'
+                     f'<td><ul class="cl">{_items}</ul></td></tr>')
     docs_json = json.dumps(docs_data(payload, history, local_ts),
                            ensure_ascii=False).replace("<", "\\u003c")
 
@@ -525,17 +562,20 @@ def build_page(payload, history, gates, incidents) -> str:
 <style>{CSS}</style>
 </head>
 <body>
-<h1>同步面状态 · Sync Status</h1>
 <div class="banner {vcls}" role="status" aria-live="polite">
-  <div class="big"><span class="dot" aria-hidden="true"></span>{BANNER_TEXT[rc]}{exempt_note}<span class="en">{BANNER_EN[rc]}</span></div>
-  <div class="meta">快照 {esc(payload["checked_at"])}（UTC）· 本地 {esc(local_ts)} · 清单 v{esc(payload.get("manifest_version"))} ·
-    下次生成 {NEXT_RUN} · {GEN_MARK}</div>
+  <h1 class="big"><span class="dot" aria-hidden="true"></span>{BANNER_TEXT[rc]}{exempt_note}{hidden_note}<span class="en">{BANNER_EN[rc]}</span></h1>
 </div>
 
+<h2>近 90 天 · Uptime</h2>
+<div class="bars">{''.join(cells)}</div>
+<div class="legend">自 {first_day or "—"} 起记录（每日一行，同日重复校验覆盖当天）；灰 = 无记录，绿 = 全部在预算内，
+黄 = 存在陈旧/过渡项，红 = 结构违规。</div>
+<div class="samples">30 天 {u30[0]}（样本 {u30[2]}/30 天） · 90 天 {u90[0]}（样本 {u90[2]}/90 天） · 其中通过 {u90[1]} 天</div>
+
 <div class="cards">
-  <div class="card"><div class="k">产物按时</div><div class="v">{ontime}</div><div class="n">打戳且在预算内 / 全部产物</div></div>
-  <div class="card"><div class="k">最旧产物</div><div class="v">{f"{oldest['age_h']:.0f}h" if oldest and oldest.get("age_h") is not None else "—"}</div><div class="n">{esc(oldest.get("artifact") if oldest else "—")}</div></div>
-  <div class="card"><div class="k">平均年龄</div><div class="v">{f"{sum(ages)/len(ages):.1f}h" if ages else "—"}</div><div class="n">仅计已打戳产物</div></div>
+  <div class="card"><div class="k">门户页面按时</div><div class="v">{ontime}</div><div class="n">打戳且在预算内 / 门户页面</div></div>
+  <div class="card"><div class="k">最旧页面</div><div class="v">{f"{oldest['age_h']:.0f}h" if oldest and oldest.get("age_h") is not None else "—"}</div><div class="n">{oldest_note}</div></div>
+  <div class="card"><div class="k">平均年龄</div><div class="v">{f"{sum(ages)/len(ages):.1f}h" if ages else "—"}</div><div class="n">仅计已打戳页面</div></div>
   <div class="card"><div class="k">结构违规</div><div class="v">{unreg}</div><div class="n">未注册产物文件数</div></div>
 </div>
 
@@ -557,22 +597,10 @@ def build_page(payload, history, gates, incidents) -> str:
 </div>
 <div class="samples">绿 = 当天该产物正常，黄 = 陈旧 / 过渡，红 = 结构违规，深灰 = 无记录。样本不足 30 天按实际天数计。</div>
 
-<h2>近 90 天 · Uptime</h2>
-<div class="bars">{''.join(cells)}</div>
-<div class="legend">自 {first_day or "—"} 起记录（每日一行，同日重复校验覆盖当天）；灰 = 无记录，绿 = 全部在预算内，
-黄 = 存在陈旧/过渡项，红 = 结构违规。</div>
-<div class="samples">30 天 {u30[0]}（样本 {u30[2]}/30 天） · 90 天 {u90[0]}（样本 {u90[2]}/90 天） · 其中通过 {u90[1]} 天</div>
-
-<h2>门禁 · Gates</h2>
-<div class="gates">
-  <span>portal-check <b>{esc(gates.get("portal", "—"))}</b></span>
-  <span>perf-check <b>{esc(gates.get("perf", "—"))}</b></span>
-  <span>sync-check selftest <b>{esc(gates.get("sync", "—"))}</b></span>
-</div>
-
 <footer>
   <button class="verline" id="sdocsOpen" type="button" aria-haspopup="dialog" aria-controls="sdocs" aria-expanded="false">页面文档 · 同步面状态 · {PAGE_VERSION}({PAGE_DATE}) <span aria-hidden="true">▾</span></button>
-  <div class="foot2">生成于 {esc(local_ts)} · 下次生成 {NEXT_RUN}</div>
+  <div class="foot2">生成于 {esc(local_ts)} · 下次生成 {NEXT_RUN} · {TZ_NOTE}</div>
+  <div class="foot2">另有 {len(hidden)} 项非门户产物（{hidden_list}）仍由同步校验覆盖，明细见机器 JSON</div>
   <div class="foot3">
     <span>机器：<a href="./data/sync-status.json">sync-status.json</a> · <a href="./data/sync-history.json">sync-history.json</a></span>
     <span>人读：<a href="./tokens-tracker/">公开镜像看板</a> · <a href="./">← 返回首页</a></span>
@@ -611,6 +639,8 @@ def build_page(payload, history, gates, incidents) -> str:
           <span>历史 JSON</span><span><a href="./data/sync-history.json">data/sync-history.json</a> —— 每日一行，含逐产物状态、ok_ratio、rc、verdict</span>
           <span>事件登记</span><span>data/incidents.json（人工）；页面另外从历史 rc≠0 自动派生</span>
           <span>门禁复跑</span><span><code>python3 scripts/portal-check.py --mode post</code> · <code>python3 scripts/sync-check.py --selftest</code> · <code>python3 scripts/perf-check.py</code></span>
+          <span>门禁现状</span><span>portal-check <b>{esc(gates.get("portal", "—"))}</b> · perf-check <b>{esc(gates.get("perf", "—"))}</b> · sync-check selftest <b>{esc(gates.get("sync", "—"))}</b></span>
+          <span>清单 / 生成器</span><span>清单 v{esc(payload.get("manifest_version"))} · 由 <code>scripts/sync-status-gen.py</code> 生成，勿手改</span>
           <span>重出页面</span><span><code>python3 scripts/sync-status-gen.py</code>（无网络依赖，含 --selftest）</span>
         </div>
       </div>
@@ -679,6 +709,7 @@ def main(argv=None) -> int:
                 "group": ART_GROUP.get(a["id"], "other"),
                 "status": {"ok": "ok", "mismatch": "outage", "missing": "outage"}.get(s, "degraded"),
                 "stamped_at": a.get("generated"), "age_h": a.get("age_h"),
+                "visible": a["id"] in VISIBLE_IDS,
             })
         _today = _snapshot_date(payload)
         _inc = [{"id": f"inc-{i.get('at')}", "started_at": i.get("at"), "resolved_at": i.get("at"),
@@ -698,6 +729,7 @@ def main(argv=None) -> int:
              "service": {"name": "www.jaden.tech sync surface", "url": "https://www.jaden.tech/sync-status.html"},
              "status": {0: "ok", 1: "degraded", 2: "outage"}.get(rc, "degraded"),
              "components": comps,
+             "hidden_components": [a["id"] for a in payload["artifacts"] if a["id"] not in VISIBLE_IDS],
              "incidents": _inc,
              "updated_at": payload["checked_at"]},
             ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
@@ -766,12 +798,18 @@ def selftest() -> int:
        "全部正常" in b0 and "All Systems Operational" in b0
        and "部分降级" in build_page(p1, {}, {}, []) and "Some Systems Degraded" in build_page(p1, {}, {}, [])
        and "服务中断" in build_page(p2, {}, {}, []) and "Major Outage" in build_page(p2, {}, {}, []))
-    ok("组件按三组渲染且顺序为 页面→数据层→资产",
-       b0.count('tr class="grp"') == 3
-       and b0.index("页面产物") < b0.index("数据层") < b0.index("静态资产"))
-    ok("每组件 30 天色块（行数=产物数，格数=6×30）",
-       len(re.findall(r'<div class="prow">', b0)) == 6
-       and len(re.findall(r'<span class="pc pc-', b0)) == 180)
+    ok("组件按门户分组渲染（页面→数据层，资产组为空则不出）",
+       b0.count('tr class="grp"') == 2
+       and b0.index("页面产物") < b0.index("数据层"))
+    ok("每组件 30 天色块（只数门户页面：3 行 × 30 格）",
+       len(re.findall(r'<div class="prow">', b0)) == 3
+       and len(re.findall(r'<span class="pc pc-', b0)) == 90)
+    ok("非门户产物在页脚说明但仍被校验", "项非门户产物" in b0 and "仍由同步校验覆盖" in b0)
+    p_hidden = _multi(1)
+    for _d in p_hidden["details"]:
+        _d["status"] = "stale" if _d["id"] == "dt-archive" else "ok"
+    ok("隐藏项异常时 banner 点名（不让人对着黄页找不到行）",
+       "非门户产物 1 项异常" in build_page(p_hidden, {}, {}, []))
     ok("可用率带样本数（不把 1/1 读成 100%）", "样本 0/30 天" in b0)
     h_bad = {"2026-11-17": {"rc": 1, "verdict": "FAIL", "ok_ratio": 0.5,
                             "artifacts": {"bmi-tracker": "stale"}}}
@@ -786,8 +824,12 @@ def selftest() -> int:
     ok("三件套：版本行入口 + 抽屉 + 三 tab/三 pane",
        'id="sdocsOpen"' in b0 and 'id="sdocs"' in b0
        and b0.count("data-docs-tab=") == 3 and b0.count("data-docs-pane=") == 3)
-    _tz = datetime.now().astimezone().strftime("%Z")
-    ok(f"时间本地化（后缀 {_tz}）", _fmt_ts("2026-11-17T00:00:00+00:00").endswith(_tz))
+    ok("人读时间统一 yyyy-mm-dd HH:MM:SS（无 T、无时区后缀）",
+       re.fullmatch(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}",
+                    _fmt_ts("2026-11-17T00:00:00+00:00")) is not None)
+    _plain = re.sub(r'<script[^>]*type="application/json">.*?</script>', "", b0, flags=re.S)
+    ok("页面正文零 ISO 时间串（机器面才用 ISO8601）",
+       re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}", _plain) is None)
 
     passed = sum(1 for _, c in cases if c)
     for name, cond in cases:

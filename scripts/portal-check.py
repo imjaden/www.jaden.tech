@@ -485,8 +485,9 @@ def status_page_guard(root=None):
     # 根绝对路径会 404（页面在站点根，但仍统一要求相对引用，避免迁目录再翻车）
     if re.search(r'(?:href|src)="/', html):
         problems.append("存在根绝对引用")
-    if not re.search(r"快照 \d{4}-\d{2}-\d{2}T\d{2}:\d{2}", html) or "（UTC）" not in html:
-        problems.append("快照时间标注缺值（须形如「快照 2026-11-16T08:12（UTC）」）")
+    # 2026-11-17：banner 元信息段已按用户口径删除，provenance 落在页脚（人读 yyyy-mm-dd HH:MM:SS）
+    if not re.search(r"生成于 \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", html):
+        problems.append("页脚缺「生成于 yyyy-mm-dd HH:MM:SS」provenance")
     if "下次生成" not in html:
         problems.append("缺「下次生成」说明")
     # 状态列徽章类必须取自四档枚举（新增档位若忘记加样式会渲染成无底色）
@@ -510,7 +511,7 @@ def status_page_guard(root=None):
         _days = sorted((hist.get("days") or {}).keys())
         # 基准取**页面快照**（`快照 YYYY-MM-DDTHH:MM（UTC）`）而不是 now()：
         # 采集到审计之间跨过 UTC 午夜时，now() 的窗口会比页面对齐的窗口多一天 ⇒ 每日约 14h 误红。
-        _snap = re.search(r"快照 (\d{4}-\d{2}-\d{2})T", html)
+        _snap = re.search(r"生成于 (\d{4}-\d{2}-\d{2}) ", html)
         _base = (datetime.fromisoformat(_snap.group(1)).date() if _snap
                  else datetime.now(timezone.utc).date())
         _cut = (_base - timedelta(days=89)).isoformat()
@@ -528,10 +529,12 @@ def status_page_guard(root=None):
         problems.append(f"90 天条格数 {bars} != 90")
     try:
         manifest = json.loads((root / "config/sync-manifest.json").read_text(encoding="utf-8"))
-        want = len(manifest["artifacts"])
+        # 只核对「页面展示的集合」：可见集合由机器 JSON 的 components[].visible 决定（单一真源）
+        _sj = json.loads((root / "data" / "sync-status.json").read_text(encoding="utf-8"))
+        want = sum(1 for c in (_sj.get("components") or []) if c.get("visible"))
         got = html.count(ROWS_CELL)
         if got != want:
-            problems.append(f"组件表行数 {got} != 清单产物数 {want}")
+            problems.append(f"组件表行数 {got} != 可见产物数 {want}")
     except (OSError, json.JSONDecodeError, KeyError):
         problems.append("清单不可读，无法核对行数")
 
@@ -613,11 +616,15 @@ def status_docs_guard(root=None):
         except json.JSONDecodeError:
             problems.append("内联文档数据块不可解析")
 
+    # 可见集合 = 机器 JSON 的 components[].visible（页面与门禁同源，不在门禁里硬编码 id）
+    want, hidden_n = None, 0
     try:
-        want = len(json.loads((root / "config/sync-manifest.json").read_text(encoding="utf-8"))["artifacts"])
-    except (OSError, json.JSONDecodeError, KeyError):
-        want = None
-        problems.append("清单不可读，无法核对分组/色块数")
+        _sj = json.loads((root / "data" / "sync-status.json").read_text(encoding="utf-8"))
+        _comps = _sj.get("components") or []
+        want = sum(1 for c in _comps if c.get("visible"))
+        hidden_n = len(_comps) - want
+    except (OSError, json.JSONDecodeError):
+        problems.append("机器 JSON 不可读，无法核对可见集合")
 
     grp = html.count('tr class="grp"')
     if grp < 2:
@@ -641,10 +648,15 @@ def status_docs_guard(root=None):
 
     if "机器：" not in html or "人读：" not in html:
         problems.append("页脚未分离人读 / 机器入口")
-    if "（UTC）" not in html:
-        problems.append("快照缺 UTC 绝对时刻")
-    if not re.search(r"\d{2}:\d{2}:\d{2} [A-Z]{2,5}", html):
-        problems.append("缺本地时区后缀（打戳时间会与年龄互相矛盾）")
+    if "本地时区" not in html:
+        problems.append("缺「时间为本地时区」说明（无后缀时只能靠这句定口径）")
+    _plain = re.sub(r'<script[^>]*type="application/json">.*?</script>', "", html, flags=re.S)
+    if re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}", _plain):
+        problems.append("正文仍有 ISO 时间串（人读面须统一 yyyy-mm-dd HH:MM:SS）")
+    if hidden_n and "项非门户产物" not in html:
+        problems.append(f"隐藏了 {hidden_n} 项却没在页脚说明（黄页会找不到对应行）")
+    if "<h2>门禁 · Gates</h2>" in html:
+        problems.append("门禁段仍在正文（2026-11-17 口径：已移入抽屉机器接口）")
 
     if problems:
         return False, "；".join(problems[:4])
@@ -754,8 +766,8 @@ def status_selftest():
                                      lambda t: t.replace(FAVICON_STAMP, "static/img/nope.png?t="))),
         ("根绝对引用回流", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace("<footer>", '<footer><a href="/x">x</a>', 1))),
-        ("删快照时间标注", lambda d: _mutate(d, "sync-status.html",
-                                     lambda t: t.replace("快照 ", "时间 "))),
+        ("删页脚 provenance 时间", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace("生成于 ", "时间 "))),
         ("删下次生成说明", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace("下次生成", "生成"))),
         ("小球 href 改坏", lambda d: _mutate(d, "index.html",
@@ -778,6 +790,12 @@ def status_selftest():
                                      lambda t: t.replace("起无事件", "暂无事件记录"))),
         ("S27 页脚回到人机混排", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace("机器：", "入口：", 1))),
+        ("S27 删「本地时区」说明", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace("本地时区", "特定时区"))),   # 两处（页脚 + 抽屉判据）都要换，否则变异没生效
+        ("S27 删非门户产物说明", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace("项非门户产物", "项其它产物", 1))),
+        ("S27 门禁段回流正文", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: t.replace("<footer>", "<h2>门禁 · Gates</h2>\n<footer>", 1))),
     ):
         tmp = Path(tempfile.mkdtemp(prefix="s25-"))
         try:
