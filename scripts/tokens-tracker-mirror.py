@@ -226,6 +226,13 @@ CHROME_CSS = """
 .jt-home:focus-visible { outline: 2px solid #9ecbff; outline-offset: 2px; }
 @media (max-width: 600px) { .jt-home { right: 10px; width: 40px; height: 40px; border-radius: 10px; } }
 @media (prefers-reduced-motion: reduce) { .jt-home { transition: none; } }
+/* 内容宽度与上游 bmi 侧对齐（2026-11-17 D4=A）：镜像自带 .dash-wrap{max-width:1400px}，
+   body 前缀把特异性抬到 (0,1,1) 压过它；--page-max 同时供 .wc-nav 的居中 padding 复用，
+   否则 nav 链接会按 1400 居中、内容按 1200 → 左边缘错开 100px。 */
+body { --page-max: 1200px; }
+body .dash-wrap { max-width: 1200px; }
+/* 顶栏高度与上游 bmi 侧 .jt-nav（48px）对齐；本页原为 padding 撑出的 43px，差 5px 并排看得出来 */
+body .wc-nav { min-height: 48px; align-items: center; }
 """
 
 
