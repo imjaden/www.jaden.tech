@@ -39,6 +39,19 @@
     "tokens-live": "ok"
    },
    "ok_ratio": 1.0
+  },
+  "2026-11-19": {
+   "rc": 1,
+   "verdict": "PASS（含过渡/陈旧项）",
+   "artifacts": {
+    "bmi-tracker": "stale",
+    "dt-archive": "stale",
+    "tokens-board": "ok",
+    "daily-poetry": "ok",
+    "poetry-titles": "ok",
+    "tokens-live": "ok"
+   },
+   "ok_ratio": 0.667
   }
  }
 }

@@ -29,7 +29,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -38,14 +38,32 @@ MANIFEST = ROOT / "config" / "sync-manifest.json"
 HISTORY = ROOT / "data" / "sync-history.json"
 STATE_JSON = ROOT / "data" / "sync-status.json"
 INCIDENTS = ROOT / "data" / "incidents.json"
+MAINT = ROOT / "data" / "maintenance.json"
 PAGE = ROOT / "sync-status.html"
 INDEX = ROOT / "index.html"
 
 BADGE_START = "<!-- sync-badge:start -->"
 BADGE_END = "<!-- sync-badge:end -->"
-FAVICON = "static/img/favicon-64.png?t=1794394182"
+# 默认 favicon 由 script-miner status page 规范 v1.1 §7.1/§13 统一（www 站级 64px 图标）
+FAVICON = "https://www.jaden.tech/static/img/favicon-64.png"
 GEN_MARK = "由 scripts/sync-status-gen.py 生成，勿手改"
-NEXT_RUN = "每日 21:45（ops cron）"
+# 生成槽位（ops cron `sync-status-refresh`，每天 21:45）；页面「下次生成」与机器面 meta 都由它算
+SLOTS = ("21:45",)
+
+
+def _next_run(now: datetime | None = None) -> datetime:
+    now = now or datetime.now()
+    cands = []
+    for s in SLOTS:
+        try:
+            hh, mm = (int(x) for x in str(s).split(":")[:2])
+        except ValueError:
+            continue
+        t = now.replace(hour=hh, minute=mm, second=0, microsecond=0)
+        if t <= now:
+            t += timedelta(days=1)
+        cands.append(t)
+    return min(cands) if cands else now
 
 V_CLASS = {0: "ok", 1: "warn", 2: "bad", 3: "warn"}
 V_TEXT = {0: "全部正常", 1: "有陈旧或过渡项", 2: "结构违规", 3: "无法判定"}
@@ -72,9 +90,12 @@ TZ_NOTE = "页面时间均为本地时区（CST）"
 HIDDEN_LABEL = {"dt-archive": "BMI 归档页", "tokens-live": "看板数据层", "poetry-titles": "诗词题名集"}
 
 # 页面文档三件套（版本行 = 文档入口 + 同页抽屉 + 内联数据）
-PAGE_VERSION = "1.1"
-PAGE_DATE = "20261117"
+PAGE_VERSION = "1.2"
+PAGE_DATE = "20261119"
 CHANGELOG = [
+    ("1.2", "20261119", "feat", "对齐 status page 规范 v1.1：段落序改成 组件 → 事件 → 计划维护 → 数据口径；"
+                              "新增可见的「计划维护」段与「数据口径 · Gates」段；favicon 改 www 站级 64px 绝对地址；"
+                              "「下次生成」与机器面 meta.slots/meta.next_run 由槽位表计算，不再写死"),
     ("1.1", "20261117", "feat", "底部栏改用三件套：版本行即入口，判据搬进抽屉（变更日志 / 判据说明 / 机器接口）"),
     ("1.1", "20261117", "feat", "横幅三档命名 + 英文副标 + aria-live；组件按页面/数据层/资产分组"),
     ("1.1", "20261117", "feat", "新增每组件 30 天色块与可用率样本数；事件由历史 rc≠0 自动派生"),
@@ -239,6 +260,20 @@ def load_incidents() -> list:
         return data if isinstance(data, list) else []
     except (OSError, json.JSONDecodeError):
         return []
+
+
+def load_maintenance() -> list:
+    """计划维护窗口：只保留未过期的（文件不存在 ⇒ 空，页面显示「无计划维护」）。
+
+    文件形状：`{"windows": [{"starts_at": "YYYY-MM-DD", "ends_at": "YYYY-MM-DD", "summary": "…"}]}`
+    """
+    try:
+        raw = json.loads(MAINT.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    items = raw.get("windows") if isinstance(raw, dict) else raw
+    today = datetime.now().date().isoformat()
+    return [m for m in (items or []) if str(m.get("ends_at", "")) >= today]
 
 
 def esc(text) -> str:
@@ -549,6 +584,22 @@ def build_page(payload, history, gates, incidents) -> str:
                      f'<td><ul class="cl">{_items}</ul></td></tr>')
     docs_json = json.dumps(docs_data(payload, history, local_ts),
                            ensure_ascii=False).replace("<", "\\u003c")
+    nxt = _next_run()
+    next_txt = f"{nxt.strftime('%Y-%m-%d %H:%M')}（每日 {' / '.join(SLOTS)} · ops cron）"
+    maint = load_maintenance()
+    if maint:
+        maint_html = ('<table class="data-table"><tbody>' + "".join(
+            f'<tr><td class="mono" style="width:190px">{esc(m.get("starts_at", ""))} → {esc(m.get("ends_at", ""))}</td>'
+            f'<td>{esc(m.get("summary", ""))}</td></tr>' for m in maint) + '</tbody></table>')
+    else:
+        maint_html = '<div class="empty">无计划维护。</div>'
+    gates_html = ('<div class="gates">'
+                  f'<span>portal-check <b>{esc(gates.get("portal", "—"))}</b></span>'
+                  f'<span>perf-check <b>{esc(gates.get("perf", "—"))}</b></span>'
+                  f'<span>sync-check selftest <b>{esc(gates.get("sync", "—"))}</b></span>'
+                  f'<span>样本 <b>{len(history)} 天</b></span>'
+                  f'<span>生成器 <b>sync-status-gen v{PAGE_VERSION}</b></span>'
+                  '</div>')
 
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -558,19 +609,13 @@ def build_page(payload, history, gates, incidents) -> str:
 <title>同步面状态 · jaden.tech</title>
 <meta name="description" content="www.jaden.tech 同步面健康状态：逐产物打戳年龄、预算余量、90 天可用率与事件记录。">
 <meta name="referrer" content="no-referrer">
-<link rel="shortcut icon" href="{FAVICON}">
+<link rel="icon" href="{FAVICON}">
 <style>{CSS}</style>
 </head>
 <body>
 <div class="banner {vcls}" role="status" aria-live="polite">
   <h1 class="big"><span class="dot" aria-hidden="true"></span>{BANNER_TEXT[rc]}{exempt_note}{hidden_note}<span class="en">{BANNER_EN[rc]}</span></h1>
 </div>
-
-<h2>近 90 天 · Uptime</h2>
-<div class="bars">{''.join(cells)}</div>
-<div class="legend">自 {first_day or "—"} 起记录（每日一行，同日重复校验覆盖当天）；灰 = 无记录，绿 = 全部在预算内，
-黄 = 存在陈旧/过渡项，红 = 结构违规。</div>
-<div class="samples">30 天 {u30[0]}（样本 {u30[2]}/30 天） · 90 天 {u90[0]}（样本 {u90[2]}/90 天） · 其中通过 {u90[1]} 天</div>
 
 <div class="cards">
   <div class="card"><div class="k">门户页面按时</div><div class="v">{ontime}</div><div class="n">打戳且在预算内 / 门户页面</div></div>
@@ -579,8 +624,11 @@ def build_page(payload, history, gates, incidents) -> str:
   <div class="card"><div class="k">结构违规</div><div class="v">{unreg}</div><div class="n">未注册产物文件数</div></div>
 </div>
 
-<h2>事件 · Incidents</h2>
-{inc_html}
+<h2>近 90 天 · Uptime</h2>
+<div class="bars">{''.join(cells)}</div>
+<div class="legend">自 {first_day or "—"} 起记录（每日一行，同日重复校验覆盖当天）；灰 = 无记录，绿 = 全部在预算内，
+黄 = 存在陈旧/过渡项，红 = 结构违规。</div>
+<div class="samples">30 天 {u30[0]}（样本 {u30[2]}/30 天） · 90 天 {u90[0]}（样本 {u90[2]}/90 天） · 其中通过 {u90[1]} 天</div>
 
 <h2>组件状态 · Components</h2>
 <table class="data-table">
@@ -597,9 +645,18 @@ def build_page(payload, history, gates, incidents) -> str:
 </div>
 <div class="samples">绿 = 当天该产物正常，黄 = 陈旧 / 过渡，红 = 结构违规，深灰 = 无记录。样本不足 30 天按实际天数计。</div>
 
+<h2>事件 · Incidents</h2>
+{inc_html}
+
+<h2>计划维护 · Maintenance</h2>
+{maint_html}
+
+<h2>数据口径 · Gates</h2>
+{gates_html}
+
 <footer>
   <button class="verline" id="sdocsOpen" type="button" aria-haspopup="dialog" aria-controls="sdocs" aria-expanded="false">页面文档 · 同步面状态 · {PAGE_VERSION}({PAGE_DATE}) <span aria-hidden="true">▾</span></button>
-  <div class="foot2">生成于 {esc(local_ts)} · 下次生成 {NEXT_RUN} · {TZ_NOTE}</div>
+  <div class="foot2">生成于 {esc(local_ts)} · 下次生成 {next_txt} · {TZ_NOTE}</div>
   <div class="foot2">另有 {len(hidden)} 项非门户产物（{hidden_list}）仍由同步校验覆盖，明细见机器 JSON</div>
   <div class="foot3">
     <span>机器：<a href="./data/sync-status.json">sync-status.json</a> · <a href="./data/sync-history.json">sync-history.json</a></span>
@@ -731,7 +788,13 @@ def main(argv=None) -> int:
              "components": comps,
              "hidden_components": [a["id"] for a in payload["artifacts"] if a["id"] not in VISIBLE_IDS],
              "incidents": _inc,
-             "updated_at": payload["checked_at"]},
+             "updated_at": payload["checked_at"],
+             # 2026-11-19（规范 v1.1 §6）：槽位表是「下次生成」的唯一来源，页面与机器面不得各写一套
+             "schema_version": "1.1",
+             "meta": {"slots": list(SLOTS),
+                      "next_run": _next_run().astimezone().isoformat(timespec="seconds"),
+                      "timezone": "CST", "page_version": PAGE_VERSION,
+                      "generated_by": "scripts/sync-status-gen.py"}},
             ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         return page_html
 

@@ -1,7 +1,7 @@
 {
- "rc": 0,
- "verdict": "全部正常",
- "checked_at": "2026-11-18T13:45:41+00:00",
+ "rc": 1,
+ "verdict": "有陈旧或过渡项",
+ "checked_at": "2026-11-19T10:18:20+00:00",
  "artifacts": [
   {
    "id": "bmi-tracker",
@@ -16,7 +16,7 @@
     "sha256": "b3e31e4b8c2d1ede"
    },
    "generated": "2026-11-17T00:00:00+08:00",
-   "age_h": 45.8
+   "age_h": 66.3
   },
   {
    "id": "dt-archive",
@@ -31,7 +31,7 @@
     "sha256": "6cecbca51f0e2970"
    },
    "generated": "2026-11-17T00:00:00+08:00",
-   "age_h": 45.8
+   "age_h": 66.3
   },
   {
    "id": "tokens-board",
@@ -46,7 +46,7 @@
     "sha256": "41a5a319545e6e1c"
    },
    "generated": "2026-11-18T20:05:52+08:00",
-   "age_h": 1.7
+   "age_h": 22.2
   },
   {
    "id": "daily-poetry",
@@ -61,7 +61,7 @@
     "sha256": "e4bc773b58fea20e"
    },
    "generated": "2026-11-16T19:10:56+08:00",
-   "age_h": 50.6
+   "age_h": 71.1
   },
   {
    "id": "poetry-titles",
@@ -76,7 +76,7 @@
     "sha256": "ef1cb98e57028a6c"
    },
    "generated": "2026-09-09T16:34:17+08:00",
-   "age_h": 1685.2
+   "age_h": 1705.7
   },
   {
    "id": "tokens-live",
@@ -91,7 +91,7 @@
     "sha256": "520a10b1b6883f77"
    },
    "generated": "2026-11-18T20:05:52+08:00",
-   "age_h": 1.7
+   "age_h": 22.2
   }
  ],
  "gates": {
@@ -99,30 +99,30 @@
   "perf": "PASS",
   "sync": "28/28"
  },
- "days_recorded": 3,
+ "days_recorded": 4,
  "version": 1,
  "service": {
   "name": "www.jaden.tech sync surface",
   "url": "https://www.jaden.tech/sync-status.html"
  },
- "status": "ok",
+ "status": "degraded",
  "components": [
   {
    "id": "bmi-tracker",
    "name": "bmi-tracker.html",
    "group": "page",
-   "status": "ok",
+   "status": "degraded",
    "stamped_at": "2026-11-17T00:00:00+08:00",
-   "age_h": 45.8,
+   "age_h": 66.3,
    "visible": true
   },
   {
    "id": "dt-archive",
    "name": "daily-tracker-archive-202607-202610.html",
    "group": "page",
-   "status": "ok",
+   "status": "degraded",
    "stamped_at": "2026-11-17T00:00:00+08:00",
-   "age_h": 45.8,
+   "age_h": 66.3,
    "visible": false
   },
   {
@@ -131,7 +131,7 @@
    "group": "data",
    "status": "ok",
    "stamped_at": "2026-11-18T20:05:52+08:00",
-   "age_h": 1.7,
+   "age_h": 22.2,
    "visible": true
   },
   {
@@ -140,7 +140,7 @@
    "group": "page",
    "status": "ok",
    "stamped_at": "2026-11-16T19:10:56+08:00",
-   "age_h": 50.6,
+   "age_h": 71.1,
    "visible": true
   },
   {
@@ -149,7 +149,7 @@
    "group": "asset",
    "status": "ok",
    "stamped_at": "2026-09-09T16:34:17+08:00",
-   "age_h": 1685.2,
+   "age_h": 1705.7,
    "visible": false
   },
   {
@@ -158,7 +158,7 @@
    "group": "data",
    "status": "ok",
    "stamped_at": "2026-11-18T20:05:52+08:00",
-   "age_h": 1.7,
+   "age_h": 22.2,
    "visible": false
   }
  ],
@@ -167,6 +167,27 @@
   "poetry-titles",
   "tokens-live"
  ],
- "incidents": [],
- "updated_at": "2026-11-18T13:45:41+00:00"
+ "incidents": [
+  {
+   "id": "inc-2026-11-19",
+   "started_at": "2026-11-19",
+   "resolved_at": "2026-11-19",
+   "status": "已恢复",
+   "impact": "同步面",
+   "summary": "日聚合 PASS（含过渡/陈旧项） · 按时 0.667",
+   "source": "derived",
+   "postmortem_url": null
+  }
+ ],
+ "updated_at": "2026-11-19T10:18:20+00:00",
+ "schema_version": "1.1",
+ "meta": {
+  "slots": [
+   "21:45"
+  ],
+  "next_run": "2026-11-19T21:45:00+08:00",
+  "timezone": "CST",
+  "page_version": "1.2",
+  "generated_by": "scripts/sync-status-gen.py"
+ }
 }
