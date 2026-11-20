@@ -1,6 +1,6 @@
-/* SYNC id=tokens-live producer=hermes-manager/dashboard-gen v=1 generated=2026-11-20T19:09:11+08:00 sha256=23461198aee5ae36 */
+/* SYNC id=tokens-live producer=hermes-manager/dashboard-gen v=1 generated=2026-11-20T19:39:11+08:00 sha256=d07e5ada040059f8 */
 window.WEB_DATA_META = {
-  "generated_at": "2026-11-20T19:09:11+08:00",
+  "generated_at": "2026-11-20T19:39:11+08:00",
   "generator": "hub-build",
   "generator_version": "cbcab130",
   "max_age_ms": 86400000,
@@ -11,19 +11,32 @@ window.WEB_DATA_META = {
 window.DASHBOARD = {
   "board": {
     "counts": {
-      "anomaly_total": 10,
-      "doc_missing": 8,
+      "anomaly_total": 11,
+      "doc_missing": 9,
       "idle": 1,
-      "ledger_total": 74,
-      "prompt": "【已过滤】9 条非白名单项目的异常明细（公开面不列）\n\n【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-17（距今 3.27 天）\n【异常】实施停滞超阈值 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值\n【期望】回到该项目继续推进，并落一次步骤（step JSON），让「最近推进」刷新\n【验收】`（本地命令）HERMES-MANAGER-CL353` 的最近步骤时间已刷新，异常圆点消失\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
-      "prompt_count": 10,
-      "skipped": 20,
+      "ledger_total": 82,
+      "prompt": "【已过滤】9 条非白名单项目的异常明细（公开面不列）\n\n【任务】hermes-manager · HERMES-MANAGER-CL353\n【现状】台账状态=active；进度=[6/6] 收尾复盘；最近更新=2026-11-17（距今 3.29 天）\n【异常】实施停滞超阈值 —— 该条在「进行中」，但最近一次步骤推进距今已超过阈值\n【期望】回到该项目继续推进，并落一次步骤（step JSON），让「最近推进」刷新\n【验收】`（本地命令）HERMES-MANAGER-CL353` 的最近步骤时间已刷新，异常圆点消失\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态\n\n【任务】daily-checker · DAILY-CHECKER-CL278\n【现状】台账状态=done；进度=[6/6]；最近更新=2026-11-20（距今 0.82 天）\n【异常】复盘文档缺失 —— 台账进度已到 [6/6]，但没有可读的复盘文档\n【期望】补齐该笔的复盘文档，或把台账状态回退到与实际一致的阶段（二选一，别只改状态）\n【验收】`（本地命令）` 中含该条且带复盘文档；板上该行不再标 doc-missing\n【边界】先只读定位再动手；不要改其他仓的代码；不要直接改 closed-loop 记录来「修」状态",
+      "prompt_count": 11,
+      "skipped": 27,
       "timeout": 1,
-      "total": 54,
+      "total": 55,
       "unknown": 0
     },
-    "note": "台账 74 条 · 可判定任务 54 条（跳过无闭环编号 20 条）· 异常 10 条（1 超时 / 8 文档不全 / 1 搁置）",
+    "note": "台账 82 条 · 可判定任务 55 条（跳过无闭环编号 27 条）· 异常 11 条（1 超时 / 9 文档不全 / 1 搁置）",
     "rows": [
+      {
+        "number": "DAILY-CHECKER-CL278",
+        "project": "daily-checker",
+        "status": "done",
+        "level": "critical",
+        "progress": "[6/6]",
+        "updated_at": "2026-11-20",
+        "signals": [
+          "doc-missing"
+        ],
+        "desc": "**DAILY-CHECKER-CL278 CLI 中断收敛（§11）+ 并发池…",
+        "copy_cmd": "（本地命令）"
+      },
       {
         "number": "HERMES-MANAGER-CL353",
         "project": "hermes-manager",
@@ -35,6 +48,138 @@ window.DASHBOARD = {
           "timeout"
         ],
         "desc": "**消息通道噪音观测台 + 每日 08",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL264",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL264 15 号并入台账两类判据（承 11-…",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL264",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL264 15 号并入台账口径两类判据（缺复盘…",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL259",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL259 向 其他项目 回灌 layo…",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL271",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**Evernote token 过期（凭据类，需用户重新授权）**",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL272",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL205 gold DNS hang 观察至 …",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL273",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL253 / CL254 等上游回执**",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL269",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL253 其他项目 卡补「活跃项目…",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL270",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL254 git-status 卡改「两类清单…",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL249",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL249 收 r3 的两条文档补充（R3-3 …",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL229",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL229 CL228 评审残余 3🟢 登记**",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL189",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**DAILY-CHECKER-CL189 跨仓 其他项目 `…",
+        "copy_cmd": "（本地命令）"
+      },
+      {
+        "number": "DAILY-CHECKER-CL205",
+        "project": "daily-checker",
+        "status": "pending",
+        "level": "ok",
+        "progress": "-",
+        "updated_at": "2026-11-20 19:31",
+        "signals": [],
+        "desc": "**gold DNS hang 根因未消除（观测项，未开工）**",
         "copy_cmd": "（本地命令）"
       },
       {
@@ -223,138 +368,6 @@ window.DASHBOARD = {
         "signals": [],
         "desc": "**巡检 job 覆盖核对**",
         "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL264",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL264 15 号并入台账两类判据（承 11-…",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL264",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL264 15 号并入台账口径两类判据（缺复盘…",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL259",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL259 向 其他项目 回灌 layo…",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL271",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**Evernote token 过期（凭据类，需用户重新授权）**",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL272",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL205 gold DNS hang 观察至 …",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL273",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL253 / CL254 等上游回执**",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL269",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL253 其他项目 卡补「活跃项目…",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL270",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL254 git-status 卡改「两类清单…",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL249",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL249 收 r3 的两条文档补充（R3-3 …",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL229",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL229 CL228 评审残余 3🟢 登记**",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL189",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**DAILY-CHECKER-CL189 跨仓 其他项目 `…",
-        "copy_cmd": "（本地命令）"
-      },
-      {
-        "number": "DAILY-CHECKER-CL205",
-        "project": "daily-checker",
-        "status": "pending",
-        "level": "ok",
-        "progress": "-",
-        "updated_at": "-",
-        "signals": [],
-        "desc": "**gold DNS hang 根因未消除（观测项，未开工）**",
-        "copy_cmd": "（本地命令）"
       }
     ],
     "status": "ok"
@@ -366,20 +379,20 @@ window.DASHBOARD = {
       "label": "Task 实施进度",
       "level": "critical",
       "action_label": "复制排查 Prompt",
-      "value": "1 / 54 超时",
+      "value": "1 / 55 超时",
       "note": "阈值 >1.5h（自最近一次步骤推进起算）· 全台账口径",
       "copy_cmd": "（本地命令）",
-      "prompt": "【任务】台账里有 1/54 个任务超过 1.5h 没有步骤推进\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：台账里有 1/54 个任务超过 1.5h 没有步骤推进\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：超时任务会占住队列、拖住复盘与收口；但卡住的原因可能是等授权、等窗口或真跑飞了\nHow：先跑 `（本地命令）HERMES-MANAGER-CL353` 定位超时任务键，再看每条停在哪个步骤（[N/6]）与最后一次动作时间；只读判断，不要直接改台账\nHow much：1 次只读查询；如需推进某条，走「开工 <编号>」，任何写操作须我点头"
+      "prompt": "【任务】台账里有 1/55 个任务超过 1.5h 没有步骤推进\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：台账里有 1/55 个任务超过 1.5h 没有步骤推进\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：超时任务会占住队列、拖住复盘与收口；但卡住的原因可能是等授权、等窗口或真跑飞了\nHow：先跑 `（本地命令）HERMES-MANAGER-CL353` 定位超时任务键，再看每条停在哪个步骤（[N/6]）与最后一次动作时间；只读判断，不要直接改台账\nHow much：1 次只读查询；如需推进某条，走「开工 <编号>」，任何写操作须我点头"
     },
     {
       "key": "task_doc",
       "label": "Task 复盘文档",
       "level": "critical",
       "action_label": "复制补记 Prompt",
-      "value": "8 条缺文档",
+      "value": "9 条缺文档",
       "note": "到 [6/6] 但无可用 retro 文件",
       "copy_cmd": "（本地命令）",
-      "prompt": "【任务】有 8 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：有 8 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：闭环缺最后一笔就不算完成；台账判 done 的判据里含 retro 件，缺件会让「已收口」变成假绿\nHow：用 `（本地命令）` 列出这些任务键，逐个确认 retro 文档是否真的不存在（而不是换了路径），再决定补文档还是补台账登记；不要凭空新造复盘内容\nHow much：1 次只读列举 + 每缺件 1 次补记；补记属写操作，须我点头"
+      "prompt": "【任务】有 9 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWho：Hermes ops（profile=ops）会话；读数由本仓 Dashboard 生成器汇总\nWhat：有 9 个任务已经走到 [6/6] 收尾，但没有可用的 retro（复盘）文件\nWhen：数据窗口见卡片 note（页面刷新时刻见页脚）\n仓 hermes-manager；页面 页面壳；数据 数据层；真值源 本地会话库 与 台账\nWhy：闭环缺最后一笔就不算完成；台账判 done 的判据里含 retro 件，缺件会让「已收口」变成假绿\nHow：用 `（本地命令）` 列出这些任务键，逐个确认 retro 文档是否真的不存在（而不是换了路径），再决定补文档还是补台账登记；不要凭空新造复盘内容\nHow much：1 次只读列举 + 每缺件 1 次补记；补记属写操作，须我点头"
     },
     {
       "key": "memory_usage",
@@ -397,7 +410,7 @@ window.DASHBOARD = {
       "level": "ok",
       "action_label": "",
       "value": "无在跑会话",
-      "note": "0 条在跑会话 ≥75%（预警）/ ≥90%（超限）；usage = 累计 tokens ÷ 一次预算 ⇒ 是倍数不是剩余容量（含已结束会话最高 334.0%）",
+      "note": "0 条在跑会话 ≥75%（预警）/ ≥90%（超限）；usage = 累计 tokens ÷ 一次预算 ⇒ 是倍数不是剩余容量（含已结束会话最高 334.2%）",
       "copy_cmd": "（本地命令）",
       "prompt": ""
     }
@@ -424,9 +437,9 @@ window.DASHBOARD = {
             },
             {
               "label": "归因成本（独占 + 共享）",
-              "value": "$117.2588",
-              "raw": 117.258817,
-              "note": "独占 $75.1383（654 会话）/ 共享池 $42.1206（93 会话，单列不重复计）；旧口径 Σ $86.0612 已弃用（2026-09-29 后移除）"
+              "value": "$117.3776",
+              "raw": 117.377589,
+              "note": "独占 $75.1383（654 会话）/ 共享池 $42.2393（93 会话，单列不重复计）；旧口径 Σ $86.0612 已弃用（2026-09-29 后移除）"
             },
             {
               "label": "超限会话（上限 5）",
@@ -443,8 +456,8 @@ window.DASHBOARD = {
             {
               "label": "归因占比（对全 profile 真值）",
               "value": "12.1%",
-              "raw": 12.08,
-              "note": "真值 ¥6,911.32 ≈ $970.69（@7.12）；占比 = 归因合计 / 真值"
+              "raw": 12.05,
+              "note": "真值 ¥6,935.43 ≈ $974.08（@7.12）；占比 = 归因合计 / 真值"
             }
           ],
           "analysis": [
@@ -573,33 +586,33 @@ window.DASHBOARD = {
           "key": "session",
           "label": "Session",
           "window": "近 30 天 · 会话 started_at 滚动窗（本地会话库 sessions 真源; Session 页展示窗 = 近 14 天 / 每 profile ≤60 条）",
-          "headline": "2927 个会话花了 $94.7756，cache 命中 97.4% —— 钱主要花在上下文复用，不是新读",
+          "headline": "2928 个会话花了 $95.0995，cache 命中 97.4% —— 钱主要花在上下文复用，不是新读",
           "href": "",
           "unavailable": null,
           "stats": [
             {
               "label": "会话数（未结束）",
-              "value": "2,927（57）",
-              "raw": 2927,
+              "value": "2,928（60）",
+              "raw": 2928,
               "note": "未结束 = ended_at 缺失，耗时/成本仍在增长"
             },
             {
               "label": "成本合计",
-              "value": "$94.7756",
-              "raw": 94.775623,
+              "value": "$95.0995",
+              "raw": 95.099497,
               "note": "本地会话库 sessions 真源"
             },
             {
               "label": "tokens(in+out+reasoning)",
-              "value": "266,442,456",
-              "raw": 266442456,
+              "value": "267,709,438",
+              "raw": 267709438,
               "note": "cache_read 单列，不计入"
             },
             {
               "label": "cache_read tokens（占全部 tokens）",
-              "value": "9,911,374,332 / 10,177,816,788 ≈ 97.4%",
+              "value": "9,942,893,052 / 10,210,602,490 ≈ 97.4%",
               "raw": 97.38,
-              "note": "会话级不重复计数；其中 36 个到点会话占 31.3%"
+              "note": "会话级不重复计数；其中 36 个到点会话占 31.2%"
             }
           ],
           "analysis": [
@@ -609,8 +622,8 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "deepseek-v4-flash",
-                  "value": "2,518",
-                  "raw": 2518
+                  "value": "2,519",
+                  "raw": 2519
                 },
                 {
                   "label": "deepseek-flash",
@@ -635,8 +648,8 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ops",
-                  "value": "$53.2528",
-                  "raw": 53.252775
+                  "value": "$53.5766",
+                  "raw": 53.576648
                 },
                 {
                   "label": "review",
@@ -763,7 +776,7 @@ window.DASHBOARD = {
           "key": "cron",
           "label": "Cron Job",
           "window": "状态快照（不受时间范围影响）",
-          "headline": "59 条定时任务（56 在跑），7 条连续失败 —— 无人值守链路有断点",
+          "headline": "59 条定时任务（56 在跑），6 条连续失败 —— 无人值守链路有断点",
           "href": "",
           "unavailable": null,
           "stats": [
@@ -775,9 +788,9 @@ window.DASHBOARD = {
             },
             {
               "label": "连续失败 >0",
-              "value": "7",
-              "raw": 7,
-              "note": "failure_streak；另有 7 条 last_error 非空（原文见 Cron 页详情）"
+              "value": "6",
+              "raw": 6,
+              "note": "failure_streak；另有 6 条 last_error 非空（原文见 Cron 页详情）"
             }
           ],
           "analysis": [
@@ -787,13 +800,13 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ok",
-                  "value": "51",
-                  "raw": 51
+                  "value": "52",
+                  "raw": 52
                 },
                 {
                   "label": "error",
-                  "value": "7",
-                  "raw": 7
+                  "value": "6",
+                  "raw": 6
                 },
                 {
                   "label": "-",
@@ -827,7 +840,7 @@ window.DASHBOARD = {
                   "raw": 1
                 },
                 {
-                  "label": "ops 控制台-orchestrator",
+                  "label": "personal daily-tracker-2145",
                   "value": "1",
                   "raw": 1
                 }
@@ -888,9 +901,9 @@ window.DASHBOARD = {
             },
             {
               "label": "归因成本（独占 + 共享）",
-              "value": "$117.2588",
-              "raw": 117.258817,
-              "note": "独占 $75.1383（654 会话）/ 共享池 $42.1206（93 会话，单列不重复计）；旧口径 Σ $0.0156 已弃用（2026-09-29 后移除）"
+              "value": "$117.3776",
+              "raw": 117.377589,
+              "note": "独占 $75.1383（654 会话）/ 共享池 $42.2393（93 会话，单列不重复计）；旧口径 Σ $0.0156 已弃用（2026-09-29 后移除）"
             },
             {
               "label": "超限会话（上限 5）",
@@ -906,9 +919,9 @@ window.DASHBOARD = {
             },
             {
               "label": "归因占比（对全 profile 真值）",
-              "value": "161.3%",
-              "raw": 161.25,
-              "note": "真值 ¥517.75 ≈ $72.72（@7.12）；占比 = 归因合计 / 真值"
+              "value": "159.1%",
+              "raw": 159.12,
+              "note": "真值 ¥525.22 ≈ $73.77（@7.12）；占比 = 归因合计 / 真值"
             }
           ],
           "analysis": [
@@ -1022,33 +1035,33 @@ window.DASHBOARD = {
           "key": "session",
           "label": "Session",
           "window": "近 7 天 · 会话 started_at 滚动窗（本地会话库 sessions 真源; Session 页展示窗 = 近 14 天 / 每 profile ≤60 条）",
-          "headline": "525 个会话花了 $7.6815，cache 命中 96.7% —— 钱主要花在上下文复用，不是新读",
+          "headline": "528 个会话花了 $7.7512，cache 命中 96.8% —— 钱主要花在上下文复用，不是新读",
           "href": "",
           "unavailable": null,
           "stats": [
             {
               "label": "会话数（未结束）",
-              "value": "525（5）",
-              "raw": 525,
+              "value": "528（6）",
+              "raw": 528,
               "note": "未结束 = ended_at 缺失，耗时/成本仍在增长"
             },
             {
               "label": "成本合计",
-              "value": "$7.6815",
-              "raw": 7.681495,
+              "value": "$7.7512",
+              "raw": 7.75121,
               "note": "本地会话库 sessions 真源"
             },
             {
               "label": "tokens(in+out+reasoning)",
-              "value": "24,016,609",
-              "raw": 24016609,
+              "value": "24,187,273",
+              "raw": 24187273,
               "note": "cache_read 单列，不计入"
             },
             {
               "label": "cache_read tokens（占全部 tokens）",
-              "value": "713,870,336 / 737,886,945 ≈ 96.7%",
-              "raw": 96.75,
-              "note": "会话级不重复计数；其中 36 个到点会话占 434.6%"
+              "value": "724,188,032 / 748,375,305 ≈ 96.8%",
+              "raw": 96.77,
+              "note": "会话级不重复计数；其中 36 个到点会话占 428.4%"
             }
           ],
           "analysis": [
@@ -1058,13 +1071,13 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "deepseek-v4-flash",
-                  "value": "522",
-                  "raw": 522
+                  "value": "526",
+                  "raw": 526
                 },
                 {
                   "label": "mimo-v2.6-flash",
-                  "value": "3",
-                  "raw": 3
+                  "value": "2",
+                  "raw": 2
                 }
               ]
             },
@@ -1074,8 +1087,8 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ops",
-                  "value": "$4.9104",
-                  "raw": 4.910356
+                  "value": "$4.9801",
+                  "raw": 4.980071
                 },
                 {
                   "label": "review",
@@ -1197,7 +1210,7 @@ window.DASHBOARD = {
           "key": "cron",
           "label": "Cron Job",
           "window": "状态快照（不受时间范围影响）",
-          "headline": "59 条定时任务（56 在跑），7 条连续失败 —— 无人值守链路有断点",
+          "headline": "59 条定时任务（56 在跑），6 条连续失败 —— 无人值守链路有断点",
           "href": "",
           "unavailable": null,
           "stats": [
@@ -1209,9 +1222,9 @@ window.DASHBOARD = {
             },
             {
               "label": "连续失败 >0",
-              "value": "7",
-              "raw": 7,
-              "note": "failure_streak；另有 7 条 last_error 非空（原文见 Cron 页详情）"
+              "value": "6",
+              "raw": 6,
+              "note": "failure_streak；另有 6 条 last_error 非空（原文见 Cron 页详情）"
             }
           ],
           "analysis": [
@@ -1221,13 +1234,13 @@ window.DASHBOARD = {
               "rows": [
                 {
                   "label": "ok",
-                  "value": "51",
-                  "raw": 51
+                  "value": "52",
+                  "raw": 52
                 },
                 {
                   "label": "error",
-                  "value": "7",
-                  "raw": 7
+                  "value": "6",
+                  "raw": 6
                 },
                 {
                   "label": "-",
@@ -1261,7 +1274,7 @@ window.DASHBOARD = {
                   "raw": 1
                 },
                 {
-                  "label": "ops 控制台-orchestrator",
+                  "label": "personal daily-tracker-2145",
                   "value": "1",
                   "raw": 1
                 }
