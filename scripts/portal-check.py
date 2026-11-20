@@ -902,7 +902,7 @@ def status_selftest():
         ("S28 字体回落 Arial", lambda d: _mutate(d, "bmi-tracker.html",
                                      lambda t: t.replace("font-family:inherit", "font-family:Arial", 1))),
         ("S28 站点侧双写布局", lambda d: _mutate(d, "scripts/site_chrome.py",
-                                     lambda t: t.replace("CHROME_CSS = \"\"\"", "CHROME_CSS = \"\"\"body{--jt-maxw:1200px}", 1))),
+                                     lambda t: t.replace("GH_CSS = \"\"\"", "GH_CSS = \"\"\"body{--jt-maxw:1200px}", 1))),
     ):
         tmp = Path(tempfile.mkdtemp(prefix="s25-"))
         try:
