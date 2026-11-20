@@ -1,5 +1,5 @@
-<!-- generated: 2026-11-20 · source: cache/draft/TODO-20261120.md · sha256:904fdc91 -->
-> 派生: 待执行 **6** 条 · 最近闭环 **CL322** · 差异知会 无（未找到含「差异知会」的设计文档）
+<!-- generated: 2026-11-20 · source: cache/draft/TODO-20261120.md · sha256:791ac5f9 -->
+> 派生: 待执行 **5** 条 · 最近闭环 **CL322** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261120.md）
 
@@ -9,7 +9,6 @@
 | 待开（hm-rotate-done） | hm draft 轮转丢完成节（工具缺陷） | 待办 | bug | normal | - |
 | 待开（dt-push-3） | 上游三笔未推 | 待他线 | process | high | - |
 | 待开（dt-skip-empty-commit） | 上游空转 commit（观察项） | 待办 | process | low | - |
-| 待开（dt-native-home） | 上游原生 home 按钮（转交件已出） | 待他线 | process | normal | - |
 | 待开（status-cl322-gates） | S25/S27 判据与 CL322 新版状态页不兼容 | 待办 | bug | high | - |
 <!-- generated end -->
 
