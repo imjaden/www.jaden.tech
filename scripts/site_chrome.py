@@ -50,7 +50,6 @@ CHROME_END = "<!-- jt-chrome:end -->"
 # 上游已自带 github-corner 的页面把 gh 设 False —— 否则会并出第二个角标。
 TARGETS = [
     ("bmi-tracker.html", "./", True),
-    ("daily-tracker-archive-*.html", "./", False),
     ("daily-poetry.html", "./", False),
 ]
 

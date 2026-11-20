@@ -44,8 +44,13 @@ INDEX = ROOT / "index.html"
 
 BADGE_START = "<!-- sync-badge:start -->"
 BADGE_END = "<!-- sync-badge:end -->"
-# 默认 favicon 由 script-miner status page 规范 v1.1 §7.1/§13 统一（www 站级 64px 图标）
-FAVICON = "https://www.jaden.tech/static/img/favicon-64.png"
+# favicon：站点级 64px 图标，但**必须相对路径 + 带缓存戳**（2026-11-20 修正）。
+# 规范 v1.1 §7.1 当初给的是 https://www.jaden.tech/... 绝对地址：本地预览会走公网、
+# 域名迁移即失效，且没有 ?t= 换图不刷新 —— 与本站「站内互链一律相对路径」冲突，以本站为准。
+# 戳取生成日 00:00（同日多次生成同值，避免每次重出都改字节；换日才变）。
+_FAVICON_TS = int(datetime.now(timezone(timedelta(hours=8)))
+                  .replace(hour=0, minute=0, second=0, microsecond=0).timestamp())
+FAVICON = f"static/img/favicon-64.png?t={_FAVICON_TS}"
 GEN_MARK = "由 scripts/sync-status-gen.py 生成，勿手改"
 # 生成槽位（ops cron `sync-status-refresh`，每天 21:45）；页面「下次生成」与机器面 meta 都由它算
 SLOTS = ("21:45",)
@@ -76,7 +81,7 @@ BANNER_EN = {0: "All Systems Operational", 1: "Some Systems Degraded",
 
 # 组件分组（用户视角，不暴露内部仓名）：id → (组标题, 组英文)
 GROUPS = [
-    ("page", "页面产物 · Pages", ("bmi-tracker", "dt-archive", "daily-poetry")),
+    ("page", "页面产物 · Pages", ("bmi-tracker", "daily-poetry")),
     ("data", "数据层 · Data", ("tokens-board", "tokens-live")),
     ("asset", "静态资产 · Assets", ("poetry-titles",)),
 ]
@@ -87,7 +92,7 @@ ART_GROUP = {aid: gid for gid, _t, ids in GROUPS for aid in ids}
 # 其余产物仍由 sync-check 校验（banner 判色不变），只是不占页面行；机器 JSON 用 hidden_components 导出。
 VISIBLE_IDS = ("bmi-tracker", "tokens-board", "daily-poetry")
 TZ_NOTE = "页面时间均为本地时区（CST）"
-HIDDEN_LABEL = {"dt-archive": "BMI 归档页", "tokens-live": "看板数据层", "poetry-titles": "诗词题名集"}
+HIDDEN_LABEL = {"tokens-live": "看板数据层", "poetry-titles": "诗词题名集"}
 
 # 页面文档三件套（版本行 = 文档入口 + 同页抽屉 + 内联数据）
 PAGE_VERSION = "1.3"
@@ -95,7 +100,7 @@ PAGE_DATE = "20261120"
 CHANGELOG = [
     ("1.3", "20261120", "feat", "呈现层对齐 status page 规范 v1.3（B 视图不全迁）：色块 90 → 15 天（视图条带与每组件色块，30/90 天可用率数字保留）；指标卡改 2 行（.k 左 + .n 右，截断带 title 悬浮）；组件名改可点击链接（.html 产物外链 www 同页，target=_blank + title 悬浮来源）；窄屏来源列 word-break 防断行残句"),
     ("1.2", "20261119", "feat", "对齐 status page 规范 v1.1：段落序改成 组件 → 事件 → 计划维护 → 数据口径；"
-                              "新增可见的「计划维护」段与「数据口径 · Gates」段；favicon 改 www 站级 64px 绝对地址；"
+                              "新增可见的「计划维护」段与「数据口径 · Gates」段；favicon 改 www 站级 64px（1.3 后回归相对路径 + 戳）；"
                               "「下次生成」与机器面 meta.slots/meta.next_run 由槽位表计算，不再写死"),
     ("1.1", "20261117", "feat", "底部栏改用三件套：版本行即入口，判据搬进抽屉（变更日志 / 判据说明 / 机器接口）"),
     ("1.1", "20261117", "feat", "横幅三档命名 + 英文副标 + aria-live；组件按页面/数据层/资产分组"),
@@ -867,7 +872,7 @@ def selftest() -> int:
 
     # ── 2026-11-17 重设计判别力（横幅三档 / 分组 / 每组件色块 / 样本数 / 事件派生 / 三件套 / 时区）
     def _multi(rc=0):
-        ids = ["bmi-tracker", "dt-archive", "daily-poetry", "tokens-board", "tokens-live", "poetry-titles"]
+        ids = ["bmi-tracker", "daily-poetry", "tokens-board", "tokens-live", "poetry-titles"]
         return {"rc": rc, "checked_at": "2026-11-17T00:00:00+00:00", "manifest_version": 1,
                 "artifacts": [{"id": i, "artifact": i + ".html", "producer": "p", "trigger": "t",
                                "generated": "2026-11-17T00:00:00+00:00", "age_h": 1.0} for i in ids],
@@ -890,7 +895,7 @@ def selftest() -> int:
     ok("非门户产物在页脚说明但仍被校验", "项非门户产物" in b0 and "仍由同步校验覆盖" in b0)
     p_hidden = _multi(1)
     for _d in p_hidden["details"]:
-        _d["status"] = "stale" if _d["id"] == "dt-archive" else "ok"
+        _d["status"] = "stale" if _d["id"] == "poetry-titles" else "ok"
     ok("隐藏项异常时 banner 点名（不让人对着黄页找不到行）",
        "非门户产物 1 项异常" in build_page(p_hidden, {}, {}, []))
     ok("可用率带样本数（不把 1/1 读成 100%）", "样本 0/30 天" in b0)

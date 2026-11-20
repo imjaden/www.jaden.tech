@@ -3,7 +3,6 @@
   "version": 1,
   "watch": [
     "bmi-tracker.html",
-    "daily-tracker-archive-*.html",
     "tokens-tracker/index.html",
     "tokens-tracker/data/dashboard.js",
     "daily-poetry.html",
@@ -13,40 +12,6 @@
     {
       "id": "bmi-tracker",
       "artifact": "bmi-tracker.html",
-      "producer": {
-        "repo": "daily-tracker",
-        "entry": "scripts/daily-tracker-update.py",
-        "mode": "emit-site",
-        "profile": "personal",
-        "cmd": [
-          "python3",
-          "scripts/daily-tracker-update.py",
-          "--emit-site"
-        ]
-      },
-      "trigger": {
-        "cron": "10:00,21:45",
-        "cadence_h": 24
-      },
-      "contract": {
-        "version": 1,
-        "write": "overwrite",
-        "stamp": "required",
-        "deterministic": false
-      },
-      "publish": {
-        "pii": "none"
-      },
-      "verify": {
-        "freshness_h": 48,
-        "hash": "required",
-        "guard": "none"
-      },
-      "_freshness_note": "上游戳按「数据窗口」口径打（当日 00:00:00+08:00），而更新在 21:05 ⇒ 次日 20:59 时戳龄可达 45h。36h 预算会让页面在次日下午就转黄（假陈旧）。改 48h：覆盖到下一次写盘前，仍能在漏跑一天时于次日午夜后转红。"
-    },
-    {
-      "id": "dt-archive",
-      "artifact": "daily-tracker-archive-*.html",
       "producer": {
         "repo": "daily-tracker",
         "entry": "scripts/daily-tracker-update.py",

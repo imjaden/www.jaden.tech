@@ -466,6 +466,9 @@ def check_s22(board_path=None):
 # S25（2026-11-16）：状态页 + 首页小球契约 —— 三处同源（页面横幅 / 小球 / 机器 JSON）。
 STATUS_PAGE = ROOT / "sync-status.html"
 FAVICON_STAMP = "static/img/favicon-64.png?t="
+FAVICON_NAME = "static/img/favicon-64.png"
+# 2026-11-20（CL322 v1.3）：状态页条带 90 天 → 15 天，与每组件色块同窗口。改这里要同批改生成器。
+STATUS_DAYS = 15
 ROWS_CELL = '<td data-l="产物"'
 DOT_OF_BANNER = {"ok": "is-ok", "warn": "is-warn", "bad": "is-bad"}
 
@@ -482,8 +485,18 @@ def status_page_guard(root=None):
     m_banner = re.search(r'<div class="banner (ok|warn|bad)"', html)
     if not m_banner:
         problems.append("横幅缺结论类")
-    if FAVICON_STAMP not in html:
-        problems.append("favicon 戳缺失/格式不符")
+    # 2026-11-20：CL322 把 favicon 改成 https://www.jaden.tech/... 绝对域名 ⇒ 拆成四条各判各的
+    _m_fav = re.search(r'<link[^>]*rel="(?:shortcut )?icon"[^>]*href="([^"]*)"', html)
+    if not _m_fav:
+        problems.append("缺 favicon link")
+    else:
+        _href = _m_fav.group(1)
+        if re.match(r"(?i)https?://", _href):
+            problems.append("favicon 用绝对域名（须相对路径；本地预览与域名迁移会失效）")
+        elif FAVICON_NAME not in _href:
+            problems.append(f"favicon 路径异常（应为 {FAVICON_NAME}）")
+        elif "?t=" not in _href:
+            problems.append("favicon 缺 ?t= 缓存戳")
     # 根绝对路径会 404（页面在站点根，但仍统一要求相对引用，避免迁目录再翻车）
     if re.search(r'(?:href|src)="/', html):
         problems.append("存在根绝对引用")
@@ -509,14 +522,14 @@ def status_page_guard(root=None):
     colored = len(re.findall(r'<span class="(?:ok|warn|bad)" title=', html))
     try:
         hist = json.loads((root / "data/sync-history.json").read_text(encoding="utf-8"))
-        # 页面只画最近 90 天窗口，历史文件不裁剪 ⇒ 拿全量天数比会在第 91 天起恒红。
+        # 页面只画最近 STATUS_DAYS 天窗口，历史文件不裁剪 ⇒ 拿全量天数比会在第 N+1 天起恒红。
         _days = sorted((hist.get("days") or {}).keys())
         # 基准取**页面快照**（`快照 YYYY-MM-DDTHH:MM（UTC）`）而不是 now()：
         # 采集到审计之间跨过 UTC 午夜时，now() 的窗口会比页面对齐的窗口多一天 ⇒ 每日约 14h 误红。
         _snap = re.search(r"生成于 (\d{4}-\d{2}-\d{2}) ", html)
         _base = (datetime.fromisoformat(_snap.group(1)).date() if _snap
                  else datetime.now(timezone.utc).date())
-        _cut = (_base - timedelta(days=89)).isoformat()
+        _cut = (_base - timedelta(days=STATUS_DAYS - 1)).isoformat()
         _top = _base.isoformat()
         # 历史不得含「晚于快照日」的键：那条通道曾能塞未来日骗过窗口计数（review r6 🟢）
         _future = [d for d in _days if d > _top]
@@ -527,8 +540,8 @@ def status_page_guard(root=None):
             problems.append(f"彩色格数 {colored} != 历史记录天数 {days_recorded}")
     except (OSError, json.JSONDecodeError, AttributeError):
         problems.append("data/sync-history.json 不可读，无法核对彩色格数")
-    if bars != 90:
-        problems.append(f"90 天条格数 {bars} != 90")
+    if bars != STATUS_DAYS:
+        problems.append(f"{STATUS_DAYS} 天条格数 {bars} != {STATUS_DAYS}")
     try:
         manifest = json.loads((root / "config/sync-manifest.json").read_text(encoding="utf-8"))
         # 只核对「页面展示的集合」：可见集合由机器 JSON 的 components[].visible 决定（单一真源）
@@ -572,20 +585,20 @@ def status_page_guard(root=None):
         return False, "；".join(problems[:4])
     if not (m_banner and m_dot):
         return False, "横幅/小球解析失败"
-    return True, (f"横幅={m_banner.group(1)} 小球={m_dot.group(1)} 条=90 "
+    return True, (f"横幅={m_banner.group(1)} 小球={m_dot.group(1)} 条={STATUS_DAYS} "
                   f"行数={html.count(ROWS_CELL)} favicon✓ 相对引用✓")
 
 
 def check_s25(root=None):
     ok, detail = status_page_guard(root)
-    check("S25", "状态页契约：三处同源 + favicon 戳 + 90 格 + 行数=清单 + 快照/下次生成标注 + 小球 href", ok, detail)
+    check("S25", f"状态页契约：三处同源 + favicon 相对且带戳 + {STATUS_DAYS} 格 + 行数=清单 + 快照/下次生成标注 + 小球 href", ok, detail)
     return ok
 
 
 # S27（2026-11-17）：状态页「可读性 + 三件套」契约。
 # 判据只认机械事实：三件套四件、分组行、每组件色块数、可用率样本数、事件区不再是空壳、人机入口分离。
 DOCS_BLOCK = "SYNC_STATUS_DOCS"
-PC_DAYS = 30          # 与 sync-status-gen.py 的每组件窗口一致（改那里要同批改这里）
+PC_DAYS = STATUS_DAYS  # 与 sync-status-gen.py 的每组件窗口一致（v1.3 起 15；改生成器要同批改这里）
 
 
 def status_docs_guard(root=None):
@@ -776,10 +789,18 @@ def _seed_s25(root):
         shutil.copy2(ROOT / rel, dest)
 
 
+def _spoil_events(t: str) -> str:
+    """把事件区打回旧空壳文案。两种正常形态都要能命中，否则变异空转、负控假绿。"""
+    for anchor in ("起无事件", "自动派生"):
+        if anchor in t:
+            return t.replace(anchor, "暂无事件记录", 1)
+    raise RuntimeError("S27 事件区负控无法构造：页面既无「起无事件」也无「自动派生」")
+
+
 def _add_hist_day(root):
     """历史多一天、页面没重出 —— 只该由「彩色格数 != 天数」抓到（90 格不动）。
 
-    ⚠️ 必须落在**页面快照的 90 天窗口内**：窗口基准取快照日（不是 now()），
+    ⚠️ 必须落在**页面快照的 STATUS_DAYS 天窗口内**：窗口基准取快照日（不是 now()），
     所以 2999-01-01 这类未来日会落在窗口外 ⇒ 变异失效（实测过一次）。
     """
     page = (Path(root) / "sync-status.html").read_text(encoding="utf-8", errors="replace")
@@ -790,10 +811,10 @@ def _add_hist_day(root):
     # 取窗口内**第一个空缺日**：写死「快照日-5」在历史攒满 5 天后会撞上已有记录 ⇒ 变异空转、
     # 负控恒 ❌（review 指出 2026-11-21 起必现）。
     days = data.get("days") or {}
-    day = next(((base - timedelta(days=i)).isoformat() for i in range(1, 90)
+    day = next(((base - timedelta(days=i)).isoformat() for i in range(1, STATUS_DAYS)
                 if (base - timedelta(days=i)).isoformat() not in days), None)
-    if day is None:                    # 窗口全满（2027-02-12 起）：删一条入窗记录，彩色 90 vs 历史 89 必红
-        _victim = next((d for d in sorted(days) if d >= (base - timedelta(days=89)).isoformat()), None)
+    if day is None:                    # 窗口全满：删一条入窗记录，彩色 N vs 历史 N-1 必红
+        _victim = next((d for d in sorted(days) if d >= (base - timedelta(days=STATUS_DAYS - 1)).isoformat()), None)
         if _victim is None:
             raise RuntimeError("S25 负控无法构造：窗口内既无空缺日也无入窗记录")
         _n1 = len(days)
@@ -854,6 +875,10 @@ def status_selftest():
         ("球色与横幅不同源", lambda d: _mutate(d, "index.html", _flip_dot)),
         ("删 favicon 戳", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace(FAVICON_STAMP, "static/img/nope.png?t="))),
+        ("favicon 改绝对域名", lambda d: _mutate(d, "sync-status.html",
+                                     lambda t: re.sub(r'(rel="(?:shortcut )?icon"[^>]*href=")[^"]*"',
+                                                      r'\1https://www.jaden.tech/static/img/favicon-64.png?t=1"',
+                                                      t, count=1))),
         ("根绝对引用回流", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace("<footer>", '<footer><a href="/x">x</a>', 1))),
         ("删页脚 provenance 时间", lambda d: _mutate(d, "sync-status.html",
@@ -862,7 +887,7 @@ def status_selftest():
                                      lambda t: t.replace("下次生成", "生成"))),
         ("小球 href 改坏", lambda d: _mutate(d, "index.html",
                                      lambda t: t.replace('href="./sync-status.html"', 'href="./nope.html"'))),
-        ("删一格 90 天条", lambda d: _mutate(d, "sync-status.html",
+        ("删一格条带格", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: re.sub(r'<span class="(?:ok|warn|bad|none)" title="[^"]*"></span>',
                                                       "", t, count=1))),
         ("横幅类与 JSON rc 不同源", lambda d: _flip_banner_or_json(d)),
@@ -873,11 +898,10 @@ def status_selftest():
         ("S27 删版本行入口", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace('id="sdocsOpen"', 'id="sdocsGone"'))),
         ("S27 内联数据版本与变更日志错位", lambda d: _mutate(d, "sync-status.html",
-                                     lambda t: t.replace('"version": "1.1"', '"version": "9.9"', 1))),
+                                     lambda t: re.sub(r'"version": "\d+\.\d+"', '"version": "9.9"', t, count=1))),
         ("S27 每组件色块少一格", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace('<span class="pc pc-', '<span class="pc-x pc-', 1))),
-        ("S27 事件区回落旧空壳", lambda d: _mutate(d, "sync-status.html",
-                                     lambda t: t.replace("起无事件", "暂无事件记录"))),
+        ("S27 事件区回落旧空壳", lambda d: _mutate(d, "sync-status.html", _spoil_events)),
         ("S27 页脚回到人机混排", lambda d: _mutate(d, "sync-status.html",
                                      lambda t: t.replace("机器：", "入口：", 1))),
         ("S27 删「本地时区」说明", lambda d: _mutate(d, "sync-status.html",
