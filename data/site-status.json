@@ -1,8 +1,8 @@
 {
   "schema_version": "1.2",
   "service": "jaden-sites",
-  "status": "outage",
-  "updated_at": "2026-11-20T17:36:22+08:00",
+  "status": "operational",
+  "updated_at": "2026-11-20T18:29:35+08:00",
   "components": [
     {
       "id": "gh-pages",
@@ -11,9 +11,9 @@
       "status": "operational",
       "desc": "8 个站点的共同宿主；该层故障时所有站点同时不可用",
       "url": "https://www.githubstatus.com/",
-      "uptime_30d": 0.9643,
-      "uptime_90d": 0.9643,
-      "samples": 28,
+      "uptime_30d": 0.9667,
+      "uptime_90d": 0.9667,
+      "samples": 30,
       "extensions": {
         "reach": {
           "state": "operational",
@@ -33,13 +33,13 @@
       "status": "operational",
       "desc": "主页 / 微信封面 / BMI 归档 / Tokens 看板 / 今日诗词",
       "url": "https://www.jaden.tech",
-      "uptime_30d": 0.9643,
-      "uptime_90d": 0.9643,
-      "samples": 28,
+      "uptime_30d": 0.9667,
+      "uptime_90d": 0.9667,
+      "samples": 30,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 647,
+          "ttfb_ms": 1501,
           "bytes": 10909,
           "location": "",
           "server": "GitHub.com",
@@ -51,9 +51,9 @@
         },
         "freshness": {
           "anchor": "git",
-          "sha": "24fe86e",
-          "at": "2026-11-19T22:39:51+08:00",
-          "age_h": 18.9,
+          "sha": "6e611cb",
+          "at": "2026-11-20T17:36:38+08:00",
+          "age_h": 0.9,
           "budget_d": 30,
           "state": "operational"
         }
@@ -66,13 +66,13 @@
       "status": "operational",
       "desc": "Think→Act→Observe→Verify 框架与交互式可视化",
       "url": "https://agent-loop.lab.jaden.tech",
-      "uptime_30d": 0.9286,
-      "uptime_90d": 0.9286,
-      "samples": 28,
+      "uptime_30d": 0.9333,
+      "uptime_90d": 0.9333,
+      "samples": 30,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 1537,
+          "ttfb_ms": 1851,
           "bytes": 28393,
           "location": "",
           "server": "GitHub.com",
@@ -86,7 +86,7 @@
           "anchor": "git",
           "sha": "558bd9f",
           "at": "2026-11-09T18:19:39+08:00",
-          "age_h": 263.3,
+          "age_h": 264.2,
           "budget_d": 30,
           "state": "operational"
         }
@@ -99,13 +99,13 @@
       "status": "operational",
       "desc": "每日 7 源采集的 LLM 情报雷达（日更）",
       "url": "https://llm-radar.lab.jaden.tech",
-      "uptime_30d": 0.9643,
-      "uptime_90d": 0.9643,
-      "samples": 28,
+      "uptime_30d": 0.9667,
+      "uptime_90d": 0.9667,
+      "samples": 30,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 2073,
+          "ttfb_ms": 817,
           "bytes": 71642,
           "location": "",
           "server": "GitHub.com",
@@ -119,7 +119,7 @@
           "anchor": "git",
           "sha": "fea22a1",
           "at": "2026-11-20T16:42:08+08:00",
-          "age_h": 0.9,
+          "age_h": 1.8,
           "budget_d": 2,
           "state": "operational"
         }
@@ -129,16 +129,16 @@
       "id": "http-server",
       "name": "http-server CLI",
       "group": "工具站",
-      "status": "degraded",
+      "status": "operational",
       "desc": "零依赖 HTTP 服务管理器文档站",
       "url": "https://http-server.cli.jaden.tech",
-      "uptime_30d": 0.9286,
-      "uptime_90d": 0.9286,
-      "samples": 28,
+      "uptime_30d": 0.9333,
+      "uptime_90d": 0.9333,
+      "samples": 30,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 6001,
+          "ttfb_ms": 587,
           "bytes": 29387,
           "location": "",
           "server": "GitHub.com",
@@ -146,14 +146,13 @@
           "sha256_16": "eb32d77e3f4c06d6",
           "tls_days": 63,
           "attempt": 1,
-          "state": "degraded",
-          "note": "响应偏慢 6001ms"
+          "state": "operational"
         },
         "freshness": {
           "anchor": "git",
           "sha": "cc8f65b",
           "at": "2026-11-09T21:15:40+08:00",
-          "age_h": 260.3,
+          "age_h": 261.2,
           "budget_d": 30,
           "state": "operational"
         }
@@ -166,13 +165,13 @@
       "status": "operational",
       "desc": "模板驱动静态站生成器文档站",
       "url": "https://html-gen.cli.jaden.tech",
-      "uptime_30d": 0.9286,
-      "uptime_90d": 0.9286,
-      "samples": 28,
+      "uptime_30d": 0.9333,
+      "uptime_90d": 0.9333,
+      "samples": 30,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 421,
+          "ttfb_ms": 1665,
           "bytes": 29508,
           "location": "",
           "server": "GitHub.com",
@@ -186,7 +185,7 @@
           "anchor": "git",
           "sha": "ea1da62",
           "at": "2026-11-17T20:34:48+08:00",
-          "age_h": 69.0,
+          "age_h": 69.9,
           "budget_d": 30,
           "state": "operational"
         }
@@ -196,30 +195,30 @@
       "id": "tools",
       "name": "tools.cli 工具集",
       "group": "工具站",
-      "status": "outage",
+      "status": "operational",
       "desc": "9 个工具页的公开门户（构建水印即更新锚）",
       "url": "https://tools.cli.jaden.tech",
-      "uptime_30d": 0.8929,
-      "uptime_90d": 0.8929,
-      "samples": 28,
+      "uptime_30d": 0.9,
+      "uptime_90d": 0.9,
+      "samples": 30,
       "extensions": {
         "reach": {
-          "http": 0,
-          "ttfb_ms": 260,
-          "bytes": 0,
+          "http": 200,
+          "ttfb_ms": 1672,
+          "bytes": 49780,
           "location": "",
-          "server": "",
-          "error": "RemoteDisconnected: Remote end closed connection without response",
-          "sha256_16": "",
+          "server": "GitHub.com",
+          "error": null,
+          "sha256_16": "221240f7eb951668",
           "tls_days": 84,
-          "attempt": 2,
-          "state": "outage"
+          "attempt": 1,
+          "state": "operational"
         },
         "freshness": {
           "anchor": "stamp",
-          "sha": "34df1d81",
-          "at": "2026-11-20T17:34:31+08:00",
-          "age_h": 0.0,
+          "sha": "ab7bddda",
+          "at": "2026-11-20T18:19:13+08:00",
+          "age_h": 0.2,
           "budget_d": 30,
           "state": "operational"
         }
@@ -232,19 +231,19 @@
       "status": "operational",
       "desc": "FDE 方案作品集（归档，不参与时效）",
       "url": "https://cloudwise.archived.jaden.tech",
-      "uptime_30d": 0.9643,
-      "uptime_90d": 0.9643,
-      "samples": 28,
+      "uptime_30d": 0.9667,
+      "uptime_90d": 0.9667,
+      "samples": 30,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 2870,
+          "ttfb_ms": 574,
           "bytes": 47059,
           "location": "",
           "server": "GitHub.com",
           "error": null,
           "sha256_16": "396abde47c100ebf",
-          "tls_days": 45,
+          "tls_days": 44,
           "attempt": 1,
           "state": "operational"
         },
@@ -261,13 +260,13 @@
       "status": "operational",
       "desc": "全栈开发历程（归档，不参与时效）",
       "url": "https://intfocus.archived.jaden.tech",
-      "uptime_30d": 0.9643,
-      "uptime_90d": 0.9643,
-      "samples": 28,
+      "uptime_30d": 0.9667,
+      "uptime_90d": 0.9667,
+      "samples": 30,
       "extensions": {
         "reach": {
           "http": 200,
-          "ttfb_ms": 597,
+          "ttfb_ms": 584,
           "bytes": 28718,
           "location": "",
           "server": "GitHub.com",
@@ -289,8 +288,8 @@
       "id": "agent-loop-alias",
       "name": "agent-loop 默认域",
       "url": "https://imjaden.github.io/agent-loop.lab/",
-      "http": 0,
-      "target_ok": false
+      "http": 301,
+      "target_ok": true
     },
     {
       "id": "apex",
@@ -303,8 +302,8 @@
       "id": "tools-alias",
       "name": "tools.cli 默认域",
       "url": "https://imjaden.github.io/tools.cli/",
-      "http": 0,
-      "target_ok": false
+      "http": 301,
+      "target_ok": true
     }
   ],
   "incidents": [
@@ -335,8 +334,8 @@
   ],
   "maintenance": [],
   "uptime": {
-    "30d": 0.9388,
-    "90d": 0.9388
+    "30d": 0.9429,
+    "90d": 0.9429
   },
   "meta": {
     "schedule": "09:05 / 21:45",
@@ -349,6 +348,6 @@
     "degrade_after": 2,
     "scope": "个人站点 8 个 + 宿主层",
     "json_href": "data/site-status.json",
-    "generator": "status-page v1.4"
+    "generator": "status-page v1.5"
   }
 }
