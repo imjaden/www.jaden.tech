@@ -754,6 +754,24 @@ def shell_guard(root=None):
     if 'class="jt-home"' not in b:
         problems.append("bmi 缺 .jt-home（chrome 注入被覆盖后没补）")
 
+    # A7 home 按钮契约（2026-11-20 起由上游原生输出，我方去重后不再注入）
+    # 必须 border-box：tokens 页上游是 content-box，漏写会渲染成 42×42（实测差 2px）；
+    # 必须 40×40：44px 在 754 档会压住卡片徽章；元素必须唯一：我方去重分支失效会并出两个按钮。
+    _rule = re.search(r"\.jt-home\s*\{[^}]*\}", b)
+    if not _rule:
+        problems.append("bmi 页缺 .jt-home 规则")
+    else:
+        _rc = _rule.group(0).replace(" ", "")
+        if "box-sizing:border-box" not in _rc:
+            problems.append(".jt-home 缺 box-sizing:border-box（content-box 页会渲染成 42×42）")
+        if "width:40px" not in _rc or "height:40px" not in _rc:
+            problems.append(".jt-home 尺寸非 40×40（44px 会压住卡片徽章）")
+        if "right:10px" not in _rc:
+            problems.append(".jt-home 右边距非 10px")
+    _home_n = b.count('class="jt-home"')
+    if _home_n != 1:
+        problems.append(f"bmi 页 .jt-home 元素数 {_home_n} != 1（去重失效或按钮丢失）")
+
     # A9 防双写：站点侧不得再注入布局（回执 §五.1 的机制化）
     for bad in ("--jt-maxw", "jt-nav", "dash-wrap"):
         if bad in chrome_src:
@@ -851,6 +869,9 @@ def _bump_days_recorded(root):
     p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
 
 
+_MUT_N = 0
+
+
 def status_selftest():
     """S25 判别力自证：副本基线必绿 + 12 种破坏各自必红（共 14 条断言）。"""
     import tempfile
@@ -925,6 +946,10 @@ def status_selftest():
                                      lambda t: t.replace("h2{font-size:16px;font-weight:700", "h2{font-size:14px;font-weight:700"))),
         ("S28 字体回落 Arial", lambda d: _mutate(d, "bmi-tracker.html",
                                      lambda t: t.replace("font-family:inherit", "font-family:Arial", 1))),
+        ("S28 home 缺 box-sizing", lambda d: _mutate(d, "bmi-tracker.html",
+                                     lambda t: t.replace("box-sizing:border-box;", "", 1))),
+        ("S28 home 元素双写", lambda d: _mutate(d, "bmi-tracker.html",
+                                     lambda t: t.replace("</body>", '<a href="./" class="jt-home">dup</a></body>', 1))),
         ("S28 站点侧双写布局", lambda d: _mutate(d, "scripts/site_chrome.py",
                                      lambda t: t.replace("GH_CSS = \"\"\"", "GH_CSS = \"\"\"body{--jt-maxw:1200px}", 1))),
     ):
@@ -951,6 +976,8 @@ def status_selftest():
     for name, cond in results:
         print(f"  {'✅' if cond else '❌'} {name}")
     print(f"\n{sum(1 for _, c in results if c)}/{len(results)} 通过（S25 判别力）")
+    global _MUT_N
+    _MUT_N = sum(1 for name, _ in results if not name.startswith("副本基线"))
     return all(c for _, c in results)
 
 
@@ -1112,8 +1139,9 @@ def main():
               f"href={_ok_a} no_title={_ok_b} tabbar={_ok_c} active={_ok_d}")
 
         # S25 判别力自证：四种破坏（球色/ favicon / 根绝对 / 少一行）⇒ 判据必红
-        check("S26", "V18 判别力自证：28 个变异（S25 十二项 + S27 八项 + S28 八项：宽度/顶栏/链接/分页/标题/字体/双写）⇒ 各自判据必红",
-              status_selftest(), "")
+        _ok26 = status_selftest()
+        check("S26", f"V18 判别力自证：{_MUT_N} 个变异（S25 契约类 + S27 可读性类 + S28 外壳/按钮契约类）⇒ 各自判据必红",
+              _ok26, "")
 
     fails = [r for r in results if not r[2]]
     for cid, desc, ok, detail in results:
