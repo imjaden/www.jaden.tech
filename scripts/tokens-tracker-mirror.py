@@ -49,6 +49,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import chrome_assets  # noqa: E402
+
+
 WWW_REPO = Path("/Users/jadenli/CodeSpace/www.jaden.tech")
 # 2026-11-16（用户决策：第五条 A 方案）：镜像源从 1ACL Task 板切到 **Dashboard 页**。
 # 上游 Dashboard 是自包含单壳（无 assets/），动态加载 data/dashboard.js ⇒ 产物只剩两件：
@@ -191,15 +195,8 @@ GH_CORNER_HTML = (
     "</svg></a>"
 )
 
-# 右侧垂直居中的「返回首页」按钮（2026-11-16）：与 bmi-tracker.html 同一形态。
-# 链接用相对路径 "../"，因为镜像发布在 /tokens-tracker/ 一级深（root-absolute 会违 JT-SEC-018）。
-HOME_BTN_HTML = (
-    '<a href="../" class="jt-home" aria-label="返回首页 ｜ Back to home" '
-    'title="返回首页 ｜ Back to home">'
-    '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">'
-    '<path d="M12 3.2 2.8 11h2.5v9.2h5.1v-6h3.2v6h5.1V11h2.5z" fill="currentColor"/>'
-    "</svg></a>"
-)
+# 「返回首页」按钮的 HTML/CSS 与 site_chrome 共用 scripts/chrome_assets.py（单一真源）。
+HOME_BTN_HTML = chrome_assets.home_html("../")
 
 CHROME_CSS = """
 /* site chrome: github corner（dark-theme）—— 旧双层导航已废弃，只保留 corner */
@@ -212,27 +209,13 @@ CHROME_CSS = """
 .github-corner:hover .octo-arm { animation: octocat-wave 560ms ease-in-out; }
 @keyframes octocat-wave { 0%,100%{transform:rotate(0)} 20%,60%{transform:rotate(-25deg)} 40%,80%{transform:rotate(10deg)} }
 @media (max-width: 500px) { .github-corner:hover .octo-arm { animation: none; } }
-/* 右侧垂直居中的「返回首页」悬浮按钮（2026-11-16）：bmi-tracker 与本页共用同一形态 */
-.jt-home {
-  position: fixed; right: 10px; top: 50%; transform: translateY(-50%); z-index: 999;
-  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-  border-radius: 12px; color: #fff; text-decoration: none;
-  background: rgba(8, 12, 20, .55); border: 1px solid rgba(255, 255, 255, .22);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, .28);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  transition: background .18s ease, border-color .18s ease, transform .18s ease;
-}
-.jt-home:hover { background: rgba(12, 18, 30, .72); border-color: rgba(255, 255, 255, .45); transform: translateY(-50%) scale(1.05); }
-.jt-home:focus-visible { outline: 2px solid #9ecbff; outline-offset: 2px; }
-@media (max-width: 600px) { .jt-home { right: 10px; width: 40px; height: 40px; border-radius: 10px; } }
-@media (prefers-reduced-motion: reduce) { .jt-home { transition: none; } }
 /* 内容宽度与上游 bmi 侧 --jt-maxw 同源（2026-11-17 转交件 A1 对侧）：.dash-wrap 的 max-width 已由
    注入步骤改写成 var(--page-max)，这里只声明真值；同一变量同时供 .wc-nav 的居中 padding 复用，
    否则 nav 链接按 1400 居中、内容按 1200 → 左边缘错开 100px。 */
 body { --page-max: 1200px; }
 /* 顶栏高度与上游 bmi 侧 .jt-nav（48px）对齐；本页原为 padding 撑出的 43px，差 5px 并排看得出来 */
 body .wc-nav { min-height: 48px; align-items: center; }
-"""
+""" + chrome_assets.HOME_CSS
 
 
 def _stamp_generated(live_text: str) -> str:

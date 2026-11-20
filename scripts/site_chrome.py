@@ -38,6 +38,7 @@ from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SITE / "scripts"))
+import chrome_assets  # noqa: E402
 import sync_stamp  # noqa: E402
 
 PRODUCER = "www.jaden.tech/scripts/site_chrome.py"
@@ -61,22 +62,12 @@ CHROME_CSS = """<style id="jt-chrome-css">
 .jt-gh .octo-arm { transform-origin: 130px 106px; }
 .jt-gh:hover .octo-arm { animation: jt-octo 560ms ease-in-out; }
 @keyframes jt-octo { 0%,100%{transform:rotate(0)} 20%,60%{transform:rotate(-25deg)} 40%,80%{transform:rotate(10deg)} }
-.jt-home { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); z-index: 999;
-  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-  border-radius: 12px; color: #e6edf3; text-decoration: none;
-  background: rgba(8,12,20,.55); border: 1px solid rgba(255,255,255,.22);
-  box-shadow: 0 6px 18px rgba(0,0,0,.28);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  transition: background .18s ease, border-color .18s ease, transform .18s ease; }
-.jt-home:hover { background: rgba(12,18,30,.72); border-color: rgba(255,255,255,.45);
-  transform: translateY(-50%) scale(1.05); }
-.jt-home:focus-visible { outline: 2px solid #9ecbff; outline-offset: 2px; }
 @media (max-width: 600px) {
   .jt-gh { width: 52px; height: 52px; }
   .jt-gh svg { width: 52px; height: 52px; }
-  .jt-home { right: 10px; width: 40px; height: 40px; border-radius: 10px; }
 }
-@media (prefers-reduced-motion: reduce) { .jt-home { transition: none; } .jt-gh:hover .octo-arm { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .jt-gh:hover .octo-arm { animation: none; } }
+""" + chrome_assets.HOME_CSS + """
 </style>"""
 
 GH_HTML = """<a href="https://github.com/imjaden" class="jt-gh" target="_blank" rel="noopener" aria-label="在 GitHub 查看源码 ｜ View source on GitHub" title="在 GitHub 查看源码 ｜ View source on GitHub">
@@ -84,10 +75,7 @@ GH_HTML = """<a href="https://github.com/imjaden" class="jt-gh" target="_blank" 
 </a>
 """
 
-HOME_HTML = """<a href="{home}" class="jt-home" aria-label="返回首页 ｜ Back to home" title="返回首页 ｜ Back to home">
-<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 3.2 2.8 11h2.5v9.2h5.1v-6h3.2v6h5.1V11h2.5z" fill="currentColor"/></svg>
-</a>
-"""
+# 「返回首页」按钮的 HTML/CSS 与 tokens 镜像共用 scripts/chrome_assets.py（单一真源）
 
 
 def _strip_chrome(html: str) -> str:
@@ -102,7 +90,7 @@ def inject(html: str, home: str, gh: bool) -> str:
     if "</head>" not in body:
         raise RuntimeError("no </head> — cannot inject chrome (fail-closed)")
     body = body.replace("</head>", CHROME_CSS + "\n</head>", 1)
-    block = CHROME_START + "\n" + (GH_HTML if gh else "") + HOME_HTML.format(home=home) + CHROME_END
+    block = CHROME_START + "\n" + (GH_HTML if gh else "") + chrome_assets.home_html(home) + CHROME_END
     if "</body>" in body:
         return body.replace("</body>", block + "\n</body>", 1)
     return body + "\n" + block + "\n"
