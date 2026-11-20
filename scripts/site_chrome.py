@@ -87,12 +87,15 @@ def inject(html: str, home: str, gh: bool) -> str:
     body = _strip_chrome(html)
     if "</head>" not in body:
         raise RuntimeError("no </head> — cannot inject chrome (fail-closed)")
-    # 上游若已原生输出 .jt-home（handoff-bmi-native-home-v1.0 落地后），这里不再补一份，
-    # 否则会并出两个按钮。判据只看 class，不依赖标记块：标记块已被 _strip_chrome 清掉。
+    # 上游若已原生输出 .jt-home / .jt-gh（handoff-bmi-native-home v1.0 §八/§九），这里不再补一份，
+    # 否则会并出两个按钮 / 两个角标。判据只看 class，不依赖标记块：标记块已被 _strip_chrome 清掉。
+    # 去重是幂等防御：上游没做也完全无害，做了则当天切换，无需我方改动。
     have_home = 'class="jt-home"' in body
-    css = '<style id="jt-chrome-css">' + GH_CSS + ("" if have_home else chrome_assets.HOME_CSS) + "</style>"
+    have_gh = 'class="jt-gh"' in body
+    css = ('<style id="jt-chrome-css">' + ("" if have_gh else GH_CSS)
+           + ("" if have_home else chrome_assets.HOME_CSS) + "</style>")
     body = body.replace("</head>", css + "\n</head>", 1)
-    block = (CHROME_START + "\n" + (GH_HTML if gh else "")
+    block = (CHROME_START + "\n" + ("" if (have_gh or not gh) else GH_HTML)
              + ("" if have_home else chrome_assets.home_html(home)) + CHROME_END)
     if "</body>" in body:
         return body.replace("</body>", block + "\n</body>", 1)

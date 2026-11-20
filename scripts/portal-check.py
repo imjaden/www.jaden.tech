@@ -771,6 +771,10 @@ def shell_guard(root=None):
     _home_n = b.count('class="jt-home"')
     if _home_n != 1:
         problems.append(f"bmi 页 .jt-home 元素数 {_home_n} != 1（去重失效或按钮丢失）")
+    # 角标同理（2026-11-20 起 site_chrome 也对 .jt-gh 去重，防上游原生输出后并出两个）
+    _gh_n = b.count('class="jt-gh"')
+    if _gh_n != 1:
+        problems.append(f"bmi 页 .jt-gh 元素数 {_gh_n} != 1（去重失效或角标丢失）")
 
     # A9 防双写：站点侧不得再注入布局（回执 §五.1 的机制化）
     for bad in ("--jt-maxw", "jt-nav", "dash-wrap"):
@@ -950,6 +954,8 @@ def status_selftest():
                                      lambda t: t.replace("box-sizing:border-box;", "", 1))),
         ("S28 home 元素双写", lambda d: _mutate(d, "bmi-tracker.html",
                                      lambda t: t.replace("</body>", '<a href="./" class="jt-home">dup</a></body>', 1))),
+        ("S28 角标元素双写", lambda d: _mutate(d, "bmi-tracker.html",
+                                     lambda t: t.replace("</body>", '<a href="https://github.com/" class="jt-gh">dup</a></body>', 1))),
         ("S28 站点侧双写布局", lambda d: _mutate(d, "scripts/site_chrome.py",
                                      lambda t: t.replace("GH_CSS = \"\"\"", "GH_CSS = \"\"\"body{--jt-maxw:1200px}", 1))),
     ):
