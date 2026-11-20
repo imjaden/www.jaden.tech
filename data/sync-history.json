@@ -58,7 +58,6 @@
    "verdict": "PASS",
    "artifacts": {
     "bmi-tracker": "ok",
-    "dt-archive": "ok",
     "tokens-board": "ok",
     "daily-poetry": "ok",
     "poetry-titles": "ok",
