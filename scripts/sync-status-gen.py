@@ -90,9 +90,10 @@ TZ_NOTE = "页面时间均为本地时区（CST）"
 HIDDEN_LABEL = {"dt-archive": "BMI 归档页", "tokens-live": "看板数据层", "poetry-titles": "诗词题名集"}
 
 # 页面文档三件套（版本行 = 文档入口 + 同页抽屉 + 内联数据）
-PAGE_VERSION = "1.2"
-PAGE_DATE = "20261119"
+PAGE_VERSION = "1.3"
+PAGE_DATE = "20261120"
 CHANGELOG = [
+    ("1.3", "20261120", "feat", "呈现层对齐 status page 规范 v1.3（B 视图不全迁）：色块 90 → 15 天（视图条带与每组件色块，30/90 天可用率数字保留）；指标卡改 2 行（.k 左 + .n 右，截断带 title 悬浮）；组件名改可点击链接（.html 产物外链 www 同页，target=_blank + title 悬浮来源）；窄屏来源列 word-break 防断行残句"),
     ("1.2", "20261119", "feat", "对齐 status page 规范 v1.1：段落序改成 组件 → 事件 → 计划维护 → 数据口径；"
                               "新增可见的「计划维护」段与「数据口径 · Gates」段；favicon 改 www 站级 64px 绝对地址；"
                               "「下次生成」与机器面 meta.slots/meta.next_run 由槽位表计算，不再写死"),
@@ -124,9 +125,11 @@ border-radius:var(--radius-md);padding:14px 16px;margin:14px 0 18px}
 .banner.ok{--banner:#3fb950}.banner.warn{--banner:#d29922}.banner.bad{--banner:#f85149}
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 22px}
 .card{background:var(--surface-900);border:1px solid var(--line);border-radius:var(--radius-md);padding:12px 14px}
-.card .k{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+.card .k{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
 .card .v{font-size:1.35rem;font-weight:700;margin-top:4px}
-.card .n{color:var(--muted);font-size:.74rem;margin-top:2px}
+.card .k-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.card .n{color:var(--muted);font-size:.74rem;margin:0;max-width:62%;text-align:right;
+overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 h2{font-size:.86rem;font-weight:700;margin:26px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .data-table{width:100%;border-collapse:collapse;table-layout:fixed}
 .data-table th{position:sticky;top:0;z-index:10;background:var(--surface-900);border-bottom:1px solid var(--line);
@@ -149,8 +152,8 @@ background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px;color:#c9d1d9
 display:inline-block;vertical-align:middle}
 .bar>i{display:block;height:100%;border-radius:3px}
 .bar-ok>i{background:#3fb950}.bar-warn>i{background:#d29922}.bar-bad>i{background:#f85149}
-.bars{display:flex;gap:2px;flex-wrap:wrap;margin-top:6px}
-.bars span{width:9px;height:22px;border-radius:2px;background:#232334;display:block}
+.bars{display:flex;gap:3px;margin-top:6px}
+.bars span{flex:1 1 0;min-width:2px;height:22px;border-radius:2px;background:#232334;display:block}
 .bars span.ok{background:#3fb950}.bars span.warn{background:#d29922}.bars span.bad{background:#f85149}
 .bars span.none{background:#2f2f45;opacity:.9}
 .legend{color:var(--muted);font-size:.74rem;margin-top:8px}
@@ -169,6 +172,9 @@ font-size:.76rem;text-align:center}
     white-space:normal;overflow:visible;text-overflow:clip}
   .data-table td[data-l="状态"],.data-table td[data-l="年龄/预算"]{overflow:visible;text-overflow:clip}
   .data-table td::before{content:attr(data-l);color:var(--muted);font-size:.72rem;text-transform:uppercase}
+  .data-table td::before{flex:0 0 auto;white-space:nowrap}
+  .data-table td>*{min-width:0}
+  .data-table td[data-l="来源"],.data-table td[data-l="来源"] code{overflow-wrap:anywhere}
 }
 /* ── 2026-11-17 重设计（横幅三重表征 / 组件分组 / 每组件色块 / 文档三件套） ── */
 .banner h1.big{margin:0;font-size:1.02rem;line-height:1.4}
@@ -182,8 +188,11 @@ text-transform:uppercase;letter-spacing:.06em;padding:6px 10px;border-bottom:1px
 .prow .pname{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.76rem;
 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .prow .bars{margin:0}
-.prow .bars span{width:7px;height:16px}
+.prow .bars span{flex:1 1 0;min-width:2px;height:16px}
 .prow .pct{font-size:.75rem;color:var(--muted);white-space:nowrap}
+.comp-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comp-name a{color:var(--fg);text-decoration:none;border-bottom:1px dotted rgba(255,255,255,.25)}
+.comp-name a:hover{color:var(--cobalt-400);border-bottom-color:var(--cobalt-400)}
 .bars span.pc-ok{background:#3fb950}.bars span.pc-warn{background:#d29922}.bars span.pc-bad{background:#f85149}
 .samples{color:var(--muted);font-size:.74rem;margin-top:8px}
 footer .verline{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--cobalt-400);
@@ -468,6 +477,16 @@ def build_page(payload, history, gates, incidents) -> str:
     unreg = len(payload.get("unregistered") or [])
     ontime = f"{ok_n}/{len(arts)}"
 
+    def _name_cell(a) -> str:
+        """产物名：可点击（仅 .html 产物，链到 www 站同名页）＋超长省略 + title 悬浮全名/来源"""
+        name = a.get("artifact") or a["id"]
+        tip = a.get("producer") or name
+        if str(name).endswith(".html"):
+            href = f"https://www.jaden.tech/{name}"
+            return (f'<span class="comp-name"><a href="{esc(href)}" target="_blank" rel="noopener" '
+                    f'title="{esc(tip)}"><code>{esc(name)}</code></a></span>')
+        return f'<span class="comp-name" title="{esc(tip)}"><code>{esc(name)}</code></span>'
+
     def _row(a) -> str:
         d = detail.get(a["id"], {"status": "unknown"})
         cls, label = S_MARK.get(d.get("status"), ("warn", "无法判定"))
@@ -477,7 +496,8 @@ def build_page(payload, history, gates, incidents) -> str:
         bc = f" / {budget}h" if budget else ""
         budget_txt = f"{budget:g}h" if budget else "—"
         return ("<tr>"
-                f'<td data-l="产物" title="{esc(a.get("artifact") or a["id"])}"><code>{esc(a.get("artifact") or a["id"])}</code></td>'
+                f'<td data-l="产物" title="{esc(a.get("artifact") or a["id"])}">'
+                + _name_cell(a) + '</td>'
                 f'<td data-l="来源" title="{esc(a.get("producer") or "—")}">{esc(a.get("producer") or "—")}</td>'
                 f'<td data-l="班次" title="{esc(a.get("trigger") or "—")}">{esc(a.get("trigger") or "—")}</td>'
                 f'<td data-l="上次打戳">{esc(_fmt_ts(gen))}</td>'
@@ -499,13 +519,13 @@ def build_page(payload, history, gates, incidents) -> str:
         rows.append('<tr class="grp"><td colspan="6">其它 · Other</td></tr>')
         rows.extend(_rest)
 
-    # 90 天条（自首个记录日起；无记录 = 灰）
+    # 15 天条（自首个记录日起；无记录 = 灰）
     # 窗口基准取**本次快照时刻**（payload.checked_at，UTC），不取渲染时刻：
     # 采集到渲染之间跨 UTC 午夜会让窗口平移一天，页面与 JSON 口径分裂（review 🟡1/🟡3）。
     from datetime import timedelta
     today = _snapshot_date(payload)
     cells = []
-    for i in range(89, -1, -1):
+    for i in range(14, -1, -1):
         day = (today - timedelta(days=i)).isoformat()
         rec = history.get(day)
         if not rec:
@@ -516,7 +536,7 @@ def build_page(payload, history, gates, incidents) -> str:
                          f'按时 {rec.get("ok_ratio")}"></span>')
     first_day = min(history) if history else None
 
-    # ── 每组件 30 天色块 + 可用率（2026-11-17，D3=A：样本不足就标灰并注明，不画满假绿）
+    # ── 每组件 15 天色块 + 可用率（v1.3 对齐；样本不足就标灰并注明，不画满假绿）
     def _window(days: int) -> list[str]:
         return [(today - timedelta(days=i)).isoformat() for i in range(days - 1, -1, -1)]
 
@@ -531,7 +551,7 @@ def build_page(payload, history, gates, incidents) -> str:
 
     def _pcells(art_id: str) -> str:
         out = []
-        for day in _window(30):
+        for day in _window(15):
             st = ((history.get(day) or {}).get("artifacts") or {}).get(art_id)
             if st is None:
                 out.append(f'<span class="pc pc-none" title="{day} · 无记录"></span>')
@@ -542,7 +562,7 @@ def build_page(payload, history, gates, incidents) -> str:
         return "".join(out)
 
     def _pct(art_id: str) -> str:
-        vals = [((history.get(d) or {}).get("artifacts") or {}).get(art_id) for d in _window(30)]
+        vals = [((history.get(d) or {}).get("artifacts") or {}).get(art_id) for d in _window(15)]
         vals = [v for v in vals if v is not None]
         if not vals:
             return "无记录"
@@ -607,7 +627,7 @@ def build_page(payload, history, gates, incidents) -> str:
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>同步面状态 · jaden.tech</title>
-<meta name="description" content="www.jaden.tech 同步面健康状态：逐产物打戳年龄、预算余量、90 天可用率与事件记录。">
+<meta name="description" content="www.jaden.tech 同步面健康状态：逐产物打戳年龄、预算余量、15 天色块与 30/90 天可用率、事件记录。">
 <meta name="referrer" content="no-referrer">
 <link rel="icon" href="{FAVICON}">
 <style>{CSS}</style>
@@ -618,13 +638,13 @@ def build_page(payload, history, gates, incidents) -> str:
 </div>
 
 <div class="cards">
-  <div class="card"><div class="k">门户页面按时</div><div class="v">{ontime}</div><div class="n">打戳且在预算内 / 门户页面</div></div>
-  <div class="card"><div class="k">最旧页面</div><div class="v">{f"{oldest['age_h']:.0f}h" if oldest and oldest.get("age_h") is not None else "—"}</div><div class="n">{oldest_note}</div></div>
-  <div class="card"><div class="k">平均年龄</div><div class="v">{f"{sum(ages)/len(ages):.1f}h" if ages else "—"}</div><div class="n">仅计已打戳页面</div></div>
-  <div class="card"><div class="k">结构违规</div><div class="v">{unreg}</div><div class="n">未注册产物文件数</div></div>
+  <div class="card"><div class="k-row"><div class="k">门户页面按时</div><div class="n" title="打戳且在预算内 / 门户页面">打戳且在预算内 / 门户页面</div></div><div class="v">{ontime}</div></div>
+  <div class="card"><div class="k-row"><div class="k">最旧页面</div><div class="n" title="{esc(oldest_note)}">{esc(oldest_note)}</div></div><div class="v">{f"{oldest['age_h']:.0f}h" if oldest and oldest.get("age_h") is not None else "—"}</div></div>
+  <div class="card"><div class="k-row"><div class="k">平均年龄</div><div class="n" title="仅计已打戳页面">仅计已打戳页面</div></div><div class="v">{f"{sum(ages)/len(ages):.1f}h" if ages else "—"}</div></div>
+  <div class="card"><div class="k-row"><div class="k">结构违规</div><div class="n" title="未注册产物文件数">未注册产物文件数</div></div><div class="v">{unreg}</div></div>
 </div>
 
-<h2>近 90 天 · Uptime</h2>
+<h2>近 15 天 · Uptime</h2>
 <div class="bars">{''.join(cells)}</div>
 <div class="legend">自 {first_day or "—"} 起记录（每日一行，同日重复校验覆盖当天）；灰 = 无记录，绿 = 全部在预算内，
 黄 = 存在陈旧/过渡项，红 = 结构违规。</div>
@@ -639,11 +659,11 @@ def build_page(payload, history, gates, incidents) -> str:
 </tbody>
 </table>
 
-<h2>各组件近 30 天 · Per-component 30d</h2>
+<h2>各组件近 15 天 · Per-component 15d</h2>
 <div class="pgrid">
 {prows}
 </div>
-<div class="samples">绿 = 当天该产物正常，黄 = 陈旧 / 过渡，红 = 结构违规，深灰 = 无记录。样本不足 30 天按实际天数计。</div>
+<div class="samples">绿 = 当天该产物正常，黄 = 陈旧 / 过渡，红 = 结构违规，深灰 = 无记录。样本不足 15 天按实际天数计。</div>
 
 <h2>事件 · Incidents</h2>
 {inc_html}
@@ -838,9 +858,9 @@ def selftest() -> int:
 
     ok("预算进度条按阈值变色", 'bar-bad' in bar_cell(9.0, 8) and 'bar-ok' in bar_cell(1.0, 8)
        and 'bar-warn' in bar_cell(7.5, 8))
-    ok("90 天条恒为 90 格（无历史 = 全灰）",
-       build_page(base, {}, {}, []).count('<span class="none"') + 
-       build_page(base, {}, {}, []).count('<span class="ok"') == 90)
+    ok("15 天条恒为 15 格（无历史 = 全灰）",
+       build_page(base, {}, {}, []).count('<span class="none"') +
+       build_page(base, {}, {}, []).count('<span class="ok"') == 15)
     ok("无事件时显示事实空态", "起无事件" in build_page(base, {}, {}, []))
     ok("有历史时格子着色", build_page(base, {"2026-11-16": {"rc": 1, "verdict": "x", "ok_ratio": 0.5}},
                                 {}, []).count('<span class="warn" title="2026-11-16') == 1)
@@ -864,9 +884,9 @@ def selftest() -> int:
     ok("组件按门户分组渲染（页面→数据层，资产组为空则不出）",
        b0.count('tr class="grp"') == 2
        and b0.index("页面产物") < b0.index("数据层"))
-    ok("每组件 30 天色块（只数门户页面：3 行 × 30 格）",
+    ok("每组件 15 天色块（只数门户页面：3 行 × 15 格）",
        len(re.findall(r'<div class="prow">', b0)) == 3
-       and len(re.findall(r'<span class="pc pc-', b0)) == 90)
+       and len(re.findall(r'<span class="pc pc-', b0)) == 45)
     ok("非门户产物在页脚说明但仍被校验", "项非门户产物" in b0 and "仍由同步校验覆盖" in b0)
     p_hidden = _multi(1)
     for _d in p_hidden["details"]:
