@@ -1,4 +1,4 @@
-<!-- generated: 2026-11-20 · source: cache/draft/TODO-20261120.md · sha256:c54d531a -->
+<!-- generated: 2026-11-20 · source: cache/draft/TODO-20261120.md · sha256:14bc9cdc -->
 > 派生: 待执行 **4** 条 · 最近闭环 **CL322** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
 ## 一、已登记待执行（来源: live draft cache/draft/TODO-20261120.md）
