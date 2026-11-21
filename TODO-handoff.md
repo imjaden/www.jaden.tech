@@ -1,14 +1,12 @@
-<!-- generated: 2026-11-20 · source: cache/draft/TODO-20261120.md · sha256:14bc9cdc -->
-> 派生: 待执行 **4** 条 · 最近闭环 **CL322** · 差异知会 无（未找到含「差异知会」的设计文档）
+<!-- generated: 2026-11-21 · source: cache/draft/TODO-20261121.md · sha256:89b2a01c -->
+> 派生: 待执行 **2** 条 · 最近闭环 **CL82** · 差异知会 无（未找到含「差异知会」的设计文档）
 > （本行由 `hm loop entry-page` 自动统计，人工段勿复述这些数字；`hm check handoff` 校验人工段声明与实数一致）
-## 一、已登记待执行（来源: live draft cache/draft/TODO-20261120.md）
+## 一、已登记待执行（来源: live draft cache/draft/TODO-20261121.md）
 
 | 编号 | 标题 | 状态（派生摘要·全文见 draft） | kind | priority | 方案文档 |
 |:--|:--|:--|:--|:--|:--|
-| 待开（sec-030-handoff-public） | 公开面口径（站点面已收口，仓库面待裁） | 待裁 | verify | normal | - |
-| 待开（hm-rotate-done） | hm draft 轮转丢完成节（工具缺陷） | 待办 | bug | normal | - |
-| 待开（dt-push-3） | 上游三笔未推 | 待他线 | process | high | - |
-| 待开（dt-skip-empty-commit） | 上游空转 commit（观察项） | 待办 | process | low | - |
+| 待开（dt-cron-timeout） | personal 仓 cron 超时（登记） | 待他线 | bug | low | - |
+| 待开（dt-backlog-8） | 上游待办 8 条（登记） | 待他线 | process | low | - |
 <!-- generated end -->
 
 ## 二、基线（人工维护）
