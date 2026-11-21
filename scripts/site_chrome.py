@@ -92,11 +92,18 @@ def inject(html: str, home: str, gh: bool) -> str:
     # 去重是幂等防御：上游没做也完全无害，做了则当天切换，无需我方改动。
     have_home = 'class="jt-home"' in body
     have_gh = 'class="jt-gh"' in body
-    css = ('<style id="jt-chrome-css">' + ("" if have_gh else GH_CSS)
-           + ("" if have_home else chrome_assets.HOME_CSS) + "</style>")
+    need_home = not have_home
+    need_gh = gh and not have_gh
+    if not (need_home or need_gh):
+        # 页面自己什么都不缺 ⇒ 原样返回（不塞空 style、不塞空标记块、不重打戳）。
+        # 2026-11-21：上游把 .jt-home + .jt-gh 都原生输出后，bmi 页本该由上游全权拥有，
+        # 之前这里会插一个空的 <style id="jt-chrome-css"></style> 并把 producer 改成我方，纯属噪声。
+        return body
+    css = ('<style id="jt-chrome-css">' + ("" if not need_gh else GH_CSS)
+           + ("" if not need_home else chrome_assets.HOME_CSS) + "</style>")
     body = body.replace("</head>", css + "\n</head>", 1)
-    block = (CHROME_START + "\n" + ("" if (have_gh or not gh) else GH_HTML)
-             + ("" if have_home else chrome_assets.home_html(home)) + CHROME_END)
+    block = (CHROME_START + "\n" + (GH_HTML if need_gh else "")
+             + (chrome_assets.home_html(home) if need_home else "") + CHROME_END)
     if "</body>" in body:
         return body.replace("</body>", block + "\n</body>", 1)
     return body + "\n" + block + "\n"
@@ -157,7 +164,11 @@ def main() -> int:
     changed = 0
     for p, home, gh in targets:
         html = p.read_text(encoding="utf-8")
-        want = restamp(inject(html, home, gh))
+        # 没有注入动作 ⇒ 不重打戳：上游全权拥有的页面连 producer 都不该被我方改名。
+        # （2026-11-21：上游原生输出 .jt-home + .jt-gh 后，bmi 页本该零改动；
+        #   之前无条件 restamp 会让每班次都产生一笔「只改戳」的空转提交。）
+        _inj = inject(html, home, gh)
+        want = html if _inj == html else restamp(_inj)
         if want != html:
             changed += 1
             if a.write:
