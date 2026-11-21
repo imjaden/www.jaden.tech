@@ -10,9 +10,10 @@ Static personal homepage hosted on GitHub Pages.
   Upstream rewrites the whole file daily (21:05) ⇒ site chrome is injected **after** the write by
   `scripts/site_chrome.py` (home button + GitHub corner) and the SYNC stamp is re-issued there
   (id/generated kept from upstream, `producer` = `www.jaden.tech/scripts/site_chrome.py`, hash = post-injection body).
-  Cron `site-chrome-refresh` re-applies it and publishes (every 10 min since 2026-11-20 — upstream may
-  rewrite more than once a day); the nightly chain verifies it and turns red if the home button is missing
-  after the chain closes.
+  As of 2026-11-21 both producers emit the home button natively (daily-tracker for `bmi-tracker.html`,
+  script-miner for `daily-poetry.html`) ⇒ no site-side chrome pass is scheduled any more and the former
+  `site-chrome-refresh` cron is gone; `site_chrome.py` stays as a manual repair tool, and the nightly
+  chain still turns red if either page loses its button.
   `site_chrome.py` covers `daily-poetry.html` too (home button only — that page already ships its own
   GitHub corner); `--paths` is the single source of the managed list. `daily-tracker-archive-*.html` was
   retired on 2026-11-20/21: removed from the manifest / site_chrome / status page, upstream stopped
