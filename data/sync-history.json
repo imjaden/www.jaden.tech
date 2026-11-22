@@ -76,6 +76,18 @@
     "tokens-live": "ok"
    },
    "ok_ratio": 1.0
+  },
+  "2026-11-22": {
+   "rc": 0,
+   "verdict": "PASS",
+   "artifacts": {
+    "bmi-tracker": "ok",
+    "tokens-board": "ok",
+    "daily-poetry": "ok",
+    "poetry-titles": "ok",
+    "tokens-live": "ok"
+   },
+   "ok_ratio": 1.0
   }
  }
 }
