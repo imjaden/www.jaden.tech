@@ -1,7 +1,7 @@
 {
- "rc": 1,
- "verdict": "有陈旧或过渡项",
- "checked_at": "2026-11-26T15:51:29+00:00",
+ "rc": 0,
+ "verdict": "全部正常",
+ "checked_at": "2026-11-27T13:45:14+00:00",
  "artifacts": [
   {
    "id": "bmi-tracker",
@@ -12,11 +12,11 @@
     "id": "bmi-tracker",
     "producer": "daily-tracker/scripts/daily-tracker-update.py",
     "v": "1",
-    "generated": "2026-11-24T00:00:00+08:00",
-    "sha256": "1b82c49b0f4495b5"
+    "generated": "2026-11-27T00:00:00+08:00",
+    "sha256": "233fa660b67ba3b6"
    },
-   "generated": "2026-11-24T00:00:00+08:00",
-   "age_h": 71.9
+   "generated": "2026-11-27T00:00:00+08:00",
+   "age_h": 21.8
   },
   {
    "id": "tokens-board",
@@ -27,11 +27,11 @@
     "id": "tokens-board",
     "producer": "hermes-manager/dashboard-gen",
     "v": "1",
-    "generated": "2026-11-26T19:30:52+08:00",
+    "generated": "2026-11-27T20:29:24+08:00",
     "sha256": "bcfe3d7313612677"
    },
-   "generated": "2026-11-26T19:30:52+08:00",
-   "age_h": 4.3
+   "generated": "2026-11-27T20:29:24+08:00",
+   "age_h": 1.3
   },
   {
    "id": "daily-poetry",
@@ -46,7 +46,7 @@
     "sha256": "27ee6086395bc43f"
    },
    "generated": "2026-11-21T12:44:00+08:00",
-   "age_h": 131.1
+   "age_h": 153.0
   },
   {
    "id": "poetry-titles",
@@ -61,7 +61,7 @@
     "sha256": "ef1cb98e57028a6c"
    },
    "generated": "2026-09-09T16:34:17+08:00",
-   "age_h": 1879.3
+   "age_h": 1901.2
   },
   {
    "id": "tokens-live",
@@ -72,11 +72,11 @@
     "id": "tokens-live",
     "producer": "hermes-manager/dashboard-gen",
     "v": "1",
-    "generated": "2026-11-26T19:30:52+08:00",
-    "sha256": "a4f482f578987684"
+    "generated": "2026-11-27T20:29:24+08:00",
+    "sha256": "031df923eff75c8f"
    },
-   "generated": "2026-11-26T19:30:52+08:00",
-   "age_h": 4.3
+   "generated": "2026-11-27T20:29:24+08:00",
+   "age_h": 1.3
   }
  ],
  "gates": {
@@ -84,21 +84,21 @@
   "perf": "PASS",
   "sync": "28/28"
  },
- "days_recorded": 11,
+ "days_recorded": 12,
  "version": 1,
  "service": {
   "name": "www.jaden.tech sync surface",
   "url": "https://www.jaden.tech/sync-status.html"
  },
- "status": "degraded",
+ "status": "ok",
  "components": [
   {
    "id": "bmi-tracker",
    "name": "bmi-tracker.html",
    "group": "page",
-   "status": "degraded",
-   "stamped_at": "2026-11-24T00:00:00+08:00",
-   "age_h": 71.9,
+   "status": "ok",
+   "stamped_at": "2026-11-27T00:00:00+08:00",
+   "age_h": 21.8,
    "visible": true
   },
   {
@@ -106,8 +106,8 @@
    "name": "tokens-tracker/index.html",
    "group": "data",
    "status": "ok",
-   "stamped_at": "2026-11-26T19:30:52+08:00",
-   "age_h": 4.3,
+   "stamped_at": "2026-11-27T20:29:24+08:00",
+   "age_h": 1.3,
    "visible": true
   },
   {
@@ -116,7 +116,7 @@
    "group": "page",
    "status": "ok",
    "stamped_at": "2026-11-21T12:44:00+08:00",
-   "age_h": 131.1,
+   "age_h": 153.0,
    "visible": true
   },
   {
@@ -125,7 +125,7 @@
    "group": "asset",
    "status": "ok",
    "stamped_at": "2026-09-09T16:34:17+08:00",
-   "age_h": 1879.3,
+   "age_h": 1901.2,
    "visible": false
   },
   {
@@ -133,8 +133,8 @@
    "name": "tokens-tracker/data/dashboard.js",
    "group": "data",
    "status": "ok",
-   "stamped_at": "2026-11-26T19:30:52+08:00",
-   "age_h": 4.3,
+   "stamped_at": "2026-11-27T20:29:24+08:00",
+   "age_h": 1.3,
    "visible": false
   }
  ],
@@ -164,13 +164,13 @@
    "postmortem_url": null
   }
  ],
- "updated_at": "2026-11-26T15:51:29+00:00",
+ "updated_at": "2026-11-27T13:45:14+00:00",
  "schema_version": "1.1",
  "meta": {
   "slots": [
    "21:45"
   ],
-  "next_run": "2026-11-27T21:45:00+08:00",
+  "next_run": "2026-11-28T21:45:00+08:00",
   "timezone": "CST",
   "page_version": "1.3",
   "generated_by": "scripts/sync-status-gen.py"
